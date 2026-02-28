@@ -149,6 +149,34 @@ public class EventDb {
                 });
     }
 
+    /**
+     * Fetches all events where the given user appears in a specific participant list.
+     * Use the LIST_* constants for the fieldName.
+     *
+     * Example — get all events a user is waiting on:
+     *   EventDb.getInstance().getEventsForUser(deviceId, EventDb.LIST_WAITING, ...);
+     *
+     * @param deviceId  The user's device ID to search for.
+     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED.
+     * @param onFetched Called with the matching Event list.
+     * @param onFailure Called with the exception if the read fails.
+     */
+    public void getEventsForUser(String deviceId, String fieldName,
+                                 OnEventListFetchedCallback onFetched,
+                                 OnFailureCallback onFailure) {
+        db.collection(COLLECTION_NAME)
+                .whereArrayContains(fieldName, deviceId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Event> events = querySnapshot.toObjects(Event.class);
+                    onFetched.onFetched(events);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to fetch events for user: " + deviceId, e);
+                    onFailure.onFailure(e);
+                });
+    }
+
     // ── UPDATE ─────────────────────────────────────────────────────────────
 
     /**
