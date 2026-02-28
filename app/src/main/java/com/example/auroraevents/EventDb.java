@@ -254,7 +254,6 @@ public class EventDb {
 
     /**
      * Moves a user from one participant list to another atomically using a Firestore batch write.
-     * Useful for lottery flows: e.g. move from waitingList → selectedList.
      *
      * @param eventId       The event document ID.
      * @param fromFieldName The list to remove the user from.
