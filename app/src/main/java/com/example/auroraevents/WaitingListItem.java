@@ -6,19 +6,8 @@ package com.example.auroraevents;
  * @see WaitingList
  */
 public class WaitingListItem {
-    private Entrant entrant;
+    private final Entrant entrant;
     private WaitingList.WaitingListStatus status;
-
-    /**
-     * Constructor to add an entrant (status defaults to WAITING)
-     * @author Jared Strandlund
-     * @param entrant
-     *     The entrant this item tracks
-     */
-    public WaitingListItem (Entrant entrant) {
-        this.entrant = entrant;
-        status = WaitingList.WaitingListStatus.WAITING;
-    }
 
     /**
      * Constructor to add an entrant with a specified status
@@ -30,7 +19,7 @@ public class WaitingListItem {
      */
     public WaitingListItem (Entrant entrant, WaitingList.WaitingListStatus status) {
         this.entrant = entrant;
-        this.status = WaitingList.WaitingListStatus.WAITING;
+        this.status = status;
     }
 
     /**

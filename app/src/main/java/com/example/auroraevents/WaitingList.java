@@ -43,6 +43,20 @@ public class WaitingList {
     }
 
     /**
+     * Get the list of all entrants with the specified status
+     * @author Jared Strandlund
+     * @return
+     *     list of all entrants
+     */
+    public ArrayList<Entrant> getEntrants(WaitingListStatus status) {
+        ArrayList<Entrant> output = new ArrayList<>();
+        for (WaitingListItem item : list) {
+            if (item.getStatus() == status) output.add(item.getEntrant());
+        }
+        return output;
+    }
+
+    /**
      * Get the WaitingListStatus of a specified entrant
      * @author Jared Strandlund
      * @param entrant
@@ -73,11 +87,14 @@ public class WaitingList {
      *     -1 if entrant not in list (added to list)
      *     1 if error
      */
-    private int change (Entrant entrant, WaitingListStatus status) {
+    public int setStatus(Entrant entrant, WaitingListStatus status) {
         int idx = entrants.indexOf(entrant);
         if (idx >= 0) { // in list
-            list.get(idx).setStatus(status);
-            return 0;
+            if (list.get(idx).setStatus(status) == 0) {
+                return 0;
+            } else {
+                return 1;
+            }
         } else if (idx == -1) { // not in list
             list.add(new WaitingListItem(entrant, status));
             entrants.add(entrant);
@@ -98,7 +115,7 @@ public class WaitingList {
      *     error code (>0) if error
      */
     public int join (Entrant entrant) {
-        int status = change(entrant, WaitingListStatus.WAITING);
+        int status = setStatus(entrant, WaitingListStatus.WAITING);
         if (status > 0) { // error
             return status;
         } else { // no error
@@ -117,7 +134,7 @@ public class WaitingList {
      *     error code (>0) if error
      */
     public int leave (Entrant entrant) {
-        int status = change(entrant, WaitingListStatus.SELF_LEFT);
+        int status = setStatus(entrant, WaitingListStatus.SELF_LEFT);
         if (status > 0) { // error
             return status;
         } else { // no error
@@ -136,7 +153,7 @@ public class WaitingList {
      *     error code (>0) if error
      */
     public int accept (Entrant entrant) {
-        int status = change(entrant, WaitingListStatus.ACCEPTED);
+        int status = setStatus(entrant, WaitingListStatus.ACCEPTED);
         if (status > 0) { // error
             return status;
         } else { // no error
@@ -155,7 +172,7 @@ public class WaitingList {
      *     error code (>0) if error
      */
     public int decline (Entrant entrant) {
-        int status = change(entrant, WaitingListStatus.DECLINED);
+        int status = setStatus(entrant, WaitingListStatus.DECLINED);
         if (status > 0) { // error
             return status;
         } else { // no error
@@ -174,7 +191,7 @@ public class WaitingList {
      *     error code (>0) if error
      */
     public int remove (Entrant entrant) {
-        int status = change(entrant, WaitingListStatus.FORCE_LEFT);
+        int status = setStatus(entrant, WaitingListStatus.FORCE_LEFT);
         if (status > 0) { // error
             return status;
         } else { // no error
@@ -193,7 +210,7 @@ public class WaitingList {
      *     error code (>0) if error
      */
     public int invite (Entrant entrant) {
-        int status = change(entrant, WaitingListStatus.INVITED);
+        int status = setStatus(entrant, WaitingListStatus.INVITED);
         if (status > 0) { // error
             return status;
         } else { // no error
