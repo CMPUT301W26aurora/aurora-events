@@ -32,7 +32,7 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
         TextView eventName = view.findViewById(R.id.event_name);
         TextView eventDescription = view.findViewById(R.id.event_description);
 
-        eventName.setText(event.getEventName());
+        eventName.setText(event.getName());
         eventDescription.setText(event.getDescription());
 
         return view;

@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        //CHECK THIS
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
