@@ -4,6 +4,7 @@ package com.example.auroraevents;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Represents an event in the application.
@@ -83,4 +84,21 @@ public class Event {
 
     public List<String> getCancelledList()                             { return cancelledList; }
     public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
+
+    public int getEmptySlotAmount() {
+        return capacity - attendingList.size();
+    }
+
+    public void randomSampling(int amount) {
+        Random random = new Random();
+        for (int i = 0; i < amount ; i++) {
+            int randomIndex = random.nextInt(waitingList.size());
+            // Reroll randomIndex if its number is greater than waitingList (waitingList size shrinks for every successful selection)
+            while (randomIndex >= waitingList.size())
+                randomIndex = random.nextInt(waitingList.size());
+            selectedList.add(waitingList.get(randomIndex));
+            waitingList.remove(randomIndex);
+        }
+    }
+
 }
