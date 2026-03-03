@@ -26,9 +26,11 @@ public class Event {
      * that returns the value specified inside of the variable
      * @author Sean Ross
      */
-    private void generateQrCode(){
+    public void generateQrCode(){
         MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
         try{
+            // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
+
             int width = 400; //these values change the width and height of the qr code
             int height = 400;
 
@@ -45,7 +47,7 @@ public class Event {
 
     }
 
-    private Bitmap getQrCode(){
+    public Bitmap getQrCode(){
         return this.qR;
     }
 }
