@@ -10,13 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class EventArrayAdapter extends ArrayAdapter<Event> {
-    public EventArrayAdapter(Context context, ArrayList<Event> events){
+    private final String userId;
+    public EventArrayAdapter(Context context, ArrayList<Event> events, String userId){
         super(context, 0,events);
+        this.userId = userId;
     }
 
     @NonNull
@@ -31,10 +31,21 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
         Event event = getItem(position);
         TextView eventName = view.findViewById(R.id.event_name);
         TextView eventDescription = view.findViewById(R.id.event_description);
+        TextView eventTag = view.findViewById(R.id.event_tag);
 
         eventName.setText(event.getName());
         eventDescription.setText(event.getDescription());
 
+        // check and update status tag
+        if (event.getAttendingList() != null && event.getAttendingList().contains(userId)) {
+            eventTag.setText("Attending");
+        } else if (event.getSelectedList() != null && event.getSelectedList().contains(userId)) {
+            eventTag.setText("Invited");
+        } else if (event.getWaitingList() != null && event.getWaitingList().contains(userId)) {
+            eventTag.setText("Waiting");
+        } else {
+            eventTag.setText("");
+        }
         return view;
     }
 }
