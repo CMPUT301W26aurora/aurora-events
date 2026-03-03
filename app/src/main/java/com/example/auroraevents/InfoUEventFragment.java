@@ -22,6 +22,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Displays event details for the event tapped by the user.
+ * Gets the event details from Firestore using the event ID.
+ * Implements US 01.01.01 - View event details.
+ * Implements US 01.01.03
+ * Implements US 01.06.02 - Sign up for an event from event details.
+ */
+
 public class InfoUEventFragment extends Fragment {
 
     private static final String TAG = "InfoUEventFragment";
@@ -33,16 +41,32 @@ public class InfoUEventFragment extends Fragment {
     private ImageView poster;
     private Button backButton, joinButton, acceptButton, declineButton;
 
+    /**
+     * Displays event details screen UI.
+     * Fetches the user's device ID.
+     * Fetches event ID.
+     * Displays required buttons for the event details screen.
+     * Fetches the event from Firestore.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
-        // get eventId from bundle
+        // get eventId from EventFragment
         eventId = getArguments().getString("eventId");
 
-        // get device id
+        // get device id to identify user
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // get views
@@ -61,7 +85,7 @@ public class InfoUEventFragment extends Fragment {
         acceptButton = view.findViewById(R.id.accept_button);
         declineButton = view.findViewById(R.id.decline_button);
 
-        // back button
+        // back button to return to events list when it is clicked
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
         // fetch event from firestore
@@ -78,7 +102,7 @@ public class InfoUEventFragment extends Fragment {
                                 Event event = document.toObject(Event.class);
                                 event.setEventId(document.getId());
 
-                                // show event details on screen
+                                // display event details on screen
                                 eventName.setText(event.getName());
                                 eventDescription.setText(event.getDescription());
                                 eventLocation.setText(event.getLocation());
@@ -89,8 +113,9 @@ public class InfoUEventFragment extends Fragment {
                                 eventDeadline.setText("");
                                 poster.setVisibility(View.GONE);
 
-                                // check which list user is in
+                                // check which list user is in and display corresponding buttons
                                 if (event.getAttendingList().contains(userId)) {
+                                    // selected user that is attending event
                                     joinButton.setVisibility(View.GONE);
                                     acceptButton.setVisibility(View.GONE);
                                     declineButton.setVisibility(View.GONE);
@@ -98,11 +123,13 @@ public class InfoUEventFragment extends Fragment {
                                     attendingLabel.setText("You are attending");
 
                                 } else if (event.getSelectedList().contains(userId)) {
+                                    // user selected to attend event
                                     joinButton.setVisibility(View.GONE);
                                     acceptButton.setVisibility(View.VISIBLE);
                                     declineButton.setVisibility(View.VISIBLE);
                                     attendingLabel.setVisibility(View.GONE);
 
+                                    // move user from selectedList to the attendingList upon accepting event invite
                                     acceptButton.setOnClickListener(v -> {
                                         EventDb.getInstance().moveUserBetweenLists(
                                                 event.getEventId(),
@@ -118,7 +145,7 @@ public class InfoUEventFragment extends Fragment {
                                                 },
                                                 e -> Log.d(TAG, "Error accepting invitation: " + e.getMessage()));
                                     });
-
+                                    // move user from selectedList to declinedList upon declining event invite
                                     declineButton.setOnClickListener(v -> {
                                         EventDb.getInstance().moveUserBetweenLists(
                                                 event.getEventId(),
@@ -136,12 +163,14 @@ public class InfoUEventFragment extends Fragment {
                                     });
 
                                 } else if (event.getWaitingList().contains(userId)) {
+                                    // user is on waitingList
                                     joinButton.setVisibility(View.VISIBLE);
                                     joinButton.setText("Leave Pool");
                                     acceptButton.setVisibility(View.GONE);
                                     declineButton.setVisibility(View.GONE);
                                     attendingLabel.setVisibility(View.GONE);
 
+                                    // remove user from waitingList once the user clicks Leave Pool
                                     joinButton.setOnClickListener(v -> {
                                         EventDb.getInstance().removeUserFromList(
                                                 event.getEventId(),
@@ -155,12 +184,14 @@ public class InfoUEventFragment extends Fragment {
                                     });
 
                                 } else {
+                                    // show Join Pool button if user is not on any list
                                     joinButton.setVisibility(View.VISIBLE);
                                     joinButton.setText("Join Pool");
                                     acceptButton.setVisibility(View.GONE);
                                     declineButton.setVisibility(View.GONE);
                                     attendingLabel.setVisibility(View.GONE);
 
+                                    // add user to the waitingList when clicked on Join Pool button
                                     joinButton.setOnClickListener(v -> {
                                         EventDb.getInstance().addUserToList(
                                                 event.getEventId(),

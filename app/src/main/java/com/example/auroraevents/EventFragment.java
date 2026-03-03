@@ -17,6 +17,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
+/**
+ * Displays a list of all available events fetched form Firestore.
+ * Allows users to view a list of all events.
+ * Allows users to tap an event to view event details.
+ * Implements US 01.01.03 - View list of events available for joining the waiting list.
+ */
 public class EventFragment extends Fragment {
 
     private static final String TAG = "EventFragment";
@@ -31,6 +37,7 @@ public class EventFragment extends Fragment {
         ArrayList<Event> eventList = new ArrayList<>();
         ListView eventsListView = view.findViewById(R.id.events_list);
 
+        // get user's device ID to determine user's status for the event
         String userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
