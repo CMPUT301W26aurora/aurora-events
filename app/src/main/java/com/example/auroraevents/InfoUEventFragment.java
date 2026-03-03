@@ -1,3 +1,6 @@
+// resources used:
+// https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
+// https://stackoverflow.com/questions/63312913/check-if-a-user-id-exists-in-arraylist
 package com.example.auroraevents;
 
 import android.os.Bundle;
@@ -20,6 +23,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class InfoUEventFragment extends Fragment {
+
+    private static final String TAG = "InfoUEventFragment";
+
     private String eventId;
     private String userId;
     private TextView eventName, eventDescription, eventLocation, eventDateTime;
@@ -72,20 +78,19 @@ public class InfoUEventFragment extends Fragment {
                                 Event event = document.toObject(Event.class);
                                 event.setEventId(document.getId());
 
-                                // populate UI
+                                // show event details on screen
                                 eventName.setText(event.getName());
                                 eventDescription.setText(event.getDescription());
-                                eventLocation.setText("Location: " + event.getLocation());
-                                eventDateTime.setText("Date: " + event.getDateTime().toString());
+                                eventLocation.setText(event.getLocation());
+                                eventDateTime.setText(event.getDateTime().toString());
                                 eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
-                                waitingListCount.setText("Waiting: " + event.getWaitingList().size() + " people");
-                                attendeesCount.setText("Attending: " + event.getAttendingList().size() + " people");
+                                waitingListCount.setText(event.getWaitingList().size() + "people are waiting");
+                                attendeesCount.setText(event.getAttendingList().size() + " people are participating");
                                 eventDeadline.setText("");
                                 poster.setVisibility(View.GONE);
 
                                 // check which list user is in
                                 if (event.getAttendingList().contains(userId)) {
-                                    // user already accepted
                                     joinButton.setVisibility(View.GONE);
                                     acceptButton.setVisibility(View.GONE);
                                     declineButton.setVisibility(View.GONE);
@@ -93,7 +98,6 @@ public class InfoUEventFragment extends Fragment {
                                     attendingLabel.setText("You are attending");
 
                                 } else if (event.getSelectedList().contains(userId)) {
-                                    // user has been invited
                                     joinButton.setVisibility(View.GONE);
                                     acceptButton.setVisibility(View.VISIBLE);
                                     declineButton.setVisibility(View.VISIBLE);
@@ -110,12 +114,9 @@ public class InfoUEventFragment extends Fragment {
                                                     declineButton.setVisibility(View.GONE);
                                                     attendingLabel.setVisibility(View.VISIBLE);
                                                     attendingLabel.setText("You are attending");
+                                                    Log.d(TAG, "User accepted invitation");
                                                 },
-                                                e -> {
-                                                    if (e != null) {
-                                                        Log.d("acceptButton", "Error: " + e.getMessage());
-                                                    }
-                                                });
+                                                e -> Log.d(TAG, "Error accepting invitation: " + e.getMessage()));
                                     });
 
                                     declineButton.setOnClickListener(v -> {
@@ -129,16 +130,12 @@ public class InfoUEventFragment extends Fragment {
                                                     declineButton.setVisibility(View.GONE);
                                                     joinButton.setVisibility(View.VISIBLE);
                                                     joinButton.setText("Join Pool");
+                                                    Log.d(TAG, "User declined invitation");
                                                 },
-                                                e -> {
-                                                    if (e != null) {
-                                                        Log.d("declineButton", "Error: " + e.getMessage());
-                                                    }
-                                                });
+                                                e -> Log.d(TAG, "Error declining invitation: " + e.getMessage()));
                                     });
 
                                 } else if (event.getWaitingList().contains(userId)) {
-                                    // user is on waiting list
                                     joinButton.setVisibility(View.VISIBLE);
                                     joinButton.setText("Leave Pool");
                                     acceptButton.setVisibility(View.GONE);
@@ -150,16 +147,14 @@ public class InfoUEventFragment extends Fragment {
                                                 event.getEventId(),
                                                 EventDb.LIST_WAITING,
                                                 userId,
-                                                () -> joinButton.setText("Join Pool"),
-                                                e -> {
-                                                    if (e != null) {
-                                                        Log.d("joinButton", "Error: " + e.getMessage());
-                                                    }
-                                                });
+                                                () -> {
+                                                    joinButton.setText("Join Pool");
+                                                    Log.d(TAG, "User left waiting list");
+                                                },
+                                                e -> Log.d(TAG, "Error leaving: " + e.getMessage()));
                                     });
 
                                 } else {
-                                    // user not in any list
                                     joinButton.setVisibility(View.VISIBLE);
                                     joinButton.setText("Join Pool");
                                     acceptButton.setVisibility(View.GONE);
@@ -171,19 +166,18 @@ public class InfoUEventFragment extends Fragment {
                                                 event.getEventId(),
                                                 EventDb.LIST_WAITING,
                                                 userId,
-                                                () -> joinButton.setText("Leave Pool"),
-                                                e -> {
-                                                    if (e != null) {
-                                                        Log.d("joinButton", "Error: " + e.getMessage());
-                                                    }
-                                                });
+                                                () -> {
+                                                    joinButton.setText("Leave Pool");
+                                                    Log.d(TAG, "User joined waiting list");
+                                                },
+                                                e -> Log.d(TAG, "Error joining: " + e.getMessage()));
                                     });
                                 }
                             } else {
-                                Log.d("fetchEvent", "No such event available");
+                                Log.d(TAG, "No such event available");
                             }
                         } else {
-                            Log.d("fetchEvent", "Error: " + task.getException().getMessage());
+                            Log.d(TAG, "Error: " + task.getException().getMessage());
                         }
                     }
                 });
