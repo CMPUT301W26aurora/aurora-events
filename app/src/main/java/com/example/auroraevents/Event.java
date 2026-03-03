@@ -12,7 +12,6 @@ public class Event {
     private List<String> cancelledList;   // self cancelled
     private List<String> removedList;     // force removed
 
-    /** Required no-arg constructor for Firestore deserialization */
     public Event() {
         waitingList   = new ArrayList<>();
         selectedList  = new ArrayList<>();
@@ -232,7 +231,7 @@ public class Event {
      *          And so on.
      * @author Jared Strandlund
      */
-    public void         cleanLists()                                   {
+    public void         tidyLists()                                   {
         declinedList.removeAll(removedList);
         attendingList.removeAll(removedList);
         attendingList.removeAll(declinedList);
