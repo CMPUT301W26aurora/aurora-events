@@ -28,12 +28,12 @@ public class Event {
      */
     public List<String> getWaitingList()                               { return waitingList; }
     /**
-     * Sets the waiting list to include only the provided entrant device IDs unless that entrant is already on the selected, attending, declined, or removed lists.
-     *     Removes the entrants from the cancelled list if they're on it.
+     * Sets the waiting list to include only the provided entrant device IDs.
+     * Please run {@code cleanLists()} when all the entrants are added.
      * @param waitingList
      *     List of entrant device IDs to set the waiting list to
      */
-    public void         setWaitingList(List<String> waitingList)       { this.waitingList = waitingList; } //TODO: add checks/removes
+    public void         setWaitingList(List<String> waitingList)       { this.waitingList = waitingList; }
     /**
      * Add the specified entrant device ID to the waiting list.
      *     Does nothing if the entrant is already on the selected, attending, or removed lists.
@@ -60,12 +60,12 @@ public class Event {
      */
     public List<String> getSelectedList()                              { return selectedList; }
     /**
-     * Sets the selected list to include only the provided entrant device IDs unless that entrant is already on the attending, declined, or removed lists.
-     *     Removes the entrants from the waiting or cancelled lists if they're on them.
+     * Sets the selected list to include only the provided entrant device IDs.
+     * Please run {@code cleanLists()} when all the entrants are added.
      * @param selectedList
      *     List of entrant device IDs to set the selected list to
      */
-    public void         setSelectedList(List<String> selectedList)     { this.selectedList = selectedList; } //TODO: add checks/removes
+    public void         setSelectedList(List<String> selectedList)     { this.selectedList = selectedList; }
     /**
      * Add the specified entrant device ID to the selected list.
      *     Does nothing if the entrant is not on the waiting list.
@@ -89,12 +89,12 @@ public class Event {
      */
     public List<String> getAttendingList()                             { return attendingList; }
     /**
-     * Sets the attending list to include only the provided entrant device IDs unless that entrant is already on the removed or declined list.
-     *     Removes the entrants from the waiting, cancelled, or invited lists if they're on any of them.
+     * Sets the attending list to include only the provided entrant device IDs.
+     * Please run {@code cleanLists()} when all the entrants are added.
      * @param attendingList
      *     List of entrant device IDs to set the attending list to
      */
-    public void         setAttendingList(List<String> attendingList)   { this.attendingList = attendingList; } //TODO: add checks/removes
+    public void         setAttendingList(List<String> attendingList)   { this.attendingList = attendingList; }
     /**
      * Add the specified entrant device ID to the attending list.
      *     Does nothing if the entrant is not on the selected list.
@@ -118,12 +118,12 @@ public class Event {
      */
     public List<String> getDeclinedList()                              { return declinedList; }
     /**
-     * Sets the declined list to include only the provided entrant device IDs unless that entrant is already on the removed list.
-     *     Removes the entrants from the waiting, cancelled, invited, or attending lists if they're on any of them.
+     * Sets the declined list to include only the provided entrant device IDs.
+     * Please run {@code cleanLists()} when all the entrants are added.
      * @param declinedList
      *     List of entrant device IDs to set the declined list to
      */
-    public void         setDeclinedList(List<String> declinedList)     { this.declinedList = declinedList; } //TODO: add checks/removes
+    public void         setDeclinedList(List<String> declinedList)     { this.declinedList = declinedList; }
     /**
      * Add the specified entrant device ID to the declined list.
      *     Does nothing if the entrant is not on the selected list.
@@ -147,11 +147,12 @@ public class Event {
      */
     public List<String> getCancelledList()                             { return cancelledList; }
     /**
-     * Sets the cancelled list to include only the provided entrant device IDs unless that entrant is already on another entrant list.
+     * Sets the cancelled list to include only the provided entrant device IDs.
+     * Please run {@code cleanLists()} when all the entrants are added.
      * @param cancelledList
      *     List of entrant device IDs to set the cancelled list to
      */
-    public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; } //TODO: add checks/removes
+    public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
     /**
      * Add the specified entrant device ID to the cancelled list.
      *     Does nothing if the entrant is not on the waiting list.
@@ -176,11 +177,11 @@ public class Event {
     public List<String> getRemovedList()                               { return removedList; }
     /**
      * Sets the removed list to include only the provided entrant device IDs.
-     *     Removes the entrants from all other entrant lists if they're on any of them.
+     * Please run {@code cleanLists()} when all the entrants are added.
      * @param removedList
      *     List of entrant device IDs to set the removed list to
      */
-    public void         setRemovedList(List<String> removedList)       { this.removedList = removedList; } //TODO: add checks/removes
+    public void         setRemovedList(List<String> removedList)       { this.removedList = removedList; }
     /**
      * Add the specified entrant device ID to the removed list (will be blocked from being added to any other entrant list).
      * @author Jared Strandlund
@@ -197,9 +198,8 @@ public class Event {
         removedList.add(entrantID);
     }
     /**
-     * Remove the specified entrant device ID from the removed list (will be able to be added to entrant lists).
+     * Remove the specified entrant device ID from the removed list (the entrant will be able to be added to entrant lists).
      *      Does nothing if the entrant is not on the removed list.
-     * @author Jared Strandlund
      * @param entrantID
      * The entrant's device ID
      * @return {@code true} on success
@@ -220,6 +220,34 @@ public class Event {
         output.addAll(this.getRemovedList());
 
         return output;
+    }
+
+    /**
+     * Removes duplicate entrants from the entrant lists.
+     *      The priority of the lists is:
+     *          removed > declined > attending > selected > waiting > cancelled.
+     *      In other words, the removed list will remain unchanged.
+     *          Entrants will be removed from the declined list if they're on the removed list.
+     *          Entrants will be removed from the attending list if they're on the removed list or the declined list.
+     *          And so on.
+     * @author Jared Strandlund
+     */
+    public void         cleanLists()                                   {
+        declinedList.removeAll(removedList);
+        attendingList.removeAll(removedList);
+        attendingList.removeAll(declinedList);
+        selectedList.removeAll(removedList);
+        selectedList.removeAll(declinedList);
+        selectedList.removeAll(attendingList);
+        waitingList.removeAll(removedList);
+        waitingList.removeAll(declinedList);
+        waitingList.removeAll(attendingList);
+        waitingList.removeAll(selectedList);
+        cancelledList.removeAll(removedList);
+        cancelledList.removeAll(declinedList);
+        cancelledList.removeAll(attendingList);
+        cancelledList.removeAll(selectedList);
+        cancelledList.removeAll(waitingList);
     }
 
 }
