@@ -27,8 +27,8 @@ public class EventDb {
     public static final String LIST_SELECTED   = "selectedList";
     public static final String LIST_WAITING    = "waitingList";
     public static final String LIST_CANCELLED  = "cancelledList";
-    public static final String LIST_DECLINED  = "declinedList";
-    public static final String LIST_REMOVED  = "removedList";
+    public static final String LIST_DECLINED   = "declinedList";
+    public static final String LIST_REMOVED    = "removedList";
 
 
     private static EventDb instance;
@@ -160,7 +160,7 @@ public class EventDb {
      *   EventDb.getInstance().getEventsForUser(deviceId, EventDb.LIST_WAITING, ...);
      *
      * @param deviceId  The user's device ID to search for.
-     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED.
+     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED.
      * @param onFetched Called with the matching Event list.
      * @param onFailure Called with the exception if the read fails.
      */
@@ -217,7 +217,7 @@ public class EventDb {
      *   EventDb.getInstance().addUserToList(eventId, EventDb.LIST_WAITING, deviceId, ...);
      *
      * @param eventId   The event document ID.
-     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED.
+     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED.
      * @param deviceId  The user's device ID to add.
      * @param onSuccess Called when the update succeeds.
      * @param onFailure Called with the exception if the update fails.
@@ -238,7 +238,7 @@ public class EventDb {
      * Removes a user (by deviceId) from one of the event's participant lists.
      *
      * @param eventId   The event document ID.
-     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED.
+     * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED.
      * @param deviceId  The user's device ID to remove.
      * @param onSuccess Called when the update succeeds.
      * @param onFailure Called with the exception if the update fails.
