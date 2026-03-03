@@ -27,6 +27,9 @@ public class EventDb {
     public static final String LIST_SELECTED   = "selectedList";
     public static final String LIST_WAITING    = "waitingList";
     public static final String LIST_CANCELLED  = "cancelledList";
+    public static final String LIST_DECLINED  = "declinedList";
+    public static final String LIST_REMOVED  = "removedList";
+
 
     private static EventDb instance;
     private final  FirebaseFirestore db;

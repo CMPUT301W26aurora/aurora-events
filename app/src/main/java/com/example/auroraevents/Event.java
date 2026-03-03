@@ -22,17 +22,21 @@ public class Event {
 
 
     // Participant lists — each list holds device IDs (User.deviceId)
-    private List<String> attendingList;   // confirmed attendees
-    private List<String> selectedList;    // drawn / invited but not yet confirmed
     private List<String> waitingList;     // signed up, awaiting lottery
-    private List<String> cancelledList;   // cancelled or removed
+    private List<String> selectedList;    // drawn / invited but not yet confirmed
+    private List<String> attendingList;   // confirmed attendees
+    private List<String> declinedList;    // invited then self declined
+    private List<String> cancelledList;   // self cancelled
+    private List<String> removedList;     // force removed
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
-        attendingList  = new ArrayList<>();
-        selectedList   = new ArrayList<>();
-        waitingList    = new ArrayList<>();
-        cancelledList  = new ArrayList<>();
+        waitingList   = new ArrayList<>();
+        selectedList  = new ArrayList<>();
+        attendingList = new ArrayList<>();
+        declinedList  = new ArrayList<>();
+        cancelledList = new ArrayList<>();
+        removedList   = new ArrayList<>();
     }
 
     public Event(String organizerDeviceId, String name, String description,
@@ -80,6 +84,12 @@ public class Event {
 
     public List<String> getWaitingList()                               { return waitingList; }
     public void         setWaitingList(List<String> waitingList)       { this.waitingList = waitingList; }
+
+    public List<String> getDeclinedList()                              { return declinedList; }
+    public void         setDeclinedList(List<String> declinedList)     { this.declinedList = declinedList; }
+
+    public List<String> getRemovedList()                               { return removedList; }
+    public void         setRemovedList(List<String> removedList)       { this.removedList = removedList; }
 
     public List<String> getCancelledList()                             { return cancelledList; }
     public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
