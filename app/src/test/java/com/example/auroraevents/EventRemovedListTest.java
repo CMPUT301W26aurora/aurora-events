@@ -138,5 +138,18 @@ public class EventRemovedListTest {
         checkSingle(event, entrantID);
     }
 
-    //TODO: test removeFromRemovedList()
+    /**
+     * Tests {@code removeFromRemovedList}
+     * @author Jared Strandlund
+     */
+    @Test
+    public void removeFromRemovedTest() {
+        setUpRemovedList(event, entrantID);
+
+        assertTrue(event.removeFromRemovedList(entrantID));
+        assertEquals(0, event.getRemovedList().size());
+
+        assertFalse(event.removeFromRemovedList(entrantID));
+        assertEquals(0, event.getRemovedList().size());
+    }
 }
