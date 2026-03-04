@@ -27,11 +27,11 @@ public class WaitListSamplingTest {
         User user = new User();
         user.setDeviceId("TestID");
         User user2 = new User();
-        user.setDeviceId("TestID2");
+        user2.setDeviceId("TestID2");
         User user3 = new User();
-        user.setDeviceId("TestID3");
+        user3.setDeviceId("TestID3");
         User user4 = new User();
-        user.setDeviceId("TestID4");
+        user4.setDeviceId("TestID4");
         waitlist.add(user.getDeviceId());
         waitlist.add(user2.getDeviceId());
         waitlist.add(user3.getDeviceId());
@@ -62,9 +62,12 @@ public class WaitListSamplingTest {
 
         // Revert selection and try sampling again to see if it selected different users
         // Note, due to the random nature of the sampling function, this test may not always succeed
+        waitlist = new ArrayList<String>();
+        waitlist.add(user.getDeviceId());
+        waitlist.add(user2.getDeviceId());
+        waitlist.add(user3.getDeviceId());
+        waitlist.add(user4.getDeviceId());
         myEvent.setWaitingList(waitlist);
-        myEvent.setSelectedList(new ArrayList<String>());
-        // Test failed, apparently this is not random selection?
         organizer.sampleWaitList(myEvent,2);
         assertFalse(previousWaitList.containsAll(myEvent.getWaitingList()));
         assertFalse(previousSelectedList.containsAll(myEvent.getSelectedList()));
