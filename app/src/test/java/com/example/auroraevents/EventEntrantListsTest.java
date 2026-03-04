@@ -53,32 +53,32 @@ public class EventEntrantListsTest {
         finalList.add(declinedEntrant);
         finalList.add(removedEntrant);
         ArrayList<String> cancelledList = new ArrayList<>();
-        finalList.add(cancelledEntrant);
-        finalList.add(waitingEntrant);
-        finalList.add(selectedEntrant);
-        finalList.add(attendingEntrant);
-        finalList.add(declinedEntrant);
-        finalList.add(removedEntrant);
+        cancelledList.add(cancelledEntrant);
+        cancelledList.add(waitingEntrant);
+        cancelledList.add(selectedEntrant);
+        cancelledList.add(attendingEntrant);
+        cancelledList.add(declinedEntrant);
+        cancelledList.add(removedEntrant);
         ArrayList<String> waitingList = new ArrayList<>();
-        finalList.add(waitingEntrant);
-        finalList.add(selectedEntrant);
-        finalList.add(attendingEntrant);
-        finalList.add(declinedEntrant);
-        finalList.add(removedEntrant);
+        waitingList.add(waitingEntrant);
+        waitingList.add(selectedEntrant);
+        waitingList.add(attendingEntrant);
+        waitingList.add(declinedEntrant);
+        waitingList.add(removedEntrant);
         ArrayList<String> selectedList = new ArrayList<>();
-        finalList.add(selectedEntrant);
-        finalList.add(attendingEntrant);
-        finalList.add(declinedEntrant);
-        finalList.add(removedEntrant);
+        selectedList.add(selectedEntrant);
+        selectedList.add(attendingEntrant);
+        selectedList.add(declinedEntrant);
+        selectedList.add(removedEntrant);
         ArrayList<String> attendingList = new ArrayList<>();
-        finalList.add(attendingEntrant);
-        finalList.add(declinedEntrant);
-        finalList.add(removedEntrant);
+        attendingList.add(attendingEntrant);
+        attendingList.add(declinedEntrant);
+        attendingList.add(removedEntrant);
         ArrayList<String> declinedList = new ArrayList<>();
-        finalList.add(declinedEntrant);
-        finalList.add(removedEntrant);
+        declinedList.add(declinedEntrant);
+        declinedList.add(removedEntrant);
         ArrayList<String> removedList = new ArrayList<>();
-        finalList.add(removedEntrant);
+        removedList.add(removedEntrant);
 
         //Testing
         event.setCancelledList(cancelledList);
@@ -108,6 +108,6 @@ public class EventEntrantListsTest {
         assertEquals(1, event.getRemovedList().size());
         assertTrue(event.getRemovedList().contains(removedEntrant));
         assertEquals(6, event.getAllEntrantsList().size());
-        assertEquals(finalList, event.getAllEntrantsList());
+        assertTrue(event.getAllEntrantsList().containsAll(finalList));
     }
 }

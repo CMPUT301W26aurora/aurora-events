@@ -10,6 +10,11 @@ public class EventEntrantListsSupport {
         assertTrue(event.getAllEntrantsList().contains(entrantID));
     }
 
+    public static void checkNone(Event event, String entrantID) {
+        assertEquals(0, event.getAllEntrantsList().size());
+        assertFalse(event.getAllEntrantsList().contains(entrantID));
+    }
+
     public static void setUpWaitingList(Event event, String entrantID) {
         assertTrue(event.addToWaitingList(entrantID));
         assertEquals(1, event.getWaitingList().size());

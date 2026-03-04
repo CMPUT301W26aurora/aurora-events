@@ -1,5 +1,6 @@
 package com.example.auroraevents;
 
+import static com.example.auroraevents.EventEntrantListsSupport.checkNone;
 import static com.example.auroraevents.EventEntrantListsSupport.checkSingle;
 import static com.example.auroraevents.EventEntrantListsSupport.setUpAttendingList;
 import static com.example.auroraevents.EventEntrantListsSupport.setUpCancelledList;
@@ -35,7 +36,7 @@ public class EventCancelledListTest {
         assertEquals(0, event.getCancelledList().size());
         assertFalse(event.getCancelledList().contains(entrantID));
 
-        checkSingle(event, entrantID);
+        checkNone(event, entrantID);
     }
 
     /**

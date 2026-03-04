@@ -42,10 +42,8 @@ public class Event {
      * @return {@code true} on success
      */
     public boolean      addToWaitingList(String entrantID)             {
-        if ((selectedList.contains(entrantID))|| (attendingList.contains(entrantID)) || (removedList.contains(entrantID)))
+        if (selectedList.contains(entrantID) || attendingList.contains(entrantID) || removedList.contains(entrantID) || declinedList.contains(entrantID) || waitingList.contains(entrantID))
             return false;
-        else if (waitingList.contains(entrantID))
-            return true;
         else {
             cancelledList.remove(entrantID);
             waitingList.add(entrantID);
