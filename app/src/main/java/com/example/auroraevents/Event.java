@@ -1,6 +1,8 @@
 package com.example.auroraevents;
 
 
+import android.util.Log;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -110,6 +112,17 @@ public class Event {
             int randomIndex = random.nextInt(waitingList.size());
             selectedList.add(waitingList.get(randomIndex));
             waitingList.remove(randomIndex); // Remove the randomly selected user so the same user cannot be selected twice
+
+            // Update database
+            EventDb.getInstance().moveUserBetweenLists(eventId,"waitingList", "selectedList", waitingList.get(randomIndex),
+                    () -> {
+                        Log.d("Main", "Success");
+                    }
+                    ,
+                    e->
+                    {
+                        Log.d("Main", "Failure");
+                    });
         }
     }
 
