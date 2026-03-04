@@ -1,8 +1,11 @@
 package com.example.auroraevents;
 
 
+import android.os.Build;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,7 +18,9 @@ public class Event {
     private String  organizerDeviceId;
     private String  name;
     private String  description;
-    private Date    dateTime;
+    private LocalDate    dateTime;
+    private LocalDateTime registrationTimeStart;
+    private LocalDateTime registrationTimeEnd;
     private String  location;
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
@@ -40,15 +45,19 @@ public class Event {
     }
 
     public Event(String organizerDeviceId, String name, String description,
-                 Date dateTime, String location, int capacity) {
+                 LocalDate dateTime, LocalDateTime registrationStart,
+                 LocalDateTime registrationEnd, String location, int capacity) {
         this();
         this.organizerDeviceId = organizerDeviceId;
         this.name              = name;
         this.description       = description;
         this.dateTime          = dateTime;
+        this.registrationTimeStart = registrationStart;
+        this.registrationTimeEnd = registrationEnd;
         this.location          = location;
         this.capacity          = capacity;
     }
+
 
     // ── Getters & Setters ──────────────────────────────────────────────────
 
@@ -64,8 +73,20 @@ public class Event {
     public String getDescription()                     { return description; }
     public void   setDescription(String description)   { this.description = description; }
 
-    public Date   getDateTime()                        { return dateTime; }
-    public void   setDateTime(Date dateTime)           { this.dateTime = dateTime; }
+    public LocalDate  getDateTime()                        { return this.dateTime; }
+    public void   setDateTime(LocalDate dateTime)           { this.dateTime = dateTime; }
+
+    public LocalDateTime getRegistrationTimeStart()     { return registrationTimeStart; }
+    public void setRegistrationTimeStart(LocalDateTime registrationStart)
+    {
+        this.registrationTimeStart = registrationStart;
+    }
+
+    public LocalDateTime getRegistrationTimeEnd()     { return registrationTimeEnd; }
+    public void setRegistrationTimeEnd(LocalDateTime registrationEnd)
+    {
+        this.registrationTimeEnd = registrationEnd;
+    }
 
     public String getLocation()                        { return location; }
     public void   setLocation(String location)         { this.location = location; }

@@ -1,29 +1,80 @@
 package com.example.auroraevents;
 import android.os.Build;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class Organizer extends User {
-    String eventTitle;
-    String eventDate;
-    LocalDate eventTime;
-    LocalDateTime eventRegisterStartTime;
-    LocalDateTime eventRegisterEndTime;
-    String eventDescription;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
+import android.util.Log;
 
+/**
+ * This class contains the constructor and methods for the Organizer class, a subclass of the User class
+ */
+public class Organizer extends User {
+    private ArrayList<Event> myEvents;
+
+    /**
+     * Organizer constructor
+     */
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
+        myEvents = new ArrayList<Event>();
     }
-    private void CreateEvent(String title, String date, String time, String startTime, String endTime, String description) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            this.eventTitle = title;
-            this.eventDate = date;
-            this.eventTime = LocalDate.from(LocalDateTime.parse(time));
-            this.eventRegisterStartTime = LocalDate.from(LocalDateTime.parse(startTime)).atStartOfDay();
-            this.eventRegisterEndTime = LocalDate.from(LocalDateTime.parse(endTime)).atStartOfDay();
-            this.eventDescription = description;
+
+    public ArrayList<Event> getMyEvents() {
+        return myEvents;
+    }
+
+    public void setMyEvents(ArrayList<Event> myEvents) {
+        this.myEvents = myEvents;
+    }
+
+    /**
+     * This function
+     * @param title
+     *      The title of the event
+     * @param date
+     *      The date of the event, format: yyyy-MM-dd
+     * @param time
+     *      The time of the event, format: yyyy-MM-dd HH:mm:ss
+     * @param startTime
+     *      The start of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param endTime
+     *      The end of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param description
+     *      The event description
+     * @param location
+     *      The event location
+     * @param capacity
+     *      The event capacity
+     */
+    public void CreateEvent(String organizerDeviceId, String title, String description, String date,
+                            String time, String startTime, String endTime, String location, int capacity) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        try {
+            LocalDate eventDate = LocalDate.parse(date);
+            LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
+            LocalDateTime eventRegistrationEnd = LocalDateTime.parse(endTime, formatter);
+
+            LocalTime parsedTime = LocalTime.parse(time); // Assume HH:mm:ss
+            LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
+
+            Event event = new Event(organizerDeviceId, title, description,
+                    eventDate, eventRegistrationStart,
+                    eventRegistrationEnd, location, capacity);
+
+            myEvents.add(event);
+
+        } catch (Exception e) {
+            Log.e("Organizer", "Failed to create event", e);
+            throw e;
         }
     }
 }
