@@ -51,7 +51,7 @@ public class EventWaitingListTest {
     public void waitingToWaitingTest() {
         setUpWaitingList(event, entrantID);
 
-        assertFalse(event.addToWaitingList(entrantID));
+        assertTrue(event.addToWaitingList(entrantID));
         assertEquals(1, event.getWaitingList().size());
         assertTrue(event.getWaitingList().contains(entrantID));
 

@@ -42,8 +42,10 @@ public class Event {
      * @return {@code true} on success
      */
     public boolean      addToWaitingList(String entrantID)             {
-        if (selectedList.contains(entrantID) || attendingList.contains(entrantID) || removedList.contains(entrantID) || declinedList.contains(entrantID) || waitingList.contains(entrantID))
+        if (selectedList.contains(entrantID) || attendingList.contains(entrantID) || removedList.contains(entrantID) || declinedList.contains(entrantID))
             return false;
+        else if (waitingList.contains(entrantID))
+            return true;
         else {
             cancelledList.remove(entrantID);
             waitingList.add(entrantID);
@@ -75,9 +77,7 @@ public class Event {
         if (waitingList.remove(entrantID)) {
             selectedList.add(entrantID);
             return true;
-        } else {
-            return false;
-        }
+        } else return selectedList.contains(entrantID);
     }
 
     /**
@@ -104,9 +104,7 @@ public class Event {
         if (selectedList.remove(entrantID)) {
             attendingList.add(entrantID);
             return true;
-        } else {
-            return false;
-        }
+        } else return attendingList.contains(entrantID);
     }
 
     /**
@@ -133,9 +131,7 @@ public class Event {
         if (selectedList.remove(entrantID)) {
             declinedList.add(entrantID);
             return true;
-        } else {
-            return false;
-        }
+        } else return declinedList.contains(entrantID);
     }
 
     /**
@@ -162,9 +158,7 @@ public class Event {
         if (waitingList.remove(entrantID)) {
             cancelledList.add(entrantID);
             return true;
-        } else {
-            return false;
-        }
+        } else return cancelledList.contains(entrantID);
     }
 
     /**
@@ -191,12 +185,10 @@ public class Event {
         attendingList.remove(entrantID);
         declinedList.remove(entrantID);
         cancelledList.remove(entrantID);
-        if (removedList.contains(entrantID)) {
-            return false;
-        } else {
+        if (!removedList.contains(entrantID)) {
             removedList.add(entrantID);
-            return true;
         }
+        return true;
     }
     /**
      * Remove the specified entrant device ID from the removed list (the entrant will be able to be added to entrant lists).

@@ -81,7 +81,7 @@ public class EventAttendingListTest {
     public void attendingToAttendingTest() {
         setUpAttendingList(event, entrantID);
 
-        assertFalse(event.addToAttendingList(entrantID));
+        assertTrue(event.addToAttendingList(entrantID));
         assertEquals(1, event.getAttendingList().size());
         assertTrue(event.getAttendingList().contains(entrantID));
 

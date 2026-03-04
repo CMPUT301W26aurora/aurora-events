@@ -131,7 +131,7 @@ public class EventRemovedListTest {
     public void removedToRemovedTest() {
         setUpRemovedList(event, entrantID);
 
-        assertFalse(event.addToRemovedList(entrantID));
+        assertTrue(event.addToRemovedList(entrantID));
         assertEquals(1, event.getRemovedList().size());
         assertTrue(event.getRemovedList().contains(entrantID));
 

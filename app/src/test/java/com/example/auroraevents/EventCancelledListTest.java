@@ -115,7 +115,7 @@ public class EventCancelledListTest {
     public void cancelledToCancelledTest() {
         setUpCancelledList(event, entrantID);
 
-        assertFalse(event.addToCancelledList(entrantID));
+        assertTrue(event.addToCancelledList(entrantID));
         assertEquals(1, event.getCancelledList().size());
         assertTrue(event.getCancelledList().contains(entrantID));
 

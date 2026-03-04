@@ -64,7 +64,7 @@ public class EventSelectedListTest {
     public void selectedToSelectedTest() {
         setUpSelectedList(event, entrantID);
 
-        assertFalse(event.addToSelectedList(entrantID));
+        assertTrue(event.addToSelectedList(entrantID));
         assertEquals(1, event.getSelectedList().size());
         assertTrue(event.getSelectedList().contains(entrantID));
 

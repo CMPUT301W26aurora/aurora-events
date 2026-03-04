@@ -98,7 +98,7 @@ public class EventDeclinedListTest {
     public void declinedToDeclinedTest() {
         setUpDeclinedList(event, entrantID);
 
-        assertFalse(event.addToDeclinedList(entrantID));
+        assertTrue(event.addToDeclinedList(entrantID));
         assertEquals(1, event.getDeclinedList().size());
         assertTrue(event.getDeclinedList().contains(entrantID));
 
