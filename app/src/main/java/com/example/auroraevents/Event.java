@@ -187,14 +187,18 @@ public class Event {
      * @param entrantID
      *     The entrant's device ID
      */
-    public void         addToRemovedList(String entrantID)             {
+    public boolean      addToRemovedList(String entrantID)             {
         waitingList.remove(entrantID);
         selectedList.remove(entrantID);
         attendingList.remove(entrantID);
         declinedList.remove(entrantID);
         cancelledList.remove(entrantID);
-        removedList.remove(entrantID);
-        removedList.add(entrantID);
+        if (removedList.contains(entrantID)) {
+            return false;
+        } else {
+            removedList.add(entrantID);
+            return true;
+        }
     }
     /**
      * Remove the specified entrant device ID from the removed list (the entrant will be able to be added to entrant lists).
@@ -233,15 +237,19 @@ public class Event {
      */
     public void         tidyLists()                                   {
         declinedList.removeAll(removedList);
+
         attendingList.removeAll(removedList);
         attendingList.removeAll(declinedList);
+
         selectedList.removeAll(removedList);
         selectedList.removeAll(declinedList);
         selectedList.removeAll(attendingList);
+
         waitingList.removeAll(removedList);
         waitingList.removeAll(declinedList);
         waitingList.removeAll(attendingList);
         waitingList.removeAll(selectedList);
+
         cancelledList.removeAll(removedList);
         cancelledList.removeAll(declinedList);
         cancelledList.removeAll(attendingList);

@@ -58,7 +58,7 @@ public class EventEntrantListsSupport {
     }
 
     public static void setUpRemovedList(Event event, String entrantID) {
-        event.addToRemovedList(entrantID);
+        assertTrue(event.addToRemovedList(entrantID));
         assertEquals(1, event.getRemovedList().size());
         assertTrue(event.getRemovedList().contains(entrantID));
         checkSingle(event, entrantID);
