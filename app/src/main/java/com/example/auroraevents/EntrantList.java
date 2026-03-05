@@ -21,7 +21,6 @@ public class EntrantList {
     }
 
     //TODO: add EventDb calls to all adders
-    //TODO: fix all references in tests
 
     /**
      * Returns a list of device IDs of entrants on the waiting list.

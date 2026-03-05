@@ -1,0 +1,71 @@
+package com.example.auroraevents;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class EntrantListTestsSupport {
+    public static void checkSingle(EntrantList list, String entrantID) {
+        assertEquals(1, list.getAllEntrantsList().size());
+        assertTrue(list.getAllEntrantsList().contains(entrantID));
+    }
+
+    public static void checkNone(EntrantList list, String entrantID) {
+        assertEquals(0, list.getAllEntrantsList().size());
+        assertFalse(list.getAllEntrantsList().contains(entrantID));
+    }
+
+    public static void setUpWaitingList(EntrantList list, String entrantID) {
+        assertTrue(list.addToWaitingList(entrantID));
+        assertEquals(1, list.getWaitingList().size());
+        assertTrue(list.getWaitingList().contains(entrantID));
+        checkSingle(list, entrantID);
+    }
+
+    public static void setUpSelectedList(EntrantList list, String entrantID) {
+        setUpWaitingList(list, entrantID);
+        assertTrue(list.addToSelectedList(entrantID));
+        assertEquals(1, list.getSelectedList().size());
+        assertTrue(list.getSelectedList().contains(entrantID));
+        assertEquals(0, list.getWaitingList().size());
+        assertFalse(list.getWaitingList().contains(entrantID));
+        checkSingle(list, entrantID);
+    }
+
+    public static void setUpAttendingList(EntrantList list, String entrantID) {
+        setUpSelectedList(list, entrantID);
+        assertTrue(list.addToAttendingList(entrantID));
+        assertEquals(1, list.getAttendingList().size());
+        assertTrue(list.getAttendingList().contains(entrantID));
+        assertEquals(0, list.getSelectedList().size());
+        assertFalse(list.getSelectedList().contains(entrantID));
+        checkSingle(list, entrantID);
+    }
+
+    public static void setUpDeclinedList(EntrantList list, String entrantID) {
+        setUpSelectedList(list, entrantID);
+        assertTrue(list.addToDeclinedList(entrantID));
+        assertEquals(1, list.getDeclinedList().size());
+        assertTrue(list.getDeclinedList().contains(entrantID));
+        assertEquals(0, list.getSelectedList().size());
+        assertFalse(list.getSelectedList().contains(entrantID));
+        checkSingle(list, entrantID);
+    }
+
+    public static void setUpCancelledList(EntrantList list, String entrantID) {
+        setUpWaitingList(list, entrantID);
+        assertTrue(list.addToCancelledList(entrantID));
+        assertEquals(1, list.getCancelledList().size());
+        assertTrue(list.getCancelledList().contains(entrantID));
+        assertEquals(0, list.getWaitingList().size());
+        assertFalse(list.getWaitingList().contains(entrantID));
+        checkSingle(list, entrantID);
+    }
+
+    public static void setUpRemovedList(EntrantList list, String entrantID) {
+        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(1, list.getRemovedList().size());
+        assertTrue(list.getRemovedList().contains(entrantID));
+        checkSingle(list, entrantID);
+    }
+}
