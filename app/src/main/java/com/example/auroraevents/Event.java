@@ -17,7 +17,6 @@ public class Event {
     private Date    dateTime;
     private String  location;
     private int     capacity;         // 0 = unlimited
-    private String  qrCodeData;       // String payload encoded in the QR code
 
     // Participant lists — each list holds device IDs (User.deviceId)
     private List<String> waitingList;     // signed up, awaiting lottery
@@ -71,9 +70,10 @@ public class Event {
     public int    getCapacity()                        { return capacity; }
     public void   setCapacity(int capacity)            { this.capacity = capacity; }
 
-    public String getQrCodeData()                          { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
-
+    //TODO: move to EntrantListManipulation
+    //TODO: add EventDb calls to all adders
+    //TODO: get rid of setters
+    //TODO: {@code addAll}s
     /**
      * Returns a list of device IDs of entrants on the waiting list.
      * @return The waiting list of entrant device IDs
