@@ -12,11 +12,11 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 public class Event {
 
-    private String  qrCodeData;
+    private String  eventId;
     private Bitmap qR;
 
-    public Event(String qrCodeData){
-        this.qrCodeData = qrCodeData;
+    public Event(String eventId){
+        this.eventId = eventId;
     }
 
 
@@ -35,7 +35,7 @@ public class Event {
             int height = 400;
 
             //convert data to bit matrix
-            BitMatrix matrix = writer.encode(this.qrCodeData, BarcodeFormat.QR_CODE, width, height);
+            BitMatrix matrix = writer.encode(this.eventId, BarcodeFormat.QR_CODE, width, height);
 
             //convert matrix to bitmap, can be used in image view
             BarcodeEncoder encoder = new BarcodeEncoder();
