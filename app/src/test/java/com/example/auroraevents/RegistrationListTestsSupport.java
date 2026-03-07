@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class RegistrationListTestsSupport {
+public class RegistrationListTestsSupport { //TODO: work with new returns
     public static void checkSingle(RegistrationList list, String entrantID) {
         assertEquals(1, list.getAllEntrantsList().size());
         assertTrue(list.getAllEntrantsList().contains(entrantID));

@@ -20,7 +20,7 @@ import org.junit.Test;
  * @author Jared Strandlund
  * @see Event
  */
-public class RegistrationWaitingListTest {
+public class RegistrationWaitingListTest { //TODO: work with new returns
     RegistrationList list;
     String entrantID;
 

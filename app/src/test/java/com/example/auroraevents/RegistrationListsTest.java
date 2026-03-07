@@ -33,7 +33,7 @@ public class RegistrationListsTest {
 //     * @author Jared Strandlund
 //     */
 //    @Test
-//    public void setTest() {
+//    public void setTest() {  //TODO: work with new returns
 //        // Set up
 //        String cancelledEntrant = "Pope Leo";
 //        String waitingEntrant = "Chappell Roan";

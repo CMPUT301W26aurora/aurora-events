@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import kotlin.jvm.internal.Lambda;
-
 public class RegistrationList {
     private String eventId;
     private final List<String> waitingList;     // signed up, awaiting lottery
@@ -40,6 +38,15 @@ public class RegistrationList {
         this.eventId = eventId;
     }
 
+    /**
+     * Changes the list that the user is on in the database.
+     *
+     * @param fromFieldName The list that the user is currently on, and will be removed from. (null to only add)
+     * @param toFieldName   The list that the user will be put on to (null to only remove)
+     * @param userID        The device ID of the user
+     * @return {@code true} on success
+     * @author Jared Strandlund
+     */
     private boolean changeDb(String fromFieldName, String toFieldName, String userID) {
         AtomicReference<Boolean> status = new AtomicReference<>(true);
 
@@ -61,8 +68,6 @@ public class RegistrationList {
         return status.get();
     }
 
-    //TODO: add EventDb calls to all adders
-
     /**
      * Returns a list of device IDs of entrants on the waiting list.
      *
@@ -77,14 +82,18 @@ public class RegistrationList {
      * Does nothing if the entrant is already on the selected, attending, or removed lists.
      *
      * @param userID The entrant's device ID
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public boolean addToWaitingList(String userID) {
+    public int addToWaitingList(String userID) {
         if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID) || declinedList.contains(userID))
-            return false;
+            return 1;
         else if (waitingList.contains(userID))
-            return true;
+            return -1;
         else {
             int status = 0;
             if (cancelledList.remove(userID)) {
@@ -97,10 +106,10 @@ public class RegistrationList {
 
             if (status == 0) {
                 waitingList.add(userID);
-                return true;
+                return 0;
             } else {
                 if (status == 1) cancelledList.add(userID);
-                return false;
+                return 2;
             }
         }
     }
@@ -110,11 +119,15 @@ public class RegistrationList {
      * Does nothing if the entrant is already on the selected, attending, or removed lists.
      *
      * @param userIDs The entrants' device IDs
-     * @return {@code true} on success
+     * @return
+     *      {@code 0} when successful add
+     *      {@code -1} when already on list
+     *      {@code 1} when already on blocking list
+     *      {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public List<Boolean> addAllToWaitingList(List<String> userIDs) {
-        List<Boolean> output = new ArrayList<>();
+    public List<Integer> addAllToWaitingList(List<String> userIDs) {
+        List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
             output.set(i, addToWaitingList(userIDs.get(i)));
         }
@@ -135,20 +148,30 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the waiting list.
      *
      * @param userID The entrant's device ID
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public boolean addToSelectedList(String userID) {
+
+    public int addToSelectedList(String userID) {
         if (waitingList.remove(userID)) {
             boolean status = changeDb(LIST_WAITING, LIST_SELECTED, userID);
             if (status) {
                 selectedList.add(userID);
-                return true;
+                return 0;
             } else {
                 waitingList.add(userID);
-                return false;
+                return 2;
             }
-        } else return selectedList.contains(userID);
+        } else {
+            if (selectedList.contains(userID))
+                return -1;
+            else
+                return 1;
+        }
     }
 
     /**
@@ -156,11 +179,15 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the waiting list.
      *
      * @param userIDs The entrants' device IDs
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public List<Boolean> addAllToSelectedList(List<String> userIDs) {
-        List<Boolean> output = new ArrayList<>();
+    public List<Integer> addAllToSelectedList(List<String> userIDs) {
+        List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
             output.set(i, addToSelectedList(userIDs.get(i)));
         }
@@ -181,20 +208,29 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the selected list.
      *
      * @param userID The entrant's device ID
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public boolean addToAttendingList(String userID) {
+    public int addToAttendingList(String userID) {
         if (selectedList.remove(userID)) {
             boolean status = changeDb(LIST_SELECTED, LIST_ATTENDING, userID);
             if (status) {
                 attendingList.add(userID);
-                return true;
+                return 0;
             } else {
                 selectedList.add(userID);
-                return false;
+                return 2;
             }
-        } else return attendingList.contains(userID);
+        } else {
+            if (attendingList.contains(userID))
+                return -1;
+            else
+                return 1;
+        }
     }
 
     /**
@@ -202,11 +238,15 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the selected list.
      *
      * @param userIDs The entrants' device IDs
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public List<Boolean> addAllToAttendingList(List<String> userIDs) {
-        List<Boolean> output = new ArrayList<>();
+    public List<Integer> addAllToAttendingList(List<String> userIDs) {
+        List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
             output.set(i, addToAttendingList(userIDs.get(i)));
         }
@@ -227,20 +267,29 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the selected list.
      *
      * @param userID The entrant's device ID
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public boolean addToDeclinedList(String userID) {
+    public int addToDeclinedList(String userID) {
         if (selectedList.remove(userID)) {
             boolean status = changeDb(LIST_SELECTED, LIST_DECLINED, userID);
             if (status) {
                 declinedList.add(userID);
-                return true;
+                return 0;
             } else {
                 selectedList.add(userID);
-                return false;
+                return 2;
             }
-        } else return declinedList.contains(userID);
+        } else {
+            if (declinedList.contains(userID))
+                return -1;
+            else
+                return 1;
+        }
     }
 
     /**
@@ -248,11 +297,15 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the selected list.
      *
      * @param userIDs The entrants' device IDs
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public List<Boolean> addAllToDeclinedList(List<String> userIDs) {
-        List<Boolean> output = new ArrayList<>();
+    public List<Integer> addAllToDeclinedList(List<String> userIDs) {
+        List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
             output.set(i, addToDeclinedList(userIDs.get(i)));
         }
@@ -273,20 +326,29 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the waiting list.
      *
      * @param userID The entrant's device ID
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public boolean addToCancelledList(String userID) {
+    public int addToCancelledList(String userID) {
         if (waitingList.remove(userID)) {
             boolean status = changeDb(LIST_WAITING, LIST_CANCELLED, userID);
             if (status) {
                 cancelledList.add(userID);
-                return true;
+                return 0;
             } else {
                 waitingList.add(userID);
-                return false;
+                return 2;
             }
-        } else return cancelledList.contains(userID);
+        } else {
+            if (cancelledList.contains(userID))
+                return -1;
+            else
+                return 1;
+        }
     }
 
     /**
@@ -294,11 +356,15 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the waiting list.
      *
      * @param userIDs The entrants' device IDs
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public List<Boolean> addAllToCancelledList(List<String> userIDs) {
-        List<Boolean> output = new ArrayList<>();
+    public List<Integer> addAllToCancelledList(List<String> userIDs) {
+        List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
             output.set(i, addToCancelledList(userIDs.get(i)));
         }
@@ -318,49 +384,61 @@ public class RegistrationList {
      * Add the specified entrant device ID to the removed list (will be blocked from being added to any other entrant list).
      *
      * @param userID The entrant's device ID
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public boolean addToRemovedList(String userID) {
+    public int addToRemovedList(String userID) {
         if (waitingList.remove(userID))
             if (!changeDb(LIST_WAITING, null, userID)) {
                 waitingList.add(userID);
-                return false;
+                return 2;
             }
         if (selectedList.remove(userID))
             if (!changeDb(LIST_SELECTED, null, userID)) {
                 selectedList.add(userID);
-                return false;
+                return 2;
             }
         if (attendingList.remove(userID))
             if (!changeDb(LIST_ATTENDING, null, userID)) {
                 attendingList.add(userID);
-                return false;
+                return 2;
             }
         if (declinedList.remove(userID))
             if (!changeDb(LIST_DECLINED, null, userID)) {
                 declinedList.add(userID);
-                return false;
+                return 2;
             }
         if (cancelledList.remove(userID))
             if (!changeDb(LIST_CANCELLED, null, userID)) {
                 cancelledList.add(userID);
-                return false;
+                return 2;
             }
 
-        if (!removedList.contains(userID)) {
+        if (removedList.contains(userID)) {
+            return -1;
+        } else {
             removedList.add(userID);
+            return 0;
         }
-        return true;
     }
 
     /**
      * Add all the specified entrant device IDs to the removed list (will be blocked from being added to any other entrant list).
      *
      * @param userIDs The entrants' device IDs
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when already on list
+     *     {@code 1} when already on blocking list
+     *     {@code 2} when database change fails
      * @author Jared Strandlund
      */
-    public List<Boolean> addAllToRemovedList(List<String> userIDs) {
-        List<Boolean> output = new ArrayList<>();
+    public List<Integer> addAllToRemovedList(List<String> userIDs) {
+        List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
             output.set(i, addToRemovedList(userIDs.get(i)));
         }
@@ -372,15 +450,19 @@ public class RegistrationList {
      * Does nothing if the entrant is not on the removed list.
      *
      * @param userID The entrant's device ID
-     * @return {@code true} on success
+     * @return
+     *     {@code 0} when successful add
+     *     {@code -1} when not on list
+     *     {@code 2} when database change fails
+     * @author Jared Strandlund
      */
-    public boolean removeFromRemovedList(String userID) {
+    public int removeFromRemovedList(String userID) {
         if (removedList.remove(userID)) {
             if (!changeDb(LIST_REMOVED, null, userID)) {
                 removedList.add(userID);
-                return false;
-            } else return true;
-        } else return false;
+                return 2;
+            } else return 0;
+        } else return -1;
     }
 
     /**

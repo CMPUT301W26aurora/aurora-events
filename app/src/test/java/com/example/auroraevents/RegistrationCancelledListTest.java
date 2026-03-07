@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RegistrationCancelledListTest {
+public class RegistrationCancelledListTest { //TODO: work with new returns
     RegistrationList list;
     String entrantID;
 
