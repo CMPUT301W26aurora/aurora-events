@@ -1,9 +1,20 @@
 package com.example.auroraevents;
 
+import static com.example.auroraevents.EventDb.LIST_ATTENDING;
+import static com.example.auroraevents.EventDb.LIST_CANCELLED;
+import static com.example.auroraevents.EventDb.LIST_DECLINED;
+import static com.example.auroraevents.EventDb.LIST_REMOVED;
+import static com.example.auroraevents.EventDb.LIST_SELECTED;
+import static com.example.auroraevents.EventDb.LIST_WAITING;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import kotlin.jvm.internal.Lambda;
 
 public class RegistrationList {
+    private String eventId;
     private final List<String> waitingList;     // signed up, awaiting lottery
     private final List<String> selectedList;    // drawn / invited but not yet confirmed
     private final List<String> attendingList;   // confirmed attendees
@@ -18,6 +29,36 @@ public class RegistrationList {
         declinedList = new ArrayList<>();
         cancelledList = new ArrayList<>();
         removedList = new ArrayList<>();
+    }
+
+    public RegistrationList(String eventId) {
+        this();
+        this.eventId = eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    private boolean changeDb(String fromFieldName, String toFieldName, String userID) {
+        AtomicReference<Boolean> status = new AtomicReference<>(true);
+
+        if ((toFieldName == null) && (fromFieldName == null)) return false;
+        if (fromFieldName == null) {
+            EventDb.getInstance().addUserToList(eventId, toFieldName, userID, null,
+                    e -> status.set(false)
+            );
+        } else if (toFieldName == null) {
+            EventDb.getInstance().removeUserFromList(eventId, fromFieldName, userID, null,
+                    e -> status.set(false)
+            );
+        } else {
+            EventDb.getInstance().moveUserBetweenLists(eventId, fromFieldName, toFieldName, userID, null,
+                    e -> status.set(false)
+            );
+        }
+
+        return status.get();
     }
 
     //TODO: add EventDb calls to all adders
@@ -45,9 +86,22 @@ public class RegistrationList {
         else if (waitingList.contains(userID))
             return true;
         else {
-            cancelledList.remove(userID);
-            waitingList.add(userID);
-            return true;
+            int status = 0;
+            if (cancelledList.remove(userID)) {
+                if (changeDb(LIST_CANCELLED, LIST_WAITING, userID))
+                    status = 1;
+            } else {
+                if (changeDb(null, LIST_WAITING, userID))
+                    status = 2;
+            }
+
+            if (status == 0) {
+                waitingList.add(userID);
+                return true;
+            } else {
+                if (status == 1) cancelledList.add(userID);
+                return false;
+            }
         }
     }
 
@@ -86,8 +140,14 @@ public class RegistrationList {
      */
     public boolean addToSelectedList(String userID) {
         if (waitingList.remove(userID)) {
-            selectedList.add(userID);
-            return true;
+            boolean status = changeDb(LIST_WAITING, LIST_SELECTED, userID);
+            if (status) {
+                selectedList.add(userID);
+                return true;
+            } else {
+                waitingList.add(userID);
+                return false;
+            }
         } else return selectedList.contains(userID);
     }
 
@@ -126,8 +186,14 @@ public class RegistrationList {
      */
     public boolean addToAttendingList(String userID) {
         if (selectedList.remove(userID)) {
-            attendingList.add(userID);
-            return true;
+            boolean status = changeDb(LIST_SELECTED, LIST_ATTENDING, userID);
+            if (status) {
+                attendingList.add(userID);
+                return true;
+            } else {
+                selectedList.add(userID);
+                return false;
+            }
         } else return attendingList.contains(userID);
     }
 
@@ -166,8 +232,14 @@ public class RegistrationList {
      */
     public boolean addToDeclinedList(String userID) {
         if (selectedList.remove(userID)) {
-            declinedList.add(userID);
-            return true;
+            boolean status = changeDb(LIST_SELECTED, LIST_DECLINED, userID);
+            if (status) {
+                declinedList.add(userID);
+                return true;
+            } else {
+                selectedList.add(userID);
+                return false;
+            }
         } else return declinedList.contains(userID);
     }
 
@@ -206,8 +278,14 @@ public class RegistrationList {
      */
     public boolean addToCancelledList(String userID) {
         if (waitingList.remove(userID)) {
-            cancelledList.add(userID);
-            return true;
+            boolean status = changeDb(LIST_WAITING, LIST_CANCELLED, userID);
+            if (status) {
+                cancelledList.add(userID);
+                return true;
+            } else {
+                waitingList.add(userID);
+                return false;
+            }
         } else return cancelledList.contains(userID);
     }
 
@@ -243,11 +321,32 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public boolean addToRemovedList(String userID) {
-        waitingList.remove(userID);
-        selectedList.remove(userID);
-        attendingList.remove(userID);
-        declinedList.remove(userID);
-        cancelledList.remove(userID);
+        if (waitingList.remove(userID))
+            if (!changeDb(LIST_WAITING, null, userID)) {
+                waitingList.add(userID);
+                return false;
+            }
+        if (selectedList.remove(userID))
+            if (!changeDb(LIST_SELECTED, null, userID)) {
+                selectedList.add(userID);
+                return false;
+            }
+        if (attendingList.remove(userID))
+            if (!changeDb(LIST_ATTENDING, null, userID)) {
+                attendingList.add(userID);
+                return false;
+            }
+        if (declinedList.remove(userID))
+            if (!changeDb(LIST_DECLINED, null, userID)) {
+                declinedList.add(userID);
+                return false;
+            }
+        if (cancelledList.remove(userID))
+            if (!changeDb(LIST_CANCELLED, null, userID)) {
+                cancelledList.add(userID);
+                return false;
+            }
+
         if (!removedList.contains(userID)) {
             removedList.add(userID);
         }
@@ -276,7 +375,12 @@ public class RegistrationList {
      * @return {@code true} on success
      */
     public boolean removeFromRemovedList(String userID) {
-        return removedList.remove(userID);
+        if (removedList.remove(userID)) {
+            if (!changeDb(LIST_REMOVED, null, userID)) {
+                removedList.add(userID);
+                return false;
+            } else return true;
+        } else return false;
     }
 
     /**

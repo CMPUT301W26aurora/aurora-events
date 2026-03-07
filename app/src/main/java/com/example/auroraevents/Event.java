@@ -38,7 +38,10 @@ public class Event {
     // ── Getters & Setters ──────────────────────────────────────────────────
 
     public String getEventId()                         { return eventId; }
-    public void   setEventId(String eventId)           { this.eventId = eventId; }
+    public void   setEventId(String eventId)           {
+        this.eventId = eventId;
+        registrationList.setEventId(eventId);
+    }
 
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
