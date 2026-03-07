@@ -1,17 +1,34 @@
 package com.example.auroraevents;
 
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
+import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 import static org.junit.Assert.assertEquals;
 //import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Date;
 
 public class RegistrationListsTest {
     Event event;
 
     @Before
     public void before() {
-        event = new Event();
+        event = new Event(
+                "test device",
+                "registration test",
+                "event for registration test",
+                new Date(),
+                "testing environment",
+                0);
+        setUpEvent(event);
+    }
+
+    @After
+    public void after() {
+        takeDownEvent(event);
     }
 
     /**

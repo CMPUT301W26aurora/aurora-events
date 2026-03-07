@@ -1,28 +1,47 @@
 package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RegistrationRemovedListTest { //TODO: work with new returns
+import java.util.Date;
+
+public class RegistrationRemovedListTest {
+    Event event;
     RegistrationList list;
     String entrantID;
 
     @Before
     public void before() {
-        list = new RegistrationList();
+        event = new Event(
+                "test device",
+                "registration test",
+                "event for registration test",
+                new Date(),
+                "testing environment",
+                0);
+        setUpEvent(event);
+        list = event.registrationList;
         entrantID = "aurora";
+    }
+
+    @After
+    public void after() {
+        takeDownEvent(event);
     }
 
     /**
@@ -31,7 +50,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
      */
     @Test
     public void noneToRemovedTest() {
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
 
@@ -46,7 +65,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void waitingToRemovedTest() {
         setUpWaitingList(list, entrantID);
 
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
         assertEquals(0, list.getWaitingList().size());
@@ -63,7 +82,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void selectedToRemovedTest() {
         setUpSelectedList(list, entrantID);
 
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
         assertEquals(0, list.getSelectedList().size());
@@ -80,7 +99,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void attendingToRemovedTest() {
         setUpAttendingList(list, entrantID);
 
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
         assertEquals(0, list.getAttendingList().size());
@@ -97,7 +116,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void declinedToRemovedTest() {
         setUpDeclinedList(list, entrantID);
 
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
         assertEquals(0, list.getDeclinedList().size());
@@ -114,7 +133,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void cancelledToRemovedTest() {
         setUpCancelledList(list, entrantID);
 
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
         assertEquals(0, list.getCancelledList().size());
@@ -131,7 +150,7 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void removedToRemovedTest() {
         setUpRemovedList(list, entrantID);
 
-        assertTrue(list.addToRemovedList(entrantID));
+        assertEquals(-1, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
 
@@ -146,10 +165,10 @@ public class RegistrationRemovedListTest { //TODO: work with new returns
     public void removeFromRemovedTest() {
         setUpRemovedList(list, entrantID);
 
-        assertTrue(list.removeFromRemovedList(entrantID));
+        assertEquals(0, list.removeFromRemovedList(entrantID));
         assertEquals(0, list.getRemovedList().size());
 
-        assertFalse(list.removeFromRemovedList(entrantID));
+        assertEquals(-1, list.removeFromRemovedList(entrantID));
         assertEquals(0, list.getRemovedList().size());
     }
 }

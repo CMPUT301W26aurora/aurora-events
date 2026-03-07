@@ -2,28 +2,47 @@ package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.checkNone;
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RegistrationCancelledListTest { //TODO: work with new returns
+import java.util.Date;
+
+public class RegistrationCancelledListTest {
+    Event event;
     RegistrationList list;
     String entrantID;
 
     @Before
     public void before() {
-        list = new RegistrationList();
+        event = new Event(
+                "test device",
+                "registration test",
+                "event for registration test",
+                new Date(),
+                "testing environment",
+                0);
+        setUpEvent(event);
+        list = event.registrationList;
         entrantID = "aurora";
+    }
+
+    @After
+    public void after() {
+        takeDownEvent(event);
     }
 
     /**
@@ -32,7 +51,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
      */
     @Test
     public void noneToCancelledTest() {
-        assertFalse(list.addToCancelledList(entrantID));
+        assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
         assertFalse(list.getCancelledList().contains(entrantID));
 
@@ -47,7 +66,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
     public void waitingToCancelledTest() {
         setUpWaitingList(list, entrantID);
 
-        assertTrue(list.addToCancelledList(entrantID));
+        assertEquals(0, list.addToCancelledList(entrantID));
         assertEquals(1, list.getCancelledList().size());
         assertTrue(list.getCancelledList().contains(entrantID));
         assertEquals(0, list.getWaitingList().size());
@@ -64,7 +83,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
     public void selectedToCancelledTest() {
         setUpSelectedList(list, entrantID);
 
-        assertFalse(list.addToCancelledList(entrantID));
+        assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
         assertFalse(list.getCancelledList().contains(entrantID));
         assertEquals(1, list.getSelectedList().size());
@@ -81,7 +100,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
     public void attendingToCancelledTest() {
         setUpAttendingList(list, entrantID);
 
-        assertFalse(list.addToCancelledList(entrantID));
+        assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
         assertFalse(list.getCancelledList().contains(entrantID));
         assertEquals(1, list.getAttendingList().size());
@@ -98,7 +117,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
     public void declinedToCancelledTest() {
         setUpDeclinedList(list, entrantID);
 
-        assertFalse(list.addToCancelledList(entrantID));
+        assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
         assertFalse(list.getCancelledList().contains(entrantID));
         assertEquals(1, list.getDeclinedList().size());
@@ -115,7 +134,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
     public void cancelledToCancelledTest() {
         setUpCancelledList(list, entrantID);
 
-        assertTrue(list.addToCancelledList(entrantID));
+        assertEquals(-1, list.addToCancelledList(entrantID));
         assertEquals(1, list.getCancelledList().size());
         assertTrue(list.getCancelledList().contains(entrantID));
 
@@ -130,7 +149,7 @@ public class RegistrationCancelledListTest { //TODO: work with new returns
     public void removedToCancelledTest() {
         setUpRemovedList(list, entrantID);
 
-        assertFalse(list.addToCancelledList(entrantID));
+        assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
         assertFalse(list.getCancelledList().contains(entrantID));
         assertEquals(1, list.getRemovedList().size());

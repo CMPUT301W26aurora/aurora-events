@@ -1,5 +1,7 @@
 package com.example.auroraevents;
 
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
+import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
@@ -12,22 +14,39 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Date;
 
 /**
  * Event.waitingList local unit test, which will execute on the development machine (host).
  * @author Jared Strandlund
- * @see Event
+ * @see RegistrationList
  */
-public class RegistrationWaitingListTest { //TODO: work with new returns
+public class RegistrationWaitingListTest {
+    Event event;
     RegistrationList list;
     String entrantID;
 
     @Before
     public void before() {
-        list = new RegistrationList();
+        event = new Event(
+                "test device",
+                "registration test",
+                "event for registration test",
+                new Date(),
+                "testing environment",
+                0);
+        setUpEvent(event);
+        list = event.registrationList;
         entrantID = "aurora";
+    }
+
+    @After
+    public void after() {
+        takeDownEvent(event);
     }
 
     /**
@@ -36,7 +55,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
      */
     @Test
     public void noneToWaitingTest() {
-        assertTrue(list.addToWaitingList(entrantID));
+        assertEquals(0, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
         assertTrue(list.getWaitingList().contains(entrantID));
 
@@ -51,7 +70,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
     public void waitingToWaitingTest() {
         setUpWaitingList(list, entrantID);
 
-        assertTrue(list.addToWaitingList(entrantID));
+        assertEquals(-1, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
         assertTrue(list.getWaitingList().contains(entrantID));
 
@@ -66,7 +85,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
     public void selectedToWaitingTest() {
         setUpSelectedList(list, entrantID);
 
-        assertFalse(list.addToWaitingList(entrantID));
+        assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());
         assertFalse(list.getWaitingList().contains(entrantID));
         assertEquals(1, list.getSelectedList().size());
@@ -83,7 +102,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
     public void attendingToWaitingTest() {
         setUpAttendingList(list, entrantID);
 
-        assertFalse(list.addToWaitingList(entrantID));
+        assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());
         assertFalse(list.getWaitingList().contains(entrantID));
         assertEquals(1, list.getAttendingList().size());
@@ -100,7 +119,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
     public void declinedToWaitingTest() {
         setUpDeclinedList(list, entrantID);
 
-        assertFalse(list.addToWaitingList(entrantID));
+        assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());
         assertFalse(list.getWaitingList().contains(entrantID));
         assertEquals(1, list.getDeclinedList().size());
@@ -117,7 +136,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
     public void cancelledToWaitingTest() {
         setUpCancelledList(list, entrantID);
 
-        assertTrue(list.addToWaitingList(entrantID));
+        assertEquals(0, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
         assertTrue(list.getWaitingList().contains(entrantID));
         assertEquals(0, list.getCancelledList().size());
@@ -134,7 +153,7 @@ public class RegistrationWaitingListTest { //TODO: work with new returns
     public void removedToWaitingTest() {
         setUpRemovedList(list, entrantID);
 
-        assertFalse(list.addToWaitingList(entrantID));
+        assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());
         assertFalse(list.getWaitingList().contains(entrantID));
         assertEquals(1, list.getRemovedList().size());

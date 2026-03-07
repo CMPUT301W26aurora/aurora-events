@@ -2,54 +2,73 @@ package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.checkNone;
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RegistrationDeclinedListTest { //TODO: work with new returns
+import java.util.Date;
+
+public class RegistrationAttendingListTest {
+    Event event;
     RegistrationList list;
     String entrantID;
 
     @Before
     public void before() {
-        list = new RegistrationList();
+        event = new Event(
+                "test device",
+                "registration test",
+                "event for registration test",
+                new Date(),
+                "testing environment",
+                0);
+        setUpEvent(event);
+        list = event.registrationList;
         entrantID = "aurora";
     }
 
+    @After
+    public void after() {
+        takeDownEvent(event);
+    }
+
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that isn't on any entrant lists
+     * Tests {@code addToAttendingList()} on an entrant that isn't on any entrant lists
      * @author Jared Strandlund
      */
     @Test
-    public void noneToDeclinedTest() {
-        assertFalse(list.addToDeclinedList(entrantID));
-        assertEquals(0, list.getDeclinedList().size());
-        assertFalse(list.getDeclinedList().contains(entrantID));
+    public void noneToAttendingTest() {
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
 
         checkNone(list, entrantID);
     }
 
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that is on the waiting list
+     * Tests {@code addToAttendingList()} on an entrant that is on the waiting list
      * @author Jared Strandlund
      */
     @Test
-    public void waitingToDeclinedTest() {
+    public void waitingToAttendingTest() {
         setUpWaitingList(list, entrantID);
 
-        assertFalse(list.addToDeclinedList(entrantID));
-        assertEquals(0, list.getDeclinedList().size());
-        assertFalse(list.getDeclinedList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getWaitingList().size());
         assertTrue(list.getWaitingList().contains(entrantID));
 
@@ -57,16 +76,16 @@ public class RegistrationDeclinedListTest { //TODO: work with new returns
     }
 
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that is on the selected list
+     * Tests {@code addToAttendingList()} on an entrant that is on the selected list
      * @author Jared Strandlund
      */
     @Test
-    public void selectedToDeclinedTest() {
+    public void selectedToAttendingTest() {
         setUpSelectedList(list, entrantID);
 
-        assertTrue(list.addToDeclinedList(entrantID));
-        assertEquals(1, list.getDeclinedList().size());
-        assertTrue(list.getDeclinedList().contains(entrantID));
+        assertEquals(0, list.addToAttendingList(entrantID));
+        assertEquals(1, list.getAttendingList().size());
+        assertTrue(list.getAttendingList().contains(entrantID));
         assertEquals(0, list.getSelectedList().size());
         assertFalse(list.getSelectedList().contains(entrantID));
 
@@ -74,16 +93,14 @@ public class RegistrationDeclinedListTest { //TODO: work with new returns
     }
 
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that is on the attending list
+     * Tests {@code addToAttendingList()} on an entrant that is on the attending list
      * @author Jared Strandlund
      */
     @Test
-    public void attendingToDeclinedTest() {
+    public void attendingToAttendingTest() {
         setUpAttendingList(list, entrantID);
 
-        assertFalse(list.addToDeclinedList(entrantID));
-        assertEquals(0, list.getDeclinedList().size());
-        assertFalse(list.getDeclinedList().contains(entrantID));
+        assertEquals(-1, list.addToAttendingList(entrantID));
         assertEquals(1, list.getAttendingList().size());
         assertTrue(list.getAttendingList().contains(entrantID));
 
@@ -91,14 +108,16 @@ public class RegistrationDeclinedListTest { //TODO: work with new returns
     }
 
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that is on the declined list
+     * Tests {@code addToAttendingList()} on an entrant that is on the declined list
      * @author Jared Strandlund
      */
     @Test
-    public void declinedToDeclinedTest() {
+    public void declinedToAttendingTest() {
         setUpDeclinedList(list, entrantID);
 
-        assertTrue(list.addToDeclinedList(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getDeclinedList().size());
         assertTrue(list.getDeclinedList().contains(entrantID));
 
@@ -106,16 +125,16 @@ public class RegistrationDeclinedListTest { //TODO: work with new returns
     }
 
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that is on the cancelled list
+     * Tests {@code addToAttendingList()} on an entrant that is on the cancelled list
      * @author Jared Strandlund
      */
     @Test
-    public void cancelledToDeclinedTest() {
+    public void cancelledToAttendingTest() {
         setUpCancelledList(list, entrantID);
 
-        assertFalse(list.addToDeclinedList(entrantID));
-        assertEquals(0, list.getDeclinedList().size());
-        assertFalse(list.getDeclinedList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getCancelledList().size());
         assertTrue(list.getCancelledList().contains(entrantID));
 
@@ -123,16 +142,16 @@ public class RegistrationDeclinedListTest { //TODO: work with new returns
     }
 
     /**
-     * Tests {@code addToDeclinedList()} on an entrant that is on the removed list
+     * Tests {@code addToAttendingList()} on an entrant that is on the removed list
      * @author Jared Strandlund
      */
     @Test
-    public void removedToDeclinedTest() {
+    public void removedToAttendingTest() {
         setUpRemovedList(list, entrantID);
 
-        assertFalse(list.addToDeclinedList(entrantID));
-        assertEquals(0, list.getDeclinedList().size());
-        assertFalse(list.getDeclinedList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
 
