@@ -3,7 +3,7 @@ package com.example.auroraevents;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntrantList {
+public class RegistrationList {
     private final List<String> waitingList;     // signed up, awaiting lottery
     private final List<String> selectedList;    // drawn / invited but not yet confirmed
     private final List<String> attendingList;   // confirmed attendees
@@ -11,7 +11,7 @@ public class EntrantList {
     private final List<String> cancelledList;   // self cancelled
     private final List<String> removedList;     // force removed
 
-    public EntrantList() {
+    public RegistrationList() {
         waitingList = new ArrayList<>();
         selectedList = new ArrayList<>();
         attendingList = new ArrayList<>();

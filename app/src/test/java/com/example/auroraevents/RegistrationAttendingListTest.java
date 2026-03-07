@@ -1,13 +1,13 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.EntrantListTestsSupport.checkNone;
-import static com.example.auroraevents.EntrantListTestsSupport.checkSingle;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.checkNone;
+import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,13 +16,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EntrantAttendingListTest {
-    EntrantList list;
+public class RegistrationAttendingListTest {
+    RegistrationList list;
     String entrantID;
 
     @Before
     public void before() {
-        list = new EntrantList();
+        list = new RegistrationList();
         entrantID = "aurora";
     }
 

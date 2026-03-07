@@ -6,7 +6,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EntrantListsTest {
+public class RegistrationListsTest {
     Event event;
 
     @Before
@@ -19,13 +19,13 @@ public class EntrantListsTest {
      */
     @Test
     public void constructorTest() {
-        assertEquals(0, event.entrantList.getWaitingList().size());
-        assertEquals(0, event.entrantList.getSelectedList().size());
-        assertEquals(0, event.entrantList.getAttendingList().size());
-        assertEquals(0, event.entrantList.getDeclinedList().size());
-        assertEquals(0, event.entrantList.getCancelledList().size());
-        assertEquals(0, event.entrantList.getRemovedList().size());
-        assertEquals(0, event.entrantList.getAllEntrantsList().size());
+        assertEquals(0, event.registrationList.getWaitingList().size());
+        assertEquals(0, event.registrationList.getSelectedList().size());
+        assertEquals(0, event.registrationList.getAttendingList().size());
+        assertEquals(0, event.registrationList.getDeclinedList().size());
+        assertEquals(0, event.registrationList.getCancelledList().size());
+        assertEquals(0, event.registrationList.getRemovedList().size());
+        assertEquals(0, event.registrationList.getAllEntrantsList().size());
     }
 
 //    /**

@@ -17,11 +17,11 @@ public class Event {
     private int     capacity;         // 0 = unlimited
 
     // Participant lists — each list holds device IDs (User.deviceId)
-    public EntrantList entrantList; // for manipulating the lists
+    public RegistrationList registrationList; // for manipulating the lists
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
-        entrantList = new EntrantList();
+        registrationList = new RegistrationList();
     }
   
     public Event(String organizerDeviceId, String name, String description,

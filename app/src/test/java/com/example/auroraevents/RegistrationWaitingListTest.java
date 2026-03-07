@@ -1,12 +1,12 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.EntrantListTestsSupport.checkSingle;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.EntrantListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,13 +20,13 @@ import org.junit.Test;
  * @author Jared Strandlund
  * @see Event
  */
-public class EntrantWaitingListTest {
-    EntrantList list;
+public class RegistrationWaitingListTest {
+    RegistrationList list;
     String entrantID;
 
     @Before
     public void before() {
-        list = new EntrantList();
+        list = new RegistrationList();
         entrantID = "aurora";
     }
 
