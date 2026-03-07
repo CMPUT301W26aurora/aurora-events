@@ -17,14 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 /**
  * Displays event details for the event tapped by the user.
- * Gets the event details from Firestore using the event ID.
+ * Gets the event details using the event ID.
  * Implements US 01.01.01 - View event details.
  * Implements US 01.01.03
  * Implements US 01.06.02 - Sign up for an event from event details.
@@ -42,7 +37,7 @@ public class InfoUEventFragment extends Fragment {
     private Button backButton, joinButton, acceptButton, declineButton;
 
     /**
-     * Displays event details screen UI.
+     * Displays event details' screen UI.
      * Fetches the user's device ID.
      * Fetches event ID.
      * Displays required buttons for the event details screen.
@@ -55,7 +50,7 @@ public class InfoUEventFragment extends Fragment {
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
      *
-     * @return
+     * @return view for this fragment displaying event details.
      */
     @Nullable
     @Override
@@ -69,7 +64,7 @@ public class InfoUEventFragment extends Fragment {
         // get device id to identify user
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        // get views
+        // get views to display event information
         eventName = view.findViewById(R.id.event_name);
         eventDescription = view.findViewById(R.id.event_description);
         eventLocation = view.findViewById(R.id.event_location);
@@ -88,130 +83,116 @@ public class InfoUEventFragment extends Fragment {
         // back button to return to events list when it is clicked
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        // fetch event from firestore
-        FirebaseFirestore eventsDb = FirebaseFirestore.getInstance();
-        eventsDb.collection("Events")
-                .document(eventId)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document != null && document.exists()) {
-                                Event event = document.toObject(Event.class);
-                                event.setEventId(document.getId());
+        // fetch event clicked by user from firestore using EventDb to display its details
+            EventDb.getInstance().getEvent(eventId, event -> {
+                if (event != null) {
+                    // display event details on screen
+                    eventName.setText(event.getName());
+                    eventDescription.setText(event.getDescription());
+                    eventLocation.setText(event.getLocation());
+                    eventDateTime.setText(event.getDateTime().toString());
+                    eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
+                    waitingListCount.setText(event.getWaitingList().size() + " people are waiting ");
+                    attendeesCount.setText(event.getAttendingList().size() + " people are participating ");
+                    eventDeadline.setText("");
+                    poster.setVisibility(View.GONE);
 
-                                // display event details on screen
-                                eventName.setText(event.getName());
-                                eventDescription.setText(event.getDescription());
-                                eventLocation.setText(event.getLocation());
-                                eventDateTime.setText(event.getDateTime().toString());
-                                eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
-                                waitingListCount.setText(event.getWaitingList().size() + "people are waiting");
-                                attendeesCount.setText(event.getAttendingList().size() + " people are participating");
-                                eventDeadline.setText("");
-                                poster.setVisibility(View.GONE);
+                    // check which list user is in and display corresponding buttons
+                    if (event.getAttendingList().contains(userId)) {
+                        // selected user that is attending event
+                        joinButton.setVisibility(View.GONE);
+                        acceptButton.setVisibility(View.GONE);
+                        declineButton.setVisibility(View.GONE);
+                        attendingLabel.setVisibility(View.VISIBLE);
+                        attendingLabel.setText("You are attending");
 
-                                // check which list user is in and display corresponding buttons
-                                if (event.getAttendingList().contains(userId)) {
-                                    // selected user that is attending event
-                                    joinButton.setVisibility(View.GONE);
-                                    acceptButton.setVisibility(View.GONE);
-                                    declineButton.setVisibility(View.GONE);
-                                    attendingLabel.setVisibility(View.VISIBLE);
-                                    attendingLabel.setText("You are attending");
+                    } else if (event.getSelectedList().contains(userId)) {
+                        // user selected to attend event
+                        joinButton.setVisibility(View.GONE);
+                        acceptButton.setVisibility(View.VISIBLE);
+                        declineButton.setVisibility(View.VISIBLE);
+                        attendingLabel.setVisibility(View.GONE);
 
-                                } else if (event.getSelectedList().contains(userId)) {
-                                    // user selected to attend event
-                                    joinButton.setVisibility(View.GONE);
-                                    acceptButton.setVisibility(View.VISIBLE);
-                                    declineButton.setVisibility(View.VISIBLE);
-                                    attendingLabel.setVisibility(View.GONE);
-
-                                    // move user from selectedList to the attendingList upon accepting event invite
-                                    acceptButton.setOnClickListener(v -> {
-                                        EventDb.getInstance().moveUserBetweenLists(
-                                                event.getEventId(),
-                                                EventDb.LIST_SELECTED,
-                                                EventDb.LIST_ATTENDING,
-                                                userId,
-                                                () -> {
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    attendingLabel.setVisibility(View.VISIBLE);
-                                                    attendingLabel.setText("You are attending");
-                                                    Log.d(TAG, "User accepted invitation");
-                                                },
-                                                e -> Log.d(TAG, "Error accepting invitation: " + e.getMessage()));
-                                    });
-                                    // move user from selectedList to declinedList upon declining event invite
-                                    declineButton.setOnClickListener(v -> {
-                                        EventDb.getInstance().moveUserBetweenLists(
-                                                event.getEventId(),
-                                                EventDb.LIST_SELECTED,
-                                                EventDb.LIST_DECLINED,
-                                                userId,
-                                                () -> {
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    joinButton.setVisibility(View.VISIBLE);
-                                                    joinButton.setText("Join Pool");
+                        // move user from selectedList to the attendingList upon accepting event invite
+                        acceptButton.setOnClickListener(v -> {
+                            EventDb.getInstance().moveUserBetweenLists(
+                                    event.getEventId(),
+                                    EventDb.LIST_SELECTED,
+                                    EventDb.LIST_ATTENDING,
+                                    userId,
+                                    () -> {
+                                        acceptButton.setVisibility(View.GONE);
+                                        declineButton.setVisibility(View.GONE);
+                                        attendingLabel.setVisibility(View.VISIBLE);
+                                        attendingLabel.setText("You are attending");
+                                        Log.d(TAG, "User accepted invitation");
+                                        },
+                                    e -> Log.d(TAG, "Error accepting invitation: " + e.getMessage()));
+                        });
+                        // move user from selectedList to declinedList upon declining event invite
+                        declineButton.setOnClickListener(v -> {
+                            EventDb.getInstance().moveUserBetweenLists(
+                                    event.getEventId(),
+                                    EventDb.LIST_SELECTED,
+                                    EventDb.LIST_DECLINED,
+                                    userId,
+                                    () -> {
+                                        acceptButton.setVisibility(View.GONE);
+                                        declineButton.setVisibility(View.GONE);
+                                        joinButton.setVisibility(View.VISIBLE);
+                                        joinButton.setText("Join Pool");
                                                     Log.d(TAG, "User declined invitation");
-                                                },
-                                                e -> Log.d(TAG, "Error declining invitation: " + e.getMessage()));
+                                                    },
+                                    e -> Log.d(TAG, "Error declining invitation: " + e.getMessage()));
+                        });
+
+                    } else if (event.getWaitingList().contains(userId)) {
+                        // user is on waitingList
+                        joinButton.setVisibility(View.VISIBLE);
+                        joinButton.setText("Leave Pool");
+                        acceptButton.setVisibility(View.GONE);
+                        declineButton.setVisibility(View.GONE);
+                        attendingLabel.setVisibility(View.GONE);
+
+                        // remove user from waitingList once the user clicks Leave Pool
+                        joinButton.setOnClickListener(v -> {
+                            EventDb.getInstance().removeUserFromList(
+                                    event.getEventId(),
+                                    EventDb.LIST_WAITING,
+                                    userId,
+                                    () -> {
+                                        joinButton.setText("Join Pool");
+                                        Log.d(TAG, "User left waiting list");
+                                        },
+                                    e -> Log.d(TAG, "Error leaving waiting list: " + e.getMessage()));
+                        });
+
+                    } else {
+                        // show Join Pool button if user is not on any list
+                        joinButton.setVisibility(View.VISIBLE);
+                        joinButton.setText("Join Pool");
+                        acceptButton.setVisibility(View.GONE);
+                        declineButton.setVisibility(View.GONE);
+                        attendingLabel.setVisibility(View.GONE);
+
+                        // add user to the waitingList when clicked on Join Pool button
+                        joinButton.setOnClickListener(v -> {
+                            EventDb.getInstance().addUserToList(
+                                    event.getEventId(),
+                                    EventDb.LIST_WAITING,
+                                    userId,
+                                    () -> {
+                                        joinButton.setText("Leave Pool");
+                                        Log.d(TAG, "User joined waiting list");
+                                        },
+                                    e -> Log.d(TAG, "Error joining waiting list: " + e.getMessage()));
                                     });
-
-                                } else if (event.getWaitingList().contains(userId)) {
-                                    // user is on waitingList
-                                    joinButton.setVisibility(View.VISIBLE);
-                                    joinButton.setText("Leave Pool");
-                                    acceptButton.setVisibility(View.GONE);
-                                    declineButton.setVisibility(View.GONE);
-                                    attendingLabel.setVisibility(View.GONE);
-
-                                    // remove user from waitingList once the user clicks Leave Pool
-                                    joinButton.setOnClickListener(v -> {
-                                        EventDb.getInstance().removeUserFromList(
-                                                event.getEventId(),
-                                                EventDb.LIST_WAITING,
-                                                userId,
-                                                () -> {
-                                                    joinButton.setText("Join Pool");
-                                                    Log.d(TAG, "User left waiting list");
-                                                },
-                                                e -> Log.d(TAG, "Error leaving: " + e.getMessage()));
-                                    });
-
-                                } else {
-                                    // show Join Pool button if user is not on any list
-                                    joinButton.setVisibility(View.VISIBLE);
-                                    joinButton.setText("Join Pool");
-                                    acceptButton.setVisibility(View.GONE);
-                                    declineButton.setVisibility(View.GONE);
-                                    attendingLabel.setVisibility(View.GONE);
-
-                                    // add user to the waitingList when clicked on Join Pool button
-                                    joinButton.setOnClickListener(v -> {
-                                        EventDb.getInstance().addUserToList(
-                                                event.getEventId(),
-                                                EventDb.LIST_WAITING,
-                                                userId,
-                                                () -> {
-                                                    joinButton.setText("Leave Pool");
-                                                    Log.d(TAG, "User joined waiting list");
-                                                },
-                                                e -> Log.d(TAG, "Error joining: " + e.getMessage()));
-                                    });
-                                }
-                            } else {
-                                Log.d(TAG, "No such event available");
-                            }
-                        } else {
-                            Log.d(TAG, "Error: " + task.getException().getMessage());
-                        }
                     }
-                });
-        return view;
+                } else {
+                    Log.d(TAG, "No such event available");
+                }
+            }, e -> Log.d(TAG, "Error fetching event: " + e.getMessage())
+);
+            return view;
     }
 }
