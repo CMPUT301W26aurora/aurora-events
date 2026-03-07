@@ -1,6 +1,8 @@
 // resources used:
-// https://firebase.google.com/docs/firestore/query-data/get-data#get_a_document
+// https://firebase.google.com/docs/firestore/query-data/get-data
+// https://firebase.google.com/docs/firestore/query-data/listen
 // https://stackoverflow.com/questions/63312913/check-if-a-user-id-exists-in-arraylist
+//https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents;
 
 import android.os.Bundle;
