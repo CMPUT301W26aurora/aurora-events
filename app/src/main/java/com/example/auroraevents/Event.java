@@ -11,6 +11,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import android.graphics.Bitmap;
+import android.util.Log;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 /**
  * Represents an event in the application.
@@ -26,20 +34,14 @@ public class Event {
     private String  location;
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
-
+    private Bitmap qR;
 
     // Participant lists — each list holds device IDs (User.deviceId)
-    private List<String> attendingList;   // confirmed attendees
-    private List<String> selectedList;    // drawn / invited but not yet confirmed
-    private List<String> waitingList;     // signed up, awaiting lottery
-    private List<String> cancelledList;   // cancelled or removed
+    public RegistrationList registrationList; // for manipulating the lists
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
-        attendingList  = new ArrayList<>();
-        selectedList   = new ArrayList<>();
-        waitingList    = new ArrayList<>();
-        cancelledList  = new ArrayList<>();
+        registrationList = new RegistrationList();
     }
 
     public Event(String organizerDeviceId, String name, String description,
@@ -56,7 +58,10 @@ public class Event {
     // ── Getters & Setters ──────────────────────────────────────────────────
 
     public String getEventId()                         { return eventId; }
-    public void   setEventId(String eventId)           { this.eventId = eventId; }
+    public void   setEventId(String eventId)           {
+        this.eventId = eventId;
+        registrationList.setEventId(eventId);
+    }
 
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
@@ -79,14 +84,35 @@ public class Event {
     public String getQrCodeData()                          { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
 
-    public List<String> getAttendingList()                             { return attendingList; }
-    public void         setAttendingList(List<String> attendingList)   { this.attendingList = attendingList; }
+    public Bitmap       getQrCode()                                    { return this.qR; }
 
-    public List<String> getSelectedList()                              { return selectedList; }
-    public void         setSelectedList(List<String> selectedList)     { this.selectedList = selectedList; }
+    // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
+    /**
+     * takes a string of data and converts to a bitmap QR code
+     * The string data is defined in the constructor and using this produces a bitmap
+     * that returns the value specified inside of the variable
+     * @author Sean Ross
+     */
+    public void generateQrCode(){
+        MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
+        try{
+            // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
 
-    public List<String> getWaitingList()                               { return waitingList; }
-    public void         setWaitingList(List<String> waitingList)       { this.waitingList = waitingList; }
+            int width = 400; //these values change the width and height of the qr code
+            int height = 400;
+
+            //convert data to bit matrix
+            BitMatrix matrix = writer.encode(this.eventId, BarcodeFormat.QR_CODE, width, height);
+
+            //convert matrix to bitmap, can be used in image view
+            BarcodeEncoder encoder = new BarcodeEncoder();
+            qR = encoder.createBitmap(matrix);
+        }
+        catch (WriterException e){
+            Log.e("EVENT","Error encoding QR code", e);
+        }
+
+    }
 
     public List<String> getCancelledList()                             { return cancelledList; }
     public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
