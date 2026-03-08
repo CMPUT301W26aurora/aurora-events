@@ -29,23 +29,13 @@ public class Event {
     private Bitmap qR; 
   
     // Participant lists — each list holds device IDs (User.deviceId)
-    private List<String> waitingList;     // signed up, awaiting lottery
-    private List<String> selectedList;    // drawn / invited but not yet confirmed
-    private List<String> attendingList;   // confirmed attendees
-    private List<String> declinedList;    // invited then self declined
-    private List<String> cancelledList;   // self cancelled
-    private List<String> removedList;     // force removed
+    public RegistrationList registrationList; // for manipulating the lists
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
-        waitingList   = new ArrayList<>();
-        selectedList  = new ArrayList<>();
-        attendingList = new ArrayList<>();
-        declinedList  = new ArrayList<>();
-        cancelledList = new ArrayList<>();
-        removedList   = new ArrayList<>();
+        registrationList = new RegistrationList();
     }
-
+  
     public Event(String organizerDeviceId, String name, String description,
                  Date dateTime, String location, int capacity) {
         this();
@@ -60,7 +50,10 @@ public class Event {
     // ── Getters & Setters ──────────────────────────────────────────────────
 
     public String getEventId()                         { return eventId; }
-    public void   setEventId(String eventId)           { this.eventId = eventId; }
+    public void   setEventId(String eventId)           {
+        this.eventId = eventId;
+        registrationList.setEventId(eventId);
+    }
 
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
@@ -82,26 +75,9 @@ public class Event {
 
     public String getQrCodeData()                          { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
-
-    public List<String> getAttendingList()                             { return attendingList; }
-    public void         setAttendingList(List<String> attendingList)   { this.attendingList = attendingList; }
-
-    public List<String> getSelectedList()                              { return selectedList; }
-    public void         setSelectedList(List<String> selectedList)     { this.selectedList = selectedList; }
-
-    public List<String> getWaitingList()                               { return waitingList; }
-    public void         setWaitingList(List<String> waitingList)       { this.waitingList = waitingList; }
-
-    public List<String> getDeclinedList()                              { return declinedList; }
-    public void         setDeclinedList(List<String> declinedList)     { this.declinedList = declinedList; }
-
-    public List<String> getRemovedList()                               { return removedList; }
-    public void         setRemovedList(List<String> removedList)       { this.removedList = removedList; }
-
-    public List<String> getCancelledList()                             { return cancelledList; }
-    public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
   
     public Bitmap       getQrCode()                                    { return this.qR; }
+    
     // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
     /**
      * takes a string of data and converts to a bitmap QR code

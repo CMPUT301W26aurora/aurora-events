@@ -23,12 +23,13 @@ public class EventDb {
     private static final String COLLECTION_NAME = "Events";
 
     // Participant list field names — use these constants everywhere
-    public static final String LIST_ATTENDING  = "attendingList";
-    public static final String LIST_SELECTED   = "selectedList";
-    public static final String LIST_WAITING    = "waitingList";
-    public static final String LIST_CANCELLED  = "cancelledList";
-    public static final String LIST_DECLINED   = "declinedList";
-    public static final String LIST_REMOVED    = "removedList";
+    public static final String LIST_REGISTRATION = "registrationList";
+    public static final String LIST_ATTENDING  = LIST_REGISTRATION + '.' + "attendingList";
+    public static final String LIST_SELECTED   = LIST_REGISTRATION + '.' + "selectedList";
+    public static final String LIST_WAITING    = LIST_REGISTRATION + '.' + "waitingList";
+    public static final String LIST_CANCELLED  = LIST_REGISTRATION + '.' + "cancelledList";
+    public static final String LIST_DECLINED   = LIST_REGISTRATION + '.' + "declinedList";
+    public static final String LIST_REMOVED    = LIST_REGISTRATION + '.' + "removedList";
 
 
     private static EventDb instance;
