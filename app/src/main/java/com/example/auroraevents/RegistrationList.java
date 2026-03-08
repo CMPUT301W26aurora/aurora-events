@@ -7,8 +7,12 @@ import static com.example.auroraevents.EventDb.LIST_REMOVED;
 import static com.example.auroraevents.EventDb.LIST_SELECTED;
 import static com.example.auroraevents.EventDb.LIST_WAITING;
 
+import com.google.firebase.firestore.Exclude;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RegistrationList {
@@ -19,6 +23,8 @@ public class RegistrationList {
     private final List<String> declinedList;    // invited then self declined
     private final List<String> cancelledList;   // self cancelled
     private final List<String> removedList;     // force removed
+    private Integer databaseTimeout = 10;
+    private TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
     public RegistrationList() {
         waitingList = new ArrayList<>();
@@ -29,13 +35,30 @@ public class RegistrationList {
         removedList = new ArrayList<>();
     }
 
-    public RegistrationList(String eventId) {
+    public RegistrationList(int databaseTimeout, TimeUnit timeoutUnit) {
         this();
-        this.eventId = eventId;
+        this.databaseTimeout = databaseTimeout;
+        this.timeoutUnit = timeoutUnit;
     }
 
     public void setEventId(String eventId) {
         this.eventId = eventId;
+    }
+
+    public Integer getDatabaseTimeout() {
+        return databaseTimeout;
+    }
+
+    public void setDatabaseTimeout(Integer databaseTimeout) {
+        this.databaseTimeout = databaseTimeout;
+    }
+
+    public TimeUnit getTimeoutUnit() {
+        return timeoutUnit;
+    }
+
+    public void setTimeoutUnit(TimeUnit unit) {
+        timeoutUnit = unit;
     }
 
     /**
@@ -48,21 +71,41 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     private boolean changeDb(String fromFieldName, String toFieldName, String userID) {
+        if ((toFieldName == null) && (fromFieldName == null)) return false;
+
+        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Boolean> status = new AtomicReference<>(true);
 
-        if ((toFieldName == null) && (fromFieldName == null)) return false;
         if (fromFieldName == null) {
-            EventDb.getInstance().addUserToList(eventId, toFieldName, userID, null,
-                    e -> status.set(false)
+            EventDb.getInstance().addUserToList(eventId, toFieldName, userID,
+                    latch::countDown,
+                    e -> {
+                        status.set(false);
+                        latch.countDown();
+                    }
             );
         } else if (toFieldName == null) {
-            EventDb.getInstance().removeUserFromList(eventId, fromFieldName, userID, null,
-                    e -> status.set(false)
+            EventDb.getInstance().removeUserFromList(eventId, fromFieldName, userID,
+                    latch::countDown,
+                    e -> {
+                        status.set(false);
+                        latch.countDown();
+                    }
             );
         } else {
-            EventDb.getInstance().moveUserBetweenLists(eventId, fromFieldName, toFieldName, userID, null,
-                    e -> status.set(false)
+            EventDb.getInstance().moveUserBetweenLists(eventId, fromFieldName, toFieldName, userID,
+                    latch::countDown,
+                    e -> {
+                        status.set(false);
+                        latch.countDown();
+                    }
             );
+        }
+
+        try {
+            assert latch.await(databaseTimeout, timeoutUnit);
+        } catch (InterruptedException e) {
+            return false;
         }
 
         return status.get();
@@ -97,10 +140,10 @@ public class RegistrationList {
         else {
             int status = 0;
             if (cancelledList.remove(userID)) {
-                if (changeDb(LIST_CANCELLED, LIST_WAITING, userID))
+                if (!changeDb(LIST_CANCELLED, LIST_WAITING, userID))
                     status = 1;
             } else {
-                if (changeDb(null, LIST_WAITING, userID))
+                if (!changeDb(null, LIST_WAITING, userID))
                     status = 2;
             }
 
@@ -470,6 +513,7 @@ public class RegistrationList {
      *
      * @return The list of all entrant device IDs
      */
+    @Exclude
     public List<String> getAllEntrantsList() {
         List<String> output = new ArrayList<>();
         output.addAll(this.getAttendingList());

@@ -1,18 +1,25 @@
 package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
+import static com.example.auroraevents.RegistrationListTestsSupport.signIn;
 import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 import static org.junit.Assert.assertEquals;
 //import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
 
 public class RegistrationListsTest {
     Event event;
+
+    @BeforeClass
+    public static void prepare() {
+        signIn();
+    }
 
     @Before
     public void before() {
@@ -50,7 +57,7 @@ public class RegistrationListsTest {
 //     * @author Jared Strandlund
 //     */
 //    @Test
-//    public void setTest() {  //TODO: work with new returns
+//    public void setTest() {  //TO/DO: work with new returns
 //        // Set up
 //        String cancelledEntrant = "Pope Leo";
 //        String waitingEntrant = "Chappell Roan";

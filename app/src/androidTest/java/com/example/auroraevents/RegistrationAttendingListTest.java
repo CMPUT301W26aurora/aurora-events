@@ -9,6 +9,7 @@ import static com.example.auroraevents.RegistrationListTestsSupport.setUpDecline
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.signIn;
 import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 
 import static org.junit.Assert.assertEquals;
@@ -17,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
@@ -25,6 +27,11 @@ public class RegistrationAttendingListTest {
     Event event;
     RegistrationList list;
     String entrantID;
+
+    @BeforeClass
+    public static void prepare() {
+        signIn();
+    }
 
     @Before
     public void before() {
