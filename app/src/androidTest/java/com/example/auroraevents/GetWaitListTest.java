@@ -29,6 +29,7 @@ public class GetWaitListTest {
     @BeforeClass
     public static void prepare() {
         signIn();
+        RegistrationWaitingListTest.prepare();
     }
 
     @Before
