@@ -12,12 +12,21 @@ import com.google.zxing.common.HybridBinarizer;
 
 import org.junit.Test;
 
+import java.util.Date;
+
 public class QRcodeTest {
 
     @Test
     public void bitmapTest(){
-         Event event = new Event(); //was previous new Event("hello") in the argument, this was removed as it was causing issues with test cases, feel free to add it back in
-         event.generateQrCode();
+        Event event = new Event(
+                "test device",
+                "QR code test",
+                "event for QR code test",
+                new Date(),
+                "testing environment",
+                0);
+        event.setEventId("sample id for QR Code testing");
+        event.generateQrCode();
 
          Bitmap test = event.getQrCode();
          assertNotNull(test);
