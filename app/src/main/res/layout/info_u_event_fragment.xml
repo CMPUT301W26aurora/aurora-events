@@ -104,6 +104,14 @@
             android:text="Decline"
             android:visibility="gone"/>
 
+        <!--Delete Button-->
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Event"
+            android:visibility="gone"/>
+
         <!--Attending Label-->
         <TextView
             android:id="@+id/attending_label"
@@ -113,6 +121,7 @@
             android:textColor="@android:color/holo_green_light"
             android:textSize="14sp"
             android:visibility="gone"/>
+
 
     </LinearLayout>
 </ScrollView>
