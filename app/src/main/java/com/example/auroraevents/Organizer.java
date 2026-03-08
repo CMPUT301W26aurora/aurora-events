@@ -24,28 +24,13 @@ public class Organizer extends User {
      * Randomly samples users in the waiting list of the specified event
      * @param event
      * Event that the organizer wants to sample in
-     * @param amount
-     * The amount of users the organizer wants to sample
      */
-    public void sampleWaitList(Event event, int amount) {
-        int emptySlots = event.getEmptySlotAmount();
-        int waitListSize = event.getWaitingList().size();
+    public void sampleWaitList(Event event) {
         if (!(myEvents.contains(event))) { // Check if the organizer created the specified event
             throw new IllegalArgumentException("Event not found");
         }
-        // Validate the amount input
-        else if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be bigger than than 0");
-        }
-        else if (amount > emptySlots) {
-            throw new IllegalArgumentException("Amount too big: Not enough empty slots for selection.");
-        }
-        else if (amount > waitListSize) {
-            throw new IllegalArgumentException("Amount too big: Not enough users in the waiting list.");
-        }
-        // Inputs validated, randomly sample the waitlist in the event
         else {
-            event.randomSampling(amount);
+            event.randomSampling();
         }
     }
 
@@ -58,10 +43,10 @@ public class Organizer extends User {
      */
     public ArrayList<User> getEventWaitList(Event event) {
         ArrayList<User> userInfoList = new ArrayList<User>();
-        List<String> waitList = event.getWaitingList();
+        List<String> waitList = event.registrationList.getWaitingList();
 
         if (myEvents.contains(event)) {
-            //Fetch user information from firestore database
+            //Fetch user information from Firestore database
             var ref = new Object() {
                 User returnedUser;
             };

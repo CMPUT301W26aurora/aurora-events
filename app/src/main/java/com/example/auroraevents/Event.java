@@ -3,10 +3,6 @@ package com.example.auroraevents;
 
 import android.util.Log;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -114,41 +110,30 @@ public class Event {
 
     }
 
-    public List<String> getCancelledList()                             { return cancelledList; }
-    public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
-
     /**
      * Returns the amount of empty slots that is available in the event
      * @return
      * Amount of empty slots available
      */
     public int getEmptySlotAmount() {
-        return capacity - attendingList.size() - selectedList.size();
+        return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
     }
 
     /**
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
-     * @param amount
-     * Amount of users to randomly sample for the event.
+     * then send notification to both the users who were selected and not
      */
-    public void randomSampling(int amount) {
+    public void randomSampling() {
         Random random = new Random();
-        for (int i = 0; i < amount ; i++) {
+        for (int i = 0; i < getEmptySlotAmount(); i++) {
             // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
-            int randomIndex = random.nextInt(waitingList.size());
-            selectedList.add(waitingList.get(randomIndex));
-            waitingList.remove(randomIndex); // Remove the randomly selected user so the same user cannot be selected twice
+            int randomIndex = random.nextInt(registrationList.getWaitingList().size());
+            String selectedUserID = registrationList.getWaitingList().get(randomIndex);
+            registrationList.addToSelectedList(selectedUserID);
+        }
 
-            // Update database
-            EventDb.getInstance().moveUserBetweenLists(eventId,"waitingList", "selectedList", waitingList.get(randomIndex),
-                    () -> {
-                        Log.d("Main", "Success");
-                    }
-                    ,
-                    e->
-                    {
-                        Log.d("Main", "Failure");
-                    });
+        for (String deviceId : registrationList.getWaitingList()) {
+            // Send notification to the users with the message "You weren’t selected, but you have another chance"
         }
     }
 

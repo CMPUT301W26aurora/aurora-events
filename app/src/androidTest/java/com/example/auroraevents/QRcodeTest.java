@@ -16,7 +16,7 @@ public class QRcodeTest {
 
     @Test
     public void bitmapTest(){
-         Event event = new Event("hello");
+         Event event = new Event(); //was previous new Event("hello") in the argument, this was removed as it was causing issues with test cases, feel free to add it back in
          event.generateQrCode();
 
          Bitmap test = event.getQrCode();

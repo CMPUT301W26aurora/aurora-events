@@ -1,23 +1,78 @@
 package com.example.auroraevents;
 
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
+import static com.example.auroraevents.RegistrationListTestsSupport.signIn;
+import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.util.Log;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class WaitListSamplingTest {
     private Organizer organizer;
+
+    Event myEvent;
+    RegistrationList list;
+    String entrantID;
+
+    User user;
+
+    @BeforeClass
+    public static void prepare() {
+        signIn();
+    }
+
+    @Before
+    public void before() {
+        myEvent = new Event(
+                "test device",
+                "registration test",
+                "event for registration test",
+                new Date(),
+                "testing environment",
+                0);
+        myEvent.setEventId("test event");
+        setUpEvent(myEvent);
+        list = myEvent.registrationList;
+        entrantID = "aurora";
+        user = new User();
+        user.setDeviceId("TestID");
+        UserDb.getInstance().addUser(user,
+                () -> {
+                    Log.d("Main", "Successfully added user");
+                },
+                e -> {
+                    Log.e("Main", "Error while adding user", e);
+                });
+    }
+
+    @After
+    public void after() {
+        takeDownEvent(myEvent);
+        UserDb.getInstance().deleteUser(user.getDeviceId(),
+                () -> {
+                    Log.d("Main", "Successfully deleted user");
+                },
+                e -> {
+                    Log.e("Main", "Error while deleting user", e);
+                });
+    }
 
     @Test
     public void waitListSampleTest() {
         // Initialize objects
         Organizer organizer = new Organizer();
         ArrayList<Event> myEvents = new ArrayList<>();
-        Event myEvent = new Event();
         myEvent.setCapacity(4);
         myEvents.add(myEvent);
         organizer.setMyEvents(myEvents);
@@ -36,25 +91,25 @@ public class WaitListSamplingTest {
         waitlist.add(user2.getDeviceId());
         waitlist.add(user3.getDeviceId());
         waitlist.add(user4.getDeviceId());
-        myEvent.setWaitingList(waitlist);
+        myEvent.registrationList.addAllToAttendingList(waitlist);
 
         // Randomly select 2
-        myEvent.randomSampling(2);
+        myEvent.randomSampling();
         // Check if the waitlist shrunk by 2
-        assertEquals(2, myEvent.getWaitingList().size());
+        assertEquals(2, myEvent.registrationList.getWaitingList().size());
         // Check if the selected list increased by 2
-        assertEquals(2, myEvent.getSelectedList().size());
+        assertEquals(2, myEvent.registrationList.getSelectedList().size());
         // Check if the selected list and wait list combined still has the original four users
         // Also store current waitlist and selected list for the next section
         List<String> checkList = new ArrayList<String>();
         List<String> previousWaitList = new ArrayList<String>();
         List<String> previousSelectedList = new ArrayList<String>();
 
-        for (String deviceId : myEvent.getWaitingList()) {
+        for (String deviceId : myEvent.registrationList.getWaitingList()) {
             checkList.add(deviceId);
             previousWaitList.add(deviceId);
         }
-        for (String deviceId : myEvent.getSelectedList()) {
+        for (String deviceId : myEvent.registrationList.getSelectedList()) {
             checkList.add(deviceId);
             previousSelectedList.add(deviceId);
         }
@@ -67,9 +122,9 @@ public class WaitListSamplingTest {
         waitlist.add(user2.getDeviceId());
         waitlist.add(user3.getDeviceId());
         waitlist.add(user4.getDeviceId());
-        myEvent.setWaitingList(waitlist);
-        organizer.sampleWaitList(myEvent,2);
-        assertFalse(previousWaitList.containsAll(myEvent.getWaitingList()));
-        assertFalse(previousSelectedList.containsAll(myEvent.getSelectedList()));
+        myEvent.registrationList.addAllToAttendingList(waitlist);
+        organizer.sampleWaitList(myEvent);
+        assertFalse(previousWaitList.containsAll(myEvent.registrationList.getWaitingList()));
+        assertFalse(previousSelectedList.containsAll(myEvent.registrationList.getSelectedList()));
     }
 }

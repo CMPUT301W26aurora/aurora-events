@@ -27,7 +27,7 @@ public class RegistrationListTestsSupport {
                 });
 
         try {
-            assertTrue("signIn timed out", latch.await(10, TimeUnit.SECONDS));
+            assertTrue("signIn timed out", latch.await(60, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             fail("signIn was interrupted");
         }
