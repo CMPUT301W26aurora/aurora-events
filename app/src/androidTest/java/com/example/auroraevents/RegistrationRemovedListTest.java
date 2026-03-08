@@ -8,7 +8,7 @@ import static com.example.auroraevents.RegistrationListTestsSupport.setUpDecline
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.signIn;
+import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 
 import static org.junit.Assert.assertEquals;

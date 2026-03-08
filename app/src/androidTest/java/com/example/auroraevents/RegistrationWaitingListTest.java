@@ -1,7 +1,7 @@
 package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
-import static com.example.auroraevents.RegistrationListTestsSupport.signIn;
+import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
