@@ -1,8 +1,8 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
+import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
-import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
+import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static org.junit.Assert.assertEquals;
 //import static org.junit.Assert.assertTrue;
 
@@ -26,7 +26,7 @@ public class RegistrationListsTest {
         event = new Event(
                 "test device",
                 "registration test",
-                "event for registration test",
+                "event for general registration lists test",
                 new Date(),
                 "testing environment",
                 0);

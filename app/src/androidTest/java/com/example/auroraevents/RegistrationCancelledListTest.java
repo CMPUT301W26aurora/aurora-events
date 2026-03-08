@@ -2,7 +2,7 @@ package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.checkNone;
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpEvent;
+import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
@@ -10,7 +10,7 @@ import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemoved
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
 import static com.example.auroraevents.TestsSupport.signIn;
-import static com.example.auroraevents.RegistrationListTestsSupport.takeDownEvent;
+import static com.example.auroraevents.TestsSupport.takeDownEvent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +38,7 @@ public class RegistrationCancelledListTest {
         event = new Event(
                 "test device",
                 "registration test",
-                "event for registration test",
+                "event for registration cancelled list test",
                 new Date(),
                 "testing environment",
                 0);
