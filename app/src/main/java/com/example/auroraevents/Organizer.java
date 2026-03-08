@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
@@ -52,14 +54,22 @@ public class Organizer extends User {
             };
 
             for (String userId : waitList) {
+                CountDownLatch latch = new CountDownLatch(1);
                 UserDb.getInstance().getUser(userId,
                         user -> {
                             ref.returnedUser = user;
+                            latch.countDown();
                         },
                         e -> {
                             Log.e("Main", "Error fetching user", e);
+                            latch.countDown();
                         }
                 );
+                try {
+                    assert latch.await(60, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    continue;
+                }
                 if (ref.returnedUser != null) {
                     userInfoList.add(ref.returnedUser);
                 }
