@@ -15,7 +15,7 @@ import android.util.Log;
  * This class contains the constructor and methods for the Organizer class, a subclass of the User class
  */
 public class Organizer extends User {
-    private ArrayList<Event> myEvents;
+
 
     /**
      * Organizer constructor
@@ -23,15 +23,6 @@ public class Organizer extends User {
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
-        myEvents = new ArrayList<Event>();
-    }
-
-    public ArrayList<Event> getMyEvents() {
-        return myEvents;
-    }
-
-    public void setMyEvents(ArrayList<Event> myEvents) {
-        this.myEvents = myEvents;
     }
 
     /**
@@ -57,24 +48,22 @@ public class Organizer extends User {
                             String time, String startTime, String endTime, String location, int capacity) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDate eventDate = LocalDate.parse(date);
+        LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
+        LocalDateTime eventRegistrationEnd = LocalDateTime.parse(endTime, formatter);
 
-        try {
-            LocalDate eventDate = LocalDate.parse(date);
-            LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
-            LocalDateTime eventRegistrationEnd = LocalDateTime.parse(endTime, formatter);
+        LocalTime parsedTime = LocalTime.parse(time); // Assume HH:mm:ss
+        LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
 
-            LocalTime parsedTime = LocalTime.parse(time); // Assume HH:mm:ss
-            LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
+        Event event = new Event(organizerDeviceId, title, description,
+                eventDate, eventRegistrationStart,
+                eventRegistrationEnd, location, capacity);
 
-            Event event = new Event(organizerDeviceId, title, description,
-                    eventDate, eventRegistrationStart,
-                    eventRegistrationEnd, location, capacity);
-
-            myEvents.add(event);
-
-        } catch (Exception e) {
-            Log.e("Organizer", "Failed to create event", e);
-            throw e;
-        }
+        EventDb.addEvent(event, eventId -> {
+            Log.d("Organizer", "Event successfully created with ID: " + eventId);
+            },
+                e -> {
+            Log.e("Organizer", "Failed to create event" + e.getMessage());
+        });
     }
 }

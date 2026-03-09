@@ -32,7 +32,7 @@ public class EventDb {
 
 
     private static EventDb instance;
-    private final  FirebaseFirestore db;
+    private static final  FirebaseFirestore db;
 
     // ── Callbacks ──────────────────────────────────────────────────────────
 
@@ -65,7 +65,7 @@ public class EventDb {
      * @param onCreated Called with the new auto-generated document ID.
      * @param onFailure Called with the exception if the write fails.
      */
-    public void addEvent(Event event, OnEventCreatedCallback onCreated, OnFailureCallback onFailure) {
+    public static void addEvent(Event event, OnEventCreatedCallback onCreated, OnFailureCallback onFailure) {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document();
 
         // Write back the ID so the caller's object is up-to-date
