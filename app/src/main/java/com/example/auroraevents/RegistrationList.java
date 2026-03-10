@@ -172,7 +172,7 @@ public class RegistrationList {
     public List<Integer> addAllToWaitingList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToWaitingList(userIDs.get(i)));
+            output.add(i, addToWaitingList(userIDs.get(i)));
         }
         return output;
     }
@@ -232,7 +232,7 @@ public class RegistrationList {
     public List<Integer> addAllToSelectedList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToSelectedList(userIDs.get(i)));
+            output.add(i, addToSelectedList(userIDs.get(i)));
         }
         return output;
     }
@@ -291,7 +291,7 @@ public class RegistrationList {
     public List<Integer> addAllToAttendingList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToAttendingList(userIDs.get(i)));
+            output.add(i, addToAttendingList(userIDs.get(i)));
         }
         return output;
     }
@@ -350,7 +350,7 @@ public class RegistrationList {
     public List<Integer> addAllToDeclinedList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToDeclinedList(userIDs.get(i)));
+            output.add(i, addToDeclinedList(userIDs.get(i)));
         }
         return output;
     }
@@ -409,7 +409,7 @@ public class RegistrationList {
     public List<Integer> addAllToCancelledList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToCancelledList(userIDs.get(i)));
+            output.add(i, addToCancelledList(userIDs.get(i)));
         }
         return output;
     }
@@ -483,7 +483,7 @@ public class RegistrationList {
     public List<Integer> addAllToRemovedList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
         for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToRemovedList(userIDs.get(i)));
+            output.add(i, addToRemovedList(userIDs.get(i)));
         }
         return output;
     }
