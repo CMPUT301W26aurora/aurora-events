@@ -41,7 +41,7 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
             }
         }
         else {
-            userName.setText("User not found");
+            userName.setText("No Users here.");
             userEmail.setText("");
             userPhoneNumber.setText("");
         }

@@ -9,8 +9,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.util.Log;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,7 +26,7 @@ public class WaitListSamplingTest {
     RegistrationList list;
     String entrantID;
 
-    User user;
+    User user1;
     User user2;
     User user3;
     User user4;
@@ -43,33 +41,29 @@ public class WaitListSamplingTest {
     public void before() {
         myEvent = new Event(
                 "test device",
-                "registration test",
-                "event for registration test",
+                "wait list sampling test",
+                "event for wait list sampling test",
                 new Date(),
                 "testing environment",
-                0);
+                3);
         myEvent.setEventId("test event");
-        setUpEvent(myEvent, 60, TimeUnit.SECONDS);
+        setUpEvent(myEvent, 10, TimeUnit.SECONDS);
         list = myEvent.registrationList;
         entrantID = "aurora";
-        user = new User();
-        user.setDeviceId("TestID");
-        setUpUser(user,60, TimeUnit.SECONDS);
-        user2 = new User();
-        user2.setDeviceId("TestID2");
-        setUpUser(user2,60, TimeUnit.SECONDS);
-        user3 = new User();
-        user3.setDeviceId("TestID3");
-        setUpUser(user3,60, TimeUnit.SECONDS);
-        user4 = new User();
-        user4.setDeviceId("TestID4");
-        setUpUser(user4,60, TimeUnit.SECONDS);
+        user1 = new User("TestID1","user1","email1","phone1","waitListSamplingTest");
+        setUpUser(user1,10, TimeUnit.SECONDS);
+        user2 = new User("TestID2","user2","email2","phone2","waitListSamplingTest");
+        setUpUser(user2,10, TimeUnit.SECONDS);
+        user3 = new User("TestID3","user3","email3","phone3","waitListSamplingTest");
+        setUpUser(user3,10, TimeUnit.SECONDS);
+        user4 = new User("TestID4","user4","email4","phone4","waitListSamplingTest");
+        setUpUser(user4,10, TimeUnit.SECONDS);
     }
 
     @After
     public void after() {
         takeDownEvent(myEvent);
-        takeDownUser(user);
+        takeDownUser(user1);
         takeDownUser(user2);
         takeDownUser(user3);
         takeDownUser(user4);
@@ -84,46 +78,39 @@ public class WaitListSamplingTest {
         organizer.setMyEvents(myEvents);
 
         // Add multiple users to waitlist
-        List<String> waitlist = new ArrayList<String>();
-        List<User> waitListWithID = new ArrayList<User>();
+        List<User> waitlist = new ArrayList<User>();
+        List<String> waitlistWithID = new ArrayList<String>();
+        waitlist.add(user1);
+        waitlist.add(user2);
+        waitlist.add(user3);
+        waitlist.add(user4);
+        waitlistWithID.add(user1.getDeviceId());
+        waitlistWithID.add(user2.getDeviceId());
+        waitlistWithID.add(user3.getDeviceId());
+        waitlistWithID.add(user4.getDeviceId());
 
-        waitlist.add(user.getDeviceId());
-        waitlist.add(user2.getDeviceId());
-        waitlist.add(user3.getDeviceId());
-        waitlist.add(user4.getDeviceId());
-        waitListWithID.add(user);
-        waitListWithID.add(user2);
-        waitListWithID.add(user3);
-        waitListWithID.add(user4);
-        myEvent.registrationList.addAllToAttendingList(waitlist);
+        myEvent.registrationList.addToWaitingList(user1.getDeviceId());
+        myEvent.registrationList.addToWaitingList(user2.getDeviceId());
+        myEvent.registrationList.addToWaitingList(user3.getDeviceId());
+        myEvent.registrationList.addToWaitingList(user4.getDeviceId());
 
-        // Randomly select 2
-        myEvent.randomSampling();
-        // Check if the waitlist shrunk by 2
-        assertEquals(2, organizer.getEventWaitList(myEvent).size());
-        // Check if the selected list increased by 2
-        assertEquals(2, myEvent.registrationList.getSelectedList().size());
-        // Check if the users from waitlist were selected
-        // Also store current waitlist the next section
-        ArrayList<User> checkList = new ArrayList<User>();
-        ArrayList<User> previousWaitList = new ArrayList<User>();
-        for (User user: organizer.getEventWaitList(myEvent)) {
-            checkList.add(user);
-            previousWaitList.add(user);
-        }
-        assertTrue(checkList.containsAll(waitListWithID));
-
-        // Revert selection and try sampling again to see if it selected different users
-        // Note, due to the random nature of the sampling function, this test may have a small chance of not passing
-        myEvent.registrationList.addToRemovedList(user.getDeviceId());
-        myEvent.registrationList.addToRemovedList(user2.getDeviceId());
-        myEvent.registrationList.addToRemovedList(user3.getDeviceId());
-        myEvent.registrationList.addToRemovedList(user4.getDeviceId());
-        myEvent.registrationList.addAllToAttendingList(waitlist);
+        // Randomly sample waiting list
         organizer.sampleWaitList(myEvent);
-        // The previous waitlist should be different from the current waitlist
-        assertFalse(previousWaitList.containsAll(organizer.getEventWaitList(myEvent)));
-        // Check if the selected list increased by 2
-        assertEquals(2, myEvent.registrationList.getSelectedList().size());
+        // Check if empty slots is 0
+        assertEquals(0, myEvent.getEmptySlotAmount());
+        // Check if the waitlist shrunk to 1
+        assertEquals(1, organizer.getEventWaitList(myEvent).size());
+        // Check if the selected list increased by 3
+        assertEquals(3, myEvent.getListOfUsersWithStatus("selected").size());
+        // Check if the users from waitlist were selected
+        // Also store current waiting list and the current selected list for the next section
+        ArrayList<String> checkList = new ArrayList<String>();
+        for (User user: organizer.getEventWaitList(myEvent)) {
+            checkList.add(user.getDeviceId());
+        }
+        for (User user: myEvent.getListOfUsersWithStatus("selected")) {
+            checkList.add(user.getDeviceId());
+        }
+        assertTrue(checkList.containsAll(waitlistWithID));
     }
 }

@@ -8,8 +8,6 @@ import static com.example.auroraevents.TestsSupport.takeDownUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import android.util.Log;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,17 +36,16 @@ public class GetWaitListTest {
     public void before() {
         myEvent = new Event(
                 "test device",
-                "registration test",
-                "event for registration test",
+                "wait list sampling test",
+                "event for wait list sampling test",
                 new Date(),
                 "testing environment",
-                0);
+                2);
         myEvent.setEventId("test event");
         setUpEvent(myEvent, 60, TimeUnit.SECONDS);
         list = myEvent.registrationList;
         entrantID = "aurora";
-        user = new User();
-        user.setDeviceId("TestID");
+        user = new User("TestID","user","email","phone","getWaitListTest");
         setUpUser(user,60, TimeUnit.SECONDS);
     }
 

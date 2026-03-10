@@ -11,7 +11,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -89,7 +88,7 @@ public class Event {
     /**
      * takes a string of data and converts to a bitmap QR code
      * The string data is defined in the constructor and using this produces a bitmap
-     * that returns the value specified inside of the variable
+     * that returns the value specified inside the variable
      * @author Sean Ross
      */
     public void generateQrCode(){
@@ -131,33 +130,36 @@ public class Event {
      */
     public ArrayList<User> getListOfUsersWithStatus(String status) {
         ArrayList<User> listOfUsers = new ArrayList<User>();
-        List<String> listOfDeviceID = new ArrayList<String>();
+        List<String> listOfDeviceIDs;
 
         // Get the list of specified status
-        if (status.equals("waitingList")) {
-            listOfDeviceID = registrationList.getWaitingList();
+        if (status.equals("waiting")) {
+            listOfDeviceIDs = registrationList.getWaitingList();
         }
-        else if (status.equals("selectedList")) {
-            listOfDeviceID = registrationList.getSelectedList();
+        else if (status.equals("selected")) {
+            listOfDeviceIDs = registrationList.getSelectedList();
         }
-        else if (status.equals("attendingList")) {
-            listOfDeviceID = registrationList.getAttendingList();
+        else if (status.equals("attending")) {
+            listOfDeviceIDs = registrationList.getAttendingList();
         }
-        else if (status.equals("declinedList")) {
-            listOfDeviceID = registrationList.getDeclinedList();
+        else if (status.equals("declined")) {
+            listOfDeviceIDs = registrationList.getDeclinedList();
         }
-        else if (status.equals("cancelledList")) {
-            listOfDeviceID = registrationList.getCancelledList();
+        else if (status.equals("cancelled")) {
+            listOfDeviceIDs = registrationList.getCancelledList();
         }
-        else if (status.equals("removedList")) {
-            listOfDeviceID = registrationList.getRemovedList();
+        else if (status.equals("removed")) {
+            listOfDeviceIDs = registrationList.getRemovedList();
+        }
+        else {
+            throw new IllegalArgumentException("This status does not exist! (Maybe a spelling mistake?)");
         }
 
         // Fetch users from database
         var ref = new Object() {
             User returnedUser;
         };
-        for (String userId : listOfDeviceID) {
+        for (String userId : listOfDeviceIDs) {
             CountDownLatch latch = new CountDownLatch(1);
             UserDb.getInstance().getUser(userId,
                     user -> {
@@ -170,7 +172,7 @@ public class Event {
                     }
             );
             try {
-                assert latch.await(60, TimeUnit.SECONDS);
+                assert latch.await(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 continue;
             }
@@ -187,16 +189,17 @@ public class Event {
      */
     public void randomSampling() {
         Random random = new Random();
-        for (int i = 0; i < getEmptySlotAmount(); i++) {
+        int amount = getEmptySlotAmount();
+        for (int i = 0; i < amount; i++) {
             // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
             int randomIndex = random.nextInt(registrationList.getWaitingList().size());
             String selectedUserID = registrationList.getWaitingList().get(randomIndex);
             registrationList.addToSelectedList(selectedUserID);
         }
 
-        for (String deviceId : registrationList.getWaitingList()) {
+        /*for (String deviceId : registrationList.getWaitingList()) {
             // Send notification to the users with the message "You weren’t selected, but you have another chance"
-        }
+        }*/
     }
 
 }

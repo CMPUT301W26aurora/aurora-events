@@ -1,11 +1,6 @@
 package com.example.auroraevents;
 
-import android.util.Log;
-
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
@@ -46,7 +41,7 @@ public class Organizer extends User {
     public ArrayList<User> getEventWaitList(Event event) {
         if (myEvents.contains(event)) {
             //Return list of users in that are in the waiting list
-            return event.getListOfUsersWithStatus("waitingList");
+            return event.getListOfUsersWithStatus("waiting");
         }
         else { // Cannot get waitlist of an event that the organizer did not create
             throw new IllegalArgumentException("Event not found");
