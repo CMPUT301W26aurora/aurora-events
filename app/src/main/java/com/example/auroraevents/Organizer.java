@@ -44,40 +44,12 @@ public class Organizer extends User {
      * Return the waiting list of users in the specified event
      */
     public ArrayList<User> getEventWaitList(Event event) {
-        ArrayList<User> userInfoList = new ArrayList<User>();
-        List<String> waitList = event.registrationList.getWaitingList();
-
         if (myEvents.contains(event)) {
-            //Fetch user information from Firestore database
-            var ref = new Object() {
-                User returnedUser;
-            };
-
-            for (String userId : waitList) {
-                CountDownLatch latch = new CountDownLatch(1);
-                UserDb.getInstance().getUser(userId,
-                        user -> {
-                            ref.returnedUser = user;
-                            latch.countDown();
-                        },
-                        e -> {
-                            Log.e("Main", "Error fetching user", e);
-                            latch.countDown();
-                        }
-                );
-                try {
-                    assert latch.await(60, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    continue;
-                }
-                if (ref.returnedUser != null) {
-                    userInfoList.add(ref.returnedUser);
-                }
-            }
+            //Return list of users in that are in the waiting list
+            return event.getListOfUsersWithStatus("waitingList");
         }
         else { // Cannot get waitlist of an event that the organizer did not create
             throw new IllegalArgumentException("Event not found");
         }
-        return userInfoList;
     }
 }

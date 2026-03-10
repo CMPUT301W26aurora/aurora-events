@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -117,6 +120,65 @@ public class Event {
      */
     public int getEmptySlotAmount() {
         return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
+    }
+
+    /**
+     * Gets the list of users with specified status
+     * @param status
+     * The status of users
+     * @return
+     * Return the list of users with specified status
+     */
+    public ArrayList<User> getListOfUsersWithStatus(String status) {
+        ArrayList<User> listOfUsers = new ArrayList<User>();
+        List<String> listOfDeviceID = new ArrayList<String>();
+
+        // Get the list of specified status
+        if (status.equals("waitingList")) {
+            listOfDeviceID = registrationList.getWaitingList();
+        }
+        else if (status.equals("selectedList")) {
+            listOfDeviceID = registrationList.getSelectedList();
+        }
+        else if (status.equals("attendingList")) {
+            listOfDeviceID = registrationList.getAttendingList();
+        }
+        else if (status.equals("declinedList")) {
+            listOfDeviceID = registrationList.getDeclinedList();
+        }
+        else if (status.equals("cancelledList")) {
+            listOfDeviceID = registrationList.getCancelledList();
+        }
+        else if (status.equals("removedList")) {
+            listOfDeviceID = registrationList.getRemovedList();
+        }
+
+        // Fetch users from database
+        var ref = new Object() {
+            User returnedUser;
+        };
+        for (String userId : listOfDeviceID) {
+            CountDownLatch latch = new CountDownLatch(1);
+            UserDb.getInstance().getUser(userId,
+                    user -> {
+                        ref.returnedUser = user;
+                        latch.countDown();
+                    },
+                    e -> {
+                        Log.e("Main", "Error fetching user", e);
+                        latch.countDown();
+                    }
+            );
+            try {
+                assert latch.await(60, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                continue;
+            }
+            if (ref.returnedUser != null) {
+                listOfUsers.add(ref.returnedUser);
+            }
+        }
+        return listOfUsers;
     }
 
     /**
