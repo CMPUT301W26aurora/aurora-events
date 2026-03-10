@@ -109,7 +109,6 @@ public class Event {
         catch (WriterException e){
             Log.e("EVENT","Error encoding QR code", e);
         }
-
     }
 
     /**
@@ -188,17 +187,23 @@ public class Event {
      * then send notification to both the users who were selected and not
      */
     public void randomSampling() {
-        Random random = new Random();
         int amount = getEmptySlotAmount();
-        for (int i = 0; i < amount; i++) {
-            // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
-            int randomIndex = random.nextInt(registrationList.getWaitingList().size());
-            String selectedUserID = registrationList.getWaitingList().get(randomIndex);
-            registrationList.addToSelectedList(selectedUserID);
+        List<String> waitingList = registrationList.getWaitingList();
+        // There are more empty slots than there are users in waiting list: Select everyone from waiting list
+        if (amount >= waitingList.size()) {
+            registrationList.addAllToSelectedList(waitingList);
         }
-
+        else { // Random sampling
+            Random random = new Random();
+            for (int i = 0; i < amount; i++) {
+                // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
+                int randomIndex = random.nextInt(waitingList.size());
+                String selectedUserID = waitingList.get(randomIndex);
+                registrationList.addToSelectedList(selectedUserID);
+            }
+        }
         /*for (String deviceId : registrationList.getWaitingList()) {
-            // Send notification to the users with the message "You weren’t selected, but you have another chance"
+                // Send notification to the users with the message "You weren’t selected, but you have another chance"
         }*/
     }
 
