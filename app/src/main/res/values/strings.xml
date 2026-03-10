@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">AuroraEvents</string>
-    <string name="login_confirm">Confirm</string>
+    <string name="login_confirm_text">Confirm</string>
     <string name="default_phone_number">(000) 000–0000</string>
     <string name="phone_number_label">Phone Number</string>
     <string name="optional_label">Optional</string>
@@ -11,4 +11,9 @@
     <string name="email_label">email</string>
     <string name="header_content_desc">Header</string>
     <string name="login_header">Login</string>
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="back_button_content_description">Back Button</string>
+    <string name="switch_to_admin_mode_text">Switch to Admin Mode</string>
+    <string name="delete_profile_text">Delete Profile</string>
+    <string name="your_profile_picture_content_description">Your profile picture</string>
 </resources>

@@ -6,12 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    tools:context=".MainActivity">
+    tools:context=".EditProfile">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/login_header"
+        android:text="@string/edit_profile_title"
         android:textSize="40sp"
         android:fontFamily="@font/roboto"
         android:textColor="@color/light_text"
@@ -31,41 +31,90 @@
         app:layout_constraintBottom_toTopOf="@+id/content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:gravity="bottom"
+        android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <include
+        <ImageView
+            android:id="@+id/profile_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/your_profile_picture_content_description"
+            android:src="@mipmap/ic_launcher"
+            android:background="@drawable/rounded_box"
+            android:clipToOutline="true"
+            tools:targetApi="31" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            layout="@layout/custom_name_input" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/switch_to_admin_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/green"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/switch_to_admin_mode_text"
+                android:textColor="@color/dark_text"
+                android:textSize="6pt"
+                app:icon="@drawable/rounded_admin_panel_settings_24"
+                app:iconTint="@color/dark_text" />
+
+            <Space
+                android:layout_width="10dp"
+                android:layout_height="10dp" />
+
+            <Button
+                android:id="@+id/delete_profile_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/light_red"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/delete_profile_text"
+                android:textColor="@color/dark_text"
+                android:textSize="6pt"
+                app:icon="@drawable/rounded_delete_forever_24"
+                app:iconTint="@color/dark_text" />
+
+        </LinearLayout>
+
+        <include
+            layout="@layout/custom_name_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="10dp" />
 
         <include
+            layout="@layout/custom_email_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/custom_email_input" />
+            android:layout_height="wrap_content" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="10dp" />
 
         <include
+            layout="@layout/custom_phone_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/custom_phone_input" />
+            android:layout_height="wrap_content" />
 
         <Space
             android:layout_width="match_parent"
@@ -77,11 +126,11 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/green"
             android:fontFamily="@font/roboto"
+            android:paddingHorizontal="145dp"
             android:paddingVertical="15dp"
             android:text="@string/login_confirm_text"
             android:textColor="@color/dark_text"
             android:textSize="8pt"
-            android:paddingHorizontal="145dp"
             app:icon="@drawable/round_check_24"
             app:iconTint="@color/dark_text" />
 
