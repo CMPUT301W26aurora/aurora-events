@@ -16,4 +16,5 @@
     <string name="switch_to_admin_mode_text">Switch to Admin Mode</string>
     <string name="delete_profile_text">Delete Profile</string>
     <string name="your_profile_picture_content_description">Your profile picture</string>
+    <string name="delete_profile_picture_content_description">Delete profile picture</string>
 </resources>
