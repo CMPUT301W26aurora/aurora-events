@@ -1,10 +1,16 @@
 package com.example.auroraevents;
 
+
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -26,8 +32,8 @@ public class Event {
     private String  location;
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
-    private Bitmap qR; 
-  
+    private Bitmap qR;
+
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
 
@@ -35,7 +41,7 @@ public class Event {
     public Event() {
         registrationList = new RegistrationList();
     }
-  
+
     public Event(String organizerDeviceId, String name, String description,
                  Date dateTime, String location, int capacity) {
         this();
@@ -75,14 +81,14 @@ public class Event {
 
     public String getQrCodeData()                          { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
-  
+
     public Bitmap       getQrCode()                                    { return this.qR; }
-    
+
     // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
     /**
      * takes a string of data and converts to a bitmap QR code
      * The string data is defined in the constructor and using this produces a bitmap
-     * that returns the value specified inside of the variable
+     * that returns the value specified inside the variable
      * @author Sean Ross
      */
     public void generateQrCode(){
@@ -103,7 +109,131 @@ public class Event {
         catch (WriterException e){
             Log.e("EVENT","Error encoding QR code", e);
         }
+    }
 
+    /**
+     * Returns the amount of empty slots that is available in the event
+     * @return
+     * Amount of empty slots available
+     */
+    public int getEmptySlotAmount() {
+        return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
+    }
+
+    /**
+     * Connects and fetches user objects from database using their device IDs and returns an array list of them
+     * @param listOfDeviceIDs
+     * The list of user's device IDs
+     * @return
+     * The list of user objects that were fetched with given device IDs
+     */
+    public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
+        ArrayList<User> listOfUsers = new ArrayList<User>();
+        // Fetch users from database
+        var ref = new Object() {
+            User returnedUser;
+        };
+        for (String userId : listOfDeviceIDs) {
+            CountDownLatch latch = new CountDownLatch(1);
+            UserDb.getInstance().getUser(userId,
+                    user -> {
+                        ref.returnedUser = user;
+                        latch.countDown();
+                    },
+                    e -> {
+                        Log.e("Main", "Error fetching user", e);
+                        latch.countDown();
+                    }
+            );
+            try {
+                assert latch.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                continue;
+            }
+            if (ref.returnedUser != null) {
+                listOfUsers.add(ref.returnedUser);
+            }
+        }
+        return listOfUsers;
+    }
+
+    /**
+     * Gets the array list of user objects that are in the waiting list
+     * @return
+     * Return the array list of user objects in the waiting list
+     */
+    public ArrayList<User> getWaitingListOfUsers() {
+        return getUsersFromDB(registrationList.getWaitingList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the selected list
+     * @return
+     * Return the array list of user objects in the selected list
+     */
+    public ArrayList<User> getSelectedListOfUsers() {
+        return getUsersFromDB(registrationList.getSelectedList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the attending list
+     * @return
+     * Return the array list of user objects in the attending list
+     */
+    public ArrayList<User> getAttendingListOfUsers() {
+        return getUsersFromDB(registrationList.getAttendingList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the declined list
+     * @return
+     * Return the array list of user objects in the declined list
+     */
+    public ArrayList<User> getDeclinedListOfUsers() {
+        return getUsersFromDB(registrationList.getDeclinedList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the cancelled list
+     * @return
+     * Return the array list of user objects in the cancelled list
+     */
+    public ArrayList<User> getCancelledListOfUsers() {
+        return getUsersFromDB(registrationList.getCancelledList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the removed list
+     * @return
+     * Return the array list of user objects in the removed list
+     */
+    public ArrayList<User> getRemovedListOfUsers() {
+        return getUsersFromDB(registrationList.getRemovedList());
+    }
+
+    /**
+     * Randomly samples users in the waiting list and adds the selected ones to the selected list
+     * then send notification to both the users who were selected and not
+     */
+    public void randomSampling() {
+        int amount = getEmptySlotAmount();
+        List<String> waitingList = registrationList.getWaitingList();
+        // There are more empty slots than there are users in waiting list: Select everyone from waiting list
+        if (amount >= waitingList.size()) {
+            registrationList.addAllToSelectedList(waitingList);
+        }
+        else { // Random sampling
+            Random random = new Random();
+            for (int i = 0; i < amount; i++) {
+                // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
+                int randomIndex = random.nextInt(waitingList.size());
+                String selectedUserID = waitingList.get(randomIndex);
+                registrationList.addToSelectedList(selectedUserID);
+            }
+        }
+        /*for (String deviceId : registrationList.getWaitingList()) {
+                // Send notification to the users with the message "You weren’t selected, but you have another chance"
+        }*/
     }
 
 }
