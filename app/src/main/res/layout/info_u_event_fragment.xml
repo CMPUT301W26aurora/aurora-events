@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#191970">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,118 +10,135 @@
         android:orientation="vertical">
 
         <!--Back Button-->
-        <Button
-        android:id="@+id/back_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="←"
-        android:textSize="30sp"/>
+            <Button
+                android:id="@+id/back_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="←"
+                android:textColor="#00FFFF"
+                android:textSize="20sp" />
 
-        <!--Optional poster image-->
-        <ImageView
-            android:id="@+id/poster_image"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"/>
+            <!--Optional poster image-->
+            <ImageView
+                android:id="@+id/poster_image"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="#FFFFF0"
+                android:scaleType="centerCrop"/>
 
-        <!--Event Name-->
-        <TextView
-            android:id="@+id/event_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="24sp"
-            android:textStyle="bold"/>
+            <!--Event Name-->
+            <TextView
+                android:id="@+id/event_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textSize="24sp"
+                android:textColor="#00FFFF"
+                android:textStyle="bold"/>
 
-        <!--Event Date and Time-->
-        <TextView
-            android:id="@+id/event_date_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            <!--Event Date and Time-->
+            <TextView
+                android:id="@+id/event_date_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="#90EE90"/>
 
-        <!--Event Organizer-->
-        <TextView
-            android:id="@+id/event_organizer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            <!--Event Organizer-->
+            <TextView
+                android:id="@+id/event_organizer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"/>
 
-        <!--Event Location-->
-        <TextView
-            android:id="@+id/event_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            <!--Event Location-->
+            <TextView
+                android:id="@+id/event_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#90EE90"
+                android:textSize="14sp"/>
 
-        <!--Event Description-->
-        <TextView
-            android:id="@+id/event_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"/>
+            <!--Event Description-->
+            <TextView
+                android:id="@+id/event_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textColor="#90EE90"
+                android:textSize="16sp"/>
 
-        <!--Registration Deadline-->
-        <TextView
-            android:id="@+id/event_deadline"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            <!--Registration Deadline-->
+            <TextView
+                android:id="@+id/event_deadline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#90EE90"
+                android:textSize="14sp"/>
 
-        <!--Waiting List Count-->
-        <TextView
-            android:id="@+id/waiting_list_count"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            <!--Waiting List Count-->
+            <TextView
+                android:id="@+id/waiting_list_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#90EE90"
+                android:textSize="14sp"
+                android:gravity="center"/>
 
-        <!--Attendees Count-->
-        <TextView
-            android:id="@+id/attendees_count"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            <!--Attendees Count-->
+            <TextView
+                android:id="@+id/attendees_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"
+                android:textColor="#90EE90"
+                android:gravity="center"/>
 
-        <!-- Join Button-->
-        <Button
-            android:id="@+id/join_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
-            android:text="Join Pool"/>
+            <!-- Join Button-->
+            <Button
+                android:id="@+id/join_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                android:text="Join Pool"/>
 
-        <!-- Accept Button-->
-        <Button
-            android:id="@+id/accept_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Accept"
-            android:visibility="gone"/>
+            <!-- Accept Button-->
+            <Button
+                android:id="@+id/accept_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Accept"
+                android:visibility="gone"/>
 
-        <!--Decline Button-->
-        <Button
-            android:id="@+id/decline_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Decline"
-            android:visibility="gone"/>
+            <!--Decline Button-->
+            <Button
+                android:id="@+id/decline_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Decline"
+                android:visibility="gone"/>
 
-        <!--Delete Button-->
-        <Button
-            android:id="@+id/delete_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Delete Event"
-            android:visibility="gone"/>
+            <!--Delete Button-->
+            <Button
+                android:id="@+id/delete_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delete Event"
+                android:visibility="gone"/>
 
-        <!--Attending Label-->
-        <TextView
-            android:id="@+id/attending_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="You are attending!"
-            android:textColor="@android:color/holo_green_light"
-            android:textSize="14sp"
-            android:visibility="gone"/>
+            <!--Attending Label-->
+            <TextView
+                android:id="@+id/attending_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="You are attending!"
+                android:textColor="@android:color/holo_green_light"
+                android:textSize="14sp"
+                android:visibility="gone"/>
 
 
     </LinearLayout>

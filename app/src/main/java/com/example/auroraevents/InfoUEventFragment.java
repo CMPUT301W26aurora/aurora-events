@@ -89,7 +89,7 @@ public class InfoUEventFragment extends Fragment {
         // back button returns to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        // sign in anonymously to Firebase before accessing Firestore
+        // sign in to firestore
         FirebaseAuth.getInstance().signInAnonymously()
                 .addOnSuccessListener(authResult -> {
                     Log.d(TAG, "Firebase sign in successful");
@@ -103,8 +103,7 @@ public class InfoUEventFragment extends Fragment {
     }
 
     /**
-     * Checks user role and attaches snapshot listener.
-     * Only called after Firebase sign in succeeds.
+     * Checks user role and attaches snapshot listener
      */
     private void loadEventData() {
         UserDb.getInstance().getUser(
