@@ -66,7 +66,7 @@ public class InfoUEventFragment extends Fragment {
 
         // get device id to identify user
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
+        Log.d("DEVICE_ID", "ANDROID_ID: " + userId);
         // get views to display event information
         eventName        = view.findViewById(R.id.event_name);
         eventDescription = view.findViewById(R.id.event_description);

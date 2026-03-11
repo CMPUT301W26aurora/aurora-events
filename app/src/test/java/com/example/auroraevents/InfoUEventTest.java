@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class InfoUEventFragmentTest {
+public class InfoUEventTest {
 
     /**
      * Tests if correct event name is displayed in event details
