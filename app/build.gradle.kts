@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation(libs.firebase.firestore)
     implementation(libs.media3.common)
     testImplementation(libs.junit)

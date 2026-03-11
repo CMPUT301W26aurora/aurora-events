@@ -5,17 +5,25 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import android.util.Log;
+import java.util.ArrayList;
 
-/**
- * This class contains the constructor and methods for the Organizer class, a subclass of the User class
- */
 public class Organizer extends User {
+    private ArrayList<Event> myEvents;
 
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
+        myEvents = new ArrayList<Event>();
     }
 
+    public ArrayList<Event> getMyEvents() {
+        return myEvents;
+    }
+
+    public void setMyEvents(ArrayList<Event> myEvents) {
+        this.myEvents = myEvents;
+    }
+  
     /**
      * @param organizerDeviceId  The organizer's device ID
      * @param title              The title of the event
@@ -52,5 +60,36 @@ public class Organizer extends User {
                 eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
                 e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );
+    }
+
+    /**
+     * Randomly samples users in the waiting list of the specified event
+     * @param event
+     * Event that the organizer wants to sample in
+     */
+    public void sampleWaitList(Event event) {
+        if (!(myEvents.contains(event))) { // Check if the organizer created the specified event
+            throw new IllegalArgumentException("Event not found");
+        }
+        else {
+            event.randomSampling();
+        }
+    }
+
+    /**
+     * Gets the list of users that are in the waiting list of the specified event
+     * @param event
+     * The event the organizer wants to get the waiting list of
+     * @return
+     * Return the waiting list of users in the specified event
+     */
+    public ArrayList<User> getEventWaitList(Event event) {
+        if (myEvents.contains(event)) {
+            //Return list of users in that are in the waiting list
+            return event.getWaitingListOfUsers();
+        }
+        else { // Cannot get waitlist of an event that the organizer did not create
+            throw new IllegalArgumentException("Event not found");
+        }
     }
 }
