@@ -121,39 +121,14 @@ public class Event {
     }
 
     /**
-     * Gets the list of users with specified status
-     * @param status
-     * The status of users
+     * Connects and fetches user objects from database using their device IDs and returns an array list of them
+     * @param listOfDeviceIDs
+     * The list of user's device IDs
      * @return
-     * Return the list of users with specified status
+     * The list of user objects that were fetched with given device IDs
      */
-    public ArrayList<User> getListOfUsersWithStatus(String status) {
+    public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
         ArrayList<User> listOfUsers = new ArrayList<User>();
-        List<String> listOfDeviceIDs;
-
-        // Get the list of specified status
-        if (status.equals("waiting")) {
-            listOfDeviceIDs = registrationList.getWaitingList();
-        }
-        else if (status.equals("selected")) {
-            listOfDeviceIDs = registrationList.getSelectedList();
-        }
-        else if (status.equals("attending")) {
-            listOfDeviceIDs = registrationList.getAttendingList();
-        }
-        else if (status.equals("declined")) {
-            listOfDeviceIDs = registrationList.getDeclinedList();
-        }
-        else if (status.equals("cancelled")) {
-            listOfDeviceIDs = registrationList.getCancelledList();
-        }
-        else if (status.equals("removed")) {
-            listOfDeviceIDs = registrationList.getRemovedList();
-        }
-        else {
-            throw new IllegalArgumentException("This status does not exist! (Maybe a spelling mistake?)");
-        }
-
         // Fetch users from database
         var ref = new Object() {
             User returnedUser;
@@ -180,6 +155,60 @@ public class Event {
             }
         }
         return listOfUsers;
+    }
+
+    /**
+     * Gets the array list of user objects that are in the waiting list
+     * @return
+     * Return the array list of user objects in the waiting list
+     */
+    public ArrayList<User> getWaitingListOfUsers() {
+        return getUsersFromDB(registrationList.getWaitingList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the selected list
+     * @return
+     * Return the array list of user objects in the selected list
+     */
+    public ArrayList<User> getSelectedListOfUsers() {
+        return getUsersFromDB(registrationList.getSelectedList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the attending list
+     * @return
+     * Return the array list of user objects in the attending list
+     */
+    public ArrayList<User> getAttendingListOfUsers() {
+        return getUsersFromDB(registrationList.getAttendingList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the declined list
+     * @return
+     * Return the array list of user objects in the declined list
+     */
+    public ArrayList<User> getDeclinedListOfUsers() {
+        return getUsersFromDB(registrationList.getDeclinedList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the cancelled list
+     * @return
+     * Return the array list of user objects in the cancelled list
+     */
+    public ArrayList<User> getCancelledListOfUsers() {
+        return getUsersFromDB(registrationList.getCancelledList());
+    }
+
+    /**
+     * Gets the array list of user objects that are in the removed list
+     * @return
+     * Return the array list of user objects in the removed list
+     */
+    public ArrayList<User> getRemovedListOfUsers() {
+        return getUsersFromDB(registrationList.getRemovedList());
     }
 
     /**

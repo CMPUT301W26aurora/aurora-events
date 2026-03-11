@@ -114,7 +114,7 @@ public class WaitListSamplingTest {
         // Check if the waitlist shrunk to 1
         assertEquals(1, organizer.getEventWaitList(myEvent).size());
         // Check if the selected list increased by 3
-        assertEquals(3, myEvent.getListOfUsersWithStatus("selected").size());
+        assertEquals(3, myEvent.getSelectedListOfUsers().size());
         // Check if the users from waitlist were selected
         // Also store current waiting list and the current selected list for the next section
         List<String> checkList = new ArrayList<String>();
@@ -124,7 +124,7 @@ public class WaitListSamplingTest {
             checkList.add(user.getDeviceId());
         }
         previousWaitListWithID = myEvent.registrationList.getWaitingList();
-        for (User user: myEvent.getListOfUsersWithStatus("selected")) {
+        for (User user: myEvent.getSelectedListOfUsers()) {
             checkList.add(user.getDeviceId());
         }
         previousSelectedListWithID = myEvent.registrationList.getSelectedList();

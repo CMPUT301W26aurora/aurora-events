@@ -41,7 +41,7 @@ public class Organizer extends User {
     public ArrayList<User> getEventWaitList(Event event) {
         if (myEvents.contains(event)) {
             //Return list of users in that are in the waiting list
-            return event.getListOfUsersWithStatus("waiting");
+            return event.getWaitingListOfUsers();
         }
         else { // Cannot get waitlist of an event that the organizer did not create
             throw new IllegalArgumentException("Event not found");
