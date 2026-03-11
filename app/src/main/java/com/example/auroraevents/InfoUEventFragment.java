@@ -2,7 +2,7 @@
 // https://firebase.google.com/docs/firestore/query-data/get-data
 // https://firebase.google.com/docs/firestore/query-data/listen
 // https://stackoverflow.com/questions/63312913/check-if-a-user-id-exists-in-arraylist
-//https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
+// https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents;
 
 import android.os.Bundle;
@@ -19,32 +19,33 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-/**
- * Displays event details for the event tapped by the user.
- * Gets the event details using the event ID.
- * Implements US 01.01.01 - View event details.
- * Implements US 01.01.03
- * Implements US 01.06.02 - Sign up for an event from event details.
- * Implements US US 03.04.01 - Show admin view for events
- */
+import com.google.firebase.firestore.ListenerRegistration;
 
+/**
+ * Displays event details for the event tapped by the entrant or admin.
+ * Gets the event details using the event ID.
+ * Checks user role to determine which buttons to display.
+ * Uses a snapshot listener to update waiting list count.
+ * Implements US 01.01.01 - View event details.
+ * Implements US 01.01.03 - Navigate from event list to event details.
+ * Implements US 01.06.01 - View waiting list count.
+ * Implements US 01.06.02 - Sign up for an event from event details.
+ * Implements US 02.02.01 - Admin can view and delete events.
+ */
 public class InfoUEventFragment extends Fragment {
 
     private static final String TAG = "InfoUEventFragment";
 
     private String eventId;
     private String userId;
+    private ListenerRegistration eventSnapshotListener;
+
     private TextView eventName, eventDescription, eventLocation, eventDateTime;
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
     private Button backButton, joinButton, acceptButton, declineButton, deleteButton;
 
     /**
-     * Displays event details' screen UI.
-     * Fetches the user's device ID.
-     * Fetches event ID.
-     * Displays required buttons for the event details screen.
-     * Fetches the event from Firestore.
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
      * @param container If non-null, this is the parent view that the fragment's
@@ -53,7 +54,7 @@ public class InfoUEventFragment extends Fragment {
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
      *
-     * @return view for this fragment displaying event details.
+     * @return view displaying event information.
      */
     @Nullable
     @Override
@@ -61,7 +62,7 @@ public class InfoUEventFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
-        // get eventId from EventFragment via bundle
+        // get eventId from EventFragment
         eventId = getArguments().getString("eventId");
 
         // get device id to identify user
@@ -87,26 +88,31 @@ public class InfoUEventFragment extends Fragment {
         // back button returns to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        // fetch event clicked by user from Firestore via EventDb to display its details
-        EventDb.getInstance().getEvent(
-                eventId,
-                event -> {
-                    if (event != null) {
-                        // display common event details
-                        eventName.setText(event.getName());
-                        eventDescription.setText(event.getDescription());
-                        eventLocation.setText(event.getLocation());
-                        eventDateTime.setText(event.getDateTime().toString());
-                        eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
-                        eventDeadline.setText("");
-                        poster.setVisibility(View.GONE);
+        // check user role first then attach snapshot listener
+        UserDb.getInstance().getUser(
+                userId,
+                user -> {
+                    // determine if user is admin — default to entrant if user not found
+                    boolean isAdmin = user != null
+                            && user.getRole().equals(User.ROLE_ADMIN);
 
-                        // check user role using UserDb to determine which buttons to display
-                        UserDb.getInstance().getUser(
-                                userId,
-                                user -> {
-                                    if (user != null && user.getRole().equals(User.ROLE_ADMIN)) {
-                                        // hide entrants buttons and show delete button for admin view
+                    // attach real-time snapshot listener — fires immediately and on every change
+                    eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
+                            eventId,
+                            event -> {
+                                if (event != null) {
+
+                                    // display common event details for all roles
+                                    eventName.setText(event.getName());
+                                    eventDescription.setText(event.getDescription());
+                                    eventLocation.setText(event.getLocation());
+                                    eventDateTime.setText(event.getDateTime().toString());
+                                    eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
+                                    eventDeadline.setText("");
+                                    poster.setVisibility(View.GONE);
+
+                                    if (isAdmin) {
+                                        // hide entrant buttons and counts for admin
                                         joinButton.setVisibility(View.GONE);
                                         acceptButton.setVisibility(View.GONE);
                                         declineButton.setVisibility(View.GONE);
@@ -128,7 +134,7 @@ public class InfoUEventFragment extends Fragment {
                                         });
 
                                     } else {
-                                        // show waiting list count and attendees count for entrants view
+                                        // show waiting list count and attendees count for entrant
                                         waitingListCount.setVisibility(View.VISIBLE);
                                         attendeesCount.setVisibility(View.VISIBLE);
                                         waitingListCount.setText(event.getWaitingList().size() + " people are waiting");
@@ -158,13 +164,7 @@ public class InfoUEventFragment extends Fragment {
                                                         EventDb.LIST_SELECTED,
                                                         EventDb.LIST_ATTENDING,
                                                         userId,
-                                                        () -> {
-                                                            acceptButton.setVisibility(View.GONE);
-                                                            declineButton.setVisibility(View.GONE);
-                                                            attendingLabel.setVisibility(View.VISIBLE);
-                                                            attendingLabel.setText("You are attending");
-                                                            Log.d(TAG, "User accepted invitation");
-                                                        },
+                                                        () -> Log.d(TAG, "User accepted invitation"),
                                                         e -> Log.d(TAG, "Error accepting invitation: " + e)
                                                 );
                                             });
@@ -176,13 +176,7 @@ public class InfoUEventFragment extends Fragment {
                                                         EventDb.LIST_SELECTED,
                                                         EventDb.LIST_DECLINED,
                                                         userId,
-                                                        () -> {
-                                                            acceptButton.setVisibility(View.GONE);
-                                                            declineButton.setVisibility(View.GONE);
-                                                            joinButton.setVisibility(View.VISIBLE);
-                                                            joinButton.setText("Join Pool");
-                                                            Log.d(TAG, "User declined invitation");
-                                                        },
+                                                        () -> Log.d(TAG, "User declined invitation"),
                                                         e -> Log.d(TAG, "Error declining invitation: " + e)
                                                 );
                                             });
@@ -201,10 +195,7 @@ public class InfoUEventFragment extends Fragment {
                                                         event.getEventId(),
                                                         EventDb.LIST_WAITING,
                                                         userId,
-                                                        () -> {
-                                                            joinButton.setText("Join Pool");
-                                                            Log.d(TAG, "User left waiting list");
-                                                        },
+                                                        () -> Log.d(TAG, "User left waiting list"),
                                                         e -> Log.d(TAG, "Error leaving waiting list: " + e)
                                                 );
                                             });
@@ -223,25 +214,34 @@ public class InfoUEventFragment extends Fragment {
                                                         event.getEventId(),
                                                         EventDb.LIST_WAITING,
                                                         userId,
-                                                        () -> {
-                                                            joinButton.setText("Leave Pool");
-                                                            Log.d(TAG, "User joined waiting list");
-                                                        },
+                                                        () -> Log.d(TAG, "User joined waiting list"),
                                                         e -> Log.d(TAG, "Error joining waiting list: " + e)
                                                 );
                                             });
                                         }
                                     }
-                                },
-                                e -> Log.d(TAG, "Error fetching user: " + e)
-                        );
-                    } else {
-                        Log.d(TAG, "No such event available");
-                    }
+                                } else {
+                                    Log.d(TAG, "No such event available");
+                                }
+                            },
+                            e -> Log.d(TAG, "Error fetching event: " + e)
+                    );
                 },
-                e -> Log.d(TAG, "Error fetching event: " + e)
+                e -> Log.d(TAG, "Error fetching user: " + e)
         );
 
         return view;
+    }
+
+    /**
+     * Detach the snapshot listener.
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (eventSnapshotListener != null) {
+            eventSnapshotListener.remove();
+            Log.d(TAG, "Event snapshot listener detached");
+        }
     }
 }

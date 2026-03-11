@@ -56,7 +56,7 @@ public class EventFragment extends Fragment {
         // get all events from firestore
         EventDb.getInstance().getAllEvents(events -> {
             for (Event event : events) {
-                Log.d(TAG, "Event" +  event.getName() +  "in"  + event.getLocation());
+                Log.d(TAG, "Event" +  event.getName() + " in " + event.getLocation());
                 eventList.add(event);
             }
             eventsAdapter.notifyDataSetChanged();

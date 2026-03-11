@@ -3,10 +3,15 @@ package com.example.auroraevents;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.List;
@@ -41,6 +46,7 @@ public class EventDb {
     public interface OnEventCreatedCallback  { void onCreated(String eventId); }
     public interface OnEventFetchedCallback  { void onFetched(Event event); }
     public interface OnEventListFetchedCallback { void onFetched(List<Event> events); }
+    public interface OnEventSnapshotCallback       { void onEventSnapshot(Event event); }
 
     // ── Singleton ──────────────────────────────────────────────────────────
 
@@ -178,6 +184,41 @@ public class EventDb {
                     Log.e(TAG, "Failed to fetch events for user: " + deviceId, e);
                     onFailure.onFailure(e);
                 });
+    }
+
+    // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────────────────
+
+    /**
+     *
+     * @param eventId
+     * @param onEventSnapshot
+     * @param onFailure
+     * @return
+     */
+    public ListenerRegistration addSnapshotListenerForEvent(String eventId,
+                                                            OnEventSnapshotCallback onEventSnapshot,
+                                                            OnFailureCallback onFailure) {
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(eventId);
+        return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e);
+                    onFailure.onFailure(e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    Event event = snapshot.toObject(Event.class);
+                    event.setEventId(snapshot.getId());
+                    onEventSnapshot.onEventSnapshot(event);
+                } else {
+                    Log.d(TAG, "Current data: null");
+                    onEventSnapshot.onEventSnapshot(null);
+                }
+            }
+        });
     }
 
     // ── UPDATE ─────────────────────────────────────────────────────────────
