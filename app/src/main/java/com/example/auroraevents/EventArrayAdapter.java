@@ -51,7 +51,9 @@ public class EventArrayAdapter extends ArrayAdapter<Event> {
         Event event = getItem(position);
         TextView eventName = view.findViewById(R.id.event_name);
         TextView eventDescription = view.findViewById(R.id.event_description);
-        TextView eventTag = view.findViewById(R.id.event_tag);
+        TextView eventTag = view.findViewById(R.id.event_tag_1);
+        TextView eventLongerTag = view.findViewById(R.id.event_tag_2);
+        TextView eventInterestingTag = view.findViewById(R.id.event_tag_3);
 
         eventName.setText(event.getName());
         eventDescription.setText(event.getDescription());

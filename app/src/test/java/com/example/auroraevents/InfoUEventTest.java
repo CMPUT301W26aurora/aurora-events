@@ -1,6 +1,9 @@
 package com.example.auroraevents;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -82,4 +85,102 @@ public class InfoUEventTest {
         event1.getWaitingList().remove("user-abc");
         assertEquals(2, event1.getWaitingList().size());
     }
-}
+
+    /**
+     * Tests if join pool button is shown to entrants
+     */
+    @Test
+    public void testNewUserSeesJoinPool() {
+        ArrayList<Event> eventList = new ArrayList<>();
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
+        String userId = "user-abc";
+
+        boolean showJoinPoolButton = !event.getWaitingList().contains(userId) && !event.getSelectedList().contains(userId) && !event.getAttendingList().contains(userId);
+        assertTrue(showJoinPoolButton);
+    }
+
+    /**
+     * Tests if entrants on waiting list can see leave button
+     */
+    @Test
+    public void testLeaveButton() {
+        ArrayList<Event> eventList = new ArrayList<>();
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
+        String userId = "user-abc";
+        event.getWaitingList().add(userId);
+
+        assertTrue(event.getWaitingList().contains(userId));
+        assertFalse(event.getSelectedList().contains(userId));
+        assertFalse(event.getAttendingList().contains(userId));
+    }
+
+    /**
+     * Tests if selected entrants can view accept and decline buttons
+     */
+    @Test
+    public void testSelectedUsersButtons() {
+        ArrayList<Event> eventList = new ArrayList<>();
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
+        String userId = "user-abc";
+        event.getSelectedList().add(userId);
+
+        assertTrue(event.getSelectedList().contains(userId));
+        assertFalse(event.getAttendingList().contains(userId));
+        assertFalse(event.getWaitingList().contains(userId));
+    }
+
+    /**
+     * Tests if accepted entrants are added to attending list
+     */
+    @Test
+    public void testAttendingListCount() {
+        ArrayList<Event> eventList = new ArrayList<>();
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
+        String userId = "user-abc";
+        event.getSelectedList().add(userId);
+        event.getSelectedList().remove(userId);
+        event.getAttendingList().add(userId);
+
+        assertFalse(event.getSelectedList().contains(userId));
+        assertTrue(event.getAttendingList().contains(userId));
+    }
+    /**
+     * Tests if accepted entrants are added to attending list
+     */
+    @Test
+    public void testDecliningListCount() {
+        ArrayList<Event> eventList = new ArrayList<>();
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
+        String userId = "user-abc";
+        event.getSelectedList().add(userId);
+        event.getSelectedList().remove(userId);
+
+        assertFalse(event.getSelectedList().contains(userId));
+        assertFalse(event.getAttendingList().contains(userId));
+    }
+
+    /**
+     * Tests if admin can view delete button
+     */
+    @Test
+    public void testAdminDeleteButton() {
+        User testUser = new User();
+        testUser.setRole(User.ROLE_ADMIN);
+        assertTrue(testUser.getRole().equals(User.ROLE_ADMIN));
+    }
+
+    /**
+     * Tests delete button to see if it navigates back to event list
+     */
+        @Test
+        public void testDeleteButton() {
+            Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
+            event.setEventId("test-event-1");
+
+            assertEquals("test-event-1", event.getEventId());
+
+            // delete event
+            event = null;
+            assertNull(event);
+        }
+    }

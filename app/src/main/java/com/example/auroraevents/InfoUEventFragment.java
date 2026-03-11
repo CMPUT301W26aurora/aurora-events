@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
 /**
@@ -67,6 +68,7 @@ public class InfoUEventFragment extends Fragment {
         // get device id to identify user
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.d("DEVICE_ID", "ANDROID_ID: " + userId);
+
         // get views to display event information
         eventName        = view.findViewById(R.id.event_name);
         eventDescription = view.findViewById(R.id.event_description);
@@ -87,7 +89,24 @@ public class InfoUEventFragment extends Fragment {
         // back button returns to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        // check user role and attach snapshot listener
+        // sign in anonymously to Firebase before accessing Firestore
+        FirebaseAuth.getInstance().signInAnonymously()
+                .addOnSuccessListener(authResult -> {
+                    Log.d(TAG, "Firebase sign in successful");
+                    loadEventData();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Firebase sign in failed", e);
+                });
+
+        return view;
+    }
+
+    /**
+     * Checks user role and attaches snapshot listener.
+     * Only called after Firebase sign in succeeds.
+     */
+    private void loadEventData() {
         UserDb.getInstance().getUser(
                 userId,
                 user -> {
@@ -232,12 +251,10 @@ public class InfoUEventFragment extends Fragment {
                 },
                 e -> Log.d(TAG, "Error fetching user: " + e)
         );
-
-        return view;
     }
 
     /**
-     * detach the snapshot listener.
+     * Detach the snapshot listener.
      */
     @Override
     public void onDestroyView() {
