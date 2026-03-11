@@ -32,19 +32,22 @@ public class Organizer extends User {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        // Parse from formatter
         LocalDate eventDate = LocalDate.parse(date);
         LocalTime parsedTime = LocalTime.parse(time);
-        LocalDateTime eventDateTime = parsedTime.atDate(eventDate); // fix: now passed to Event
+        LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
 
         LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
         LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
 
+        // Create event from parameters
         Event event = new Event(organizerDeviceId, title, description,
-                eventDateTime,            // fix: was eventDate, now eventDateTime
+                eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
                 location, capacity);
 
+        // Add event
         EventDb.addEvent(event,
                 eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
                 e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
