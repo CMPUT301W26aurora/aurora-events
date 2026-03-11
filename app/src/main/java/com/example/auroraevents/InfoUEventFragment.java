@@ -58,8 +58,7 @@ public class InfoUEventFragment extends Fragment {
      */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
         // get eventId from EventFragment
@@ -88,21 +87,25 @@ public class InfoUEventFragment extends Fragment {
         // back button returns to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        // check user role first then attach snapshot listener
+        // check user role and attach snapshot listener
         UserDb.getInstance().getUser(
                 userId,
                 user -> {
-                    // determine if user is admin — default to entrant if user not found
-                    boolean isAdmin = user != null
-                            && user.getRole().equals(User.ROLE_ADMIN);
+                    // check if user is admin
+                    boolean checkIfAdmin = false;
+                    if (user != null) {
+                        if (user.getRole().equals(User.ROLE_ADMIN)) {
+                            checkIfAdmin = true;
+                        }
+                    }
+                    final boolean userIsAdmin = checkIfAdmin;
 
-                    // attach real-time snapshot listener — fires immediately and on every change
+                    // add snapshot listener
                     eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
                             eventId,
                             event -> {
                                 if (event != null) {
-
-                                    // display common event details for all roles
+                                    // display event details for all types of users
                                     eventName.setText(event.getName());
                                     eventDescription.setText(event.getDescription());
                                     eventLocation.setText(event.getLocation());
@@ -111,8 +114,8 @@ public class InfoUEventFragment extends Fragment {
                                     eventDeadline.setText("");
                                     poster.setVisibility(View.GONE);
 
-                                    if (isAdmin) {
-                                        // hide entrant buttons and counts for admin
+                                    if (userIsAdmin) {
+                                        // display event view for admin
                                         joinButton.setVisibility(View.GONE);
                                         acceptButton.setVisibility(View.GONE);
                                         declineButton.setVisibility(View.GONE);
@@ -137,8 +140,8 @@ public class InfoUEventFragment extends Fragment {
                                         // show waiting list count and attendees count for entrant
                                         waitingListCount.setVisibility(View.VISIBLE);
                                         attendeesCount.setVisibility(View.VISIBLE);
-                                        waitingListCount.setText(event.getWaitingList().size() + " people are waiting");
-                                        attendeesCount.setText(event.getAttendingList().size() + " people are participating");
+                                        waitingListCount.setText(event.getWaitingList().size() + " people are waiting ");
+                                        attendeesCount.setText(event.getAttendingList().size() + " people are participating ");
                                         deleteButton.setVisibility(View.GONE);
 
                                         // check which list user is in and display corresponding buttons
@@ -234,7 +237,7 @@ public class InfoUEventFragment extends Fragment {
     }
 
     /**
-     * Detach the snapshot listener.
+     * detach the snapshot listener.
      */
     @Override
     public void onDestroyView() {
