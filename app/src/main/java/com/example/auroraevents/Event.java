@@ -5,6 +5,7 @@ import android.os.Build;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,13 +15,15 @@ import java.util.List;
  */
 public class Event {
 
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private String  eventId;          // Firestore document ID (set after creation)
     private String  organizerDeviceId;
     private String  name;
     private String  description;
-    private LocalDate    dateTime;
-    private LocalDateTime registrationTimeStart;
-    private LocalDateTime registrationTimeEnd;
+    private String dateTime;              // stored as "yyyy-MM-dd"
+    private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
+    private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String  location;
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
@@ -45,15 +48,15 @@ public class Event {
     }
 
     public Event(String organizerDeviceId, String name, String description,
-                 LocalDate dateTime, LocalDateTime registrationStart,
+                 LocalDateTime dateTime, LocalDateTime registrationStart,
                  LocalDateTime registrationEnd, String location, int capacity) {
         this();
         this.organizerDeviceId = organizerDeviceId;
         this.name              = name;
         this.description       = description;
-        this.dateTime          = dateTime;
-        this.registrationTimeStart = registrationStart;
-        this.registrationTimeEnd = registrationEnd;
+        this.dateTime = dateTime.format(FORMATTER); // "yyyy-MM-dd"
+        this.registrationTimeStart = registrationStart.format(FORMATTER);
+        this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location          = location;
         this.capacity          = capacity;
     }
@@ -61,41 +64,48 @@ public class Event {
 
     // ── Getters & Setters ──────────────────────────────────────────────────
 
-    public String getEventId()                         { return eventId; }
-    public void   setEventId(String eventId)           { this.eventId = eventId; }
+    public String getEventId()                       { return eventId; }
+    public void   setEventId(String eventId)         { this.eventId = eventId; }
 
-    public String getOrganizerDeviceId()                               { return organizerDeviceId; }
-    public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
+    public String getOrganizerDeviceId()                             { return organizerDeviceId; }
+    public void   setOrganizerDeviceId(String organizerDeviceId)     { this.organizerDeviceId = organizerDeviceId; }
 
-    public String getName()                            { return name; }
-    public void   setName(String name)                 { this.name = name; }
+    public String getName()                          { return name; }
+    public void   setName(String name)               { this.name = name; }
 
-    public String getDescription()                     { return description; }
-    public void   setDescription(String description)   { this.description = description; }
+    public String getDescription()                   { return description; }
+    public void   setDescription(String description) { this.description = description; }
 
-    public LocalDate  getDateTime()                        { return this.dateTime; }
-    public void   setDateTime(LocalDate dateTime)           { this.dateTime = dateTime; }
+    public String getDateTime()                      { return dateTime; }
+    public void   setDateTime(String dateTime)       { this.dateTime = dateTime; }
 
-    public LocalDateTime getRegistrationTimeStart()     { return registrationTimeStart; }
-    public void setRegistrationTimeStart(LocalDateTime registrationStart)
-    {
-        this.registrationTimeStart = registrationStart;
+    public String getRegistrationTimeStart()                         { return registrationTimeStart; }
+    public void   setRegistrationTimeStart(String registrationTimeStart) { this.registrationTimeStart = registrationTimeStart; }
+
+    public String getRegistrationTimeEnd()                           { return registrationTimeEnd; }
+    public void   setRegistrationTimeEnd(String registrationTimeEnd) { this.registrationTimeEnd = registrationTimeEnd; }
+
+    public String getLocation()                      { return location; }
+    public void   setLocation(String location)       { this.location = location; }
+
+    public int    getCapacity()                      { return capacity; }
+    public void   setCapacity(int capacity)          { this.capacity = capacity; }
+
+    public String getQrCodeData()                    { return qrCodeData; }
+    public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
+
+    // Converters
+    public LocalDate getDateTimeAsLocalDate() {
+        return LocalDateTime.parse(dateTime, FORMATTER).toLocalDate();
     }
 
-    public LocalDateTime getRegistrationTimeEnd()     { return registrationTimeEnd; }
-    public void setRegistrationTimeEnd(LocalDateTime registrationEnd)
-    {
-        this.registrationTimeEnd = registrationEnd;
+    public LocalDateTime getRegistrationTimeStartAsDateTime() {
+        return LocalDateTime.parse(registrationTimeStart, FORMATTER);
     }
 
-    public String getLocation()                        { return location; }
-    public void   setLocation(String location)         { this.location = location; }
-
-    public int    getCapacity()                        { return capacity; }
-    public void   setCapacity(int capacity)            { this.capacity = capacity; }
-
-    public String getQrCodeData()                          { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
+    public LocalDateTime getRegistrationTimeEndAsDateTime() {
+        return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
+    }
 
     public List<String> getAttendingList()                             { return attendingList; }
     public void         setAttendingList(List<String> attendingList)   { this.attendingList = attendingList; }

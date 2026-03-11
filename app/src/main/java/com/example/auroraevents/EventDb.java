@@ -32,7 +32,7 @@ public class EventDb {
 
 
     private static EventDb instance;
-    private static final  FirebaseFirestore db;
+    private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     // ── Callbacks ──────────────────────────────────────────────────────────
 
@@ -45,7 +45,7 @@ public class EventDb {
     // ── Singleton ──────────────────────────────────────────────────────────
 
     private EventDb() {
-        db = FirebaseFirestore.getInstance();
+
     }
 
     public static synchronized EventDb getInstance() {
