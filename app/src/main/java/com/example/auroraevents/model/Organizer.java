@@ -1,10 +1,13 @@
-package com.example.auroraevents;
+package com.example.auroraevents.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import android.util.Log;
+
+import com.example.auroraevents.server.EventDb;
+
 import java.util.ArrayList;
 
 public class Organizer extends User {

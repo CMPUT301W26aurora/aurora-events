@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.example.auroraevents.model.RegistrationList;
+
 public class RegistrationListTestsSupport {
     public static void checkSingle(RegistrationList list, String entrantID) {
         assertEquals(1, list.getAllEntrantsList().size());
