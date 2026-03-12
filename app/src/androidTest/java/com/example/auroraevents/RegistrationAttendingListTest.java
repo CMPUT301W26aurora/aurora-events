@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class RegistrationAttendingListTest {
@@ -42,9 +43,12 @@ public class RegistrationAttendingListTest {
                 "test device",
                 "registration test",
                 "event for registration attending list test",
-                new Date(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
                 "testing environment",
                 0);
+
         setUpEvent(event);
         list = event.registrationList;
         entrantID = "aurora";

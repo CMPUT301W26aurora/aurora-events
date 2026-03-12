@@ -13,6 +13,7 @@ firebaseFirestore = "26.1.0"
 rules = "1.7.0"
 rulesVersion = "1.5.0"
 uiautomator = "2.3.0"
+media3Common = "1.9.2"
 
 [libraries]
 androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
@@ -30,6 +31,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
+media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3Common" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

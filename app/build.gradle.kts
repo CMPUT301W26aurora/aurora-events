@@ -5,7 +5,9 @@ plugins {
 
 android {
     namespace = "com.example.auroraevents"
-    compileSdk = 36
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
         applicationId = "com.example.auroraevents"
@@ -26,10 +28,15 @@ android {
             )
         }
     }
-
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 }
 
@@ -38,9 +45,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.media3.common)
     implementation("androidx.core:core:1.12.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-
     implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
@@ -53,4 +60,10 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.rules)
     androidTestImplementation(libs.uiautomator)
+    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

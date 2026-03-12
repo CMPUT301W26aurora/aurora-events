@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class RegistrationListsTest {
@@ -28,8 +29,10 @@ public class RegistrationListsTest {
         event = new Event(
                 "test device",
                 "registration test",
-                "event for general registration lists test",
-                new Date(),
+                "event for general registration list test",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
                 "testing environment",
                 0);
         setUpEvent(event);

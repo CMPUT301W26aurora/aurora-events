@@ -1,10 +1,14 @@
 package com.example.auroraevents.model;
 
 
+import android.os.Build;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -26,11 +30,15 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
  */
 public class Event {
 
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private String  eventId;          // Firestore document ID (set after creation)
     private String  organizerDeviceId;
     private String  name;
     private String  description;
-    private Date    dateTime;
+    private String dateTime;              // stored as "yyyy-MM-dd"
+    private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
+    private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String  location;
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
@@ -45,15 +53,19 @@ public class Event {
     }
 
     public Event(String organizerDeviceId, String name, String description,
-                 Date dateTime, String location, int capacity) {
+                 LocalDateTime dateTime, LocalDateTime registrationStart,
+                 LocalDateTime registrationEnd, String location, int capacity) {
         this();
         this.organizerDeviceId = organizerDeviceId;
         this.name              = name;
         this.description       = description;
-        this.dateTime          = dateTime;
+        this.dateTime = dateTime.format(FORMATTER); // "yyyy-MM-dd"
+        this.registrationTimeStart = registrationStart.format(FORMATTER);
+        this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location          = location;
         this.capacity          = capacity;
     }
+
 
     // ── Getters & Setters ──────────────────────────────────────────────────
 
@@ -62,27 +74,47 @@ public class Event {
         this.eventId = eventId;
         registrationList.setEventId(eventId);
     }
-
+    
+    
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
-
+    
     public String getName()                            { return name; }
     public void   setName(String name)                 { this.name = name; }
-
+  
     public String getDescription()                     { return description; }
     public void   setDescription(String description)   { this.description = description; }
+  
+    public String getDateTime()                      { return dateTime; }
+    public void   setDateTime(String dateTime)       { this.dateTime = dateTime; }
 
-    public Date   getDateTime()                        { return dateTime; }
-    public void   setDateTime(Date dateTime)           { this.dateTime = dateTime; }
+    public String getRegistrationTimeStart()                         { return registrationTimeStart; }
+    public void   setRegistrationTimeStart(String registrationTimeStart) { this.registrationTimeStart = registrationTimeStart; }
 
-    public String getLocation()                        { return location; }
-    public void   setLocation(String location)         { this.location = location; }
+    public String getRegistrationTimeEnd()                           { return registrationTimeEnd; }
+    public void   setRegistrationTimeEnd(String registrationTimeEnd) { this.registrationTimeEnd = registrationTimeEnd; }
 
-    public int    getCapacity()                        { return capacity; }
-    public void   setCapacity(int capacity)            { this.capacity = capacity; }
+    public String getLocation()                      { return location; }
+    public void   setLocation(String location)       { this.location = location; }
 
-    public String getQrCodeData()                          { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
+    public int    getCapacity()                      { return capacity; }
+    public void   setCapacity(int capacity)          { this.capacity = capacity; }
+
+    public String getQrCodeData()                    { return qrCodeData; }
+    public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
+
+    // Converters
+    public LocalDate getDateTimeAsLocalDate() {
+        return LocalDateTime.parse(dateTime, FORMATTER).toLocalDate();
+    }
+
+    public LocalDateTime getRegistrationTimeStartAsDateTime() {
+        return LocalDateTime.parse(registrationTimeStart, FORMATTER);
+    }
+
+    public LocalDateTime getRegistrationTimeEndAsDateTime() {
+        return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
+    }
 
     public Bitmap       getQrCode()                                    { return this.qR; }
 

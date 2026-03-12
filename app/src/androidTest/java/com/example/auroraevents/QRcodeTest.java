@@ -9,6 +9,7 @@ import com.example.auroraevents.model.Event;
 
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class QRcodeTest {
@@ -19,7 +20,9 @@ public class QRcodeTest {
                 "test device",
                 "QR code test",
                 "event for QR code test",
-                new Date(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
                 "testing environment",
                 0);
         event.setEventId("sample id for QR Code testing");
