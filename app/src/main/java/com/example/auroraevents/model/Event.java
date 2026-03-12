@@ -1,4 +1,4 @@
-package com.example.auroraevents;
+package com.example.auroraevents.model;
 
 
 import android.util.Log;
@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.graphics.Bitmap;
 
+import com.example.auroraevents.server.UserDb;
 import com.google.firebase.firestore.Exclude;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;

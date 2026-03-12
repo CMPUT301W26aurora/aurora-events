@@ -1,8 +1,8 @@
-package com.example.auroraevents;
+package com.example.auroraevents.server;
 
 import android.util.Log;
 
-import com.google.firebase.firestore.DocumentReference;
+import com.example.auroraevents.model.User;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;

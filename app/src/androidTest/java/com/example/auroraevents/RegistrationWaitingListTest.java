@@ -15,6 +15,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.RegistrationList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

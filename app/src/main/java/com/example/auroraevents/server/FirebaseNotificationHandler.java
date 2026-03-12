@@ -1,6 +1,5 @@
-package com.example.auroraevents;
+package com.example.auroraevents.server;
 
-import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;

@@ -1,4 +1,4 @@
-package com.example.auroraevents;
+package com.example.auroraevents.model;
 
 import java.util.ArrayList;
 

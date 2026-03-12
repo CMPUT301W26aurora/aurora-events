@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.auroraevents.model.User;
+
 import java.util.ArrayList;
 
 public class UserArrayAdapter extends ArrayAdapter<User> {
