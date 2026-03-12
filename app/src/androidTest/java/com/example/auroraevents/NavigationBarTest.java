@@ -28,6 +28,7 @@ import org.junit.Test;
 @LargeTest
 public class NavigationBarTest {
     @Rule
+    // bypass system notification permission dialogue which may interfere with tests
     public GrantPermissionRule notificationPermissionRule = Build.VERSION.SDK_INT >= 33
             ? GrantPermissionRule.grant(android.Manifest.permission.POST_NOTIFICATIONS)
             : GrantPermissionRule.grant();
