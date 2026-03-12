@@ -4,14 +4,19 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="18dp"
-    android:background="@drawable/aurora_gradient">
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/event_list_card">
 
     <TextView
         android:id="@+id/event_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Event Name"
-        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <TextView
@@ -19,14 +24,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Brief Description"
-        android:textSize="13sp"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
         android:layout_marginTop="6dp"/>
 
     <LinearLayout
         android:id="@+id/tag_shape"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
 
         <TextView
             android:id="@+id/event_tag_1"
@@ -36,7 +43,10 @@
             android:paddingTop="6dp"
             android:paddingEnd="14dp"
             android:paddingBottom="6dp"
+            android:layout_marginEnd="8dp"
             android:text="Tag"
+            android:textColor="@android:color/black"
+            android:background="@drawable/event_tag_gradient"
             android:textSize="13sp"
             android:layout_marginTop="4dp"/>
 
@@ -45,10 +55,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Longer Tag"
+            android:textColor="@android:color/black"
+            android:background="@drawable/event_tag_gradient"
             android:paddingStart="14dp"
             android:paddingTop="6dp"
             android:paddingEnd="14dp"
             android:paddingBottom="6dp"
+            android:layout_marginEnd="8dp"
             android:textSize="13sp"
             android:layout_marginTop="4dp"/>
 
@@ -57,6 +70,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Interesting Tag"
+            android:textColor="@android:color/black"
+            android:background="@drawable/event_tag_gradient"
             android:paddingStart="14dp"
             android:paddingTop="6dp"
             android:paddingEnd="14dp"
