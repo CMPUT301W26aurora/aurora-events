@@ -7,6 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.server.EventDb;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

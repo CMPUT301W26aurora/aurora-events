@@ -22,13 +22,11 @@ import androidx.test.rule.GrantPermissionRule;
 
 import android.os.Build;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 @LargeTest
 public class NavigationBarTest {
-    // Keep only this — GrantPermissionRule alone should be sufficient
     @Rule
     public GrantPermissionRule notificationPermissionRule = Build.VERSION.SDK_INT >= 33
             ? GrantPermissionRule.grant(android.Manifest.permission.POST_NOTIFICATIONS)
