@@ -76,6 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/green"
+            android:clickable="true"
+            android:focusable="true"
             android:fontFamily="@font/roboto"
             android:paddingVertical="15dp"
             android:text="@string/login_confirm_text"

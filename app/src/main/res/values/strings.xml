@@ -17,4 +17,6 @@
     <string name="delete_profile_text">Delete Profile</string>
     <string name="your_profile_picture_content_description">Your profile picture</string>
     <string name="delete_profile_picture_content_description">Delete profile picture</string>
+    <string name="mandatory_fields_toast_text">Please fill in the mandatory fields</string>
+    <string name="database_error_toast_text">Sorry, we couldn\'t reach the database. Please try again later.</string>
 </resources>
