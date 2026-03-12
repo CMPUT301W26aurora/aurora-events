@@ -6,6 +6,8 @@ import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static org.junit.Assert.assertEquals;
 //import static org.junit.Assert.assertTrue;
 
+import com.example.auroraevents.model.Event;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

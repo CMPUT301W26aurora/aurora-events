@@ -1,14 +1,15 @@
-package com.example.auroraevents;
+package com.example.auroraevents.model;
 
-import static com.example.auroraevents.EventDb.LIST_ATTENDING;
-import static com.example.auroraevents.EventDb.LIST_CANCELLED;
-import static com.example.auroraevents.EventDb.LIST_DECLINED;
-import static com.example.auroraevents.EventDb.LIST_REMOVED;
-import static com.example.auroraevents.EventDb.LIST_SELECTED;
-import static com.example.auroraevents.EventDb.LIST_WAITING;
+import static com.example.auroraevents.server.EventDb.LIST_ATTENDING;
+import static com.example.auroraevents.server.EventDb.LIST_CANCELLED;
+import static com.example.auroraevents.server.EventDb.LIST_DECLINED;
+import static com.example.auroraevents.server.EventDb.LIST_REMOVED;
+import static com.example.auroraevents.server.EventDb.LIST_SELECTED;
+import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 
 import android.util.Log;
 
+import com.example.auroraevents.server.EventDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;

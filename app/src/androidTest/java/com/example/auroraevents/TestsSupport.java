@@ -5,6 +5,10 @@ import static org.junit.Assert.fail;
 
 import android.util.Log;
 
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.User;
+import com.example.auroraevents.server.EventDb;
+import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.concurrent.CountDownLatch;
