@@ -7,6 +7,8 @@ import static com.example.auroraevents.EventDb.LIST_REMOVED;
 import static com.example.auroraevents.EventDb.LIST_SELECTED;
 import static com.example.auroraevents.EventDb.LIST_WAITING;
 
+import android.util.Log;
+
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
@@ -103,8 +105,12 @@ public class RegistrationList {
         }
 
         try {
-            assert latch.await(databaseTimeout, timeoutUnit);
+            if (!latch.await(databaseTimeout, timeoutUnit)) {
+                Log.w("RegistrationList", "changeDb timed out");
+                return false;
+            }
         } catch (InterruptedException e) {
+            Log.w("RegistrationList", "changeDb interrupted");
             return false;
         }
 

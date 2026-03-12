@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,8 +42,10 @@ public class WaitListSamplingTest {
         myEvent = new Event(
                 "test device",
                 "wait list sampling test",
-                "event for wait list sampling test",
-                new Date(),
+                "event for wait list sampling test\"",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
                 "testing environment",
                 3);
         myEvent.setEventId("test event");
@@ -52,7 +55,9 @@ public class WaitListSamplingTest {
                 "test device 2",
                 "wait list sampling test (Redo random sampling to test randomness)",
                 "event for testing if random sampling is actually random",
-                new Date(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
                 "testing environment",
                 3);
         myEvent2.setEventId("test event");
@@ -62,7 +67,9 @@ public class WaitListSamplingTest {
                 "test device 3",
                 "wait list sampling test (waitlist less than empty slots)",
                 "event for testing if waitlist simply selects everyone if there are more empty slots",
-                new Date(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
                 "testing environment",
                 10);
         myEvent3.setEventId("test event");

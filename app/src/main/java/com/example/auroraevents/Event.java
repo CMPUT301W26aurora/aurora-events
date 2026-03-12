@@ -1,10 +1,14 @@
 package com.example.auroraevents;
 
 
+import android.os.Build;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.graphics.Bitmap;
 
+import com.google.firebase.firestore.Exclude;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -24,11 +29,15 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
  */
 public class Event {
 
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private String  eventId;          // Firestore document ID (set after creation)
     private String  organizerDeviceId;
     private String  name;
     private String  description;
-    private Date    dateTime;
+    private String dateTime;              // stored as "yyyy-MM-dd"
+    private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
+    private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String  location;
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
@@ -43,15 +52,19 @@ public class Event {
     }
 
     public Event(String organizerDeviceId, String name, String description,
-                 Date dateTime, String location, int capacity) {
+                 LocalDateTime dateTime, LocalDateTime registrationStart,
+                 LocalDateTime registrationEnd, String location, int capacity) {
         this();
         this.organizerDeviceId = organizerDeviceId;
         this.name              = name;
         this.description       = description;
-        this.dateTime          = dateTime;
+        this.dateTime = dateTime.format(FORMATTER); // "yyyy-MM-dd"
+        this.registrationTimeStart = registrationStart.format(FORMATTER);
+        this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location          = location;
         this.capacity          = capacity;
     }
+
 
     // ── Getters & Setters ──────────────────────────────────────────────────
 
@@ -60,6 +73,7 @@ public class Event {
         this.eventId = eventId;
         registrationList.setEventId(eventId);
     }
+
 
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
@@ -70,17 +84,36 @@ public class Event {
     public String getDescription()                     { return description; }
     public void   setDescription(String description)   { this.description = description; }
 
-    public Date   getDateTime()                        { return dateTime; }
-    public void   setDateTime(Date dateTime)           { this.dateTime = dateTime; }
+    public String getDateTime()                      { return dateTime; }
+    public void   setDateTime(String dateTime)       { this.dateTime = dateTime; }
 
-    public String getLocation()                        { return location; }
-    public void   setLocation(String location)         { this.location = location; }
+    public String getRegistrationTimeStart()                         { return registrationTimeStart; }
+    public void   setRegistrationTimeStart(String registrationTimeStart) { this.registrationTimeStart = registrationTimeStart; }
 
-    public int    getCapacity()                        { return capacity; }
-    public void   setCapacity(int capacity)            { this.capacity = capacity; }
+    public String getRegistrationTimeEnd()                           { return registrationTimeEnd; }
+    public void   setRegistrationTimeEnd(String registrationTimeEnd) { this.registrationTimeEnd = registrationTimeEnd; }
 
-    public String getQrCodeData()                          { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData)         { this.qrCodeData = qrCodeData; }
+    public String getLocation()                      { return location; }
+    public void   setLocation(String location)       { this.location = location; }
+
+    public int    getCapacity()                      { return capacity; }
+    public void   setCapacity(int capacity)          { this.capacity = capacity; }
+
+    public String getQrCodeData()                    { return qrCodeData; }
+    public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
+
+    // Converters
+    public LocalDate getDateTimeAsLocalDate() {
+        return LocalDateTime.parse(dateTime, FORMATTER).toLocalDate();
+    }
+
+    public LocalDateTime getRegistrationTimeStartAsDateTime() {
+        return LocalDateTime.parse(registrationTimeStart, FORMATTER);
+    }
+
+    public LocalDateTime getRegistrationTimeEndAsDateTime() {
+        return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
+    }
 
     public Bitmap       getQrCode()                                    { return this.qR; }
 
@@ -91,6 +124,7 @@ public class Event {
      * that returns the value specified inside the variable
      * @author Sean Ross
      */
+    @Exclude
     public void generateQrCode(){
         MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
         try{
@@ -116,6 +150,7 @@ public class Event {
      * @return
      * Amount of empty slots available
      */
+    @Exclude
     public int getEmptySlotAmount() {
         return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
     }
@@ -127,6 +162,7 @@ public class Event {
      * @return
      * The list of user objects that were fetched with given device IDs
      */
+    @Exclude
     public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
         ArrayList<User> listOfUsers = new ArrayList<User>();
         // Fetch users from database
@@ -162,6 +198,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the waiting list
      */
+    @Exclude
     public ArrayList<User> getWaitingListOfUsers() {
         return getUsersFromDB(registrationList.getWaitingList());
     }
@@ -171,6 +208,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the selected list
      */
+    @Exclude
     public ArrayList<User> getSelectedListOfUsers() {
         return getUsersFromDB(registrationList.getSelectedList());
     }
@@ -180,6 +218,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the attending list
      */
+    @Exclude
     public ArrayList<User> getAttendingListOfUsers() {
         return getUsersFromDB(registrationList.getAttendingList());
     }
@@ -189,6 +228,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the declined list
      */
+    @Exclude
     public ArrayList<User> getDeclinedListOfUsers() {
         return getUsersFromDB(registrationList.getDeclinedList());
     }
@@ -198,6 +238,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the cancelled list
      */
+    @Exclude
     public ArrayList<User> getCancelledListOfUsers() {
         return getUsersFromDB(registrationList.getCancelledList());
     }
@@ -207,6 +248,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the removed list
      */
+    @Exclude
     public ArrayList<User> getRemovedListOfUsers() {
         return getUsersFromDB(registrationList.getRemovedList());
     }
@@ -215,6 +257,7 @@ public class Event {
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
      * then send notification to both the users who were selected and not
      */
+    @Exclude
     public void randomSampling() {
         int amount = getEmptySlotAmount();
         List<String> waitingList = registrationList.getWaitingList();
