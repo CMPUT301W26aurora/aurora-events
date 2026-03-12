@@ -231,9 +231,6 @@ public class Event {
                 registrationList.addToSelectedList(selectedUserID);
             }
         }
-        /*for (String deviceId : registrationList.getWaitingList()) {
-                // Send notification to the users with the message "You weren’t selected, but you have another chance"
-        }*/
     }
 
 }
