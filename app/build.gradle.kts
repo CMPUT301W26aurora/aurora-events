@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation("com.google.firebase:firebase-auth:22.3.1")
+    implementation(libs.firebase.messaging)
     debugImplementation("androidx.fragment:fragment-testing:1.6.2")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

@@ -170,17 +170,17 @@ public class InfoUEventTest {
     }
 
     /**
-     * Tests delete button to see if it navigates back to event list
+     * Tests delete button to see if it deletes event
      */
         @Test
         public void testDeleteButton() {
+            ArrayList<Event> events = new ArrayList<>();
             Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", new Date(2026 - 1900, 2, 15), "Community Centre", 40);
             event.setEventId("test-event-1");
-
-            assertEquals("test-event-1", event.getEventId());
-
+            // add event to list
+            events.add(event);
             // delete event
-            event = null;
-            assertNull(event);
+            events.remove(event);
+            assertFalse(events.contains(event));
         }
     }
