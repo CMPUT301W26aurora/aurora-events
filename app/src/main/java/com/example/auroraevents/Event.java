@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.graphics.Bitmap;
 
+import com.google.firebase.firestore.Exclude;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -123,6 +124,7 @@ public class Event {
      * that returns the value specified inside the variable
      * @author Sean Ross
      */
+    @Exclude
     public void generateQrCode(){
         MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
         try{
@@ -148,6 +150,7 @@ public class Event {
      * @return
      * Amount of empty slots available
      */
+    @Exclude
     public int getEmptySlotAmount() {
         return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
     }
@@ -159,6 +162,7 @@ public class Event {
      * @return
      * The list of user objects that were fetched with given device IDs
      */
+    @Exclude
     public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
         ArrayList<User> listOfUsers = new ArrayList<User>();
         // Fetch users from database
@@ -194,6 +198,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the waiting list
      */
+    @Exclude
     public ArrayList<User> getWaitingListOfUsers() {
         return getUsersFromDB(registrationList.getWaitingList());
     }
@@ -203,6 +208,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the selected list
      */
+    @Exclude
     public ArrayList<User> getSelectedListOfUsers() {
         return getUsersFromDB(registrationList.getSelectedList());
     }
@@ -212,6 +218,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the attending list
      */
+    @Exclude
     public ArrayList<User> getAttendingListOfUsers() {
         return getUsersFromDB(registrationList.getAttendingList());
     }
@@ -221,6 +228,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the declined list
      */
+    @Exclude
     public ArrayList<User> getDeclinedListOfUsers() {
         return getUsersFromDB(registrationList.getDeclinedList());
     }
@@ -230,6 +238,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the cancelled list
      */
+    @Exclude
     public ArrayList<User> getCancelledListOfUsers() {
         return getUsersFromDB(registrationList.getCancelledList());
     }
@@ -239,6 +248,7 @@ public class Event {
      * @return
      * Return the array list of user objects in the removed list
      */
+    @Exclude
     public ArrayList<User> getRemovedListOfUsers() {
         return getUsersFromDB(registrationList.getRemovedList());
     }
@@ -247,6 +257,7 @@ public class Event {
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
      * then send notification to both the users who were selected and not
      */
+    @Exclude
     public void randomSampling() {
         int amount = getEmptySlotAmount();
         List<String> waitingList = registrationList.getWaitingList();
