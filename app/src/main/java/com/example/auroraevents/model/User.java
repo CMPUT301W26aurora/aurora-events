@@ -1,7 +1,14 @@
 package com.example.auroraevents.model;
 
+import android.util.Log;
+
+import com.example.auroraevents.server.UserDb;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Represents a user in the application.
@@ -19,6 +26,8 @@ public class User {
     private String email;
     private String phoneNumber;
     private String role;
+    private Integer databaseTimeout = 10;
+    private TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
 
     // Notification history (stored as notification IDs or message strings)
@@ -44,6 +53,60 @@ public class User {
     }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
+    public boolean pull() {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<User> user = new AtomicReference<>(null);
+        UserDb.getInstance().getUser(deviceId,
+                user::set,
+                e -> {
+                    latch.countDown();
+                }
+        );
+
+        try {
+            if (!latch.await(databaseTimeout, timeoutUnit)) {
+                Log.w("RegistrationList", "user update timed out");
+                return false;
+            }
+        } catch (InterruptedException e) {
+            Log.w("RegistrationList", "user update interrupted");
+            return false;
+        }
+
+        if (user.get() == null) {
+            return false;
+        } else {
+            setName(user.get().getName());
+            setEmail(user.get().getEmail());
+            setPhoneNumber(user.get().getPhoneNumber());
+            setRole(user.get().getRole());
+            return true;
+        }
+    }
+
+    public boolean push() {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Boolean> status = new AtomicReference<>(true);
+        UserDb.getInstance().updateUser(this,
+                latch::countDown,
+                e -> {
+                    status.set(false);
+                    latch.countDown();
+                }
+        );
+
+        try {
+            if (!latch.await(databaseTimeout, timeoutUnit)) {
+                Log.w("RegistrationList", "user update timed out");
+                return false;
+            }
+        } catch (InterruptedException e) {
+            Log.w("RegistrationList", "user update interrupted");
+            return false;
+        }
+
+        return status.get();
+    }
 
     public String getDeviceId()                        { return deviceId; }
     public void   setDeviceId(String deviceId)         { this.deviceId = deviceId; }
@@ -65,5 +128,19 @@ public class User {
 
     public List<String> getTags()                      { return tags; }
     public void         setTags(List<String> tags)     { this.tags = tags; }
+
+    public Integer getDatabaseTimeout() {
+        return databaseTimeout;
+    }
+    public void setDatabaseTimeout(Integer databaseTimeout) {
+        this.databaseTimeout = databaseTimeout;
+    }
+
+    public TimeUnit getTimeoutUnit() {
+        return timeoutUnit;
+    }
+    public void setTimeoutUnit(TimeUnit unit) {
+        timeoutUnit = unit;
+    }
 
 }

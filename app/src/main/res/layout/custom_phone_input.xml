@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/phone_number_label"
+        android:textColor="@color/purple"
+        android:paddingHorizontal="5dp"/>
+
+    <EditText
+        android:id="@+id/user_phone_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="phone"
+        android:backgroundTint="@color/blue"
+        android:inputType="phone"
+        android:hint="@string/default_phone_number"
+        android:textColorHint="@color/light_glass"
+        android:textColor="@color/green"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/optional_label"
+        android:textColor="@color/light_glass"
+        android:paddingHorizontal="5dp"/>
+
+</merge>
