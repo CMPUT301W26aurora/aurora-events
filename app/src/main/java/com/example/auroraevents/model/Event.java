@@ -74,17 +74,17 @@ public class Event {
         this.eventId = eventId;
         registrationList.setEventId(eventId);
     }
-    
-    
+
+
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
-    
+
     public String getName()                            { return name; }
     public void   setName(String name)                 { this.name = name; }
-  
+
     public String getDescription()                     { return description; }
     public void   setDescription(String description)   { this.description = description; }
-  
+
     public String getDateTime()                      { return dateTime; }
     public void   setDateTime(String dateTime)       { this.dateTime = dateTime; }
 
@@ -275,9 +275,6 @@ public class Event {
                 registrationList.addToSelectedList(selectedUserID);
             }
         }
-        /*for (String deviceId : registrationList.getWaitingList()) {
-                // Send notification to the users with the message "You weren’t selected, but you have another chance"
-        }*/
     }
 
 }

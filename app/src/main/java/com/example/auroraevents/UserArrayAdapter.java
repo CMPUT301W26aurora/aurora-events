@@ -42,11 +42,6 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
                 userPhoneNumber.setText(user.getPhoneNumber());
             }
         }
-        else {
-            userName.setText("No Users here.");
-            userEmail.setText("");
-            userPhoneNumber.setText("");
-        }
 
         return view;
     }
