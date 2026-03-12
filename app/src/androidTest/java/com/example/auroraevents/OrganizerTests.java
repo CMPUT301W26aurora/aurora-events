@@ -48,7 +48,7 @@ public class OrganizerTests {
     }
 
     @Test
-    public void createEvent_thenGetEvent_returnsMatchingEvent() throws InterruptedException {
+    public void testCreateEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Event> fetchedEvent = new AtomicReference<>();
 
