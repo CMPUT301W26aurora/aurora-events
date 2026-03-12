@@ -16,8 +16,6 @@ import android.widget.Toast;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
 
-import org.w3c.dom.Text;
-
 public class ProfileFragment extends Fragment {
     String deviceId;
     EditText nameEdit;
