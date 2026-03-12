@@ -63,6 +63,7 @@ public class Organizer extends User {
                 eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
                 e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );
+        myEvents.add(event);
     }
 
     /**
