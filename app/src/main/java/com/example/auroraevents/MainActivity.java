@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -96,7 +97,10 @@ public class MainActivity extends AppCompatActivity {
         // Set user
         userViewModel.getSelectedItem().observe(this,u -> {
             UserDb.getInstance().updateUser(u,
-                    () -> Log.d(TAG, "User info updated"),
+                    () -> {
+                        Log.d(TAG, "User info updated");
+                        Toast.makeText(this, "User info updated!", Toast.LENGTH_SHORT).show();
+                    },
                     e -> Log.w(TAG, "User info not updated")
             );
         });
