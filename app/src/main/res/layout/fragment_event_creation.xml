@@ -164,7 +164,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Select Location"
+            android:text="*Location"
             android:textColor="#CCCCCC"
             android:textSize="13sp"
             app:backgroundTint="@null"
@@ -198,7 +198,7 @@
             app:layout_constraintStart_toEndOf="@+id/btn_select_location"
             app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input" />
 
-        <!-- Row 2: Start Date + End Date -->
+        <!-- Row 2: Sign-Up Start and End -->
         <Button
             android:id="@+id/btn_start_date"
             android:layout_width="0dp"
@@ -209,7 +209,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Select Start Date"
+            android:text="*Sign-Up Start"
             android:textColor="#CCCCCC"
             android:textSize="13sp"
             app:backgroundTint="@null"
@@ -231,7 +231,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Select End Date"
+            android:text="*Sign-Up End"
             android:textColor="#CCCCCC"
             android:textSize="13sp"
             app:backgroundTint="@null"
@@ -243,7 +243,7 @@
             app:layout_constraintStart_toEndOf="@+id/btn_start_date"
             app:layout_constraintTop_toBottomOf="@+id/btn_select_location" />
 
-        <!-- Row 3: Sign-up Deadline -->
+        <!-- Row 3: Event Date -->
         <Button
             android:id="@+id/btn_signup_deadline"
             android:layout_width="wrap_content"
@@ -252,7 +252,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Select Sign-up Deadline"
+            android:text="*Date"
             android:textColor="#CCCCCC"
             android:textSize="13sp"
             app:backgroundTint="@null"

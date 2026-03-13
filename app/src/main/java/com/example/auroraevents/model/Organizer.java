@@ -32,20 +32,19 @@ public class Organizer extends User {
      * @param title              The title of the event
      * @param description        The event description
      * @param date               The date of the event, format: yyyy-MM-dd
-     * @param time               The time of the event, format: HH:mm:ss
      * @param startTime          The start of the registration period, format: yyyy-MM-dd HH:mm:ss
      * @param endTime            The end of the registration period, format: yyyy-MM-dd HH:mm:ss
      * @param location           The event location
      * @param capacity           The event capacity
      */
     public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String time, String startTime, String endTime, String location, int capacity) {
+                            String startTime, String endTime, String location, int capacity) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         // Parse from formatter
         LocalDate eventDate = LocalDate.parse(date);
-        LocalTime parsedTime = LocalTime.parse(time);
+        LocalTime parsedTime = LocalTime.parse(date);
         LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
 
         LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
