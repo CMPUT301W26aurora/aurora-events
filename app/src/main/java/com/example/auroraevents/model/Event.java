@@ -47,6 +47,13 @@ public class Event {
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
 
+    private List<String> waitingList;     // signed up, awaiting lottery
+    private List<String> selectedList;    // drawn / invited but not yet confirmed
+    private List<String> attendingList;   // confirmed attendees
+    private List<String> declinedList;    // invited then self declined
+    private List<String> cancelledList;   // self cancelled
+    private List<String> removedList;     // force removed
+
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
         registrationList = new RegistrationList();
@@ -74,17 +81,17 @@ public class Event {
         this.eventId = eventId;
         registrationList.setEventId(eventId);
     }
-    
-    
+
+
     public String getOrganizerDeviceId()                               { return organizerDeviceId; }
     public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
-    
+
     public String getName()                            { return name; }
     public void   setName(String name)                 { this.name = name; }
-  
+
     public String getDescription()                     { return description; }
     public void   setDescription(String description)   { this.description = description; }
-  
+
     public String getDateTime()                      { return dateTime; }
     public void   setDateTime(String dateTime)       { this.dateTime = dateTime; }
 
@@ -104,14 +111,17 @@ public class Event {
     public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
 
     // Converters
+    @Exclude
     public LocalDate getDateTimeAsLocalDate() {
         return LocalDateTime.parse(dateTime, FORMATTER).toLocalDate();
     }
 
+    @Exclude
     public LocalDateTime getRegistrationTimeStartAsDateTime() {
         return LocalDateTime.parse(registrationTimeStart, FORMATTER);
     }
 
+    @Exclude
     public LocalDateTime getRegistrationTimeEndAsDateTime() {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
@@ -275,9 +285,6 @@ public class Event {
                 registrationList.addToSelectedList(selectedUserID);
             }
         }
-        /*for (String deviceId : registrationList.getWaitingList()) {
-                // Send notification to the users with the message "You weren’t selected, but you have another chance"
-        }*/
     }
 
 }
