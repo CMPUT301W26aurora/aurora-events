@@ -6,8 +6,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import com.example.auroraevents.model.Event;
 
 public class EventTest {
     /**
@@ -33,7 +34,11 @@ public class EventTest {
     @Test
     public void testConstructorEventOrganizerId() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport", new Date(), "Rec Centre", 20);
+        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
         assertEquals("organizer-xyz", event.getOrganizerDeviceId());
     }
 
@@ -43,7 +48,11 @@ public class EventTest {
     @Test
     public void testConstructorEventName() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport", new Date(), "Rec Centre", 20);
+        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
         assertEquals("Sports Event", event.getName());
     }
 
@@ -53,23 +62,71 @@ public class EventTest {
     @Test
     public void testConstructorEventDescription() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport", new Date(), "Rec Centre", 20);
+        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
         assertEquals("Explore your favourite sport", event.getDescription());
     }
 
     /**
-     * Tests if the constructor sets the event date and time correctly
+     * Tests LocalDate conversion
      */
     @Test
-    public void testConstructorEventDateTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd / MM / yy");
-        Calendar c = Calendar.getInstance();
-        c.set(2026, 5, 6, 13, 30, 0);
-        Date testDate = c.getTime();
+    public void testGetDateTimeAsLocalDate() {
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre",
+                20
+        );
 
-        // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport", testDate, "Rec Centre", 20);
-        assertEquals(sdf.format(testDate), sdf.format(event.getDateTime()));
+        assertEquals(LocalDate.of(2026, 6, 4), event.getDateTimeAsLocalDate());
+    }
+
+    /**
+     * Tests registration start conversion
+     */
+    @Test
+    public void testGetRegistrationTimeStartAsDateTime() {
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre",
+                20
+        );
+
+        assertEquals(LocalDateTime.of(2026, 5, 20, 9, 0),
+                event.getRegistrationTimeStartAsDateTime());
+    }
+
+    /**
+     * Tests registration end conversion
+     */
+    @Test
+    public void testGetRegistrationTimeEndAsDateTime() {
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre",
+                20
+        );
+
+        assertEquals(LocalDateTime.of(2026, 6, 1, 23, 59),
+                event.getRegistrationTimeEndAsDateTime());
     }
 
     /**
@@ -78,16 +135,24 @@ public class EventTest {
     @Test
     public void testConstructorEventLocation() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport", new Date(), "Rec Centre", 20);
+        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
         assertEquals("Rec Centre", event.getLocation());
     }
     /**
      * Tests if the constructor sets the event capacity correctly
      */
     @Test
-    public void testConstructorEventCapacity() {
+    public void testEventCapacity() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport", new Date(), "Rec Centre", 20);
+        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
         assertEquals(20, event.getCapacity());
     }
 

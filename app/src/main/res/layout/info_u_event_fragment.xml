@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B1533">
+    android:background="#0A1730">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:text="←"
-                android:textColor="@android:color/white"
+                android:textColor="@color/black"
                 android:textSize="20sp" />
 
             <!--Optional poster image-->
@@ -27,8 +27,9 @@
                 android:id="@+id/poster_image"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:background="#FFFFF0"
                 android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="#FFFFF0"
                 android:scaleType="centerCrop"/>
 
             <!--Event Name-->
@@ -49,7 +50,7 @@
                 android:textSize="15sp"
                 android:layout_marginTop="8dp"
                 android:textColor="#90EE90"
-                android:text="bold"/>
+                android:textStyle="bold"/>
 
             <!--Event Organizer-->
             <TextView
@@ -124,25 +125,24 @@
             <!-- Accept Button-->
             <Button
                 android:id="@+id/accept_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginTop="10dp"
                 android:text="Accept"
                 android:backgroundTint="#9FE3B3"
-                android:visibility="gone"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <!--Decline Button-->
             <Button
                 android:id="@+id/decline_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginTop="8dp"
                 android:text="Decline"
                 android:backgroundTint="#8B0000"
-                android:visibility="gone"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <!--Delete Button-->
             <Button

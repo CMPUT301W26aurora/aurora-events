@@ -47,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        navScan          = findViewById(R.id.nav_scan);
-        navBrowse        = findViewById(R.id.nav_browse);
+        navScan = findViewById(R.id.nav_scan);
+        navBrowse = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
-        navProfile       = findViewById(R.id.nav_profile);
+        navProfile = findViewById(R.id.nav_profile);
 
-        deviceId   = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // create notification channel
         createNotificationChannel();
