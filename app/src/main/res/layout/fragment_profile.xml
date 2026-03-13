@@ -137,6 +137,10 @@
             app:icon="@drawable/round_check_24"
             app:iconTint="@color/dark_text" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
