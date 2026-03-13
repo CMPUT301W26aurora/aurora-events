@@ -11,16 +11,12 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
-import com.example.auroraevents.view.EventListFragment;
 import com.example.auroraevents.view.NotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,8 +25,6 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,12 +41,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        navScan          = findViewById(R.id.nav_scan);
-        navBrowse        = findViewById(R.id.nav_browse);
+        navScan = findViewById(R.id.nav_scan);
+        navBrowse = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
-        navProfile       = findViewById(R.id.nav_profile);
+        navProfile = findViewById(R.id.nav_profile);
 
-        deviceId   = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // create notification channel
         createNotificationChannel();
@@ -83,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default tab
         setActiveTab(navBrowse);
-        loadFragment(new EventListFragment());
+        loadFragment(new EventFragment());
 
         navScan.setOnClickListener(v -> {
             setActiveTab(navScan);
@@ -92,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            loadFragment(new EventListFragment());
+            loadFragment(new EventFragment());
         });
 
         navNotifications.setOnClickListener(v -> {

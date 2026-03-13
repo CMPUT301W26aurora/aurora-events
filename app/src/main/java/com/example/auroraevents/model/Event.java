@@ -47,6 +47,13 @@ public class Event {
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
 
+    private List<String> waitingList;     // signed up, awaiting lottery
+    private List<String> selectedList;    // drawn / invited but not yet confirmed
+    private List<String> attendingList;   // confirmed attendees
+    private List<String> declinedList;    // invited then self declined
+    private List<String> cancelledList;   // self cancelled
+    private List<String> removedList;     // force removed
+
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
         registrationList = new RegistrationList();
@@ -104,14 +111,17 @@ public class Event {
     public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
 
     // Converters
+    @Exclude
     public LocalDate getDateTimeAsLocalDate() {
         return LocalDateTime.parse(dateTime, FORMATTER).toLocalDate();
     }
 
+    @Exclude
     public LocalDateTime getRegistrationTimeStartAsDateTime() {
         return LocalDateTime.parse(registrationTimeStart, FORMATTER);
     }
 
+    @Exclude
     public LocalDateTime getRegistrationTimeEndAsDateTime() {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
