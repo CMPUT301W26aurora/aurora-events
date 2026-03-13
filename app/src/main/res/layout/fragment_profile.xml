@@ -1,16 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     tools:context=".view.ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="PROFILE"
-        android:textSize="48dp"
-        android:gravity="center"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_profile_title"
+        android:textSize="40sp"
+        android:fontFamily="@font/roboto"
+        android:textColor="@color/light_text"
+        app:layout_constraintTop_toTopOf="@+id/image"
+        app:layout_constraintStart_toStartOf="@id/image"
+        app:layout_constraintEnd_toEndOf="@id/image"
+        app:layout_constraintBottom_toBottomOf="@id/image"
+        android:elevation="1dp"/>
 
-</FrameLayout>
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:elevation="0dp"
+        android:contentDescription="@string/header_content_desc"
+        android:src="@drawable/background_aroura_gradient"
+        app:layout_constraintBottom_toTopOf="@+id/content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/profile_picture"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:contentDescription="@string/your_profile_picture_content_description"
+            android:src="@mipmap/ic_launcher"
+            android:background="@drawable/rounded_box"
+            android:clipToOutline="true"
+            tools:targetApi="31"
+            android:visibility="gone"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/switch_to_admin_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/green"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/switch_to_admin_mode_text"
+                android:textColor="@color/dark_text"
+                android:textSize="6pt"
+                app:icon="@drawable/rounded_admin_panel_settings_24"
+                app:iconTint="@color/dark_text" />
+
+            <Space
+                android:layout_width="10dp"
+                android:layout_height="10dp" />
+
+            <Button
+                android:id="@+id/delete_profile_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/light_red"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/delete_profile_text"
+                android:textColor="@color/dark_text"
+                android:textSize="6pt"
+                app:icon="@drawable/rounded_delete_forever_24"
+                app:iconTint="@color/dark_text"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <include
+            layout="@layout/custom_name_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <include
+            layout="@layout/custom_email_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <include
+            layout="@layout/custom_phone_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            android:fontFamily="@font/roboto"
+            android:paddingHorizontal="145dp"
+            android:paddingVertical="15dp"
+            android:text="@string/login_confirm_text"
+            android:textColor="@color/dark_text"
+            android:textSize="8pt"
+            app:icon="@drawable/round_check_24"
+            app:iconTint="@color/dark_text" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

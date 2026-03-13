@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1B2E">
+    android:background="#1C1B2E"
+    android:id="@+id/main">
 
     <!-- Fragment fills the entire screen, including behind the nav bar -->
     <FrameLayout

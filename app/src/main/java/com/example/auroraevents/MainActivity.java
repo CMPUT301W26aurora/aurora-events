@@ -10,11 +10,16 @@ import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
+import com.example.auroraevents.server.UserDb;
 import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.NotificationFragment;
@@ -33,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String NOTIFICATION_CHANNEL_NAME = "Default";
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1;
     private String deviceId;
+    private UserViewModel userViewModel;
 
     private ImageButton navScan, navBrowse, navNotifications, navProfile;
 
@@ -41,8 +47,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        navScan = findViewById(R.id.nav_scan);
-        navBrowse = findViewById(R.id.nav_browse);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        navScan          = findViewById(R.id.nav_scan);
+        navBrowse        = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
         navProfile = findViewById(R.id.nav_profile);
 
@@ -74,6 +81,29 @@ public class MainActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
+
+        // Get user
+        UserDb.getInstance().getUser(deviceId,
+                user -> {
+                    user.setDeviceId(deviceId);
+                    if (user.getRole() == null || user.getRole().isEmpty())
+                        user.setRole(User.ROLE_ENTRANT);
+                    userViewModel.selectItem(user);
+                    Log.d(TAG, "User info received!");
+                },
+                e -> Log.e(TAG, "User info not available")
+        );
+
+        // Set user
+        userViewModel.getSelectedItem().observe(this,u -> {
+            UserDb.getInstance().updateUser(u,
+                    () -> {
+                        Log.d(TAG, "User info updated");
+                        Toast.makeText(this, "User info updated!", Toast.LENGTH_SHORT).show();
+                    },
+                    e -> Log.w(TAG, "User info not updated")
+            );
+        });
 
         // Set default tab
         setActiveTab(navBrowse);
