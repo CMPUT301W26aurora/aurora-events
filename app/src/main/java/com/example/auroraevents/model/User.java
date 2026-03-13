@@ -97,11 +97,11 @@ public class User {
 
         try {
             if (!latch.await(databaseTimeout, timeoutUnit)) {
-                Log.w("RegistrationList", "user update timed out");
+                Log.w("User", "user update timed out");
                 return false;
             }
         } catch (InterruptedException e) {
-            Log.w("RegistrationList", "user update interrupted");
+            Log.w("User", "user update interrupted");
             return false;
         }
 
