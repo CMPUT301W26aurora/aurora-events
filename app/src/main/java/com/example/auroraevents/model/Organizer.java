@@ -26,7 +26,7 @@ public class Organizer extends User {
     public void setMyEvents(ArrayList<Event> myEvents) {
         this.myEvents = myEvents;
     }
-  
+
     /**
      * @param organizerDeviceId  The organizer's device ID
      * @param title              The title of the event
@@ -63,6 +63,7 @@ public class Organizer extends User {
                 eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
                 e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );
+        myEvents.add(event);
     }
 
     /**

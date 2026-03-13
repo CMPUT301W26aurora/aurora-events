@@ -20,8 +20,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
+import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
-import com.example.auroraevents.view.EventListFragment;
 import com.example.auroraevents.view.NotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
         navScan          = findViewById(R.id.nav_scan);
         navBrowse        = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
-        navProfile       = findViewById(R.id.nav_profile);
+        navProfile = findViewById(R.id.nav_profile);
 
-        deviceId   = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // create notification channel
         createNotificationChannel();
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default tab
         setActiveTab(navBrowse);
-        loadFragment(new EventListFragment());
+        loadFragment(new EventFragment());
 
         navScan.setOnClickListener(v -> {
             setActiveTab(navScan);
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            loadFragment(new EventListFragment());
+            loadFragment(new EventFragment());
         });
 
         navNotifications.setOnClickListener(v -> {
