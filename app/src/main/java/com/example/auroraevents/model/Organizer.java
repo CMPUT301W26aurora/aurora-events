@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
 
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 public class Organizer extends User {
@@ -42,27 +43,31 @@ public class Organizer extends User {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // Parse from formatter
-        LocalDate eventDate = LocalDate.parse(date);
-        LocalTime parsedTime = LocalTime.parse(date);
-        LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
+        try {
+            // Parse combined string
+            LocalDateTime eventDateTime = LocalDateTime.parse(date, formatter);
 
-        LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
+            // Parse registration times
+            LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
+            LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
 
-        // Create event from parameters
-        Event event = new Event(organizerDeviceId, title, description,
-                eventDateTime,
-                eventRegistrationStart,
-                eventRegistrationEnd,
-                location, capacity);
+            // Create event from parameters
+            Event event = new Event(organizerDeviceId, title, description,
+                    eventDateTime,
+                    eventRegistrationStart,
+                    eventRegistrationEnd,
+                    location, capacity);
 
-        // Add event
-        EventDb.addEvent(event,
-                eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
-                e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
-        );
-        myEvents.add(event);
+            // Add event
+            EventDb.addEvent(event,
+                    eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
+                    e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
+            );
+            myEvents.add(event);
+
+        } catch (DateTimeParseException e) {
+            Log.e("Organizer", "Date parsing failed: " + e.getMessage());
+        }
     }
 
     /**

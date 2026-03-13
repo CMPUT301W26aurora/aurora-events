@@ -18,7 +18,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.EventListFragment;
 import com.example.auroraevents.view.NotificationFragment;
@@ -46,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        UserViewModel userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        userViewModel.fetchOrganizer(deviceId);
+
         setContentView(R.layout.activity_main);
         navScan          = findViewById(R.id.nav_scan);
         navBrowse        = findViewById(R.id.nav_browse);
@@ -61,16 +68,17 @@ public class MainActivity extends AppCompatActivity {
         requestNotificationPermission();
 
         // sign in anonymously, then save FCM token
+        String finalDeviceId = deviceId;
         FirebaseAuth.getInstance().signInAnonymously()
                 .addOnSuccessListener(result -> {
                     FirebaseMessaging.getInstance().getToken()
                             .addOnSuccessListener(token -> {
                                 FirebaseFirestore.getInstance()
                                         .collection("Users")
-                                        .document(deviceId)
+                                        .document(finalDeviceId)
                                         .set(Collections.singletonMap("fcmToken", token), SetOptions.merge())
                                         .addOnSuccessListener(unused -> {
-                                            Log.d(TAG, "FCM token saved for device: " + deviceId);
+                                            Log.d(TAG, "FCM token saved for device: " + finalDeviceId);
                                         })
                                         .addOnFailureListener(e -> {
                                             Log.e(TAG, "Failed to save FCM token", e);
