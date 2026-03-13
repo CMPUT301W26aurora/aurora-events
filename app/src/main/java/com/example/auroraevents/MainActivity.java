@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 import com.example.auroraevents.view.CameraFragment;
@@ -83,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         // Get user
         UserDb.getInstance().getUser(deviceId,
                 user -> {
+                    user.setDeviceId(deviceId);
+                    if (user.getRole() == null || user.getRole().isEmpty())
+                        user.setRole(User.ROLE_ENTRANT);
                     userViewModel.selectItem(user);
                     Log.d(TAG, "User info received!");
                 },
@@ -93,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         userViewModel.getSelectedItem().observe(this,u -> {
             UserDb.getInstance().updateUser(u,
                     () -> Log.d(TAG, "User info updated"),
-                    e -> Log.e(TAG, "User info not updated")
+                    e -> Log.w(TAG, "User info not updated")
             );
         });
 
