@@ -12,11 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.auroraevents.Event;
-import com.example.auroraevents.EventArrayAdapter;
-import com.example.auroraevents.EventDb;
-import com.example.auroraevents.InfoUEventFragment;
+import com.example.auroraevents.model.EventArrayAdapter;
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.R;
+import com.example.auroraevents.server.EventDb;
 
 import java.util.ArrayList;
 
@@ -49,19 +48,19 @@ public class EventFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.event_fragment, container, false);
 
-        ArrayList<com.example.auroraevents.Event> eventList = new ArrayList<>();
+        ArrayList<com.example.auroraevents.model.Event>eventList = new ArrayList<>();
         ListView eventsListView = view.findViewById(R.id.events_list);
 
         // get user's device ID to determine user's status for the event
         String userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         // create adapter with eventList
-        com.example.auroraevents.EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
+        com.example.auroraevents.model.EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
         eventsListView.setAdapter(eventsAdapter);
 
         // resource used: https://stackoverflow.com/questions/7309259/get-list-of-attributes-of-an-object-in-an-list
         // get all events from firestore
         EventDb.getInstance().getAllEvents(events -> {
-            for (com.example.auroraevents.Event event : events) {
+            for (com.example.auroraevents.model.Event event : events) {
                 Log.d(TAG, "Event" +  event.getName() + " in " + event.getLocation());
                 eventList.add(event);
             }

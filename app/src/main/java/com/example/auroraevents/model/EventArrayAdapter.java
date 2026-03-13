@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.auroraevents.Event;
 import com.example.auroraevents.R;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
  * Each event row displays the event details i.e.
  * name, description, status tag
  */
-public class EventArrayAdapter extends ArrayAdapter<com.example.auroraevents.Event> {
+public class EventArrayAdapter extends ArrayAdapter <com.example.auroraevents.model.Event> {
     /** get the user's deviceId*/
     private final String userId;
 
@@ -30,7 +29,7 @@ public class EventArrayAdapter extends ArrayAdapter<com.example.auroraevents.Eve
      * @param events: list of event objects
      * @param userId: device id of the user to identify status tag
      */
-    public EventArrayAdapter(Context context, ArrayList<com.example.auroraevents.Event> events, String userId){
+    public EventArrayAdapter(Context context, ArrayList <com.example.auroraevents.model.Event> events, String userId){
         super(context, 0,events);
         this.userId = userId;
     }

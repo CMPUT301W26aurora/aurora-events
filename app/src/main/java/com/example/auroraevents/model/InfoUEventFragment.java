@@ -19,10 +19,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.auroraevents.EventDb;
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.R;
-import com.example.auroraevents.User;
-import com.example.auroraevents.UserDb;
+import com.example.auroraevents.server.EventDb;
+import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 

@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.User;
 
 public class InfoUEventTest {
 
