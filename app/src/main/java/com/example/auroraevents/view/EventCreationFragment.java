@@ -37,7 +37,6 @@ public class EventCreationFragment extends Fragment {
     private TextInputEditText eventDescInput;
     private TextInputEditText eventCapInput;
     private Button locationButton;
-    private Button geolocationLockButton;
     private Button startDateButton;
     private Button endDateButton;
     private Button dateButton;
@@ -71,7 +70,6 @@ public class EventCreationFragment extends Fragment {
         eventDescInput = view.findViewById(R.id.et_event_desc);
         eventCapInput = view.findViewById(R.id.et_event_capacity);
         locationButton = view.findViewById(R.id.btn_select_location);
-        geolocationLockButton = view.findViewById(R.id.btn_geolocation_lock);
         startDateButton = view.findViewById(R.id.btn_start_date);
         endDateButton = view.findViewById(R.id.btn_end_date);
         dateButton = view.findViewById(R.id.btn_signup_deadline);
