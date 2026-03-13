@@ -110,9 +110,9 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
                 .commit();
     }
-
     private void setActiveTab(ImageButton selected) {
         ImageButton[] tabs = { navScan, navBrowse, navNotifications, navProfile };
 
