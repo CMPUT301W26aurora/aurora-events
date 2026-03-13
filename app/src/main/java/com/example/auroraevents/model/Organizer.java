@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
 
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 public class Organizer extends User {
@@ -32,38 +33,41 @@ public class Organizer extends User {
      * @param title              The title of the event
      * @param description        The event description
      * @param date               The date of the event, format: yyyy-MM-dd
-     * @param time               The time of the event, format: HH:mm:ss
      * @param startTime          The start of the registration period, format: yyyy-MM-dd HH:mm:ss
      * @param endTime            The end of the registration period, format: yyyy-MM-dd HH:mm:ss
      * @param location           The event location
      * @param capacity           The event capacity
      */
     public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String time, String startTime, String endTime, String location, int capacity) {
+                            String startTime, String endTime, String location, int capacity) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // Parse from formatter
-        LocalDate eventDate = LocalDate.parse(date);
-        LocalTime parsedTime = LocalTime.parse(time);
-        LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
+        try {
+            // Parse combined string
+            LocalDateTime eventDateTime = LocalDateTime.parse(date, formatter);
 
-        LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
+            // Parse registration times
+            LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
+            LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
 
-        // Create event from parameters
-        Event event = new Event(organizerDeviceId, title, description,
-                eventDateTime,
-                eventRegistrationStart,
-                eventRegistrationEnd,
-                location, capacity);
+            // Create event from parameters
+            Event event = new Event(organizerDeviceId, title, description,
+                    eventDateTime,
+                    eventRegistrationStart,
+                    eventRegistrationEnd,
+                    location, capacity);
 
-        // Add event
-        EventDb.addEvent(event,
-                eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
-                e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
-        );
-        myEvents.add(event);
+            // Add event
+            EventDb.addEvent(event,
+                    eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
+                    e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
+            );
+            myEvents.add(event);
+
+        } catch (DateTimeParseException e) {
+            Log.e("Organizer", "Date parsing failed: " + e.getMessage());
+        }
     }
 
     /**

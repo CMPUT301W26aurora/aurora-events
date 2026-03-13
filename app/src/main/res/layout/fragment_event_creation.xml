@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1B2E"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/circular_button_bg"
+            android:src="?attr/homeAsUpIndicator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#71FACF" />
+
+        <TextView
+            android:id="@+id/warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:text="Fields marked with * are required"
+            android:textColor="#BC4646"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/addImage"
+            android:layout_width="0dp"
+            android:layout_height="189dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/dashed_outer_border"
+            android:padding="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/warning">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/dark_inner_bg">
+
+                <Button
+                    android:id="@+id/btn_add_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/glass_pill_bg"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="10dp"
+                    android:text="Add an image"
+                    android:textColor="#CCCCCC"
+                    android:textSize="14sp"
+                    app:icon="@android:drawable/ic_input_add"
+                    app:iconGravity="start"
+                    app:iconTint="#AAAAAA" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <!-- Event Name Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/eventName_input"
+            style="@style/PurpleTextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:hint="*Event Name"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/purple_accent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addImage">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Event Description Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/eventDesc_input"
+            style="@style/PurpleTextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:hint="*Event Description"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/purple_accent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/eventName_input">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Event Capacity Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/eventCapacity_input"
+            style="@style/PurpleTextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:hint="*Event Capacity"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/purple_accent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/eventDesc_input">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_capacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Row 1: Select Location + Geolocation Lock -->
+        <Button
+            android:id="@+id/btn_select_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="*Location"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_mylocation"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF"
+            app:layout_constraintEnd_toStartOf="@+id/btn_geolocation_lock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input" />
+
+        <Button
+            android:id="@+id/btn_geolocation_lock"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Geolocation Lock"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_compass"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_select_location"
+            app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input" />
+
+        <!-- Row 2: Sign-Up Start and End -->
+        <Button
+            android:id="@+id/btn_start_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="*Sign-Up Start"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_today"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF"
+            app:layout_constraintEnd_toStartOf="@+id/btn_end_date"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_select_location" />
+
+        <Button
+            android:id="@+id/btn_end_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="*Sign-Up End"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_today"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_start_date"
+            app:layout_constraintTop_toBottomOf="@+id/btn_select_location" />
+
+        <!-- Row 3: Event Date -->
+        <Button
+            android:id="@+id/btn_signup_deadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="*Date"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_recent_history"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_start_date" />
+
+        <!-- Confirm Button -->
+        <Button
+            android:id="@+id/btn_confirm"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/gradient_confirm_button"
+            android:text="Confirm"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null"
+            app:icon="@drawable/ic_check"
+            app:iconGravity="start"
+            app:iconTint="#FFFFFF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_signup_deadline" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -12,4 +12,5 @@
     <color name="background">#FF13192A</color>
     <color name="light_glass">#40E0E0E0</color>
     <color name="dark_glass">#CC13192A</color>
+    <color name="purple_accent">#AA66FF</color>
 </resources>

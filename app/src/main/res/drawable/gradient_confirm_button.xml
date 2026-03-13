@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40000000">
+
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="50dp" />
+        </shape>
+    </item>
+
+    <!-- Outer dark border -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#2A2A3A" />
+            <corners android:radius="50dp" />
+        </shape>
+    </item>
+
+    <!-- Gradient fill with inset for border effect -->
+    <item
+        android:left="3dp"
+        android:top="3dp"
+        android:right="3dp"
+        android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#AA88FF"
+                android:endColor="#66FFCC"
+                android:angle="0" />
+            <corners android:radius="50dp" />
+        </shape>
+    </item>
+
+</ripple>

@@ -1,9 +1,20 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
     <style name="Base.Theme.AuroraEvents" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
     <style name="Theme.AuroraEvents" parent="Base.Theme.AuroraEvents" />
+
+    <style name="PurpleTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
+        <item name="boxStrokeColor">@color/purple_input_stroke</item>
+        <item name="hintTextColor">@color/purple_accent</item>
+        <item name="boxBackgroundColor">#1E1E2A</item>
+        <item name="android:textColorHint">@color/purple_accent</item>
+        <item name="colorError">#1E1E2A</item>
+        <item name="boxStrokeErrorColor">@color/purple_accent</item>
+        <item name="errorTextColor">@color/purple_accent</item>
+        <item name="errorIconTint">@color/purple_accent</item>
+    </style>
+
 </resources>
