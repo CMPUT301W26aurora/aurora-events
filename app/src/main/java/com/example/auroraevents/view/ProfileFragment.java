@@ -26,14 +26,13 @@ import com.example.auroraevents.model.UserViewModel;
  * This class controls the profile screen
  */
 public class ProfileFragment extends Fragment {
-    String deviceId;
-    EditText nameEdit;
-    EditText emailEdit;
-    EditText phoneEdit;
-    UserViewModel userViewModel;
-    Button adminToggle;
-    User user;
-    String TAG = "ProfileFragment";
+    private EditText nameEdit;
+    private EditText emailEdit;
+    private EditText phoneEdit;
+    private UserViewModel userViewModel;
+    private Button adminToggle;
+    private User user;
+    private String TAG = "ProfileFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,7 +48,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        deviceId = Settings.Secure.getString(view.getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         nameEdit = view.findViewById(R.id.user_name);
         emailEdit = view.findViewById(R.id.user_email);
