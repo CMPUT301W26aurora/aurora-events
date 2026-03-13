@@ -75,7 +75,7 @@ public class EventFragment extends Fragment {
 
         // handle event taps by user to get the event's position
         eventsListView.setOnItemClickListener((parent, v, position, id) -> {
-            Event selectedEvent = eventList.get(position);
+            Event selectedEvent = eventList.get(position - 1);
 
             // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
             // pass eventID to InfoUFragment using bundle
