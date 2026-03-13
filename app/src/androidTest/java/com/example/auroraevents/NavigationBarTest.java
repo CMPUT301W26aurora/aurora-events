@@ -13,9 +13,8 @@ import androidx.fragment.app.Fragment;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.filters.LargeTest;
 
-import com.example.auroraevents.model.EventFragment;
+import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
-import com.example.auroraevents.view.EventListFragment;
 import com.example.auroraevents.view.NotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
 

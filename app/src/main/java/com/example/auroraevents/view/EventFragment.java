@@ -1,4 +1,4 @@
-package com.example.auroraevents.model;
+package com.example.auroraevents.view;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -12,9 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.auroraevents.model.EventArrayAdapter;
-import com.example.auroraevents.model.Event;
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.EventArrayAdapter;
 import com.example.auroraevents.server.EventDb;
 
 import java.util.ArrayList;
@@ -46,10 +46,15 @@ public class EventFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.event_fragment, container, false);
+        View root = inflater.inflate(R.layout.event_fragment, container, false);
+        ListView listView = root.findViewById(R.id.events_list);
+
+        // Inflate and add the header
+        View header = inflater.inflate(R.layout.header_event_fragment, listView, false);
+        listView.addHeaderView(header, null, false);
 
         ArrayList<com.example.auroraevents.model.Event>eventList = new ArrayList<>();
-        ListView eventsListView = view.findViewById(R.id.events_list);
+        ListView eventsListView = root.findViewById(R.id.events_list);
 
         // get user's device ID to determine user's status for the event
         String userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -88,6 +93,6 @@ public class EventFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
-        return view;
+        return root;
     }
 }

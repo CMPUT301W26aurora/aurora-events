@@ -3,7 +3,7 @@
 // https://firebase.google.com/docs/firestore/query-data/listen
 // https://stackoverflow.com/questions/63312913/check-if-a-user-id-exists-in-arraylist
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
-package com.example.auroraevents.model;
+package com.example.auroraevents.view;
 
 import android.os.Bundle;
 import android.provider.Settings;
@@ -19,8 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.auroraevents.model.Event;
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.User;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
