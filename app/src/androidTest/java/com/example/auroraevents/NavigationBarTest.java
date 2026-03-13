@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.filters.LargeTest;
 
+import com.example.auroraevents.model.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.EventListFragment;
 import com.example.auroraevents.view.NotificationFragment;
@@ -39,15 +40,15 @@ public class NavigationBarTest {
 
 
     @Test
-    public void testDefaultFragment_isEventList() {
+    public void testDefaultFragment_isEventFragment() {
         // On launch, EventListFragment should be loaded by default
         activityRule.getScenario().onActivity(activity -> {
             Fragment current = activity.getSupportFragmentManager()
                     .findFragmentById(R.id.fragment_container);
             assertNotNull("Fragment container should not be empty", current);
             assertTrue(
-                    "Default fragment should be EventListFragment",
-                    current instanceof EventListFragment
+                    "Default fragment should be EventFragment",
+                    current instanceof EventFragment
             );
         });
     }
@@ -80,7 +81,7 @@ public class NavigationBarTest {
     }
 
     @Test
-    public void testTapBrowse_loadsEventListFragment() {
+    public void testTapBrowse_loadsEventFragment() {
         // Navigate away first, then come back
         onView(withId(R.id.nav_profile)).perform(click());
         onView(withId(R.id.nav_browse)).perform(click());
@@ -89,8 +90,8 @@ public class NavigationBarTest {
             Fragment current = activity.getSupportFragmentManager()
                     .findFragmentById(R.id.fragment_container);
             assertTrue(
-                    "Tapping Browse should load EventListFragment",
-                    current instanceof EventListFragment
+                    "Tapping Browse should load EventFragment",
+                    current instanceof EventFragment
             );
         });
     }

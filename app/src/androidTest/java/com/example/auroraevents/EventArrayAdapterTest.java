@@ -40,10 +40,10 @@ public class EventArrayAdapterTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20);
 
         // add device id to attendingList
-        event.getAttendingList().add("test-device-id");
+        event.registrationList.getAttendingList().add("test-device-id");
 
         // check if attendingList contains the device id
-        assertTrue(event.getAttendingList().contains("test-device-id"));
+        assertTrue(event.registrationList.getAttendingList().contains("test-device-id"));
     }
 
     /**
@@ -55,8 +55,8 @@ public class EventArrayAdapterTest {
         Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20);
-        event.getSelectedList().add("test-device-id");
-        assertTrue(event.getSelectedList().contains("test-device-id"));
+        event.registrationList.getSelectedList().add("test-device-id");
+        assertTrue(event.registrationList.getSelectedList().contains("test-device-id"));
     }
     /**
      * Tests to see if waiting tag is displayed correctly when
@@ -67,8 +67,8 @@ public class EventArrayAdapterTest {
         Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20);
-        event.getWaitingList().add("test-device-id");
-        assertTrue(event.getWaitingList().contains("test-device-id"));
+        event.registrationList.getWaitingList().add("test-device-id");
+        assertTrue(event.registrationList.getWaitingList().contains("test-device-id"));
     }
     /**
      * Tests to see if empty tag is displayed correctly when
@@ -79,8 +79,8 @@ public class EventArrayAdapterTest {
         Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20);
-        assertFalse(event.getAttendingList().contains("test-device-id"));
-        assertFalse(event.getSelectedList().contains("test-device-id"));
-        assertFalse(event.getWaitingList().contains("test-device-id"));
+        assertFalse(event.registrationList.getAttendingList().contains("test-device-id"));
+        assertFalse(event.registrationList.getSelectedList().contains("test-device-id"));
+        assertFalse(event.registrationList.getWaitingList().contains("test-device-id"));
     }
 }

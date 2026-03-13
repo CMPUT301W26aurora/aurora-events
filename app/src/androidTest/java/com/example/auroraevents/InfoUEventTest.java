@@ -76,8 +76,8 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         event1.setEventId("test-event-1");
 
-        event1.getWaitingList().add("user-abc");
-        assertEquals(1, event1.getWaitingList().size());
+        event1.registrationList.getWaitingList().add("user-abc");
+        assertEquals(1, event1.registrationList.getWaitingList().size());
     }
 
     /**
@@ -91,12 +91,12 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         event1.setEventId("test-event-1");
 
-        event1.getWaitingList().add("user-abc");
-        event1.getWaitingList().add("user-def");
-        event1.getWaitingList().add("user-ghi");
+        event1.registrationList.getWaitingList().add("user-abc");
+        event1.registrationList.getWaitingList().add("user-def");
+        event1.registrationList.getWaitingList().add("user-ghi");
 
-        event1.getWaitingList().remove("user-abc");
-        assertEquals(2, event1.getWaitingList().size());
+        event1.registrationList.getWaitingList().remove("user-abc");
+        assertEquals(2, event1.registrationList.getWaitingList().size());
     }
 
     /**
@@ -110,7 +110,7 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         String userId = "user-abc";
 
-        boolean showJoinPoolButton = !event.getWaitingList().contains(userId) && !event.getSelectedList().contains(userId) && !event.getAttendingList().contains(userId);
+        boolean showJoinPoolButton = !event.registrationList.getWaitingList().contains(userId) && !event.registrationList.getSelectedList().contains(userId) && !event.registrationList.getAttendingList().contains(userId);
         assertTrue(showJoinPoolButton);
     }
 
@@ -124,11 +124,11 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         String userId = "user-abc";
-        event.getWaitingList().add(userId);
+        event.registrationList.getWaitingList().add(userId);
 
-        assertTrue(event.getWaitingList().contains(userId));
-        assertFalse(event.getSelectedList().contains(userId));
-        assertFalse(event.getAttendingList().contains(userId));
+        assertTrue(event.registrationList.getWaitingList().contains(userId));
+        assertFalse(event.registrationList.getSelectedList().contains(userId));
+        assertFalse(event.registrationList.getAttendingList().contains(userId));
     }
 
     /**
@@ -141,11 +141,11 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         String userId = "user-abc";
-        event.getSelectedList().add(userId);
+        event.registrationList.getSelectedList().add(userId);
 
-        assertTrue(event.getSelectedList().contains(userId));
-        assertFalse(event.getAttendingList().contains(userId));
-        assertFalse(event.getWaitingList().contains(userId));
+        assertTrue(event.registrationList.getSelectedList().contains(userId));
+        assertFalse(event.registrationList.getAttendingList().contains(userId));
+        assertFalse(event.registrationList.getWaitingList().contains(userId));
     }
 
     /**
@@ -158,12 +158,12 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         String userId = "user-abc";
-        event.getSelectedList().add(userId);
-        event.getSelectedList().remove(userId);
-        event.getAttendingList().add(userId);
+        event.registrationList.getSelectedList().add(userId);
+        event.registrationList.getSelectedList().remove(userId);
+        event.registrationList.getAttendingList().add(userId);
 
-        assertFalse(event.getSelectedList().contains(userId));
-        assertTrue(event.getAttendingList().contains(userId));
+        assertFalse(event.registrationList.getSelectedList().contains(userId));
+        assertTrue(event.registrationList.getAttendingList().contains(userId));
     }
     /**
      * Tests if accepted entrants are added to attending list
@@ -175,11 +175,11 @@ public class InfoUEventTest {
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40);
         String userId = "user-abc";
-        event.getSelectedList().add(userId);
-        event.getSelectedList().remove(userId);
+        event.registrationList.getSelectedList().add(userId);
+        event.registrationList.getSelectedList().remove(userId);
 
-        assertFalse(event.getSelectedList().contains(userId));
-        assertFalse(event.getAttendingList().contains(userId));
+        assertFalse(event.registrationList.getSelectedList().contains(userId));
+        assertFalse(event.registrationList.getAttendingList().contains(userId));
     }
 
     /**

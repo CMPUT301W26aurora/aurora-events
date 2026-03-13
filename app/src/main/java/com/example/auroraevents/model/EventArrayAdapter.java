@@ -61,11 +61,11 @@ public class EventArrayAdapter extends ArrayAdapter <com.example.auroraevents.mo
         eventDescription.setText(event.getDescription());
 
         // check user status and update status tag
-        if (event.getAttendingList() != null && event.getAttendingList().contains(userId)) {
+        if (event.registrationList.getAttendingList() != null && event.registrationList.getAttendingList().contains(userId)) {
             eventTag.setText("Attending");
-        } else if (event.getSelectedList() != null && event.getSelectedList().contains(userId)) {
+        } else if (event.registrationList.getSelectedList() != null && event.registrationList.getSelectedList().contains(userId)) {
             eventTag.setText("Invited");
-        } else if (event.getWaitingList() != null && event.getWaitingList().contains(userId)) {
+        } else if (event.registrationList.getWaitingList() != null && event.registrationList.getWaitingList().contains(userId)) {
             eventTag.setText("Waiting");
         } else {
             eventTag.setText("");

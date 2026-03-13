@@ -20,12 +20,12 @@ public class EventTest {
         // create an event
         Event event = new Event();
 
-        assertTrue(event.getWaitingList().isEmpty());
-        assertTrue(event.getSelectedList().isEmpty());
-        assertTrue(event.getAttendingList().isEmpty());
-        assertTrue(event.getDeclinedList().isEmpty());
-        assertTrue(event.getCancelledList().isEmpty());
-        assertTrue(event.getRemovedList().isEmpty());
+        assertTrue(event.registrationList.getWaitingList().isEmpty());
+        assertTrue(event.registrationList.getSelectedList().isEmpty());
+        assertTrue(event.registrationList.getAttendingList().isEmpty());
+        assertTrue(event.registrationList.getDeclinedList().isEmpty());
+        assertTrue(event.registrationList.getCancelledList().isEmpty());
+        assertTrue(event.registrationList.getRemovedList().isEmpty());
     }
 
     /**
@@ -173,9 +173,9 @@ public class EventTest {
     @Test
     public void testGetWaitingList() {
         Event event = new Event();
-        event.getWaitingList().add("test-device-id");
-        assertEquals(1, event.getWaitingList().size());
-        assertTrue(event.getWaitingList().contains("test-device-id"));
+        event.registrationList.getWaitingList().add("test-device-id");
+        assertEquals(1, event.registrationList.getWaitingList().size());
+        assertTrue(event.registrationList.getWaitingList().contains("test-device-id"));
     }
 
     /**
@@ -184,9 +184,9 @@ public class EventTest {
     @Test
     public void testGetSelectedList() {
         Event event = new Event();
-        event.getSelectedList().add("test-device-id-2");
-        assertEquals(1, event.getSelectedList().size());
-        assertTrue(event.getSelectedList().contains("test-device-id-2"));
+        event.registrationList.getSelectedList().add("test-device-id-2");
+        assertEquals(1, event.registrationList.getSelectedList().size());
+        assertTrue(event.registrationList.getSelectedList().contains("test-device-id-2"));
     }
 
 
@@ -196,9 +196,9 @@ public class EventTest {
     @Test
     public void testGetAttendingList() {
         Event event = new Event();
-        event.getAttendingList().add("test-device-id-3");
-        assertEquals(1, event.getAttendingList().size());
-        assertTrue(event.getAttendingList().contains("test-device-id-3"));
+        event.registrationList.getAttendingList().add("test-device-id-3");
+        assertEquals(1, event.registrationList.getAttendingList().size());
+        assertTrue(event.registrationList.getAttendingList().contains("test-device-id-3"));
     }
 
     /**
@@ -207,9 +207,9 @@ public class EventTest {
     @Test
     public void testGetDeclinedList() {
         Event event = new Event();
-        event.getDeclinedList().add("test-device-id-4");
-        assertEquals(1, event.getDeclinedList().size());
-        assertTrue(event.getDeclinedList().contains("test-device-id-4"));
+        event.registrationList.getDeclinedList().add("test-device-id-4");
+        assertEquals(1, event.registrationList.getDeclinedList().size());
+        assertTrue(event.registrationList.getDeclinedList().contains("test-device-id-4"));
     }
 
     /**
@@ -218,9 +218,9 @@ public class EventTest {
     @Test
     public void testGetCancelledList() {
         Event event = new Event();
-        event.getCancelledList().add("test-device-id-5");
-        assertEquals(1, event.getCancelledList().size());
-        assertTrue(event.getCancelledList().contains("test-device-id-5"));
+        event.registrationList.getCancelledList().add("test-device-id-5");
+        assertEquals(1, event.registrationList.getCancelledList().size());
+        assertTrue(event.registrationList.getCancelledList().contains("test-device-id-5"));
     }
 
     /**
@@ -229,8 +229,8 @@ public class EventTest {
     @Test
     public void testGetRemovedList() {
         Event event = new Event();
-        event.getRemovedList().add("test-device-id-6");
-        assertEquals(1, event.getRemovedList().size());
-        assertTrue(event.getRemovedList().contains("test-device-id-6"));
+        event.registrationList.getRemovedList().add("test-device-id-6");
+        assertEquals(1, event.registrationList.getRemovedList().size());
+        assertTrue(event.registrationList.getRemovedList().contains("test-device-id-6"));
     }
 }

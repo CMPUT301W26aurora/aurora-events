@@ -110,33 +110,18 @@ public class Event {
     public String getQrCodeData()                    { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
 
-    public List<String> getAttendingList()                             { return attendingList; }
-    public void         setAttendingList(List<String> attendingList)   { this.attendingList = attendingList; }
-
-    public List<String> getSelectedList()                              { return selectedList; }
-    public void         setSelectedList(List<String> selectedList)     { this.selectedList = selectedList; }
-
-    public List<String> getWaitingList()                               { return waitingList; }
-    public void         setWaitingList(List<String> waitingList)       { this.waitingList = waitingList; }
-
-    public List<String> getDeclinedList()                              { return declinedList; }
-    public void         setDeclinedList(List<String> declinedList)     { this.declinedList = declinedList; }
-
-    public List<String> getRemovedList()                               { return removedList; }
-    public void         setRemovedList(List<String> removedList)       { this.removedList = removedList; }
-
-    public List<String> getCancelledList()                             { return cancelledList; }
-    public void         setCancelledList(List<String> cancelledList)   { this.cancelledList = cancelledList; }
-
     // Converters
+    @Exclude
     public LocalDate getDateTimeAsLocalDate() {
         return LocalDateTime.parse(dateTime, FORMATTER).toLocalDate();
     }
 
+    @Exclude
     public LocalDateTime getRegistrationTimeStartAsDateTime() {
         return LocalDateTime.parse(registrationTimeStart, FORMATTER);
     }
 
+    @Exclude
     public LocalDateTime getRegistrationTimeEndAsDateTime() {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }

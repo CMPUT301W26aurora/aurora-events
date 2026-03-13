@@ -125,7 +125,7 @@ public class InfoUEventFragment extends Fragment {
                                             eventName.setText(event.getName());
                                             eventDescription.setText(event.getDescription());
                                             eventLocation.setText(event.getLocation());
-                                            eventDateTime.setText(String.valueOf(event.getDateTime()));
+                                            eventDateTime.setText(event.getDateTime());
                                             eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
                                             poster.setVisibility(View.GONE);
 
@@ -154,19 +154,19 @@ public class InfoUEventFragment extends Fragment {
                                                 // show waiting list and attendees count for entrant
                                                 waitingListCount.setVisibility(View.VISIBLE);
                                                 attendeesCount.setVisibility(View.VISIBLE);
-                                                waitingListCount.setText(event.getWaitingList().size() + " people are waiting ");
-                                                attendeesCount.setText(event.getAttendingList().size() + " people are participating ");
+                                                waitingListCount.setText(event.registrationList.getWaitingList().size() + " people are waiting ");
+                                                attendeesCount.setText(event.registrationList.getAttendingList().size() + " people are participating ");
                                                 deleteButton.setVisibility(View.GONE);
 
                                                 // check which list user is in and display corresponding buttons
-                                                if (event.getAttendingList().contains(userId)) {
+                                                if (event.registrationList.getAttendingList().contains(userId)) {
                                                     joinButton.setVisibility(View.GONE);
                                                     acceptButton.setVisibility(View.GONE);
                                                     declineButton.setVisibility(View.GONE);
                                                     attendingLabel.setVisibility(View.VISIBLE);
                                                     attendingLabel.setText("You are attending");
                                                 }
-                                                else if (event.getSelectedList().contains(userId)) {
+                                                else if (event.registrationList.getSelectedList().contains(userId)) {
                                                     // user has been selected and needs to accept or decline
                                                     joinButton.setVisibility(View.GONE);
                                                     acceptButton.setVisibility(View.VISIBLE);
@@ -196,7 +196,7 @@ public class InfoUEventFragment extends Fragment {
                                                         );
                                                     });
                                                 }
-                                                else if (event.getWaitingList().contains(userId)) {
+                                                else if (event.registrationList.getWaitingList().contains(userId)) {
                                                     // user is on waiting list
                                                     joinButton.setVisibility(View.VISIBLE);
                                                     joinButton.setText("Leave Pool");
