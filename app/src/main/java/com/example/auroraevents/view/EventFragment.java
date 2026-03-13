@@ -96,7 +96,6 @@ public class EventFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
-        return root;
 
         addEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,5 +107,7 @@ public class EventFragment extends Fragment {
                         .commit();
             }
         });
+
+        return root;
     }
 }
