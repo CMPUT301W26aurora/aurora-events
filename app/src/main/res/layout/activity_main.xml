@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1B2E"
+    android:id="@+id/main">
+
+    <!-- Fragment fills the entire screen, including behind the nav bar -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Nav bar floats on top, anchored to the bottom -->
+    <LinearLayout
+        android:id="@+id/nav_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="68dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/nav_bar_background"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical"
+        android:elevation="12dp"
+        android:animateLayoutChanges="true">
+
+        <!-- QR Scan tab -->
+        <ImageButton
+            android:id="@+id/nav_scan"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_qr"
+            android:scaleType="center"
+            android:contentDescription="Scan QR Code"
+            android:layout_marginEnd="6dp"
+            app:tint="#1C1B2E" />
+
+        <!-- Browse Events tab (active by default) -->
+        <ImageButton
+            android:id="@+id/nav_browse"
+            android:layout_width="88dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_active"
+            android:src="@drawable/ic_nav_browse"
+            android:scaleType="center"
+            android:contentDescription="Browse Events"
+            android:layout_marginEnd="6dp"
+            app:tint="#1C1B2E" />
+
+        <!-- Notifications tab -->
+        <ImageButton
+            android:id="@+id/nav_notifications"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_notifications"
+            android:scaleType="center"
+            android:contentDescription="Notifications"
+            android:layout_marginEnd="6dp"
+            app:tint="#1C1B2E" />
+
+        <!-- Profile tab -->
+        <ImageButton
+            android:id="@+id/nav_profile"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_profile"
+            android:scaleType="center"
+            android:contentDescription="Profile"
+            app:tint="#1C1B2E" />
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">AuroraEvents</string>
+    <string name="login_confirm_text">Confirm</string>
+    <string name="default_phone_number">(000) 000–0000</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="optional_label">Optional</string>
+    <string name="user_name_label">Name</string>
+    <string name="default_user_name">Your Name</string>
+    <string name="mandatory_label">Mandatory</string>
+    <string name="default_email">your@email.ca</string>
+    <string name="email_label">email</string>
+    <string name="header_content_desc">Header</string>
+    <string name="login_header">Login</string>
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="back_button_content_description">Back Button</string>
+    <string name="switch_to_admin_mode_text">Switch to Admin Mode</string>
+    <string name="delete_profile_text">Delete Profile</string>
+    <string name="your_profile_picture_content_description">Your profile picture</string>
+    <string name="delete_profile_picture_content_description">Delete profile picture</string>
+    <string name="mandatory_fields_toast_text">Please fill in the mandatory fields</string>
+    <string name="database_error_toast_text">Sorry, we couldn\'t reach the database. Please try again later.</string>
+    <string name="user_info_successfully_updated_toast_text">User info successfully updated!</string>
+</resources>
