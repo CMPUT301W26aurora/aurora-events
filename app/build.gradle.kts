@@ -66,6 +66,4 @@ dependencies {
     androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-
-    implementation("com.google.android.material:material:1.12.0")
 }
