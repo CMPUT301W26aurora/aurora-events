@@ -1,5 +1,8 @@
 package com.example.auroraevents.view;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -11,10 +14,13 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.EventArrayAdapter;
+import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -30,6 +36,7 @@ public class EventFragment extends Fragment {
 
     private static final String TAG = "EventFragment";
     private FloatingActionButton addEventButton;
+    private UserViewModel userViewModel;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -49,8 +56,22 @@ public class EventFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.event_fragment, container, false);
-        ListView listView = root.findViewById(R.id.events_list);
+
         addEventButton = root.findViewById(R.id.eventAddButton);
+        addEventButton.setVisibility(GONE);
+
+        // Show add event button only if the user is an organizer
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
+            Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
+            if (user != null && User.ROLE_ORGANIZER.equals(user.getRole())) {
+                addEventButton.setVisibility(VISIBLE);
+            } else {
+                addEventButton.setVisibility(GONE);
+            }
+        });
+
+        ListView listView = root.findViewById(R.id.events_list);
 
         // Inflate and add the header
         View header = inflater.inflate(R.layout.header_event_fragment, listView, false);

@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel.selectItem(new User());
         navScan          = findViewById(R.id.nav_scan);
         navBrowse        = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
