@@ -3,20 +3,19 @@ package com.example.auroraevents.model;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserViewModel extends ViewModel {
     private final MutableLiveData<User> selectedItem = new MutableLiveData<>();
+
     public void selectItem(User user) {
         selectedItem.setValue(user);
     }
+
     public LiveData<User> getSelectedItem() {
         return selectedItem;
-import com.google.firebase.firestore.FirebaseFirestore;
+    }
 
-/**
- * Helper class to fetch user data on app startup
- */
-public class UserViewModel extends ViewModel {
     private final MutableLiveData<Organizer> organizerLiveData = new MutableLiveData<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 

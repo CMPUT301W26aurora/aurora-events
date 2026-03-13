@@ -16,6 +16,7 @@ import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.EventArrayAdapter;
 import com.example.auroraevents.server.EventDb;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 public class EventFragment extends Fragment {
 
     private static final String TAG = "EventFragment";
+    private FloatingActionButton addEventButton;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -48,6 +50,7 @@ public class EventFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.event_fragment, container, false);
         ListView listView = root.findViewById(R.id.events_list);
+        addEventButton = root.findViewById(R.id.eventAddButton);
 
         // Inflate and add the header
         View header = inflater.inflate(R.layout.header_event_fragment, listView, false);
@@ -94,5 +97,16 @@ public class EventFragment extends Fragment {
                     .commit();
         });
         return root;
+
+        addEventButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new EventCreationFragment())
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
     }
 }
