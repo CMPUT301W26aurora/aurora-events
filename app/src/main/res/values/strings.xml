@@ -20,7 +20,4 @@
     <string name="mandatory_fields_toast_text">Please fill in the mandatory fields</string>
     <string name="database_error_toast_text">Sorry, we couldn\'t reach the database. Please try again later.</string>
     <string name="user_info_successfully_updated_toast_text">User info successfully updated!</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="label">Add an image</string>
 </resources>

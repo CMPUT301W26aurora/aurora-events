@@ -217,7 +217,7 @@ public class Event {
     /**
      * Gets the array list of user objects that are in the selected list
      * @return
-//     * Return the array list of user objects in the selected list
+     * Return the array list of user objects in the selected list
      */
     @Exclude
     public ArrayList<User> getSelectedListOfUsers() {
