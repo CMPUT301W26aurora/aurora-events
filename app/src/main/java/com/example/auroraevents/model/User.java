@@ -1,7 +1,8 @@
-package com.example.auroraevents;
+package com.example.auroraevents.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a user in the application.
@@ -19,6 +20,8 @@ public class User {
     private String email;
     private String phoneNumber;
     private String role;
+    private Integer databaseTimeout = 10;
+    private TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
 
     // Notification history (stored as notification IDs or message strings)
@@ -65,5 +68,19 @@ public class User {
 
     public List<String> getTags()                      { return tags; }
     public void         setTags(List<String> tags)     { this.tags = tags; }
+
+    public Integer getDatabaseTimeout() {
+        return databaseTimeout;
+    }
+    public void setDatabaseTimeout(Integer databaseTimeout) {
+        this.databaseTimeout = databaseTimeout;
+    }
+
+    public TimeUnit getTimeoutUnit() {
+        return timeoutUnit;
+    }
+    public void setTimeoutUnit(TimeUnit unit) {
+        timeoutUnit = unit;
+    }
 
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:background="@color/background">
+
+    <include
+        layout="@layout/back_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/profile_picture"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:contentDescription="@string/your_profile_picture_content_description"
+        android:src="@mipmap/ic_launcher"
+        android:background="@drawable/profile_image_box"
+        android:clipToOutline="true"
+        tools:targetApi="31"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ImageButton
+        android:id="@+id/delete_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="275dp"
+        android:layout_marginTop="275dp"
+        android:background="@drawable/rounded_box"
+        android:clipToOutline="true"
+        android:contentDescription="@string/delete_profile_picture_content_description"
+        android:src="@drawable/rounded_delete_24"
+        app:backgroundTint="@color/light_glass"
+        app:layout_constraintStart_toStartOf="@+id/profile_picture"
+        app:layout_constraintTop_toTopOf="@+id/profile_picture"
+        app:tint="@color/dark_red"
+        tools:targetApi="31" />
+
+    <Button
+        android:id="@+id/confirm_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/green"
+        android:fontFamily="@font/roboto"
+        android:paddingHorizontal="145dp"
+        android:paddingVertical="15dp"
+        android:text="@string/login_confirm_text"
+        android:textColor="@color/dark_text"
+        android:textSize="8pt"
+        app:icon="@drawable/round_check_24"
+        app:iconTint="@color/dark_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

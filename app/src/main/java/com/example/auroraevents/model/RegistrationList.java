@@ -1,12 +1,15 @@
-package com.example.auroraevents;
+package com.example.auroraevents.model;
 
-import static com.example.auroraevents.EventDb.LIST_ATTENDING;
-import static com.example.auroraevents.EventDb.LIST_CANCELLED;
-import static com.example.auroraevents.EventDb.LIST_DECLINED;
-import static com.example.auroraevents.EventDb.LIST_REMOVED;
-import static com.example.auroraevents.EventDb.LIST_SELECTED;
-import static com.example.auroraevents.EventDb.LIST_WAITING;
+import static com.example.auroraevents.server.EventDb.LIST_ATTENDING;
+import static com.example.auroraevents.server.EventDb.LIST_CANCELLED;
+import static com.example.auroraevents.server.EventDb.LIST_DECLINED;
+import static com.example.auroraevents.server.EventDb.LIST_REMOVED;
+import static com.example.auroraevents.server.EventDb.LIST_SELECTED;
+import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 
+import android.util.Log;
+
+import com.example.auroraevents.server.EventDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
@@ -103,8 +106,12 @@ public class RegistrationList {
         }
 
         try {
-            assert latch.await(databaseTimeout, timeoutUnit);
+            if (!latch.await(databaseTimeout, timeoutUnit)) {
+                Log.w("RegistrationList", "changeDb timed out");
+                return false;
+            }
         } catch (InterruptedException e) {
+            Log.w("RegistrationList", "changeDb interrupted");
             return false;
         }
 
@@ -171,8 +178,9 @@ public class RegistrationList {
      */
     public List<Integer> addAllToWaitingList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
-        for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToWaitingList(userIDs.get(i)));
+        int size = userIDs.size();
+        for (int i = 0; i < size; i++) {
+            output.add(i, addToWaitingList(userIDs.get(i)));
         }
         return output;
     }
@@ -231,8 +239,9 @@ public class RegistrationList {
      */
     public List<Integer> addAllToSelectedList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
-        for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToSelectedList(userIDs.get(i)));
+        int size = userIDs.size();
+        for (int i = 0; i < size; i++) {
+            output.add(i, addToSelectedList(userIDs.get(0)));
         }
         return output;
     }
@@ -290,8 +299,9 @@ public class RegistrationList {
      */
     public List<Integer> addAllToAttendingList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
-        for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToAttendingList(userIDs.get(i)));
+        int size = userIDs.size();
+        for (int i = 0; i < size; i++) {
+            output.add(i, addToAttendingList(userIDs.get(i)));
         }
         return output;
     }
@@ -349,8 +359,9 @@ public class RegistrationList {
      */
     public List<Integer> addAllToDeclinedList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
-        for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToDeclinedList(userIDs.get(i)));
+        int size = userIDs.size();
+        for (int i = 0; i < size; i++) {
+            output.add(i, addToDeclinedList(userIDs.get(i)));
         }
         return output;
     }
@@ -408,8 +419,9 @@ public class RegistrationList {
      */
     public List<Integer> addAllToCancelledList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
-        for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToCancelledList(userIDs.get(i)));
+        int size = userIDs.size();
+        for (int i = 0; i < size; i++) {
+            output.add(i, addToCancelledList(userIDs.get(i)));
         }
         return output;
     }
@@ -482,8 +494,9 @@ public class RegistrationList {
      */
     public List<Integer> addAllToRemovedList(List<String> userIDs) {
         List<Integer> output = new ArrayList<>();
-        for (int i = 0; i < userIDs.size(); i++) {
-            output.set(i, addToRemovedList(userIDs.get(i)));
+        int size = userIDs.size();
+        for (int i = 0; i < size; i++) {
+            output.add(i, addToRemovedList(userIDs.get(i)));
         }
         return output;
     }

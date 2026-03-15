@@ -5,6 +5,10 @@ import static org.junit.Assert.fail;
 
 import android.util.Log;
 
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.User;
+import com.example.auroraevents.server.EventDb;
+import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.concurrent.CountDownLatch;
@@ -80,4 +84,50 @@ public class TestsSupport {
     public static void takeDownEvent(Event event) {
         takeDownEvent(event, 10, TimeUnit.SECONDS);
     }
+
+    public static void setUpUser(User user, long timeout, TimeUnit unit) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Boolean> status = new AtomicReference<>(true);
+
+        UserDb.getInstance().addUser(user,
+                latch::countDown,                       // on success this will unblock the thread
+                e -> { status.set(false); latch.countDown(); }  // on failure this will also unblock the thread, but set status to false
+        );
+
+        try {
+            assertTrue("setUpUser timed out", latch.await(timeout, unit)); // blocks thread for 10 seconds max, but will get unlocked sooner if either callback from above fires
+        } catch (InterruptedException e) {
+            fail("setUpUser was interrupted");
+        }
+
+        // this now runs only after we receive the callback from addUser
+        assertTrue("setUpUser failed", status.get());
+    }
+
+    public static void setUpUser(User user) {
+        setUpUser(user, 10, TimeUnit.SECONDS);
+    }
+
+    public static void takeDownUser(User user, long timeout, TimeUnit unit) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Boolean> status = new AtomicReference<>(true);
+
+        UserDb.getInstance().deleteUser(user.getDeviceId(),
+                latch::countDown,
+                e -> { status.set(false); latch.countDown(); }
+        );
+
+        try {
+            assertTrue("takeDownUser timed out", latch.await(timeout, unit));
+        } catch (InterruptedException e) {
+            fail("takeDownUser was interrupted");
+        }
+
+        assertTrue("takeDownUSer failed", status.get());
+    }
+
+    public static void takeDownUser(User user) {
+        takeDownUser(user, 10, TimeUnit.SECONDS);
+    }
+
 }

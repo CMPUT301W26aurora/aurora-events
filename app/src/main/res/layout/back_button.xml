@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:background="@drawable/rounded_box"
+    android:clipToOutline="true"
+    android:contentDescription="@string/back_button_content_description"
+    android:src="@drawable/round_arrow_back_24"
+    app:backgroundTint="@color/light_glass"
+    app:tint="@color/blue"
+    tools:targetApi="31"
+    android:elevation="5dp">
+</ImageButton>
