@@ -31,37 +31,51 @@ public class CameraFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    private void handleInvalid(){
+        Log.d(TAG, "No such event exists");
+        Toast.makeText(requireContext(), "Invalid QR code Scanned", LENGTH_LONG).show();
+    }
+
+    private void handleValid(String qr){
+        Bundle bundle = new Bundle();
+        bundle.putString("eventId", qr);
+
+        InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
+        infoUEventFragment.setArguments(bundle);
+
+        getParentFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, infoUEventFragment)
+                .addToBackStack(null)
+                .commit();
+    }
 
     private final ActivityResultLauncher<ScanOptions> barcodeLauncher =
             registerForActivityResult(new ScanContract(), result -> {
 
                 if(result.getContents() != null) {
                     String qr = result.getContents();
+                    //code from mkyong at mkyong.com at
+                    //https://mkyong.com/regular-expressions/java-regex-check-alphanumeric-string/
 
-                    eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
-                            qr,
-                            event -> {
-                                if (event != null) {
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("eventId", qr);
-
-                                    InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
-                                    infoUEventFragment.setArguments(bundle);
-
-                                    getParentFragmentManager()
-                                            .beginTransaction()
-                                            .replace(R.id.fragment_container, infoUEventFragment)
-                                            .addToBackStack(null)
-                                            .commit();
-                                } else {
-                                    Log.d(TAG, "No such event exists");
-                                    Toast.makeText(requireContext(), "Invalid QR code Scanned", LENGTH_LONG).show();
+                    if(!qr.matches("^[a-zA-Z0-9]+$")){
+                        handleInvalid();
+                    }else {
+                        eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
+                                qr,
+                                event -> {
+                                    if (event != null) {
+                                        handleValid(qr);
+                                    } else {
+                                        handleInvalid();
+                                    }
+                                },
+                                e -> {
+                                    Log.d(TAG, "Error fetching event:" + e);
                                 }
-                            },
-                            e -> {
-                                Log.d(TAG, "Error fetching event:" + e);
-                            }
-                    );
+
+                        );
+                    }
                 }
             });
     @Nullable
