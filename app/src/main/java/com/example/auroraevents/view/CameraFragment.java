@@ -31,12 +31,12 @@ public class CameraFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    private void handleInvalid(){
+    public void handleInvalid(){
         Log.d(TAG, "No such event exists");
         Toast.makeText(requireContext(), "Invalid QR code Scanned", LENGTH_LONG).show();
     }
 
-    private void handleValid(String qr){
+    public void handleValid(String qr){
         Bundle bundle = new Bundle();
         bundle.putString("eventId", qr);
 
@@ -96,7 +96,7 @@ public class CameraFragment extends Fragment {
             ScanOptions options = new ScanOptions();
             options.setPrompt("Scan QR Code");
             options.setBeepEnabled(false);
-            options.setOrientationLocked(false);
+            options.setOrientationLocked(true);
             options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
 
             barcodeLauncher.launch(options);

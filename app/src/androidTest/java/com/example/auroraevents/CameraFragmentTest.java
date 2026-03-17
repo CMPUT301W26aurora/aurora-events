@@ -7,6 +7,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isClickable;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import android.os.Build;
 
@@ -43,8 +44,46 @@ public class CameraFragmentTest {
         onView(withId(R.id.scan)).perform(click()); //the scanner breaks everything in terms of testing, very nice
     }
 
+    /**
+     * Tests for invalid qr code input
+     */
     @Test
-    public void testInvalid(){
+    public void testInValid(){
 
+        ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+
+        scenario.onActivity(activity -> {
+
+            CameraFragment fragment = new CameraFragment();
+
+            activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commitNow();
+
+            fragment.handleInvalid();
+        });
+
+        onView(withId(R.id.scan)).check(matches(isDisplayed())); // make sure the
+        //view does not change
+    }
+    @Test
+    public void testValid(){
+
+        ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
+
+        scenario.onActivity(activity -> {
+
+            CameraFragment fragment = new CameraFragment();
+
+            activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commitNow();
+
+            fragment.handleValid("test123");
+        });
+
+        onView(withId(R.id.scan)).check(doesNotExist()); // make sure the view changes
     }
 }
