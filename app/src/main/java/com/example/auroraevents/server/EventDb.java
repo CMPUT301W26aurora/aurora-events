@@ -1,12 +1,18 @@
-package com.example.auroraevents;
+package com.example.auroraevents.server;
 
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
+import com.example.auroraevents.model.Event;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.List;
@@ -33,7 +39,7 @@ public class EventDb {
 
 
     private static EventDb instance;
-    private final  FirebaseFirestore db;
+    private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     // ── Callbacks ──────────────────────────────────────────────────────────
 
@@ -46,7 +52,7 @@ public class EventDb {
     // ── Singleton ──────────────────────────────────────────────────────────
 
     private EventDb() {
-        db = FirebaseFirestore.getInstance();
+
     }
 
     public static synchronized EventDb getInstance() {
@@ -66,7 +72,7 @@ public class EventDb {
      * @param onCreated Called with the new auto-generated document ID.
      * @param onFailure Called with the exception if the write fails.
      */
-    public void addEvent(Event event, OnEventCreatedCallback onCreated, OnFailureCallback onFailure) {
+    public static void addEvent(Event event, OnEventCreatedCallback onCreated, OnFailureCallback onFailure) {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document();
 
         // Write back the ID so the caller's object is up-to-date
@@ -323,5 +329,47 @@ public class EventDb {
                     Log.e(TAG, "Failed to delete event: " + eventId, e);
                     onFailure.onFailure(e);
                 });
+    }
+    // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────────────────
+
+
+
+    /**
+
+     *
+
+     * @param eventId
+
+     * @param onEventSnapshot
+
+     * @param onFailure
+
+     * @return
+
+     */
+
+    public interface OnEventSnapshotCallback       { void onEventSnapshot(Event event); }
+    public ListenerRegistration addSnapshotListenerForEvent(String eventId, OnEventSnapshotCallback onEventSnapshot, OnFailureCallback onFailure) {
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(eventId);
+        return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e);
+                    onFailure.onFailure(e);
+                    return;
+                }
+                if (snapshot != null && snapshot.exists()) {
+                    Event event = snapshot.toObject(Event.class);
+                    event.setEventId(snapshot.getId());
+                    onEventSnapshot.onEventSnapshot(event);
+                } else {
+                    Log.d(TAG, "Current data: null");
+                    onEventSnapshot.onEventSnapshot(null);
+                }
+            }
+        });
+
     }
 }
