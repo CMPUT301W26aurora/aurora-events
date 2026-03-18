@@ -85,6 +85,12 @@ public class EventCreationFragment extends Fragment {
         confirmButton.setEnabled(false);
         confirmButton.setAlpha(0.5f);
 
+        String deviceId = Settings.Secure.getString(
+                getContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+
+        userViewModel.fetchOrganizer(deviceId);
         userViewModel.getOrganizer().observe(getViewLifecycleOwner(), org -> {
             if (org != null) {
                 this.organizer = org;
