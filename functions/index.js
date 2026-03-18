@@ -15,16 +15,17 @@ const db = admin.firestore();
 exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) => {
     const before = event.data.before.data().registrationList || {};
     const after  = event.data.after.data().registrationList || {};
+    const eventName = event.data.after.data().name || "an event";
 
     console.log("Function triggered for event:", event.params.eventId);
     console.log("Before selectedList:", JSON.stringify(before.selectedList));
     console.log("After selectedList:", JSON.stringify(after.selectedList));
 
-    await notifyNewEntrants(before.selectedList,  after.selectedList,  "You've been selected!",     "Check the app to confirm your spot.");
-    await notifyNewEntrants(before.attendingList, after.attendingList, "You're confirmed!",          "You're now on the attending list.");
-    await notifyNewEntrants(before.declinedList,  after.declinedList,  "Invitation declined",        "Your invitation has been declined.");
-    await notifyNewEntrants(before.cancelledList, after.cancelledList, "Registration cancelled",     "Your registration has been cancelled.");
-    await notifyNewEntrants(before.removedList,   after.removedList,   "Removed from event",         "You have been removed from this event.");
+    await notifyNewEntrants(before.selectedList,  after.selectedList,  "You've been selected!",     `You've been selected for ${eventName}!`);
+    await notifyNewEntrants(before.attendingList, after.attendingList, "You're confirmed!",          `You're confirmed for ${eventName}.`);
+    await notifyNewEntrants(before.declinedList,  after.declinedList,  "Invitation declined",        `Your invitation to ${eventName} has been declined.`);
+    await notifyNewEntrants(before.cancelledList, after.cancelledList, "Registration cancelled",     `Your registration for ${eventName} has been cancelled.`);
+    await notifyNewEntrants(before.removedList,   after.removedList,   "Removed from event",         `You have been removed from ${eventName}.`);
 });
 
 /**
@@ -78,7 +79,7 @@ async function sendNotification(deviceId, title, body) {
     try {
         const result = await admin.messaging().send({
             token: token,
-            notification: { title, body }
+            data: { title, body }
         });
         console.log("Notification sent successfully:", result);
     } catch (error) {
