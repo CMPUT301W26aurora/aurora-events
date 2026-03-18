@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,13 +51,27 @@ public class NotificationFragment extends Fragment {
         listView.addHeaderView(header, null, false);
         listView.setAdapter(adapter);
 
+        // Tap a notification to open its event
+        listView.setOnItemClickListener((parent, v, position, id) -> {
+            Notification selected = notifications.get(position - 1);
+            if (selected.getEventId() == null) return;
+
+            Bundle args = new Bundle();
+            args.putString("eventId", selected.getEventId());
+
+            InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
+            infoUEventFragment.setArguments(args);
+
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, infoUEventFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         loadNotifications();
     }
 
-    /**
-     * Queries the "Notifications" Firestore collection for all notifications
-     * belonging to this device, ordered by timestamp descending (newest first).
-     */
     private void loadNotifications() {
         String deviceId = Settings.Secure.getString(
                 requireContext().getContentResolver(), Settings.Secure.ANDROID_ID

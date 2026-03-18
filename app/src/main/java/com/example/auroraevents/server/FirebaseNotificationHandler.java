@@ -19,65 +19,37 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Collections;
 import java.util.Map;
 
-/**
- * Firebase Cloud Messaging service for handling FCM token refresh and incoming messages.
- *
- * Responsible for storing the device's FCM token in Firestore whenever it is refreshed,
- * and handling incoming push notifications when the app is in the foreground or background.
- *
- * Register this service in AndroidManifest.xml with the MESSAGING_EVENT intent filter.
- * Also call FirebaseMessaging.getInstance().getToken() on app startup to ensure the
- * token is always current.
- */
 public class FirebaseNotificationHandler extends FirebaseMessagingService {
 
     private static final String TAG              = "FCMService";
     private static final String COLLECTION_USERS = "Users";
     private static final String FIELD_FCM_TOKEN  = "fcmToken";
 
-    /**
-     * Called by Firebase when the device's FCM registration token is refreshed.
-     *
-     * Tokens may be refreshed when the app is restored on a new device, the user
-     * uninstalls and reinstalls the app, or the user clears the app's data.
-     *
-     * The new token is stored in Firestore under Users/{deviceId}/fcmToken
-     * using SetOptions.merge() so other user fields are not overwritten.
-     *
-     * @param token The new FCM registration token for this device.
-     */
     @Override
     public void onNewToken(@NonNull String token) {
         String deviceId = Settings.Secure.getString(
                 getContentResolver(), Settings.Secure.ANDROID_ID
         );
-
         FirebaseFirestore.getInstance()
                 .collection(COLLECTION_USERS)
                 .document(deviceId)
                 .set(Collections.singletonMap(FIELD_FCM_TOKEN, token), SetOptions.merge());
     }
 
-    /**
-     * Called when a data message is received, regardless of whether the app is in the
-     * foreground or background. Saves the notification to Firestore and displays it
-     * in the system tray.
-     *
-     * @param message The incoming RemoteMessage containing the data payload.
-     */
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         Map<String, String> data = message.getData();
         if (data.isEmpty()) return;
 
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        String eventId  = data.get("eventId");
         String title    = data.get("title");
         String body     = data.get("body");
 
         Log.d(TAG, "onMessageReceived: " + title + " — " + body);
 
         // Save to Firestore
-        Notification notification = new Notification(deviceId, title, body);
+        Notification notification = new Notification(deviceId, eventId, title, body);
         FirebaseFirestore.getInstance()
                 .collection("Notifications")
                 .add(notification)
@@ -87,17 +59,9 @@ public class FirebaseNotificationHandler extends FirebaseMessagingService {
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to save notification", e));
 
-        // Show in tray
         showNotification(title, body);
     }
 
-    /**
-     * Displays a notification in the system tray.
-     * On Android 13+ this requires POST_NOTIFICATIONS permission.
-     *
-     * @param title notification title
-     * @param body  notification body
-     */
     private void showNotification(String title, String body) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon(android.R.drawable.ic_dialog_info)

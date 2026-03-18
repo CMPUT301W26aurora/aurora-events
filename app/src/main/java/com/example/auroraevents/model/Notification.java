@@ -10,6 +10,7 @@ public class Notification {
 
     private String  notificationId;   // Firestore document ID (set after creation)
     private String  deviceId;         // recipient device (Settings.Secure.ANDROID_ID)
+    private String  eventId;          // the event this notification was sent from
     private String  title;
     private String  body;
     private Date    timestamp;
@@ -18,8 +19,9 @@ public class Notification {
     /** Required no-arg constructor for Firestore deserialization */
     public Notification() {}
 
-    public Notification(String deviceId, String title, String body) {
+    public Notification(String deviceId, String eventId, String title, String body) {
         this.deviceId  = deviceId;
+        this.eventId   = eventId;
         this.title     = title;
         this.body      = body;
         this.timestamp = new Date();
@@ -33,6 +35,9 @@ public class Notification {
 
     public String getDeviceId()                                { return deviceId; }
     public void   setDeviceId(String deviceId)                 { this.deviceId = deviceId; }
+
+    public String getEventId()                                 { return eventId; }
+    public void   setEventId(String eventId)                   { this.eventId = eventId; }
 
     public String getTitle()                                   { return title; }
     public void   setTitle(String title)                       { this.title = title; }
