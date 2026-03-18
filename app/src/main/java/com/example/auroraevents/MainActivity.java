@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         /*
         Hardcode user role for testing purposes
          */
+        /*
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
@@ -95,9 +96,9 @@ public class MainActivity extends AppCompatActivity {
                 },
                 e -> Log.e(TAG, "User info not available")
         );
+        */
 
         // Get user
-        /*
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
@@ -108,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
                 },
                 e -> Log.e(TAG, "User info not available")
         );
-         */
 
         // Set user
         userViewModel.getSelectedItem().observe(this,u -> {
