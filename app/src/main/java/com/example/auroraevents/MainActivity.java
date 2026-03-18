@@ -83,7 +83,20 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
 
+        /*
+        Hardcode user role for testing purposes
+         */
+        UserDb.getInstance().getUser(deviceId,
+                user -> {
+                    user.setDeviceId(deviceId);
+                    user.setRole(User.ROLE_ORGANIZER);
+                    userViewModel.selectItem(user);
+                },
+                e -> Log.e(TAG, "User info not available")
+        );
+
         // Get user
+        /*
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
@@ -94,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 },
                 e -> Log.e(TAG, "User info not available")
         );
+         */
 
         // Set user
         userViewModel.getSelectedItem().observe(this,u -> {
