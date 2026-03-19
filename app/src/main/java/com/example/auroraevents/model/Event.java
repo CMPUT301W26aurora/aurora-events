@@ -273,7 +273,8 @@ public class Event {
         int amount = getEmptySlotAmount();
         List<String> waitingList = registrationList.getWaitingList();
         // There are more empty slots than there are users in waiting list: Select everyone from waiting list
-        if (amount >= waitingList.size()) {
+        // Also do the same if the capacity = 0 (This is when there is no limit)
+        if (capacity == 0 || amount >= waitingList.size()) {
             registrationList.addAllToSelectedList(waitingList);
         }
         else { // Random sampling
