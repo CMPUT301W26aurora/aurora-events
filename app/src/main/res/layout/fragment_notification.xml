@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.NotificationFragment">
+    android:background="@drawable/background_aroura_gradient">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ListView
+        android:id="@+id/notifications_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="NOTIFICATIONS"
-        android:textSize="48dp"
-        android:gravity="center"/>
+        android:paddingBottom="96dp"
+        android:dividerHeight="8dp"
+        android:divider="@android:color/transparent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"/>
+
 </FrameLayout>

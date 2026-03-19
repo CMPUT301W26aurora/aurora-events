@@ -7,7 +7,7 @@
       "enabled": true
     },
     "singleProjectMode": true
-  }
+  },
   "firestore": {
     "database": "(default)",
     "location": "nam5",
