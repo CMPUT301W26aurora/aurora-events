@@ -45,4 +45,3 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         return view;
     }
 }
-

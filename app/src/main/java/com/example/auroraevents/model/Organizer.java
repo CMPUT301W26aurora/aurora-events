@@ -88,4 +88,49 @@ public class Organizer extends User {
             throw new IllegalArgumentException("Event not found");
         }
     }
+
+    /**
+     * Gets the list of users that were selected in the specified event
+     * @param event
+     * The event the organizer wants to get the selected list of
+     * @return
+     * Return the selected list of users in the specified event
+     */
+    public ArrayList<User> getEventSelectedList(Event event) {
+        if (myEvents.contains(event)) {
+            return event.getSelectedListOfUsers();
+        } else {
+            throw new IllegalArgumentException("Event not found");
+        }
+    }
+
+    /**
+     * Gets the list of users that are in the attending the specified event
+     * @param event
+     * The event the organizer wants to get the attending list of
+     * @return
+     * Return the attending list of users in the specified event
+     */
+    public ArrayList<User> getEventAttendingList(Event event) {
+        if (myEvents.contains(event)) {
+            return event.getAttendingListOfUsers();
+        } else {
+            throw new IllegalArgumentException("Event not found");
+        }
+    }
+
+    /**
+     * Gets the list of users that cancelled the invitation to the specified event
+     * @param event
+     * The event the organizer wants to get the cancelled list of
+     * @return
+     * Return the cancelled list of users in the specified event
+     */
+    public ArrayList<User> getCancelledWaitList(Event event) {
+        if (myEvents.contains(event)) {
+            return event.getWaitingListOfUsers();
+        } else {
+            throw new IllegalArgumentException("Event not found");
+        }
+    }
 }
