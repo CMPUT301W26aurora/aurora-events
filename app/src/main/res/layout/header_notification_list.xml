@@ -5,10 +5,10 @@
     android:gravity="center">
 
     <TextView
-        android:id="@+id/events_title"
+        android:id="@+id/notifications_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Events"
+        android:text="Notifications"
         android:textSize="40sp"
         android:fontFamily="@font/roboto"
         android:textColor="@color/light_text"/>

@@ -75,7 +75,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                10);
+                10); //0); for events with unlimited amount
         myEvent3.setEventId("test event");
         setUpEvent(myEvent3, 10, TimeUnit.SECONDS);
 
@@ -152,6 +152,7 @@ public class WaitListSamplingTest {
     @Test
     public void waitListSelectAllTest() {
         // This is when the there are more empty slots than the amount of users in waiting list
+        // Also works for unlimited capacity
         // Initialize objects
         Organizer organizer = new Organizer();
         ArrayList<Event> myEvents = new ArrayList<>();

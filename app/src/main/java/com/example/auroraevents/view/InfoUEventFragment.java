@@ -5,6 +5,7 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -25,6 +26,9 @@ import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Displays event details for the event tapped by the entrant or admin.
@@ -48,7 +52,7 @@ public class InfoUEventFragment extends Fragment {
     private TextView eventName, eventDescription, eventLocation, eventDateTime;
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
-    private Button backButton, joinButton, acceptButton, declineButton, deleteButton;
+    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton;
 
     /**
      *
@@ -67,7 +71,7 @@ public class InfoUEventFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
-        // get event Id from bundle
+        // get event ID from bundle
         Bundle args = getArguments();
         if (args == null || args.getString("eventId") == null) {
             Log.e(TAG, "Missing eventId argument");
@@ -96,6 +100,7 @@ public class InfoUEventFragment extends Fragment {
         acceptButton  = view.findViewById(R.id.accept_button);
         declineButton = view.findViewById(R.id.decline_button);
         deleteButton  = view.findViewById(R.id.delete_button);
+        sampleButton = view.findViewById(R.id.sample_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -116,6 +121,7 @@ public class InfoUEventFragment extends Fragment {
                 user -> {
                     // check if user role is admin
                     final boolean userIsAdmin = user != null && User.ROLE_ADMIN.equals(user.getRole());
+                    final boolean userIsOrganizer = user != null && User.ROLE_ORGANIZER.equals(user.getRole());
 
                     // attach snapshot listener to get event details
                     eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
@@ -150,7 +156,45 @@ public class InfoUEventFragment extends Fragment {
                                                             e -> Log.d(TAG, "Error deleting event: " + e)
                                                     );
                                                 });
-                                            } else {
+                                            }
+                                            else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
+                                                sampleButton.setVisibility(View.VISIBLE);
+                                                deleteButton.setVisibility(View.VISIBLE);
+                                                joinButton.setVisibility(View.GONE);
+                                                acceptButton.setVisibility(View.GONE);
+                                                declineButton.setVisibility(View.GONE);
+                                                attendingLabel.setVisibility(View.GONE);
+                                                waitingListCount.setVisibility(View.GONE);
+                                                attendeesCount.setVisibility(View.GONE);
+                                                deleteButton.setOnClickListener(v -> {
+                                                    EventDb.getInstance().deleteEvent(
+                                                            event.getEventId(),
+                                                            () -> {
+                                                                Log.d(TAG, "Event deleted");
+                                                                getParentFragmentManager().popBackStack();
+                                                            },
+                                                            e -> Log.d(TAG, "Error deleting event: " + e)
+                                                    );
+                                                });
+                                                // Enable/Disable Sample button
+                                                AtomicBoolean canSample = new AtomicBoolean(true);
+                                                if ((event.getEmptySlotAmount() == 0 && event.getCapacity() != 0)|| event.registrationList.getWaitingList().isEmpty()) {
+                                                    canSample.set(false);
+                                                    sampleButton.setBackgroundColor(Color.GRAY);
+                                                }
+                                                if (canSample.get()) {
+                                                    sampleButton.setOnClickListener(v -> {
+                                                        event.randomSampling();
+                                                        canSample.set(false);
+                                                        sampleButton.setBackgroundColor(Color.GRAY);
+                                                    });
+                                                    sampleButton.setBackgroundColor(Color.GREEN);
+                                                }
+                                                else {
+                                                    sampleButton.setBackgroundColor(Color.GRAY);
+                                                }
+                                            }
+                                            else {
                                                 // show waiting list and attendees count for entrant
                                                 waitingListCount.setVisibility(View.VISIBLE);
                                                 attendeesCount.setVisibility(View.VISIBLE);

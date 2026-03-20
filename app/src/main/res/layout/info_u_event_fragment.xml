@@ -20,7 +20,16 @@
                 android:layout_height="44dp"
                 android:text="Back"
                 android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textSize="20sp"/>
+
+            <Button
+                android:id="@+id/sample_button"
+                android:layout_width="130dp"
+                android:layout_height="50dp"
+                android:text="Sample"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:visibility="gone"/>
 
             <!--Optional poster image-->
             <ImageView

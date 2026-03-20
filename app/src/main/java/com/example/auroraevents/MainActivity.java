@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel.selectItem(new User());
         navScan          = findViewById(R.id.nav_scan);
         navBrowse        = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
@@ -81,6 +83,20 @@ public class MainActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
+
+        /*
+        Hardcode user role for testing purposes
+         */
+        /*
+        UserDb.getInstance().getUser(deviceId,
+                user -> {
+                    user.setDeviceId(deviceId);
+                    user.setRole(User.ROLE_ORGANIZER);
+                    userViewModel.selectItem(user);
+                },
+                e -> Log.e(TAG, "User info not available")
+        );
+        */
 
         // Get user
         UserDb.getInstance().getUser(deviceId,

@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/events_list"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/aurora_gradient"
-    android:paddingBottom="96dp"
-    android:dividerHeight="8dp"
-    android:divider="@android:color/transparent"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    android:clipToPadding="false"
-    android:scrollbars="none">
-</ListView>
+    android:background="@drawable/background_aroura_gradient">
+
+    <ListView
+        android:id="@+id/events_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="96dp"
+        android:dividerHeight="8dp"
+        android:divider="@android:color/transparent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/eventAddButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="48dp"
+        android:src="@android:drawable/ic_input_add"
+        app:elevation="6dp" />
+
+</FrameLayout>
