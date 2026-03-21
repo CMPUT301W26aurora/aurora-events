@@ -1,5 +1,12 @@
 package com.example.auroraevents.model;
 
+import android.util.Log;
+
+import com.example.auroraevents.server.EventDb;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +27,9 @@ public class User {
     private String email;
     private String phoneNumber;
     private String role;
-    private Integer databaseTimeout = 10;
-    private TimeUnit timeoutUnit = TimeUnit.SECONDS;
+    private Integer databaseTimeout;
+    private TimeUnit timeoutUnit;
+    private final String TAG = "User";
 
 
     // Notification history (stored as notification IDs or message strings)
@@ -35,6 +43,8 @@ public class User {
     public User() {
         notificationHistory  = new ArrayList<>();
         tags                 = new ArrayList<>();
+        databaseTimeout = 10;
+        timeoutUnit = TimeUnit.SECONDS;
     }
 
     public User(String deviceId, String name, String email, String phoneNumber, String role) {
@@ -81,6 +91,58 @@ public class User {
     }
     public void setTimeoutUnit(TimeUnit unit) {
         timeoutUnit = unit;
+    }
+
+    /**
+     * Deletes the user
+     * @author Jared Strandlund
+     * @return
+     *     {@code 0} when successfully deleted
+     *     {@code 1} when code error
+     *     {@code 2} when database error
+     */
+    public int deleteUser() {
+        // Delete from events
+        EventDb.getInstance().getEventsForUser(deviceId, null,
+                events -> {
+                    for (Event event : events) {
+                        event.registrationList.removeFromAllLists(deviceId);
+                    }
+                },
+                e -> {}
+        );
+
+        // Delete notifications
+        FirebaseFirestore.getInstance()
+                .collection("Notifications")
+                .whereEqualTo("deviceId", deviceId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    notificationHistory.clear();
+                    for (QueryDocumentSnapshot doc : snapshot)
+                        notificationHistory.add(doc.getId());
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to load notifications", e));
+        for (String notification : notificationHistory)
+            FirebaseFirestore.getInstance()
+                    .collection("Notifications")
+                    .document(notification)
+                    .delete()
+                    .addOnSuccessListener(unused -> Log.d(TAG, "Notification deleted: " + notification))
+                    .addOnFailureListener(e -> Log.e(TAG, "Failed to delete notification " + notification, e));
+
+        // Remove properties
+        name = null;
+        email = null;
+        phoneNumber = null;
+        role = ROLE_ENTRANT;
+        databaseTimeout = 10;
+        timeoutUnit = TimeUnit.SECONDS;
+        notificationHistory = new ArrayList<>();
+        tags = new ArrayList<>();
+
+        return 1;
     }
 
 }
