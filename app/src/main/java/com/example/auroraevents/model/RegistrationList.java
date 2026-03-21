@@ -11,6 +11,7 @@ import com.example.auroraevents.server.EventDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -520,37 +521,77 @@ public class RegistrationList {
         return output;
     }
 
-//    /**
-//     * Removes duplicate entrants from the entrant lists.
-//     * The priority of the lists is:
-//     * removed > declined > attending > selected > waiting > cancelled.
-//     * In other words, the removed list will remain unchanged.
-//     * Entrants will be removed from the declined list if they're on the removed list.
-//     * Entrants will be removed from the attending list if they're on the removed list or the declined list.
-//     * And so on.
-//     * This is automatically enforced by the adders.
-//     *
-//     * @author Jared Strandlund
-//     */
-//    public void tidyLists() {
-//        declinedList.removeAll(removedList);
-//
-//        attendingList.removeAll(removedList);
-//        attendingList.removeAll(declinedList);
-//
-//        selectedList.removeAll(removedList);
-//        selectedList.removeAll(declinedList);
-//        selectedList.removeAll(attendingList);
-//
-//        waitingList.removeAll(removedList);
-//        waitingList.removeAll(declinedList);
-//        waitingList.removeAll(attendingList);
-//        waitingList.removeAll(selectedList);
-//
-//        cancelledList.removeAll(removedList);
-//        cancelledList.removeAll(declinedList);
-//        cancelledList.removeAll(attendingList);
-//        cancelledList.removeAll(selectedList);
-//        cancelledList.removeAll(waitingList);
-//    }
+    /**
+     * Removes the specified user from all the lists (for when the user is being deleted)
+     * @param userID The entrant's device ID
+     * @return List of statuses.
+     *     <p> Status: </p>
+     *     <p> - {@code 0} when user removed from the list successfully </p>
+     *     <p> - {@code -1} when not on the list </p>
+     *     <p> - {@code 2} when database error </p>
+     *     <br>
+     *     <p> Index {@code 0}: max. of all list statuses</p>
+     *     <p> Index {@code 1}: waiting list status</p>
+     *     <p> Index {@code 2}: selected list status</p>
+     *     <p> Index {@code 3}: attending list status</p>
+     *     <p> Index {@code 4}: declined list status</p>
+     *     <p> Index {@code 5}: cancelled list status</p>
+     *     <p> Index {@code 5}: removed list status</p>
+     */
+    public List<Integer> removeFromAllLists(String userID) {
+        List<Integer> output = new ArrayList<>(7);
+        output.add(0, Integer.MIN_VALUE);
+
+        if (waitingList.remove(userID)) {
+            if (!changeDb(LIST_WAITING, null, userID)) {
+                waitingList.add(userID);
+                output.add(1, 2);
+            } else
+                output.add(1, 0);
+        } else
+            output.add(1, -1);
+        if (selectedList.remove(userID)) {
+            if (!changeDb(LIST_SELECTED, null, userID)) {
+                selectedList.add(userID);
+                output.add(2, 2);
+            } else
+                output.add(2, 0);
+        } else
+            output.add(2, -1);
+        if (attendingList.remove(userID)) {
+            if (!changeDb(LIST_ATTENDING, null, userID)) {
+                attendingList.add(userID);
+                output.add(3, 2);
+            } else
+                output.add(3, 0);
+        } else
+            output.add(3, -1);
+        if (declinedList.remove(userID)) {
+            if (!changeDb(LIST_DECLINED, null, userID)) {
+                declinedList.add(userID);
+                output.add(4, 2);
+            } else
+                output.add(4, 0);
+        } else
+            output.add(4, -1);
+        if (cancelledList.remove(userID)) {
+            if (!changeDb(LIST_CANCELLED, null, userID)) {
+                cancelledList.add(userID);
+                output.add(5, 2);
+            } else
+                output.add(5, 0);
+        } else
+            output.add(5, -1);
+        if (removedList.remove(userID)) {
+            if (!changeDb(LIST_REMOVED, null, userID)) {
+                removedList.add(userID);
+                output.add(6, 2);
+            } else
+                output.add(6, 0);
+        } else
+            output.add(6, -1);
+
+        output.set(0, Collections.max(output));
+        return output;
+    }
 }

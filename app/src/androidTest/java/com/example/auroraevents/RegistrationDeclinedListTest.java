@@ -25,7 +25,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class RegistrationDeclinedListTest {
     Event event;
@@ -78,6 +77,7 @@ public class RegistrationDeclinedListTest {
     @Test
     public void waitingToDeclinedTest() {
         setUpWaitingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToDeclinedList(entrantID));
         assertEquals(0, list.getDeclinedList().size());
@@ -95,6 +95,7 @@ public class RegistrationDeclinedListTest {
     @Test
     public void selectedToDeclinedTest() {
         setUpSelectedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToDeclinedList(entrantID));
         assertEquals(1, list.getDeclinedList().size());
@@ -112,6 +113,7 @@ public class RegistrationDeclinedListTest {
     @Test
     public void attendingToDeclinedTest() {
         setUpAttendingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToDeclinedList(entrantID));
         assertEquals(0, list.getDeclinedList().size());
@@ -129,6 +131,7 @@ public class RegistrationDeclinedListTest {
     @Test
     public void declinedToDeclinedTest() {
         setUpDeclinedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(-1, list.addToDeclinedList(entrantID));
         assertEquals(1, list.getDeclinedList().size());
@@ -144,6 +147,7 @@ public class RegistrationDeclinedListTest {
     @Test
     public void cancelledToDeclinedTest() {
         setUpCancelledList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToDeclinedList(entrantID));
         assertEquals(0, list.getDeclinedList().size());
@@ -161,6 +165,7 @@ public class RegistrationDeclinedListTest {
     @Test
     public void removedToDeclinedTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToDeclinedList(entrantID));
         assertEquals(0, list.getDeclinedList().size());

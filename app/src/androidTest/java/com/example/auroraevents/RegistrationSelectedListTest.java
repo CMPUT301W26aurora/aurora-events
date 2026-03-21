@@ -25,7 +25,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class RegistrationSelectedListTest {
     Event event;
@@ -78,6 +77,7 @@ public class RegistrationSelectedListTest {
     @Test
     public void waitingToSelectedTest() {
         setUpWaitingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToSelectedList(entrantID));
         assertEquals(1, list.getSelectedList().size());
@@ -95,6 +95,7 @@ public class RegistrationSelectedListTest {
     @Test
     public void selectedToSelectedTest() {
         setUpSelectedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(-1, list.addToSelectedList(entrantID));
         assertEquals(1, list.getSelectedList().size());
@@ -110,6 +111,7 @@ public class RegistrationSelectedListTest {
     @Test
     public void attendingToSelectedTest() {
         setUpAttendingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToSelectedList(entrantID));
         assertEquals(0, list.getSelectedList().size());
@@ -127,6 +129,7 @@ public class RegistrationSelectedListTest {
     @Test
     public void declinedToSelectedTest() {
         setUpDeclinedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToSelectedList(entrantID));
         assertEquals(0, list.getSelectedList().size());
@@ -144,6 +147,7 @@ public class RegistrationSelectedListTest {
     @Test
     public void cancelledToSelectedTest() {
         setUpCancelledList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToSelectedList(entrantID));
         assertEquals(0, list.getSelectedList().size());
@@ -161,6 +165,7 @@ public class RegistrationSelectedListTest {
     @Test
     public void removedToSelectedTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToSelectedList(entrantID));
         assertEquals(0, list.getSelectedList().size());

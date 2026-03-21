@@ -24,7 +24,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * Event.waitingList local unit test, which will execute on the development machine (host).
@@ -82,6 +81,7 @@ public class RegistrationWaitingListTest {
     @Test
     public void waitingToWaitingTest() {
         setUpWaitingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(-1, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
@@ -97,6 +97,7 @@ public class RegistrationWaitingListTest {
     @Test
     public void selectedToWaitingTest() {
         setUpSelectedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());
@@ -114,6 +115,7 @@ public class RegistrationWaitingListTest {
     @Test
     public void attendingToWaitingTest() {
         setUpAttendingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());
@@ -131,6 +133,7 @@ public class RegistrationWaitingListTest {
     @Test
     public void declinedToWaitingTest() {
         setUpDeclinedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
@@ -148,6 +151,7 @@ public class RegistrationWaitingListTest {
     @Test
     public void cancelledToWaitingTest() {
         setUpCancelledList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
@@ -165,6 +169,7 @@ public class RegistrationWaitingListTest {
     @Test
     public void removedToWaitingTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToWaitingList(entrantID));
         assertEquals(0, list.getWaitingList().size());

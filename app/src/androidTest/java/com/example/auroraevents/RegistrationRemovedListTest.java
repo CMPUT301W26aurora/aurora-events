@@ -24,7 +24,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class RegistrationRemovedListTest {
     Event event;
@@ -77,6 +76,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void waitingToRemovedTest() {
         setUpWaitingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
@@ -94,6 +94,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void selectedToRemovedTest() {
         setUpSelectedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
@@ -111,6 +112,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void attendingToRemovedTest() {
         setUpAttendingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
@@ -128,6 +130,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void declinedToRemovedTest() {
         setUpDeclinedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
@@ -145,6 +148,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void cancelledToRemovedTest() {
         setUpCancelledList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
@@ -162,6 +166,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void removedToRemovedTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(-1, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
@@ -177,6 +182,7 @@ public class RegistrationRemovedListTest {
     @Test
     public void removeFromRemovedTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.removeFromRemovedList(entrantID));
         assertEquals(0, list.getRemovedList().size());

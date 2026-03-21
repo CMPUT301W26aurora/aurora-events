@@ -25,7 +25,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class RegistrationAttendingListTest {
     Event event;
@@ -79,6 +78,7 @@ public class RegistrationAttendingListTest {
     @Test
     public void waitingToAttendingTest() {
         setUpWaitingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToAttendingList(entrantID));
         assertEquals(0, list.getAttendingList().size());
@@ -96,6 +96,7 @@ public class RegistrationAttendingListTest {
     @Test
     public void selectedToAttendingTest() {
         setUpSelectedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToAttendingList(entrantID));
         assertEquals(1, list.getAttendingList().size());
@@ -113,6 +114,7 @@ public class RegistrationAttendingListTest {
     @Test
     public void attendingToAttendingTest() {
         setUpAttendingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(-1, list.addToAttendingList(entrantID));
         assertEquals(1, list.getAttendingList().size());
@@ -128,6 +130,7 @@ public class RegistrationAttendingListTest {
     @Test
     public void declinedToAttendingTest() {
         setUpDeclinedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToAttendingList(entrantID));
         assertEquals(0, list.getAttendingList().size());
@@ -145,6 +148,7 @@ public class RegistrationAttendingListTest {
     @Test
     public void cancelledToAttendingTest() {
         setUpCancelledList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToAttendingList(entrantID));
         assertEquals(0, list.getAttendingList().size());
@@ -162,6 +166,7 @@ public class RegistrationAttendingListTest {
     @Test
     public void removedToAttendingTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToAttendingList(entrantID));
         assertEquals(0, list.getAttendingList().size());

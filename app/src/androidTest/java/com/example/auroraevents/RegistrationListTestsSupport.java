@@ -21,7 +21,6 @@ public class RegistrationListTestsSupport {
         assertEquals(0, list.addToWaitingList(entrantID));
         assertEquals(1, list.getWaitingList().size());
         assertTrue(list.getWaitingList().contains(entrantID));
-        checkSingle(list, entrantID);
     }
 
     public static void setUpSelectedList(RegistrationList list, String entrantID) {
@@ -31,7 +30,6 @@ public class RegistrationListTestsSupport {
         assertTrue(list.getSelectedList().contains(entrantID));
         assertEquals(0, list.getWaitingList().size());
         assertFalse(list.getWaitingList().contains(entrantID));
-        checkSingle(list, entrantID);
     }
 
     public static void setUpAttendingList(RegistrationList list, String entrantID) {
@@ -41,7 +39,6 @@ public class RegistrationListTestsSupport {
         assertTrue(list.getAttendingList().contains(entrantID));
         assertEquals(0, list.getSelectedList().size());
         assertFalse(list.getSelectedList().contains(entrantID));
-        checkSingle(list, entrantID);
     }
 
     public static void setUpDeclinedList(RegistrationList list, String entrantID) {
@@ -51,7 +48,6 @@ public class RegistrationListTestsSupport {
         assertTrue(list.getDeclinedList().contains(entrantID));
         assertEquals(0, list.getSelectedList().size());
         assertFalse(list.getSelectedList().contains(entrantID));
-        checkSingle(list, entrantID);
     }
 
     public static void setUpCancelledList(RegistrationList list, String entrantID) {
@@ -61,13 +57,11 @@ public class RegistrationListTestsSupport {
         assertTrue(list.getCancelledList().contains(entrantID));
         assertEquals(0, list.getWaitingList().size());
         assertFalse(list.getWaitingList().contains(entrantID));
-        checkSingle(list, entrantID);
     }
 
     public static void setUpRemovedList(RegistrationList list, String entrantID) {
         assertEquals(0, list.addToRemovedList(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
-        checkSingle(list, entrantID);
     }
 }

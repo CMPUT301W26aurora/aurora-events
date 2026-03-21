@@ -25,7 +25,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class RegistrationCancelledListTest {
     Event event;
@@ -78,6 +77,7 @@ public class RegistrationCancelledListTest {
     @Test
     public void waitingToCancelledTest() {
         setUpWaitingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(0, list.addToCancelledList(entrantID));
         assertEquals(1, list.getCancelledList().size());
@@ -95,6 +95,7 @@ public class RegistrationCancelledListTest {
     @Test
     public void selectedToCancelledTest() {
         setUpSelectedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
@@ -112,6 +113,7 @@ public class RegistrationCancelledListTest {
     @Test
     public void attendingToCancelledTest() {
         setUpAttendingList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
@@ -129,6 +131,7 @@ public class RegistrationCancelledListTest {
     @Test
     public void declinedToCancelledTest() {
         setUpDeclinedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
@@ -146,6 +149,7 @@ public class RegistrationCancelledListTest {
     @Test
     public void cancelledToCancelledTest() {
         setUpCancelledList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(-1, list.addToCancelledList(entrantID));
         assertEquals(1, list.getCancelledList().size());
@@ -161,6 +165,7 @@ public class RegistrationCancelledListTest {
     @Test
     public void removedToCancelledTest() {
         setUpRemovedList(list, entrantID);
+        checkSingle(list, entrantID);
 
         assertEquals(1, list.addToCancelledList(entrantID));
         assertEquals(0, list.getCancelledList().size());
