@@ -64,4 +64,21 @@ public class RegistrationListTestsSupport {
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
     }
+
+    public static void setUpAllLists(
+            RegistrationList registrationList,
+            String waitingEntrant,
+            String selectedEntrant,
+            String attendingEntrant,
+            String declinedEntrant,
+            String cancelledEntrant,
+            String removedEntrant
+    ) {
+        setUpAttendingList(registrationList, attendingEntrant);
+        setUpDeclinedList(registrationList, declinedEntrant);
+        setUpSelectedList(registrationList, selectedEntrant);
+        setUpCancelledList(registrationList, cancelledEntrant);
+        setUpWaitingList(registrationList, waitingEntrant);
+        setUpRemovedList(registrationList, removedEntrant);
+    }
 }

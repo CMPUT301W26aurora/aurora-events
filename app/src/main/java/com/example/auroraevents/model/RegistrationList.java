@@ -159,10 +159,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToWaitingList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToWaitingList(userIDs.get(i)));
+            output.add(i, addToWaitingList(ids.get(i)));
         }
         return output;
     }
@@ -220,10 +222,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToSelectedList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToSelectedList(userIDs.get(0)));
+            output.add(i, addToSelectedList(ids.get(i)));
         }
         return output;
     }
@@ -280,10 +284,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToAttendingList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToAttendingList(userIDs.get(i)));
+            output.add(i, addToAttendingList(ids.get(i)));
         }
         return output;
     }
@@ -340,10 +346,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToDeclinedList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToDeclinedList(userIDs.get(i)));
+            output.add(i, addToDeclinedList(ids.get(i)));
         }
         return output;
     }
@@ -400,10 +408,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToCancelledList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToCancelledList(userIDs.get(i)));
+            output.add(i, addToCancelledList(ids.get(i)));
         }
         return output;
     }
@@ -475,10 +485,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToRemovedList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToRemovedList(userIDs.get(i)));
+            output.add(i, addToRemovedList(ids.get(i)));
         }
         return output;
     }

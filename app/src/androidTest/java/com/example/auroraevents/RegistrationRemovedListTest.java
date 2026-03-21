@@ -1,6 +1,7 @@
 package com.example.auroraevents;
 
 import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpAllLists;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
 import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
@@ -24,6 +25,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class RegistrationRemovedListTest {
     Event event;
@@ -189,5 +193,54 @@ public class RegistrationRemovedListTest {
 
         assertEquals(-1, list.removeFromRemovedList(entrantID));
         assertEquals(0, list.getRemovedList().size());
+    }
+
+    /**
+     * Tests {@code addAllToRemovedList()} on entrants on each of the lists
+     */
+    @Test
+    public void allToRemovedList() {
+        // Set up
+        String noneEntrant = "none user";
+        String waitingEntrant = "waiting user";
+        String selectedEntrant = "selected user";
+        String attendingEntrant = "attending user";
+        String declinedEntrant = "declined user";
+        String cancelledEntrant = "cancelled user";
+        String removedEntrant = "removed user";
+        setUpAllLists(event.registrationList, waitingEntrant, selectedEntrant, attendingEntrant, declinedEntrant, cancelledEntrant, removedEntrant);
+
+        List<String> entrants = new ArrayList<>();
+        entrants.add(noneEntrant);
+        entrants.add(waitingEntrant);
+        entrants.add(selectedEntrant);
+        entrants.add(attendingEntrant);
+        entrants.add(declinedEntrant);
+        entrants.add(cancelledEntrant);
+        entrants.add(removedEntrant);
+
+        // Test
+        List<Integer> statuses;
+        statuses = event.registrationList.addAllToRemovedList(entrants);
+        // Check statuses
+        assertEquals(0, (long) statuses.get(0));  // none
+        assertEquals(0, (long) statuses.get(1));  // waiting
+        assertEquals(0, (long) statuses.get(2));  // selected
+        assertEquals(0, (long) statuses.get(3));  // attending
+        assertEquals(0, (long) statuses.get(4));  // declined
+        assertEquals(0, (long) statuses.get(5));  // cancelled
+        assertEquals(-1, (long) statuses.get(6)); // removed
+        // Check list sizes
+        assertEquals(0, event.registrationList.getWaitingList().size());
+        assertEquals(0, event.registrationList.getSelectedList().size());
+        assertEquals(0, event.registrationList.getAttendingList().size());
+        assertEquals(0, event.registrationList.getDeclinedList().size());
+        assertEquals(0, event.registrationList.getCancelledList().size());
+        assertEquals(7, event.registrationList.getRemovedList().size());
+        // Check list content
+        List<String> expectedList = new ArrayList<>(Arrays.asList(noneEntrant, waitingEntrant, selectedEntrant, attendingEntrant, declinedEntrant, cancelledEntrant, removedEntrant));
+        List<String> actualList = event.registrationList.getRemovedList();
+        assertTrue(actualList.containsAll(expectedList));
+        assertTrue(expectedList.containsAll(actualList));
     }
 }

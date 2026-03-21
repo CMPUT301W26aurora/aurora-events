@@ -1,18 +1,12 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.RegistrationListTestsSupport.setUpAllLists;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static org.junit.Assert.assertEquals;
 
 import com.example.auroraevents.model.Event;
-import com.example.auroraevents.model.RegistrationList;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,24 +57,9 @@ public class RegistrationListsTest {
         assertEquals(0, event.registrationList.getAllEntrantsList().size());
     }
 
-    private static void setUpAllLists(
-            RegistrationList registrationList,
-            String waitingEntrant,
-            String selectedEntrant,
-            String attendingEntrant,
-            String declinedEntrant,
-            String cancelledEntrant,
-            String removedEntrant) {
-        setUpAttendingList(registrationList, attendingEntrant);
-        setUpDeclinedList(registrationList, declinedEntrant);
-        setUpSelectedList(registrationList, selectedEntrant);
-        setUpCancelledList(registrationList, cancelledEntrant);
-        setUpWaitingList(registrationList, waitingEntrant);
-        setUpRemovedList(registrationList, removedEntrant);
-    }
-
     /**
      * Tests that the {@code removeFromAllLists()} method works on an entrant in the waiting list
+     * @author Jared Strandlund
      */
     @Test
     public void deleteAllWaitingListTest() {
@@ -97,13 +76,13 @@ public class RegistrationListsTest {
         List<Integer> statuses;
         statuses = event.registrationList.removeFromAllLists(waitingEntrant);
         // Assert proper statuses
-        assertEquals(0, (long) statuses.get(0));
-        assertEquals(0, (long) statuses.get(1));
-        assertEquals(-1, (long) statuses.get(2));
-        assertEquals(-1, (long) statuses.get(3));
-        assertEquals(-1, (long) statuses.get(4));
-        assertEquals(-1, (long) statuses.get(5));
-        assertEquals(-1, (long) statuses.get(6));
+        assertEquals(0, (long) statuses.get(0));  // max
+        assertEquals(0, (long) statuses.get(1));  // waiting list
+        assertEquals(-1, (long) statuses.get(2)); // selected list
+        assertEquals(-1, (long) statuses.get(3)); // attending list
+        assertEquals(-1, (long) statuses.get(4)); // declined list
+        assertEquals(-1, (long) statuses.get(5)); // cancelled list
+        assertEquals(-1, (long) statuses.get(6)); // removed list
         // Assert proper lists
         assertEquals(0, event.registrationList.getWaitingList().size());
         assertEquals(1, event.registrationList.getSelectedList().size());
@@ -115,6 +94,7 @@ public class RegistrationListsTest {
 
     /**
      * Tests that the {@code removeFromAllLists()} method works on an entrant in the selected list
+     * @author Jared Strandlund
      */
     @Test
     public void deleteAllSelectedListTest() {
@@ -131,13 +111,13 @@ public class RegistrationListsTest {
         List<Integer> statuses;
         statuses = event.registrationList.removeFromAllLists(selectedEntrant);
         // Assert proper statuses
-        assertEquals(0, (long) statuses.get(0));
-        assertEquals(-1, (long) statuses.get(1));
-        assertEquals(0, (long) statuses.get(2));
-        assertEquals(-1, (long) statuses.get(3));
-        assertEquals(-1, (long) statuses.get(4));
-        assertEquals(-1, (long) statuses.get(5));
-        assertEquals(-1, (long) statuses.get(6));
+        assertEquals(0, (long) statuses.get(0));  // max
+        assertEquals(-1, (long) statuses.get(1)); // waiting list
+        assertEquals(0, (long) statuses.get(2));  // selected list
+        assertEquals(-1, (long) statuses.get(3)); // attending list
+        assertEquals(-1, (long) statuses.get(4)); // declined list
+        assertEquals(-1, (long) statuses.get(5)); // cancelled list
+        assertEquals(-1, (long) statuses.get(6)); // removed list
         // Assert proper lists
         assertEquals(1, event.registrationList.getWaitingList().size());
         assertEquals(0, event.registrationList.getSelectedList().size());
@@ -149,6 +129,7 @@ public class RegistrationListsTest {
 
     /**
      * Tests that the {@code removeFromAllLists()} method works on an entrant in the attending list
+     * @author Jared Strandlund
      */
     @Test
     public void deleteAllAttendingListTest() {
@@ -165,13 +146,13 @@ public class RegistrationListsTest {
         List<Integer> statuses;
         statuses = event.registrationList.removeFromAllLists(attendingEntrant);
         // Assert proper statuses
-        assertEquals(0, (long) statuses.get(0));
-        assertEquals(-1, (long) statuses.get(1));
-        assertEquals(-1, (long) statuses.get(2));
-        assertEquals(0, (long) statuses.get(3));
-        assertEquals(-1, (long) statuses.get(4));
-        assertEquals(-1, (long) statuses.get(5));
-        assertEquals(-1, (long) statuses.get(6));
+        assertEquals(0, (long) statuses.get(0));  // max
+        assertEquals(-1, (long) statuses.get(1)); // waiting list
+        assertEquals(-1, (long) statuses.get(2)); // selected list
+        assertEquals(0, (long) statuses.get(3));  // attending list
+        assertEquals(-1, (long) statuses.get(4)); // declined list
+        assertEquals(-1, (long) statuses.get(5)); // cancelled list
+        assertEquals(-1, (long) statuses.get(6)); // removed list
         // Assert proper lists
         assertEquals(1, event.registrationList.getWaitingList().size());
         assertEquals(1, event.registrationList.getSelectedList().size());
@@ -183,6 +164,7 @@ public class RegistrationListsTest {
 
     /**
      * Tests that the {@code removeFromAllLists()} method works on an entrant in the declined list
+     * @author Jared Strandlund
      */
     @Test
     public void deleteAllDeclinedListTest() {
@@ -199,13 +181,13 @@ public class RegistrationListsTest {
         List<Integer> statuses;
         statuses = event.registrationList.removeFromAllLists(declinedEntrant);
         // Assert proper statuses
-        assertEquals(0, (long) statuses.get(0));
-        assertEquals(-1, (long) statuses.get(1));
-        assertEquals(-1, (long) statuses.get(2));
-        assertEquals(-1, (long) statuses.get(3));
-        assertEquals(0, (long) statuses.get(4));
-        assertEquals(-1, (long) statuses.get(5));
-        assertEquals(-1, (long) statuses.get(6));
+        assertEquals(0, (long) statuses.get(0));  // max
+        assertEquals(-1, (long) statuses.get(1)); // waiting list
+        assertEquals(-1, (long) statuses.get(2)); // selected list
+        assertEquals(-1, (long) statuses.get(3)); // attending list
+        assertEquals(0, (long) statuses.get(4));  // declined list
+        assertEquals(-1, (long) statuses.get(5)); // cancelled list
+        assertEquals(-1, (long) statuses.get(6)); // removed list
         // Assert proper lists
         assertEquals(1, event.registrationList.getWaitingList().size());
         assertEquals(1, event.registrationList.getSelectedList().size());
@@ -217,6 +199,7 @@ public class RegistrationListsTest {
 
     /**
      * Tests that the {@code removeFromAllLists()} method works on an entrant in the cancelled list
+     * @author Jared Strandlund
      */
     @Test
     public void deleteAllCancelledListTest() {
@@ -233,13 +216,13 @@ public class RegistrationListsTest {
         List<Integer> statuses;
         statuses = event.registrationList.removeFromAllLists(cancelledEntrant);
         // Assert proper statuses
-        assertEquals(0, (long) statuses.get(0));
-        assertEquals(-1, (long) statuses.get(1));
-        assertEquals(-1, (long) statuses.get(2));
-        assertEquals(-1, (long) statuses.get(3));
-        assertEquals(-1, (long) statuses.get(4));
-        assertEquals(0, (long) statuses.get(5));
-        assertEquals(-1, (long) statuses.get(6));
+        assertEquals(0, (long) statuses.get(0));  // max
+        assertEquals(-1, (long) statuses.get(1)); // waiting list
+        assertEquals(-1, (long) statuses.get(2)); // selected list
+        assertEquals(-1, (long) statuses.get(3)); // attending list
+        assertEquals(-1, (long) statuses.get(4)); // declined list
+        assertEquals(0, (long) statuses.get(5));  // cancelled list
+        assertEquals(-1, (long) statuses.get(6)); // removed list
         // Assert proper lists
         assertEquals(1, event.registrationList.getWaitingList().size());
         assertEquals(1, event.registrationList.getSelectedList().size());
@@ -251,6 +234,7 @@ public class RegistrationListsTest {
 
     /**
      * Tests that the {@code removeFromAllLists()} method works on an entrant in the removed list
+     * @author Jared Strandlund
      */
     @Test
     public void deleteAllRemovedListTest() {
@@ -267,13 +251,13 @@ public class RegistrationListsTest {
         List<Integer> statuses;
         statuses = event.registrationList.removeFromAllLists(removedEntrant);
         // Assert proper statuses
-        assertEquals(0, (long) statuses.get(0));
-        assertEquals(-1, (long) statuses.get(1));
-        assertEquals(-1, (long) statuses.get(2));
-        assertEquals(-1, (long) statuses.get(3));
-        assertEquals(-1, (long) statuses.get(4));
-        assertEquals(-1, (long) statuses.get(5));
-        assertEquals(0, (long) statuses.get(6));
+        assertEquals(0, (long) statuses.get(0));  // max
+        assertEquals(-1, (long) statuses.get(1)); // waiting list
+        assertEquals(-1, (long) statuses.get(2)); // selected list
+        assertEquals(-1, (long) statuses.get(3)); // attending list
+        assertEquals(-1, (long) statuses.get(4)); // declined list
+        assertEquals(-1, (long) statuses.get(5)); // cancelled list
+        assertEquals(0, (long) statuses.get(6));  // removed list
         // Assert proper lists
         assertEquals(1, event.registrationList.getWaitingList().size());
         assertEquals(1, event.registrationList.getSelectedList().size());
