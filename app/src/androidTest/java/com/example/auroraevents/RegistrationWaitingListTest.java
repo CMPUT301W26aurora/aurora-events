@@ -132,11 +132,11 @@ public class RegistrationWaitingListTest {
     public void declinedToWaitingTest() {
         setUpDeclinedList(list, entrantID);
 
-        assertEquals(1, list.addToWaitingList(entrantID));
-        assertEquals(0, list.getWaitingList().size());
-        assertFalse(list.getWaitingList().contains(entrantID));
-        assertEquals(1, list.getDeclinedList().size());
-        assertTrue(list.getDeclinedList().contains(entrantID));
+        assertEquals(0, list.addToWaitingList(entrantID));
+        assertEquals(1, list.getWaitingList().size());
+        assertTrue(list.getWaitingList().contains(entrantID));
+        assertEquals(0, list.getDeclinedList().size());
+        assertFalse(list.getDeclinedList().contains(entrantID));
 
         checkSingle(list, entrantID);
     }

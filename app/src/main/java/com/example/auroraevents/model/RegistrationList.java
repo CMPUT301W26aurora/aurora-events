@@ -7,14 +7,11 @@ import static com.example.auroraevents.server.EventDb.LIST_REMOVED;
 import static com.example.auroraevents.server.EventDb.LIST_SELECTED;
 import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 
-import android.util.Log;
-
 import com.example.auroraevents.server.EventDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -76,43 +73,23 @@ public class RegistrationList {
     private boolean changeDb(String fromFieldName, String toFieldName, String userID) {
         if ((toFieldName == null) && (fromFieldName == null)) return false;
 
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Boolean> status = new AtomicReference<>(true);
 
         if (fromFieldName == null) {
             EventDb.getInstance().addUserToList(eventId, toFieldName, userID,
-                    latch::countDown,
-                    e -> {
-                        status.set(false);
-                        latch.countDown();
-                    }
+                    () -> {},
+                    e -> status.set(false)
             );
         } else if (toFieldName == null) {
             EventDb.getInstance().removeUserFromList(eventId, fromFieldName, userID,
-                    latch::countDown,
-                    e -> {
-                        status.set(false);
-                        latch.countDown();
-                    }
+                    () -> {},
+                    e -> status.set(false)
             );
         } else {
             EventDb.getInstance().moveUserBetweenLists(eventId, fromFieldName, toFieldName, userID,
-                    latch::countDown,
-                    e -> {
-                        status.set(false);
-                        latch.countDown();
-                    }
+                    () -> {},
+                    e -> status.set(false)
             );
-        }
-
-        try {
-            if (!latch.await(databaseTimeout, timeoutUnit)) {
-                Log.w("RegistrationList", "changeDb timed out");
-                return false;
-            }
-        } catch (InterruptedException e) {
-            Log.w("RegistrationList", "changeDb interrupted");
-            return false;
         }
 
         return status.get();
@@ -140,7 +117,7 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public int addToWaitingList(String userID) {
-        if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID) || declinedList.contains(userID))
+        if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID))
             return 1;
         else if (waitingList.contains(userID))
             return -1;
@@ -149,9 +126,12 @@ public class RegistrationList {
             if (cancelledList.remove(userID)) {
                 if (!changeDb(LIST_CANCELLED, LIST_WAITING, userID))
                     status = 1;
+            } else if (declinedList.remove(userID)) {
+                if (!changeDb(LIST_DECLINED, LIST_WAITING, userID))
+                    status = 2;
             } else {
                 if (!changeDb(null, LIST_WAITING, userID))
-                    status = 2;
+                    status = 3;
             }
 
             if (status == 0) {
@@ -159,6 +139,7 @@ public class RegistrationList {
                 return 0;
             } else {
                 if (status == 1) cancelledList.add(userID);
+                else if (status == 2) declinedList.add(userID);
                 return 2;
             }
         }
