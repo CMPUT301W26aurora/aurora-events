@@ -211,7 +211,11 @@ public class Event {
      */
     @Exclude
     public ArrayList<User> getWaitingListOfUsers() {
-        return getUsersFromDB(registrationList.getWaitingList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getWaitingList());
+        for (User user: users) {
+            user.setStatus("Waiting");
+        }
+        return users;
     }
 
     /**
@@ -221,7 +225,11 @@ public class Event {
      */
     @Exclude
     public ArrayList<User> getSelectedListOfUsers() {
-        return getUsersFromDB(registrationList.getSelectedList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getSelectedList());
+        for (User user: users) {
+            user.setStatus("Invited");
+        }
+        return users;
     }
 
     /**
@@ -231,7 +239,11 @@ public class Event {
      */
     @Exclude
     public ArrayList<User> getAttendingListOfUsers() {
-        return getUsersFromDB(registrationList.getAttendingList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getAttendingList());
+        for (User user: users) {
+            user.setStatus("Attending");
+        }
+        return users;
     }
 
     /**
@@ -241,7 +253,12 @@ public class Event {
      */
     @Exclude
     public ArrayList<User> getDeclinedListOfUsers() {
-        return getUsersFromDB(registrationList.getDeclinedList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getDeclinedList());
+        for (User user: users) {
+            user.setStatus("Declined");
+            user.setCancelledReason("User Declined Invitation");
+        }
+        return users;
     }
 
     /**
@@ -251,7 +268,12 @@ public class Event {
      */
     @Exclude
     public ArrayList<User> getCancelledListOfUsers() {
-        return getUsersFromDB(registrationList.getCancelledList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getCancelledList());
+        for (User user: users) {
+            user.setStatus("Cancelled");
+            user.setCancelledReason("User Left Waiting List");
+        }
+        return users;
     }
 
     /**
@@ -261,7 +283,14 @@ public class Event {
      */
     @Exclude
     public ArrayList<User> getRemovedListOfUsers() {
-        return getUsersFromDB(registrationList.getRemovedList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getRemovedList());
+        for (User user: users) {
+            user.setStatus("Removed");
+            if (user.getCancelledReason() == null) {
+                user.setCancelledReason("Removed by Organizer");
+            }
+        }
+        return users;
     }
 
     /**

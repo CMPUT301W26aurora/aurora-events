@@ -33,6 +33,13 @@
             android:text="No Status" />
 
         <TextView
+            android:id="@+id/user_cancelled_reason"
+            android:layout_width="300dp"
+            android:layout_height="16sp"
+            android:text="Unspecified Reason"
+            android:visibility="gone"/>
+
+        <TextView
             android:id="@+id/user_email"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
@@ -59,10 +66,10 @@
     <ImageButton
         android:id="@+id/delete_user_button"
         android:src="@drawable/rounded_delete_24"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="20dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
         android:backgroundTint="@color/zxing_transparent"
         app:tint="@color/dark_red" />
 

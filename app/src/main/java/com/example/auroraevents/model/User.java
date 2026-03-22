@@ -30,6 +30,12 @@ public class User {
     // Tags associated with this user
     private List<String> tags;
 
+    // Additional information for users in a specific event; these must change dynamically depending on the event
+    // Status of this user in a specific event,
+    private String status;
+    // For cancelled users: reason behind cancellation
+    private String cancelledReason;
+
 
     /** Required no-arg constructor for Firestore deserialization */
     public User() {
@@ -62,6 +68,14 @@ public class User {
 
     public String getRole()                            { return role; }
     public void   setRole(String role)                 { this.role = role; }
+
+    public String getStatus() { return status; }
+
+    public void setStatus(String status) { this.status = status; }
+
+    public String getCancelledReason() { return cancelledReason; }
+
+    public void setCancelledReason(String reason) { this.cancelledReason = reason; }
 
     public List<String> getNotificationHistory()                                   { return notificationHistory; }
     public void         setNotificationHistory(List<String> notificationHistory)   { this.notificationHistory = notificationHistory; }

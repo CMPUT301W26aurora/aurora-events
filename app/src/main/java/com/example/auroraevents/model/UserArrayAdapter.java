@@ -32,6 +32,8 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         TextView userName = view.findViewById(R.id.user_name);
         TextView userEmail = view.findViewById(R.id.user_email);
         TextView userPhoneNumber = view.findViewById(R.id.user_phone_number);
+        TextView userStatus = view.findViewById(R.id.user_status);
+        TextView userCancelledReason = view.findViewById(R.id.user_cancelled_reason);
 
         if (user != null) {
             userName.setText(user.getName());
@@ -40,6 +42,12 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
             }
             if (user.getPhoneNumber() != null) {
                 userPhoneNumber.setText(user.getPhoneNumber());
+            }
+            if (user.getStatus() != null) {
+                userStatus.setText(user.getStatus());
+            }
+            if (user.getCancelledReason() != null) {
+                userCancelledReason.setText(user.getCancelledReason());
             }
         }
         return view;
