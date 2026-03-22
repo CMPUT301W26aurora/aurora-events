@@ -1,7 +1,6 @@
 package com.example.auroraevents.view;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +10,19 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Notification;
 import com.example.auroraevents.model.NotificationArrayAdapter;
+import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotificationFragment extends Fragment {
 
@@ -28,6 +31,8 @@ public class NotificationFragment extends Fragment {
     private ListView                 listView;
     private NotificationArrayAdapter adapter;
     private ArrayList<Notification>  notifications;
+    private UserViewModel userViewModel;
+    private User user;
 
     @Nullable
     @Override
@@ -40,6 +45,10 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        /* Get user information from the database */
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        userViewModel.getSelectedItem().observe(requireActivity(), u -> user = u);
 
         notifications = new ArrayList<>();
         adapter       = new NotificationArrayAdapter(requireContext(), notifications);
@@ -69,13 +78,10 @@ public class NotificationFragment extends Fragment {
                     .commit();
         });
 
-        loadNotifications();
+        loadNotifications(user.getDeviceId());
     }
 
-    private void loadNotifications() {
-        String deviceId = Settings.Secure.getString(
-                requireContext().getContentResolver(), Settings.Secure.ANDROID_ID
-        );
+    private void loadNotifications(String deviceId) {
 
         FirebaseFirestore.getInstance()
                 .collection("Notifications")
@@ -83,13 +89,17 @@ public class NotificationFragment extends Fragment {
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(snapshot -> {
+                    List<String> notificationHistory = new ArrayList<>(snapshot.size());
                     notifications.clear();
                     for (QueryDocumentSnapshot doc : snapshot) {
                         Notification n = doc.toObject(Notification.class);
                         n.setNotificationId(doc.getId());
                         notifications.add(n);
+                        notificationHistory.add(doc.getId());
                     }
                     adapter.notifyDataSetChanged();
+                    user.setNotificationHistory(notificationHistory);
+                    userViewModel.selectItem(user);
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to load notifications", e));
     }

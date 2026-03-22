@@ -30,11 +30,7 @@ import java.util.List;
  * @author Jared Strandlund
  */
 public class ProfileFragment extends Fragment {
-    private EditText nameEdit;
-    private EditText emailEdit;
-    private EditText phoneEdit;
     private UserViewModel userViewModel;
-    private Button adminToggle;
     private User user;
     private final String TAG = "ProfileFragment";
 
@@ -90,10 +86,10 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        nameEdit = view.findViewById(R.id.user_name);
-        emailEdit = view.findViewById(R.id.user_email);
-        phoneEdit = view.findViewById(R.id.user_phone_number);
-        adminToggle = view.findViewById(R.id.switch_to_admin_button);
+        EditText nameEdit = view.findViewById(R.id.user_name);
+        EditText emailEdit = view.findViewById(R.id.user_email);
+        EditText phoneEdit = view.findViewById(R.id.user_phone_number);
+        Button adminToggle = view.findViewById(R.id.switch_to_admin_button);
 
         /* Get user information from the database */
         userViewModel.getSelectedItem().observe(requireActivity(), u -> {
@@ -102,6 +98,7 @@ public class ProfileFragment extends Fragment {
             emailEdit.setText(user.getEmail());
             phoneEdit.setText(user.getPhoneNumber());
         });
+        user.loadNotificationHistory();
 
         /* Update user information */
         view.findViewById(R.id.confirm_button).setOnClickListener(v -> {
@@ -142,7 +139,7 @@ public class ProfileFragment extends Fragment {
         });
 
         /* Switch to admin mode */
-        if (user == null || !user.getRole().equals(User.ROLE_ADMIN))
+        if (user == null || user.getRole() == null || !user.getRole().equals(User.ROLE_ADMIN))
             adminToggle.setVisibility(GONE);
         else
             adminToggle.setVisibility(VISIBLE);
