@@ -46,9 +46,9 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.media3.common)
-    implementation("androidx.core:core:1.12.0")
+    implementation(libs.core)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
@@ -62,8 +62,7 @@ dependencies {
     androidTestImplementation(libs.uiautomator)
     androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

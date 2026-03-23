@@ -30,12 +30,13 @@ public class EventDb {
 
     // Participant list field names — use these constants everywhere
     public static final String LIST_REGISTRATION = "registrationList";
-    public static final String LIST_ATTENDING  = LIST_REGISTRATION + '.' + "attendingList";
-    public static final String LIST_SELECTED   = LIST_REGISTRATION + '.' + "selectedList";
-    public static final String LIST_WAITING    = LIST_REGISTRATION + '.' + "waitingList";
-    public static final String LIST_CANCELLED  = LIST_REGISTRATION + '.' + "cancelledList";
-    public static final String LIST_DECLINED   = LIST_REGISTRATION + '.' + "declinedList";
-    public static final String LIST_REMOVED    = LIST_REGISTRATION + '.' + "removedList";
+    public static final String LIST_ATTENDING    = LIST_REGISTRATION + '.' + "attendingList";
+    public static final String LIST_SELECTED     = LIST_REGISTRATION + '.' + "selectedList";
+    public static final String LIST_WAITING      = LIST_REGISTRATION + '.' + "waitingList";
+    public static final String LIST_CANCELLED    = LIST_REGISTRATION + '.' + "cancelledList";
+    public static final String LIST_DECLINED     = LIST_REGISTRATION + '.' + "declinedList";
+    public static final String LIST_REMOVED      = LIST_REGISTRATION + '.' + "removedList";
+    public static final String[] ALL_LISTS       = {LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED};
 
 
     private static EventDb instance;
@@ -331,22 +332,6 @@ public class EventDb {
                 });
     }
     // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────────────────
-
-
-
-    /**
-
-     *
-
-     * @param eventId
-
-     * @param onEventSnapshot
-
-     * @param onFailure
-
-     * @return
-
-     */
 
     public interface OnEventSnapshotCallback       { void onEventSnapshot(Event event); }
     public ListenerRegistration addSnapshotListenerForEvent(String eventId, OnEventSnapshotCallback onEventSnapshot, OnFailureCallback onFailure) {

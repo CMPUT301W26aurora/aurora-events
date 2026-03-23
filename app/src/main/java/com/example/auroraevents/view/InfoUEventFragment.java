@@ -27,7 +27,6 @@ import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -219,25 +218,11 @@ public class InfoUEventFragment extends Fragment {
 
                                                     // move user from selectedList to attendingList on acceptance
                                                     acceptButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().moveUserBetweenLists(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_SELECTED,
-                                                                EventDb.LIST_ATTENDING,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User accepted invitation"),
-                                                                e -> Log.d(TAG, "Error accepting invitation: " + e)
-                                                        );
+                                                        event.registrationList.addToAttendingList(userId);
                                                     });
                                                     // move user from selectedList to declinedList on decline
                                                     declineButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().moveUserBetweenLists(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_SELECTED,
-                                                                EventDb.LIST_DECLINED,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User declined invitation"),
-                                                                e -> Log.d(TAG, "Error declining invitation: " + e)
-                                                        );
+                                                        event.registrationList.addToDeclinedList(userId);
                                                     });
                                                 }
                                                 else if (event.registrationList.getWaitingList().contains(userId)) {
@@ -249,16 +234,16 @@ public class InfoUEventFragment extends Fragment {
                                                     attendingLabel.setVisibility(View.GONE);
                                                     // remove user from waitingList when Leave Pool is clicked
                                                     joinButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().removeUserFromList(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_WAITING,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User left waiting list"),
-                                                                e -> Log.d(TAG, "Error leaving waiting list: " + e)
-                                                        );
+                                                        event.registrationList.addToCancelledList(userId);
                                                     });
-                                                }
-                                                else {
+                                                } else if (event.registrationList.getRemovedList().contains(userId)) {
+                                                    // user is on removed list
+                                                    joinButton.setVisibility(View.GONE);
+                                                    acceptButton.setVisibility(View.GONE);
+                                                    declineButton.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.VISIBLE);
+                                                    attendingLabel.setText("You have been removed.");
+                                                } else {
                                                     // user is not on any list so show Join Pool button
                                                     joinButton.setVisibility(View.VISIBLE);
                                                     joinButton.setText("Join Pool");
@@ -267,13 +252,7 @@ public class InfoUEventFragment extends Fragment {
                                                     attendingLabel.setVisibility(View.GONE);
                                                     // add user to waitingList when Join Pool is clicked
                                                     joinButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().addUserToList(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_WAITING,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User joined waiting list"),
-                                                                e -> Log.d(TAG, "Error joining waiting list: " + e)
-                                                        );
+                                                        event.registrationList.addToWaitingList(userId);
                                                     });
                                                 }
                                             }

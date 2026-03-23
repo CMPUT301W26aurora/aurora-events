@@ -7,14 +7,12 @@ import static com.example.auroraevents.server.EventDb.LIST_REMOVED;
 import static com.example.auroraevents.server.EventDb.LIST_SELECTED;
 import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 
-import android.util.Log;
-
 import com.example.auroraevents.server.EventDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -76,43 +74,23 @@ public class RegistrationList {
     private boolean changeDb(String fromFieldName, String toFieldName, String userID) {
         if ((toFieldName == null) && (fromFieldName == null)) return false;
 
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Boolean> status = new AtomicReference<>(true);
 
         if (fromFieldName == null) {
             EventDb.getInstance().addUserToList(eventId, toFieldName, userID,
-                    latch::countDown,
-                    e -> {
-                        status.set(false);
-                        latch.countDown();
-                    }
+                    () -> {},
+                    e -> status.set(false)
             );
         } else if (toFieldName == null) {
             EventDb.getInstance().removeUserFromList(eventId, fromFieldName, userID,
-                    latch::countDown,
-                    e -> {
-                        status.set(false);
-                        latch.countDown();
-                    }
+                    () -> {},
+                    e -> status.set(false)
             );
         } else {
             EventDb.getInstance().moveUserBetweenLists(eventId, fromFieldName, toFieldName, userID,
-                    latch::countDown,
-                    e -> {
-                        status.set(false);
-                        latch.countDown();
-                    }
+                    () -> {},
+                    e -> status.set(false)
             );
-        }
-
-        try {
-            if (!latch.await(databaseTimeout, timeoutUnit)) {
-                Log.w("RegistrationList", "changeDb timed out");
-                return false;
-            }
-        } catch (InterruptedException e) {
-            Log.w("RegistrationList", "changeDb interrupted");
-            return false;
         }
 
         return status.get();
@@ -140,7 +118,7 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public int addToWaitingList(String userID) {
-        if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID) || declinedList.contains(userID))
+        if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID))
             return 1;
         else if (waitingList.contains(userID))
             return -1;
@@ -149,9 +127,12 @@ public class RegistrationList {
             if (cancelledList.remove(userID)) {
                 if (!changeDb(LIST_CANCELLED, LIST_WAITING, userID))
                     status = 1;
+            } else if (declinedList.remove(userID)) {
+                if (!changeDb(LIST_DECLINED, LIST_WAITING, userID))
+                    status = 2;
             } else {
                 if (!changeDb(null, LIST_WAITING, userID))
-                    status = 2;
+                    status = 3;
             }
 
             if (status == 0) {
@@ -159,6 +140,7 @@ public class RegistrationList {
                 return 0;
             } else {
                 if (status == 1) cancelledList.add(userID);
+                else if (status == 2) declinedList.add(userID);
                 return 2;
             }
         }
@@ -177,10 +159,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToWaitingList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToWaitingList(userIDs.get(i)));
+            output.add(i, addToWaitingList(ids.get(i)));
         }
         return output;
     }
@@ -238,10 +222,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToSelectedList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToSelectedList(userIDs.get(0)));
+            output.add(i, addToSelectedList(ids.get(i)));
         }
         return output;
     }
@@ -298,10 +284,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToAttendingList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToAttendingList(userIDs.get(i)));
+            output.add(i, addToAttendingList(ids.get(i)));
         }
         return output;
     }
@@ -358,10 +346,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToDeclinedList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToDeclinedList(userIDs.get(i)));
+            output.add(i, addToDeclinedList(ids.get(i)));
         }
         return output;
     }
@@ -418,10 +408,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToCancelledList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToCancelledList(userIDs.get(i)));
+            output.add(i, addToCancelledList(ids.get(i)));
         }
         return output;
     }
@@ -477,7 +469,8 @@ public class RegistrationList {
             return -1;
         } else {
             removedList.add(userID);
-            return 0;
+            boolean status = changeDb(null, LIST_REMOVED, userID);
+            return status ? 0 : 2;
         }
     }
 
@@ -493,10 +486,12 @@ public class RegistrationList {
      * @author Jared Strandlund
      */
     public List<Integer> addAllToRemovedList(List<String> userIDs) {
-        List<Integer> output = new ArrayList<>();
         int size = userIDs.size();
+        List<String> ids = new ArrayList<>(size);
+        ids.addAll(userIDs);
+        List<Integer> output = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            output.add(i, addToRemovedList(userIDs.get(i)));
+            output.add(i, addToRemovedList(ids.get(i)));
         }
         return output;
     }
@@ -539,37 +534,77 @@ public class RegistrationList {
         return output;
     }
 
-//    /**
-//     * Removes duplicate entrants from the entrant lists.
-//     * The priority of the lists is:
-//     * removed > declined > attending > selected > waiting > cancelled.
-//     * In other words, the removed list will remain unchanged.
-//     * Entrants will be removed from the declined list if they're on the removed list.
-//     * Entrants will be removed from the attending list if they're on the removed list or the declined list.
-//     * And so on.
-//     * This is automatically enforced by the adders.
-//     *
-//     * @author Jared Strandlund
-//     */
-//    public void tidyLists() {
-//        declinedList.removeAll(removedList);
-//
-//        attendingList.removeAll(removedList);
-//        attendingList.removeAll(declinedList);
-//
-//        selectedList.removeAll(removedList);
-//        selectedList.removeAll(declinedList);
-//        selectedList.removeAll(attendingList);
-//
-//        waitingList.removeAll(removedList);
-//        waitingList.removeAll(declinedList);
-//        waitingList.removeAll(attendingList);
-//        waitingList.removeAll(selectedList);
-//
-//        cancelledList.removeAll(removedList);
-//        cancelledList.removeAll(declinedList);
-//        cancelledList.removeAll(attendingList);
-//        cancelledList.removeAll(selectedList);
-//        cancelledList.removeAll(waitingList);
-//    }
+    /**
+     * Removes the specified user from all the lists (for when the user is being deleted)
+     * @param userID The entrant's device ID
+     * @return List of statuses.
+     *     <p> Status: </p>
+     *     <p> - {@code 0} when user removed from the list successfully </p>
+     *     <p> - {@code -1} when not on the list </p>
+     *     <p> - {@code 2} when database error </p>
+     *     <br>
+     *     <p> Index {@code 0}: max. of all list statuses</p>
+     *     <p> Index {@code 1}: waiting list status</p>
+     *     <p> Index {@code 2}: selected list status</p>
+     *     <p> Index {@code 3}: attending list status</p>
+     *     <p> Index {@code 4}: declined list status</p>
+     *     <p> Index {@code 5}: cancelled list status</p>
+     *     <p> Index {@code 5}: removed list status</p>
+     */
+    public List<Integer> removeFromAllLists(String userID) {
+        List<Integer> output = new ArrayList<>(7);
+        output.add(0, Integer.MIN_VALUE);
+
+        if (waitingList.remove(userID)) {
+            if (!changeDb(LIST_WAITING, null, userID)) {
+                waitingList.add(userID);
+                output.add(1, 2);
+            } else
+                output.add(1, 0);
+        } else
+            output.add(1, -1);
+        if (selectedList.remove(userID)) {
+            if (!changeDb(LIST_SELECTED, null, userID)) {
+                selectedList.add(userID);
+                output.add(2, 2);
+            } else
+                output.add(2, 0);
+        } else
+            output.add(2, -1);
+        if (attendingList.remove(userID)) {
+            if (!changeDb(LIST_ATTENDING, null, userID)) {
+                attendingList.add(userID);
+                output.add(3, 2);
+            } else
+                output.add(3, 0);
+        } else
+            output.add(3, -1);
+        if (declinedList.remove(userID)) {
+            if (!changeDb(LIST_DECLINED, null, userID)) {
+                declinedList.add(userID);
+                output.add(4, 2);
+            } else
+                output.add(4, 0);
+        } else
+            output.add(4, -1);
+        if (cancelledList.remove(userID)) {
+            if (!changeDb(LIST_CANCELLED, null, userID)) {
+                cancelledList.add(userID);
+                output.add(5, 2);
+            } else
+                output.add(5, 0);
+        } else
+            output.add(5, -1);
+        if (removedList.remove(userID)) {
+            if (!changeDb(LIST_REMOVED, null, userID)) {
+                removedList.add(userID);
+                output.add(6, 2);
+            } else
+                output.add(6, 0);
+        } else
+            output.add(6, -1);
+
+        output.set(0, Collections.max(output));
+        return output;
+    }
 }
