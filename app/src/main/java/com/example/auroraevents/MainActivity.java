@@ -10,14 +10,13 @@ import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+//import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
@@ -115,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             UserDb.getInstance().updateUser(u,
                     () -> {
                         Log.d(TAG, "User info updated");
-                        Toast.makeText(this, "User info updated!", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "User info updated!", Toast.LENGTH_SHORT).show();
                     },
                     e -> Log.w(TAG, "User info not updated")
             );

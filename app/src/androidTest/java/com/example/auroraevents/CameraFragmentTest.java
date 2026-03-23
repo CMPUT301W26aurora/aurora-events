@@ -7,8 +7,8 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isClickable;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import android.Manifest;
 import android.os.Build;
 
 import androidx.test.core.app.ActivityScenario;
@@ -24,8 +24,8 @@ import org.junit.Test;
 public class CameraFragmentTest {
     @Rule
     // bypass system notification permission dialogue which may interfere with tests
-    public GrantPermissionRule notificationPermissionRule = Build.VERSION.SDK_INT >= 33
-            ? GrantPermissionRule.grant(android.Manifest.permission.POST_NOTIFICATIONS)
+    public GrantPermissionRule cameraPermissionRule = Build.VERSION.SDK_INT >= 33
+            ? GrantPermissionRule.grant(Manifest.permission.CAMERA)
             : GrantPermissionRule.grant();
 
     @Rule
