@@ -37,17 +37,19 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
 
         if (user != null) {
             userName.setText(user.getName());
+            String status = user.getStatus();
+            String reason = user.getCancelledReason();
             if (user.getEmail() != null) {
                 userEmail.setText(user.getEmail());
             }
             if (user.getPhoneNumber() != null) {
                 userPhoneNumber.setText(user.getPhoneNumber());
             }
-            if (user.getStatus() != null) {
-                userStatus.setText(user.getStatus());
+            if (status != null) {
+                userStatus.setText(status);
             }
-            if (user.getCancelledReason() != null) {
-                userCancelledReason.setText(user.getCancelledReason());
+            if (reason != null) {
+                userCancelledReason.setText(reason);
             }
         }
         return view;
