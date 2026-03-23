@@ -469,7 +469,8 @@ public class RegistrationList {
             return -1;
         } else {
             removedList.add(userID);
-            return 0;
+            boolean status = changeDb(null, LIST_REMOVED, userID);
+            return status ? 0 : 2;
         }
     }
 

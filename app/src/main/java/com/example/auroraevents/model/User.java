@@ -150,9 +150,9 @@ public class User {
 
         // Remove properties
         if (status.get() <= 0) {
-            name = null;
-            email = null;
-            phoneNumber = null;
+            name = "";
+            email = "";
+            phoneNumber = "";
             role = ROLE_ENTRANT;
             databaseTimeout = 10;
             timeoutUnit = TimeUnit.SECONDS;
