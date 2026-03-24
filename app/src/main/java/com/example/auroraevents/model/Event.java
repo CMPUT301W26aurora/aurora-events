@@ -293,6 +293,17 @@ public class Event {
         return users;
     }
 
+    public ArrayList<User> getListOfAllUsers() {
+        ArrayList<User> users = new ArrayList<User>();
+        users.addAll(this.getAttendingListOfUsers());
+        users.addAll(this.getSelectedListOfUsers());
+        users.addAll(this.getWaitingListOfUsers());
+        users.addAll(this.getCancelledListOfUsers());
+        users.addAll(this.getDeclinedListOfUsers());
+        users.addAll(this.getRemovedListOfUsers());
+        return users;
+    }
+
     /**
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
      * then send notification to both the users who were selected and not
