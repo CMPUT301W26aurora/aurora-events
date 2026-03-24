@@ -1,9 +1,13 @@
 package com.example.auroraevents.view;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,14 +18,15 @@ import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserArrayAdapter;
+import com.example.auroraevents.server.EventDb;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public class UserListFragment extends Fragment {
-    private Event currentEvent;
-    private Organizer eventOrganizer;
     private ArrayList<User> userList;
-    private UserArrayAdapter userListView;
+    private UserArrayAdapter userListAdapter;
+    private ListView userListView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -29,7 +34,36 @@ public class UserListFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.user_list_fragment, container, false);
 
-        userList = currentEvent.getListOfAllUsers();
+        // get Event ID from bundle
+        Bundle args = getArguments();
+        if (args == null || args.getString("eventId") == null) {
+            Log.e(TAG, "Missing eventId argument");
+            getParentFragmentManager().popBackStack();
+            return view;
+        }
+        var ref = new Object() {
+            Event currentEvent;
+        };
+        String eventId = args.getString("eventId");
+
+        // get current event from EventDB
+        CountDownLatch latch = new CountDownLatch(1);
+        EventDb.getInstance().getEvent(eventId,
+                event -> {
+                    ref.currentEvent = event;
+                    latch.countDown();
+                },
+                e -> {
+            Log.d(TAG, "Error fetching event" + e);
+            latch.countDown();
+        }
+        );
+
+        // Get list of entrants and make a user array adapter
+        userList = ref.currentEvent.getListOfAllUsers();
+        userListAdapter = new UserArrayAdapter(requireContext(), userList);
+        userListView.setAdapter(userListAdapter);
+
         return view;
     }
 }
