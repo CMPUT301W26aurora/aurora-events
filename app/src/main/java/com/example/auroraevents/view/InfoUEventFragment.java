@@ -5,7 +5,6 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -13,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,8 +26,6 @@ import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Displays event details for the event tapped by the entrant or admin.
@@ -51,7 +49,8 @@ public class InfoUEventFragment extends Fragment {
     private TextView eventName, eventDescription, eventLocation, eventDateTime;
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
-    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton;
+    private Button joinButton, acceptButton, declineButton, deleteButton;
+    private ImageButton backButton;
 
     /**
      *
@@ -62,12 +61,10 @@ public class InfoUEventFragment extends Fragment {
      * but this can be used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
-     *
-     * @return
      */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) { //TODO 1: update to work with new UI
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
         // get event ID from bundle
@@ -94,12 +91,11 @@ public class InfoUEventFragment extends Fragment {
         attendeesCount   = view.findViewById(R.id.attendees_count);
         attendingLabel   = view.findViewById(R.id.attending_label);
         poster           = view.findViewById(R.id.poster_image);
-        backButton    = view.findViewById(R.id.back_button);
-        joinButton    = view.findViewById(R.id.join_button);
-        acceptButton  = view.findViewById(R.id.accept_button);
-        declineButton = view.findViewById(R.id.decline_button);
-        deleteButton  = view.findViewById(R.id.delete_button);
-        sampleButton = view.findViewById(R.id.sample_button);
+        backButton       = view.findViewById(R.id.back_button);
+        joinButton       = view.findViewById(R.id.join_button);
+        acceptButton     = view.findViewById(R.id.accept_button);
+        declineButton    = view.findViewById(R.id.decline_button);
+        deleteButton     = view.findViewById(R.id.delete_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -157,7 +153,6 @@ public class InfoUEventFragment extends Fragment {
                                                 });
                                             }
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
-                                                sampleButton.setVisibility(View.VISIBLE);
                                                 deleteButton.setVisibility(View.VISIBLE);
                                                 joinButton.setVisibility(View.GONE);
                                                 acceptButton.setVisibility(View.GONE);
@@ -175,23 +170,6 @@ public class InfoUEventFragment extends Fragment {
                                                             e -> Log.d(TAG, "Error deleting event: " + e)
                                                     );
                                                 });
-                                                // Enable/Disable Sample button
-                                                AtomicBoolean canSample = new AtomicBoolean(true);
-                                                if ((event.getEmptySlotAmount() == 0 && event.getCapacity() != 0)|| event.registrationList.getWaitingList().isEmpty()) {
-                                                    canSample.set(false);
-                                                    sampleButton.setBackgroundColor(Color.GRAY);
-                                                }
-                                                if (canSample.get()) {
-                                                    sampleButton.setOnClickListener(v -> {
-                                                        event.randomSampling();
-                                                        canSample.set(false);
-                                                        sampleButton.setBackgroundColor(Color.GRAY);
-                                                    });
-                                                    sampleButton.setBackgroundColor(Color.GREEN);
-                                                }
-                                                else {
-                                                    sampleButton.setBackgroundColor(Color.GRAY);
-                                                }
                                             }
                                             else {
                                                 // show waiting list and attendees count for entrant

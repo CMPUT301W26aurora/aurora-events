@@ -30,10 +30,12 @@ public class RegistrationListsTest {
                 "test device",
                 "registration test",
                 "event for general registration list test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
+                false,
                 0);
         setUpEvent(event);
     }

@@ -20,4 +20,14 @@
     <string name="mandatory_fields_toast_text">Please fill in the mandatory fields</string>
     <string name="database_error_toast_text">Sorry, we couldn\'t reach the database. Please try again later.</string>
     <string name="user_info_successfully_updated_toast_text">User info successfully updated!</string>
+    <string name="event_poster_content_description">Event poster</string>
+    <string name="description_title_text">Description</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit eros in quam aliquam, eget sollicitudin enim faucibus. Sed pellentesque luctus nulla eget aliquet. Aenean volutpat ut nisl blandit aliquet. Integer porta tincidunt tincidunt. Ut eleifend, neque a vestibulum finibus, tortor elit pharetra felis, ac pulvinar quam lectus et justo. Ut imperdiet tortor ut pharetra gravida. Vivamus at rutrum leo. Morbi metus nisl, egestas non mi sed, eleifend euismod nulla.</string>
+    <string name="selection_info_button_content_description">Info button about the selection process</string>
+    <string name="join_button_text">Join Pool</string>
+    <string name="leave_pool_button_text">Leave Pool</string>
+    <string name="accept_button_text">Accept</string>
+    <string name="decline_button_text">Decline</string>
+    <string name="attending_label_text">You are attending!</string>
+    <string name="cannot_attend_label_text">Sorry, you cannot attend.</string>
 </resources>

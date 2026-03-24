@@ -7,7 +7,7 @@
     android:background="@drawable/rounded_box"
     android:clipToOutline="true"
     android:contentDescription="@string/back_button_content_description"
-    android:src="@drawable/round_arrow_back_24"
+    android:src="@drawable/rounded_arrow_back_24"
     app:backgroundTint="@color/light_glass"
     app:tint="@color/blue"
     tools:targetApi="31"

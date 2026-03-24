@@ -7,12 +7,18 @@ import static com.example.auroraevents.server.EventDb.LIST_REMOVED;
 import static com.example.auroraevents.server.EventDb.LIST_SELECTED;
 import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 
+import android.util.Log;
+
 import com.example.auroraevents.server.EventDb;
+import com.example.auroraevents.server.UserDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -606,5 +612,92 @@ public class RegistrationList {
 
         output.set(0, Collections.max(output));
         return output;
+    }
+
+    // ── Sampling ──────────────────────────────────────────────────
+    /**
+     * Connects and fetches user objects from database using their device IDs and returns an array list of them
+     * @author Won Koh & Jared Strandlund
+     * @param listOfDeviceIDs
+     * The list of user's device IDs
+     * @return
+     * The list of user objects that were fetched with given device IDs
+     */
+    @Exclude
+    public List<User> getUsersFromDB(List<String> listOfDeviceIDs) {
+        ArrayList<User> listOfUsers = new ArrayList<>();
+        // Fetch users from database
+        AtomicReference<User> user = new AtomicReference<>(null);
+        for (String userId : listOfDeviceIDs) {
+            CountDownLatch latch = new CountDownLatch(1);
+            UserDb.getInstance().getUser(userId,
+                    u -> {
+                        user.set(u);
+                        latch.countDown();
+                    },
+                    e -> {
+                        Log.e("Main", "Error fetching user", e);
+                        latch.countDown();
+                    }
+            );
+            try {
+                assert latch.await(databaseTimeout, timeoutUnit);
+            } catch (InterruptedException e) {
+                continue;
+            }
+            if (user.get() != null) {
+                listOfUsers.add(user.get());
+            }
+        }
+        return listOfUsers;
+    }
+
+    /**
+     * Connects and fetches user objects from database using their device IDs and returns an array list of them
+     * @author Won Koh & Jared Strandlund
+     * @param listName
+     * The name of the list of user's device IDs (one of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED)
+     * @return
+     * The list of user objects that were fetched with given device IDs
+     */
+    public List<User> getUsersFromDB(String listName) {
+        if (Objects.equals(listName, LIST_WAITING)) {
+            return getUsersFromDB(getWaitingList());
+        } else if (Objects.equals(listName, LIST_SELECTED)) {
+            return getUsersFromDB(getSelectedList());
+        } else if (Objects.equals(listName, LIST_ATTENDING)) {
+            return getUsersFromDB(getAttendingList());
+        } else if (Objects.equals(listName, LIST_DECLINED)) {
+            return getUsersFromDB(getDeclinedList());
+        } else if (Objects.equals(listName, LIST_CANCELLED)) {
+            return getUsersFromDB(getCancelledList());
+        } else if (Objects.equals(listName, LIST_REMOVED)) {
+            return getUsersFromDB(getRemovedList());
+        } else
+            return new ArrayList<>();
+    }
+
+    /**
+     * Randomly samples users in the waiting list and adds the selected ones to the selected list
+     * then send notification to both the users who were selected and not
+     * @author Won Koh & Jared Strandlund
+     */
+    @Exclude
+    public void randomSampling(int amount, int capacity) {
+        // There are more empty slots than there are users in waiting list: Select everyone from waiting list
+        // Also do the same if the capacity = 0 (This is when there is no limit)
+        if (capacity == 0 || amount >= waitingList.size()) {
+            addAllToSelectedList(waitingList);
+        }
+        else { // Random sampling
+            Random random = new Random();
+            int limit = Math.min(amount, capacity);
+            for (int i = 0; i < limit; i++) {
+                // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
+                int randomIndex = random.nextInt(waitingList.size());
+                String selectedUserID = waitingList.get(randomIndex);
+                addToSelectedList(selectedUserID);
+            }
+        }
     }
 }

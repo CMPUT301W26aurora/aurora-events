@@ -23,14 +23,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class OrganizerEventCreationTest {
-    private static final String ORGANIZER_ID = "device-abc-123";
-    private static final String TITLE        = "Aurora Hackathon";
-    private static final String DESCRIPTION  = "A fun coding competition.";
-    private static final String DATE         = "2025-08-15";
-    private static final String START_TIME   = "2025-07-01 09:00:00";
-    private static final String END_TIME     = "2025-08-10 23:59:59";
-    private static final String LOCATION     = "Edmonton Convention Centre";
-    private static final int    CAPACITY     = 100;
+    private static final String  ORGANIZER_ID         = "device-abc-123";
+    private static final String  TITLE                = "Aurora Hackathon";
+    private static final String  DESCRIPTION          = "A fun coding competition.";
+    private static final String  PRICE                = "free";
+    private static final String  DATE                 = "2025-08-15";
+    private static final String  START_TIME           = "2025-07-01 09:00:00";
+    private static final String  END_TIME             = "2025-08-10 23:59:59";
+    private static final String  LOCATION             = "Edmonton Convention Centre";
+    private static final boolean GEOLOCATION_REQUIRED = false;
+    private static final int     CAPACITY             = 100;
 
     private Event myEvent;
 
@@ -83,10 +85,12 @@ public class OrganizerEventCreationTest {
                 ORGANIZER_ID,
                 TITLE,
                 DESCRIPTION,
+                PRICE,
                 LocalDate.parse(DATE).atStartOfDay(),
                 LocalDateTime.parse(START_TIME, formatter),
                 LocalDateTime.parse(END_TIME, formatter),
                 LOCATION,
+                GEOLOCATION_REQUIRED,
                 CAPACITY
         );
     }

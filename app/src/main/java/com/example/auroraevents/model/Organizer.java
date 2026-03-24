@@ -7,6 +7,7 @@ import android.util.Log;
 import com.example.auroraevents.server.EventDb;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
@@ -14,7 +15,7 @@ public class Organizer extends User {
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
-        myEvents = new ArrayList<Event>();
+        myEvents = new ArrayList<>();
     }
 
     public ArrayList<Event> getMyEvents() {
@@ -35,8 +36,17 @@ public class Organizer extends User {
      * @param location           The event location
      * @param capacity           The event capacity
      */
-    public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String startTime, String endTime, String location, int capacity) {
+    public void CreateEvent(
+            String organizerDeviceId,
+            String title,
+            String description,
+            String price,
+            String date,
+            String startTime,
+            String endTime,
+            String location,
+            boolean geolocationRequired,
+            int capacity) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -45,11 +55,17 @@ public class Organizer extends User {
         LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
 
         // Create event from parameters
-        Event event = new Event(organizerDeviceId, title, description,
+        Event event = new Event(
+                organizerDeviceId,
+                title,
+                description,
+                price,
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
-                location, capacity);
+                location,
+                geolocationRequired,
+                capacity);
 
         // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,
@@ -81,9 +97,9 @@ public class Organizer extends User {
      * @return
      * Return the waiting list of users in the specified event
      */
-    public ArrayList<User> getEventWaitList(Event event) {
+    public List<User> getEventWaitList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getWaitingListOfUsers();
+            return event.registrationList.getUsersFromDB(event.registrationList.getWaitingList());
         } else {
             throw new IllegalArgumentException("Event not found");
         }

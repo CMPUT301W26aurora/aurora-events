@@ -69,55 +69,67 @@ public class UserDeleteTest {
                 "test organizer",
                 "waiting",
                 "event for user on the waiting list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
+                false,
                 0);
         selectedEvent = new Event(
                 "test organizer",
                 "selected",
                 "event for user on the selected list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
+                false,
                 0);
         attendingEvent = new Event(
                 "test organizer",
                 "attending",
                 "event for user on the attending list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
+                false,
                 0);
         declinedEvent = new Event(
                 "test organizer",
                 "declined",
                 "event for user on the declined list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
+                false,
                 0);
         cancelledEvent = new Event(
                 "test organizer",
                 "cancelled",
                 "event for user on the cancelled list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
+                false,
                 0);
         removedEvent = new Event(
                 "test organizer",
                 "removed",
                 "event for user on the removed list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
+                false,
                 0);
 
         setUpEvent(waitingEvent);

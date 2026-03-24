@@ -128,12 +128,11 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/green"
             android:fontFamily="@font/roboto"
-            android:paddingHorizontal="145dp"
             android:paddingVertical="15dp"
             android:text="@string/login_confirm_text"
             android:textColor="@color/dark_text"
             android:textSize="8pt"
-            app:icon="@drawable/round_check_24"
+            app:icon="@drawable/rounded_check_24"
             app:iconTint="@color/dark_text" />
 
         <Space

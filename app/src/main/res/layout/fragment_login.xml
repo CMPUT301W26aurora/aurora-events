@@ -84,7 +84,7 @@
             android:textColor="@color/dark_text"
             android:textSize="8pt"
             android:paddingHorizontal="145dp"
-            app:icon="@drawable/round_check_24"
+            app:icon="@drawable/rounded_check_24"
             app:iconTint="@color/dark_text" />
 
     </LinearLayout>

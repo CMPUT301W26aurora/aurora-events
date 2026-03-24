@@ -46,10 +46,12 @@ public class RegistrationSelectedListTest {
                 "test device",
                 "registration test",
                 "event for registration selected list test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
+                false,
                 0);
         setUpEvent(event);
         list = event.registrationList;

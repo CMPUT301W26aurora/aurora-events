@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -9,27 +10,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:padding="16dp"
         android:paddingBottom="24dp">
 
-        <!--Back Button-->
-            <Button
+            <!--Back Button-->
+            <ImageButton
                 android:id="@+id/back_button"
-                android:layout_width="95dp"
-                android:layout_height="44dp"
-                android:text="Back"
-                android:textColor="@color/black"
-                android:textSize="20sp"/>
-
-            <Button
-                android:id="@+id/sample_button"
-                android:layout_width="130dp"
-                android:layout_height="50dp"
-                android:text="Sample"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:visibility="gone"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/back_button_content_description"
+                android:padding="10dp"
+                android:src="@drawable/rounded_arrow_back_24"
+                app:tint="@color/blue"
+                android:background="@drawable/rounded_box"
+                android:backgroundTint="@color/light_glass"/>
 
             <!--Optional poster image-->
             <ImageView
@@ -38,7 +32,9 @@
                 android:layout_height="180dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:background="#FFFFF0"
+                android:background="@drawable/rounded_box"
+                android:backgroundTint="@color/light_glass"
+                android:contentDescription="@string/event_poster_content_description"
                 android:scaleType="centerCrop"/>
 
             <!--Event Name-->
@@ -47,28 +43,50 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                android:textSize="30sp"
-                android:textColor="#00FFFF"
-                android:textStyle="bold"/>
+                android:text="Event Name"
+                android:textSize="14pt"
+                android:textColor="@color/blue"
+                android:fontFamily="@font/roboto_bold"/>
 
             <!--Event Date and Time-->
             <TextView
                 android:id="@+id/event_date_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
                 android:layout_marginTop="8dp"
-                android:textColor="#90EE90"
-                android:textStyle="bold"/>
+                android:text="Every Thursday and Friday @ 2:30 p.m. - 5:00 p.m. from 2026-03-05 - 2026-04-24"
+                android:textSize="7pt"
+                android:textColor="@color/green"
+                android:fontFamily="@font/roboto"/>
 
-            <!--Event Organizer-->
-            <TextView
-                android:id="@+id/event_organizer"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textColor="#800080"
-                android:textSize="15sp"/>
+                android:orientation="horizontal">
+
+                <!--Event Organizer-->
+                <TextView
+                    android:id="@+id/event_organizer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="put on by Aurora LLC"
+                    android:textColor="@color/purple"
+                    android:textSize="7pt"
+                    android:fontFamily="@font/roboto"/>
+
+                <!--Event Price-->
+                <TextView
+                    android:id="@+id/event_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="$999"
+                    android:textColor="@color/purple"
+                    android:textSize="7pt"
+                    android:gravity="end"
+                    android:fontFamily="@font/roboto"/>
+
+            </LinearLayout>
 
             <!--Event Location-->
             <TextView
@@ -76,82 +94,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:textColor="#90EE90"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
+                android:text="in Edmonton, Alberta, Canada"
+                android:textColor="@color/green"
+                android:textSize="7pt"
+                android:fontFamily="@font/roboto"/>
 
             <!--Event Description-->
-            <TextView
-                android:id="@+id/event_description"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Description"
-                android:textColor="#90EE90"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:orientation="vertical">
 
-            <!--Registration Deadline-->
-            <TextView
-                android:id="@+id/event_deadline"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginTop="6dp"
-                android:textColor="#90EE90"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/description_title_text"
+                    android:textColor="@color/blue"
+                    android:textSize="5pt"
+                    android:fontFamily="@font/roboto"/>
 
-            <!--Waiting List Count-->
-            <TextView
-                android:id="@+id/waiting_list_count"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="#90EE90"
-                android:textSize="14sp"
-                android:gravity="center"/>
-
-            <!--Attendees Count-->
-            <TextView
-                android:id="@+id/attendees_count"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:layout_marginTop="6dp"
-                android:textColor="#90EE90"
-                android:gravity="center"
-                android:textStyle="bold"/>
-
-            <!-- Join Button-->
-            <Button
-                android:id="@+id/join_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Join Pool"
-                android:layout_marginTop="14dp"
-                android:backgroundTint="#9FE3B3"/>
-
-            <!-- Accept Button-->
-            <Button
-                android:id="@+id/accept_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Accept"
-                android:backgroundTint="#9FE3B3"
-                android:textStyle="bold"
-                android:visibility="gone"/>
-
-            <!--Decline Button-->
-            <Button
-                android:id="@+id/decline_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Decline"
-                android:backgroundTint="#8B0000"
-                android:textStyle="bold"
-                android:visibility="gone"/>
+                <TextView
+                    android:id="@+id/event_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/lorem_ipsum"
+                    android:textColor="@color/light_text"
+                    android:textSize="6pt"
+                    android:fontFamily="@font/roboto"/>
+            </LinearLayout>
 
             <!--Delete Button-->
             <Button
@@ -160,29 +132,178 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="26dp"
-                android:backgroundTint="#8B0000"
-                android:paddingStart="20dp"
+                android:backgroundTint="@color/light_red"
+                android:paddingStart="15dp"
                 android:paddingTop="10dp"
-                android:paddingEnd="20dp"
+                android:paddingEnd="15dp"
                 android:paddingBottom="10dp"
                 android:text="Delete Event"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:visibility="gone"/>
+                android:textColor="@color/dark_text"
+                android:fontFamily="@font/roboto_bold"
+                app:icon="@drawable/rounded_delete_forever_24"
+                app:iconTint="@color/dark_text"/>
 
-            <!--Attending Label-->
-            <TextView
-                android:id="@+id/attending_label"
+            <!--Bottom Info-->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="You are attending!"
-                android:backgroundTint="#9FE3B3"
-                android:textSize="14sp"
-                android:layout_marginTop="14dp"
+                android:orientation="vertical"
                 android:gravity="center"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:textStyle="bold"
-                android:visibility="gone"/>
+                android:background="@drawable/rounded_box"
+                android:backgroundTint="@color/light_glass"
+                android:padding="7dp"
+                android:layout_marginTop="10dp">
+
+                <!--Registration Deadline-->
+                <TextView
+                    android:id="@+id/event_deadline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sign up before 2:30 p.m. on 2026-02-26"
+                    android:textColor="@color/purple"
+                    android:textSize="7pt"
+                    android:fontFamily="@font/roboto_bold" />
+
+                <!--Waiting List Count-->
+                <TextView
+                    android:id="@+id/waiting_list_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="67 people are waiting"
+                    android:textColor="@color/blue"
+                    android:textSize="6pt"
+                    android:fontFamily="@font/roboto"/>
+
+                <!--Attendees Count-->
+                <TextView
+                    android:id="@+id/attendees_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10/32 people are participating"
+                    android:textColor="@color/green"
+                    android:textSize="7pt"
+                    android:fontFamily="@font/roboto_bold"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingTop="10dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Join Button-->
+                        <Button
+                            android:id="@+id/join_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/join_button_text"
+                            android:textSize="7pt"
+                            android:textColor="@color/dark_text"
+                            android:fontFamily="@font/roboto_bold"
+                            app:icon="@drawable/rounded_add_circle_24"
+                            app:iconTint="@color/dark_text"
+                            android:backgroundTint="@color/green"/>
+
+                        <!-- Leave Button-->
+                        <Button
+                            android:id="@+id/leave_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/leave_pool_button_text"
+                            android:textSize="7pt"
+                            android:textColor="@color/light_text"
+                            android:fontFamily="@font/roboto_bold"
+                            app:icon="@drawable/rounded_logout_24"
+                            app:iconTint="@color/light_text"
+                            android:backgroundTint="@color/dark_red"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <!-- Accept Button-->
+                            <Button
+                                android:id="@+id/accept_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:backgroundTint="@color/green"
+                                android:fontFamily="@font/roboto_bold"
+                                android:text="@string/accept_button_text"
+                                android:textSize="7pt"
+                                android:textColor="@color/dark_text"
+                                app:icon="@drawable/rounded_check_24"
+                                app:iconTint="@color/dark_text"/>
+
+                            <Space
+                                android:layout_width="10dp"
+                                android:layout_height="match_parent" />
+
+                            <!--Decline Button-->
+                            <Button
+                                android:id="@+id/decline_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:backgroundTint="@color/dark_red"
+                                android:fontFamily="@font/roboto_bold"
+                                android:text="@string/decline_button_text"
+                                android:textSize="7pt"
+                                android:textColor="@color/light_text"
+                                app:icon="@drawable/rounded_cancel_24"
+                                app:iconTint="@color/light_text"/>
+                        </LinearLayout>
+
+                        <!--Attending Label-->
+                        <TextView
+                            android:id="@+id/attending_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/attending_label_text"
+                            android:textSize="7pt"
+                            android:textColor="@color/dark_text"
+                            android:fontFamily="@font/roboto_bold"
+                            android:background="@drawable/rounded_box"
+                            android:backgroundTint="@color/green"
+                            android:gravity="center"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp" />
+
+                        <!--Cannot Attend Label-->
+                        <TextView
+                            android:id="@+id/cannot_attend_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/cannot_attend_label_text"
+                            android:textSize="7pt"
+                            android:textColor="@color/light_text"
+                            android:fontFamily="@font/roboto"
+                            android:background="@drawable/rounded_box"
+                            android:backgroundTint="@color/background"
+                            android:gravity="center"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp" />
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="10dp"
+                        android:layout_height="match_parent" />
+
+                    <ImageButton
+                        android:id="@+id/selection_info_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/selection_info_button_content_description"
+                        android:src="@drawable/rounded_info_24"
+                        app:tint="@color/light_text"
+                        android:background="@drawable/rounded_box"
+                        android:backgroundTint="#00000000"/>
+                </LinearLayout>
+            </LinearLayout>
     </LinearLayout>
 </ScrollView>

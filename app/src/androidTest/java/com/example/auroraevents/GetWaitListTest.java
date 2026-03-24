@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class GetWaitListTest {
@@ -44,10 +43,12 @@ public class GetWaitListTest {
                 "test device",
                 "wait list sampling test",
                 "event for wait list sampling test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
+                false,
                 2);
         myEvent.setEventId("test event");
         setUpEvent(myEvent, 60, TimeUnit.SECONDS);
