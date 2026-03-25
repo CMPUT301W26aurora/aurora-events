@@ -1,12 +1,15 @@
 package com.example.auroraevents.view;
 
+import static android.app.Activity.RESULT_OK;
 import static androidx.core.util.TypedValueCompat.dpToPx;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -48,6 +51,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.UUID;
 
 public class EventCreationFragment extends Fragment {
@@ -71,6 +75,9 @@ public class EventCreationFragment extends Fragment {
     private User user;
     private UserViewModel userViewModel;
 
+    // Camera
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
     // Image upload
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
@@ -81,7 +88,7 @@ public class EventCreationFragment extends Fragment {
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
+                if (result.getResultCode() == RESULT_OK) {
                     if (result.getData() != null) {
                         image = result.getData().getData();
                         addImageButton.setEnabled(true);
@@ -92,6 +99,17 @@ public class EventCreationFragment extends Fragment {
                 }
             }
     );
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(Objects.requireNonNull(getActivity()).getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } else {
+            // Display an error message if no camera app is found
+            Toast.makeText(getContext(), "No camera application found", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -257,10 +275,16 @@ public class EventCreationFragment extends Fragment {
         });
 
         btnConfirm.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 uploadImage(image);
+            }
+        });
+
+        btnCamera.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
             }
         });
 
