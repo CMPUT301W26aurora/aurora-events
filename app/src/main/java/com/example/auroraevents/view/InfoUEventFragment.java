@@ -197,7 +197,15 @@ public class InfoUEventFragment extends Fragment {
 
                                                 // View Entrants Button
                                                 viewEntrantsButton.setOnClickListener(v -> {
-                                                    // Transition to user list fragment
+                                                    Bundle args = new Bundle();
+                                                    args.putString("eventId", event.getEventId());
+                                                    UserListFragment userListFragment = new UserListFragment();
+                                                    userListFragment.setArguments(args);
+                                                    getParentFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, userListFragment)
+                                                            .addToBackStack(null)
+                                                            .commit();
                                                 });
                                             }
                                             else {

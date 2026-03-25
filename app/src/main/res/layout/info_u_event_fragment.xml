@@ -22,15 +22,6 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"/>
 
-            <Button
-                android:id="@+id/sample_button"
-                android:layout_width="130dp"
-                android:layout_height="50dp"
-                android:text="Sample"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:visibility="visible"/>
-
             <!--Optional poster image-->
             <ImageView
                 android:id="@+id/poster_image"
@@ -151,6 +142,22 @@
                 android:text="Decline"
                 android:backgroundTint="#8B0000"
                 android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <!--Sample Button-->
+            <Button
+                android:id="@+id/sample_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="26dp"
+                android:paddingStart="20dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="10dp"
+                android:text="Sample"
+                android:textColor="@color/black"
+                android:textSize="20sp"
                 android:visibility="gone"/>
 
             <!--Delete Button-->

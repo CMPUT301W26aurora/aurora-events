@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -27,6 +28,7 @@ public class UserListFragment extends Fragment {
     private ArrayList<User> userList;
     private UserArrayAdapter userListAdapter;
     private ListView userListView;
+    private Button doneButton, mapButton, filterButton, sortButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,6 +65,25 @@ public class UserListFragment extends Fragment {
         userList = ref.currentEvent.getListOfAllUsers();
         userListAdapter = new UserArrayAdapter(requireContext(), userList);
         userListView.setAdapter(userListAdapter);
+
+        // Inflate and add the header
+        View header = inflater.inflate(R.layout.header_entrant_fragment, userListView, false);
+        userListView.addHeaderView(header, null, false);
+
+        // Go back
+        doneButton = view.findViewById(R.id.done_button);
+        doneButton.setOnClickListener( v -> {
+            getParentFragmentManager().popBackStack();
+                });
+
+        // Filter by status TODO
+        /*
+        if (String filter == "waiting") {
+            userList = ref.currentEvent.getWaitListOfUsers();
+        }
+        else if (String filter...) {...}
+        userListAdapter.notifyDataSetChanged();
+         */
 
         return view;
     }
