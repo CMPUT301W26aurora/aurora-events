@@ -2,8 +2,12 @@ package com.example.auroraevents.view;
 
 import static androidx.core.util.TypedValueCompat.dpToPx;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +16,10 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -19,20 +27,31 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 
+import com.bumptech.glide.Glide;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import android.provider.Settings;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.util.UUID;
 
 public class EventCreationFragment extends Fragment {
     private ImageButton backButton;
-    private Button addImageButton;
     private TextInputEditText eventNameInput;
     private TextInputEditText eventDescInput;
     private TextInputEditText eventCapInput;
@@ -51,6 +70,28 @@ public class EventCreationFragment extends Fragment {
     private Organizer organizer;
     private User user;
     private UserViewModel userViewModel;
+
+    // Image upload
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageRef = storage.getReference();
+    private Button addImageButton;
+    Uri image;
+    ImageView imageView;
+
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    if (result.getData() != null) {
+                        image = result.getData().getData();
+                        addImageButton.setEnabled(true);
+                        Glide.with(requireContext()).load(image).into(imageView);
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Please upload an image", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,6 +115,8 @@ public class EventCreationFragment extends Fragment {
         endDateButton = view.findViewById(R.id.btn_end_date);
         dateButton = view.findViewById(R.id.btn_signup_deadline);
         confirmButton = view.findViewById(R.id.btn_confirm);
+
+        imageView = view.findViewById(R.id.iv_event_image);
 
         // Hide nav bar
         requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
@@ -104,6 +147,13 @@ public class EventCreationFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 getParentFragmentManager().popBackStack();
+            }
+        });
+
+        addImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInputDialogImage();
             }
         });
 
@@ -176,6 +226,51 @@ public class EventCreationFragment extends Fragment {
         }
     }
 
+    private void showInputDialogImage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
+        builder.setView((dialogView));
+
+        AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.gravity = Gravity.CENTER;
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        ImageView imageView = dialogView.findViewById(R.id.image_view);
+        Button btnCamera = dialogView.findViewById(R.id.btn_take_photo);
+        Button btnGallery = dialogView.findViewById(R.id.btn_choose_gallery);
+        Button btnCancel = dialogView.findViewById(R.id.btn_image_cancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
+
+        btnGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                activityResultLauncher.launch(intent);
+            }
+        });
+
+        btnConfirm.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                uploadImage(image);
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+    /*
+    Show input dialog for location input
+     */
     private void showInputDialog(Button targetButton, String hint, java.util.function.Consumer<String> onConfirm) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.custom_input, null);
@@ -234,5 +329,25 @@ public class EventCreationFragment extends Fragment {
 
         }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH),
                 calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
+    }
+
+    /*
+    Upload image to firebase
+    Resource used: https://medium.com/@everydayprogrammer/
+    uploading-files-to-firebase-storage-in-android-studio-using-java-63f43b4c8d72
+     */
+    private void uploadImage(Uri image) {
+        StorageReference reference = storageRef.child("images/" + UUID.randomUUID().toString());
+        reference.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(requireContext(), "Error uploading image", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

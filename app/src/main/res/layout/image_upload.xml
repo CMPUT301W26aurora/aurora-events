@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dark_inner_bg"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Add Event Image"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
+
+    <!-- Image Preview Area -->
+    <FrameLayout
+        android:id="@+id/image_preview_container"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/dashed_outer_border"
+        android:padding="2dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/dark_inner_bg">
+
+            <!-- Placeholder shown before image is selected -->
+            <LinearLayout
+                android:id="@+id/image_placeholder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/image_view"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="8dp"
+                    android:alpha="0.4"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    app:tint="#AA66FF" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No image selected"
+                    android:textColor="#66AAAAAA"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <!-- Preview image shown after selection -->
+            <ImageView
+                android:id="@+id/image_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <!-- Source Selection Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
+
+        <!-- Camera Button -->
+        <Button
+            android:id="@+id/btn_take_photo"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Camera"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_camera"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF" />
+
+        <!-- Gallery Button -->
+        <Button
+            android:id="@+id/btn_choose_gallery"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Gallery"
+            android:textColor="#CCCCCC"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@android:drawable/ic_menu_gallery"
+            app:iconGravity="start"
+            app:iconTint="#AA66FF" />
+
+    </LinearLayout>
+
+    <!-- Confirm / Cancel -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_image_cancel"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Cancel"
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false" />
+
+        <Button
+            android:id="@+id/btn_image_confirm"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/gradient_confirm_button"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Use Image"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@drawable/ic_check"
+            app:iconGravity="start"
+            app:iconTint="#FFFFFF" />
+
+    </LinearLayout>
+
+</LinearLayout>

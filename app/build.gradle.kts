@@ -53,6 +53,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
+    implementation(libs.firebase.storage)
 
     testImplementation(libs.junit)
 
@@ -65,4 +66,5 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.7.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

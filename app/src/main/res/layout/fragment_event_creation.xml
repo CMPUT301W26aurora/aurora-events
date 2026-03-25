@@ -54,6 +54,13 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/dark_inner_bg">
 
+                <ImageView
+                    android:id="@+id/iv_event_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="visible" />
+
                 <Button
                     android:id="@+id/btn_add_image"
                     android:layout_width="wrap_content"
@@ -74,6 +81,7 @@
                     app:iconTint="#AAAAAA" />
             </FrameLayout>
         </FrameLayout>
+
 
         <!-- Event Name Input -->
         <com.google.android.material.textfield.TextInputLayout
