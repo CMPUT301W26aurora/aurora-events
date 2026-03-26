@@ -2,6 +2,8 @@ package com.example.auroraevents.model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
@@ -46,7 +48,8 @@ public class Organizer extends User {
             String endTime,
             String location,
             boolean geolocationRequired,
-            int capacity) {
+            int capacity,
+            Bitmap poster) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -65,7 +68,8 @@ public class Organizer extends User {
                 eventRegistrationEnd,
                 location,
                 geolocationRequired,
-                capacity);
+                capacity,
+                poster);
 
         // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,

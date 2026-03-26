@@ -36,6 +36,7 @@ public class Event {
     private int    capacity;              // 0 = unlimited
     private String qrCodeData;            // String payload encoded in the QR code
     private Bitmap qR;
+    private Bitmap poster;
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
@@ -55,7 +56,8 @@ public class Event {
             LocalDateTime registrationEnd,
             String location,
             boolean geolocationRequired,
-            int capacity) {
+            int capacity,
+            Bitmap poster) {
         this();
         this.organizerDeviceId     = organizerDeviceId;
         this.name                  = name;
@@ -67,6 +69,7 @@ public class Event {
         this.location              = location;
         this.geolocationRequired   = geolocationRequired;
         this.capacity              = capacity;
+        this.poster                = poster;
     }
 
 
@@ -88,8 +91,8 @@ public class Event {
     public String getDescription()                   { return description; }
     public void   setDescription(String description) { this.description = description; }
 
-    public String getPrice()           { return price; }
-    public void setPrice(String price) { this.price = price; }
+    public String getPrice()             { return price; }
+    public void   setPrice(String price) { this.price = price; }
 
     public String getDateTime()                { return dateTime; }
     public void   setDateTime(String dateTime) { this.dateTime = dateTime; }
@@ -103,14 +106,17 @@ public class Event {
     public String getLocation()                { return location; }
     public void   setLocation(String location) { this.location = location; }
 
-    public boolean getGeolocationRequired()                         { return geolocationRequired; }
-    public void setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
+    public boolean getGeolocationRequired()                            { return geolocationRequired; }
+    public void    setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
 
     public int    getCapacity()             { return capacity; }
     public void   setCapacity(int capacity) { this.capacity = capacity; }
 
     public String getQrCodeData()                  { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData) { this.qrCodeData = qrCodeData; }
+
+    public Bitmap getPoster()              { return poster; }
+    public void   setPoster(Bitmap poster) { this.poster = poster; }
 
     // Converters
     @Exclude
@@ -162,10 +168,12 @@ public class Event {
     /**
      * Returns the amount of empty slots that is available in the event
      * @return
-     * Amount of empty slots available
+     * Amount of empty slots available (-1 is infinite)
      */
     @Exclude
     public int getEmptySlotAmount() {
+        if (capacity == 0)
+            return -1;
         return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
     }
 

@@ -125,26 +125,53 @@
                     android:fontFamily="@font/roboto"/>
             </LinearLayout>
 
-            <!--Delete Button-->
-            <Button
-                android:id="@+id/delete_button"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="26dp"
-                android:backgroundTint="@color/light_red"
-                android:paddingStart="15dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="15dp"
-                android:paddingBottom="10dp"
-                android:text="Delete Event"
-                android:textColor="@color/dark_text"
-                android:fontFamily="@font/roboto_bold"
-                app:icon="@drawable/rounded_delete_forever_24"
-                app:iconTint="@color/dark_text"/>
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="26dp">
+
+                <!--Delete Button-->
+                <Button
+                    android:id="@+id/delete_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginHorizontal="5dp"
+                    android:backgroundTint="@color/light_red"
+                    android:paddingStart="15dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="15dp"
+                    android:paddingBottom="10dp"
+                    android:text="@string/delete_event_button_text"
+                    android:textColor="@color/dark_text"
+                    android:fontFamily="@font/roboto_bold"
+                    app:icon="@drawable/rounded_delete_forever_24"
+                    app:iconTint="@color/dark_text"/>
+
+                <!--Report Button-->
+                <Button
+                    android:id="@+id/report_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginHorizontal="5dp"
+                    android:backgroundTint="@color/light_red"
+                    android:paddingStart="15dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="15dp"
+                    android:paddingBottom="10dp"
+                    android:text="@string/report_event_button_text"
+                    android:textColor="@color/dark_text"
+                    android:fontFamily="@font/roboto_bold"
+                    app:icon="@drawable/rounded_report_24"
+                    app:iconTint="@color/dark_text"/>
+            </LinearLayout>
 
             <!--Bottom Info-->
             <LinearLayout
+                android:id="@+id/bottom_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -223,6 +250,7 @@
                             android:backgroundTint="@color/dark_red"/>
 
                         <LinearLayout
+                            android:id="@+id/select_button_set"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"

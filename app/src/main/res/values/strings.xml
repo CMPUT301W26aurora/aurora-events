@@ -30,4 +30,6 @@
     <string name="decline_button_text">Decline</string>
     <string name="attending_label_text">You are attending!</string>
     <string name="cannot_attend_label_text">Sorry, you cannot attend.</string>
+    <string name="delete_event_button_text">Delete Event</string>
+    <string name="report_event_button_text">Report Event</string>
 </resources>

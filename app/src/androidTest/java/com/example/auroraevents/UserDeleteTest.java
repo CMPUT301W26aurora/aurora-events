@@ -1,12 +1,12 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpWaitingList;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.setUpUser;
 import static com.example.auroraevents.TestsSupport.signIn;
@@ -75,7 +75,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0);
+                0,
+                null);
         selectedEvent = new Event(
                 "test organizer",
                 "selected",
@@ -86,7 +87,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0);
+                0,
+                null);
         attendingEvent = new Event(
                 "test organizer",
                 "attending",
@@ -97,7 +99,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0);
+                0,
+                null);
         declinedEvent = new Event(
                 "test organizer",
                 "declined",
@@ -108,7 +111,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0);
+                0,
+                null);
         cancelledEvent = new Event(
                 "test organizer",
                 "cancelled",
@@ -119,7 +123,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0);
+                0,
+                null);
         removedEvent = new Event(
                 "test organizer",
                 "removed",
@@ -130,7 +135,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0);
+                0,
+                null);
 
         setUpEvent(waitingEvent);
         setUpWaitingList(waitingEvent.registrationList, user.getDeviceId());

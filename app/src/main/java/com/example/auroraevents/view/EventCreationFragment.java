@@ -54,7 +54,7 @@ public class EventCreationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // TODO 3: update to add price and geolocation requirement
+        // TODO 3: update to add price, geolocation requirement
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_creation, container, false);
 
@@ -154,7 +154,8 @@ public class EventCreationFragment extends Fragment {
                             registerEnd,
                             location,
                             geolocationRequired,
-                            Integer.parseInt(eventCap)
+                            Integer.parseInt(eventCap),
+                            null //TODO
                     );
                     getParentFragmentManager().popBackStack();
                 }

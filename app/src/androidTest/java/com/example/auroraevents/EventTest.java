@@ -44,7 +44,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20);
+                20,
+                null);
         assertEquals("organizer-xyz", event.getOrganizerDeviceId());
     }
 
@@ -64,7 +65,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20);
+                20,
+                null);
         assertEquals("Sports Event", event.getName());
     }
 
@@ -84,7 +86,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20);
+                20,
+                null);
         assertEquals("Explore your favourite sport", event.getDescription());
     }
 
@@ -103,7 +106,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20
+                20,
+                null
         );
 
         assertEquals(LocalDate.of(2026, 6, 4), event.getDateTimeAsLocalDate());
@@ -124,7 +128,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20
+                20,
+                null
         );
 
         assertEquals(LocalDateTime.of(2026, 5, 20, 9, 0),
@@ -146,7 +151,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20
+                20,
+                null
         );
 
         assertEquals(LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -169,7 +175,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20);
+                20,
+                null);
         assertEquals("Rec Centre", event.getLocation());
     }
     /**
@@ -188,7 +195,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
-                20);
+                20,
+                null);
         assertEquals(20, event.getCapacity());
     }
 

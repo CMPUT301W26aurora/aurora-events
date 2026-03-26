@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RegistrationList {
+public class RegistrationList { //TODO: check if enough capacity on waiting, selected, and attending lists
     private String eventId;
     private final List<String> waitingList;     // signed up, awaiting lottery
     private final List<String> selectedList;    // drawn / invited but not yet confirmed

@@ -14,7 +14,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,11 +48,15 @@ public class InfoUEventFragment extends Fragment {
     private String userId;
     private ListenerRegistration eventSnapshotListener;
 
-    private TextView eventName, eventDescription, eventLocation, eventDateTime;
-    private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
-    private ImageView poster;
-    private Button joinButton, acceptButton, declineButton, deleteButton;
     private ImageButton backButton;
+    private ImageView poster;
+    private TextView eventName, eventDateTime, eventOrganizer, eventPrice, eventLocation, eventDescription;
+    private Button reportButton, deleteButton;
+    private LinearLayout bottomBar, selectButtonSet;
+    private TextView eventDeadline, waitingListCount, attendeesCount;
+    private Button joinButton, leaveButton, acceptButton, declineButton;
+    private TextView attendingLabel, cannotAttendLabel;
+    private ImageButton infoButton;
 
     /**
      *
@@ -81,21 +87,47 @@ public class InfoUEventFragment extends Fragment {
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // get views to display event details
-        eventName        = view.findViewById(R.id.event_name);
-        eventDescription = view.findViewById(R.id.event_description);
-        eventLocation    = view.findViewById(R.id.event_location);
-        eventDateTime    = view.findViewById(R.id.event_date_time);
-        eventOrganizer   = view.findViewById(R.id.event_organizer);
-        eventDeadline    = view.findViewById(R.id.event_deadline);
-        waitingListCount = view.findViewById(R.id.waiting_list_count);
-        attendeesCount   = view.findViewById(R.id.attendees_count);
-        attendingLabel   = view.findViewById(R.id.attending_label);
-        poster           = view.findViewById(R.id.poster_image);
-        backButton       = view.findViewById(R.id.back_button);
-        joinButton       = view.findViewById(R.id.join_button);
-        acceptButton     = view.findViewById(R.id.accept_button);
-        declineButton    = view.findViewById(R.id.decline_button);
-        deleteButton     = view.findViewById(R.id.delete_button);
+        backButton        = view.findViewById(R.id.back_button);           // done
+        poster            = view.findViewById(R.id.poster_image);          // done
+        eventName         = view.findViewById(R.id.event_name);            // done
+        eventDateTime     = view.findViewById(R.id.event_date_time);       // done
+        eventOrganizer    = view.findViewById(R.id.event_organizer);       // done
+        eventPrice        = view.findViewById(R.id.event_price);           // done
+        eventLocation     = view.findViewById(R.id.event_location);        // done
+        eventDescription  = view.findViewById(R.id.event_description);     // done
+
+        reportButton      = view.findViewById(R.id.report_button);         // TODO
+        deleteButton      = view.findViewById(R.id.delete_button);         // done
+
+        bottomBar         = view.findViewById(R.id.bottom_bar);            // done
+
+        eventDeadline     = view.findViewById(R.id.event_deadline);        //
+        waitingListCount  = view.findViewById(R.id.waiting_list_count);    //
+        attendeesCount    = view.findViewById(R.id.attendees_count);       //
+
+        joinButton        = view.findViewById(R.id.join_button);           //
+        leaveButton       = view.findViewById(R.id.leave_button);          //
+        selectButtonSet   = view.findViewById(R.id.select_button_set);     //
+        acceptButton      = view.findViewById(R.id.accept_button);         //
+        declineButton     = view.findViewById(R.id.decline_button);        //
+        attendingLabel    = view.findViewById(R.id.attending_label);       //
+        cannotAttendLabel = view.findViewById(R.id.cannot_attend_label);   //
+
+        infoButton        = view.findViewById(R.id.selection_info_button); //
+
+        /*
+        eventDeadline.setVisibility(View.GONE);
+        waitingListCount.setVisibility(View.GONE);
+        attendeesCount.setVisibility(View.GONE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.GONE);
+
+        infoButton.setVisibility(View.VISIBLE);
+         */
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -123,25 +155,26 @@ public class InfoUEventFragment extends Fragment {
                                     eventId,
                                     event -> { if (event != null) {
                                             // display event details for all user roles
+                                            if (event.getPoster() == null)
+                                                poster.setVisibility(View.GONE);
+                                            else
+                                                poster.setImageBitmap(event.getPoster());
                                             eventName.setText(event.getName());
-                                            eventDescription.setText(event.getDescription());
-                                            eventLocation.setText(event.getLocation());
                                             eventDateTime.setText(event.getDateTime());
-                                            eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
-                                            poster.setVisibility(View.GONE);
+                                            String organizerText = "organized by " + event.getOrganizerDeviceId();
+                                            eventOrganizer.setText(organizerText);
+                                            eventPrice.setText(event.getPrice());
+                                            eventLocation.setText(event.getLocation());
+                                            eventDescription.setText(event.getDescription());
 
                                             if (userIsAdmin) {
                                                 // display event details for admin view
-                                                joinButton.setVisibility(View.GONE);
-                                                acceptButton.setVisibility(View.GONE);
-                                                declineButton.setVisibility(View.GONE);
-                                                attendingLabel.setVisibility(View.GONE);
-                                                waitingListCount.setVisibility(View.GONE);
-                                                attendeesCount.setVisibility(View.GONE);
+                                                bottomBar.setVisibility(View.GONE);
+                                                reportButton.setVisibility(View.GONE);
                                                 deleteButton.setVisibility(View.VISIBLE);
 
                                                 // allow admin to delete event by clicking delete button
-                                                deleteButton.setOnClickListener(v -> {
+                                                deleteButton.setOnClickListener(v ->
                                                     EventDb.getInstance().deleteEvent(
                                                             event.getEventId(),
                                                             () -> {
@@ -149,18 +182,16 @@ public class InfoUEventFragment extends Fragment {
                                                                 getParentFragmentManager().popBackStack();
                                                             },
                                                             e -> Log.d(TAG, "Error deleting event: " + e)
-                                                    );
-                                                });
+                                                    )
+                                                );
                                             }
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
+                                                //TODO: open edit event fragment (if not done by EventFragment)
+                                                bottomBar.setVisibility(View.GONE);
+                                                reportButton.setVisibility(View.GONE);
                                                 deleteButton.setVisibility(View.VISIBLE);
-                                                joinButton.setVisibility(View.GONE);
-                                                acceptButton.setVisibility(View.GONE);
-                                                declineButton.setVisibility(View.GONE);
-                                                attendingLabel.setVisibility(View.GONE);
-                                                waitingListCount.setVisibility(View.GONE);
-                                                attendeesCount.setVisibility(View.GONE);
-                                                deleteButton.setOnClickListener(v -> {
+
+                                                deleteButton.setOnClickListener(v ->
                                                     EventDb.getInstance().deleteEvent(
                                                             event.getEventId(),
                                                             () -> {
@@ -168,69 +199,115 @@ public class InfoUEventFragment extends Fragment {
                                                                 getParentFragmentManager().popBackStack();
                                                             },
                                                             e -> Log.d(TAG, "Error deleting event: " + e)
-                                                    );
-                                                });
+                                                    )
+                                                );
                                             }
                                             else {
-                                                // show waiting list and attendees count for entrant
-                                                waitingListCount.setVisibility(View.VISIBLE);
-                                                attendeesCount.setVisibility(View.VISIBLE);
-                                                waitingListCount.setText(event.registrationList.getWaitingList().size() + " people are waiting ");
-                                                attendeesCount.setText(event.registrationList.getAttendingList().size() + " people are participating ");
+                                                reportButton.setVisibility(View.VISIBLE);
                                                 deleteButton.setVisibility(View.GONE);
+                                                bottomBar.setVisibility(View.VISIBLE);
 
-                                                // check which list user is in and display corresponding buttons
+                                                // set report button functionality
+                                                reportButton.setOnClickListener( //TODO
+                                                        v -> {
+                                                            Log.d(TAG, "Report button not implemented");
+                                                            Toast.makeText(v.getContext(), "Report button not implemented", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                );
+                                                // set info button functionality
+                                                infoButton.setOnClickListener( //TODO
+                                                        v -> {
+                                                            Log.d(TAG, "Info button not implemented");
+                                                            Toast.makeText(v.getContext(), "Info button not implemented", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                );
+
+                                                // check which list user is in and display corresponding content
                                                 if (event.registrationList.getAttendingList().contains(userId)) {
+                                                    eventDeadline.setVisibility(View.GONE);
+                                                    waitingListCount.setVisibility(View.GONE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+                                                    String attendeesText = event.registrationList.getAttendingList().size() + "/" + event.getCapacity() + " people are participating ";
+                                                    attendeesCount.setText(attendeesText);
+
                                                     joinButton.setVisibility(View.GONE);
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
                                                     attendingLabel.setVisibility(View.VISIBLE);
-                                                    attendingLabel.setText("You are attending");
+                                                    cannotAttendLabel.setVisibility(View.GONE);
+
+                                                    infoButton.setVisibility(View.GONE);
                                                 }
                                                 else if (event.registrationList.getSelectedList().contains(userId)) {
-                                                    // user has been selected and needs to accept or decline
+                                                    eventDeadline.setVisibility(View.VISIBLE);
+                                                    waitingListCount.setVisibility(View.VISIBLE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+
                                                     joinButton.setVisibility(View.GONE);
-                                                    acceptButton.setVisibility(View.VISIBLE);
-                                                    declineButton.setVisibility(View.VISIBLE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.VISIBLE);
                                                     attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.GONE);
+
+                                                    infoButton.setVisibility(View.VISIBLE);
 
                                                     // move user from selectedList to attendingList on acceptance
-                                                    acceptButton.setOnClickListener(v -> {
-                                                        event.registrationList.addToAttendingList(userId);
-                                                    });
+                                                    acceptButton.setOnClickListener(v ->
+                                                        event.registrationList.addToAttendingList(userId)
+                                                    );
                                                     // move user from selectedList to declinedList on decline
-                                                    declineButton.setOnClickListener(v -> {
-                                                        event.registrationList.addToDeclinedList(userId);
-                                                    });
+                                                    declineButton.setOnClickListener(v ->
+                                                        event.registrationList.addToDeclinedList(userId)
+                                                    );
                                                 }
                                                 else if (event.registrationList.getWaitingList().contains(userId)) {
-                                                    // user is on waiting list
-                                                    joinButton.setVisibility(View.VISIBLE);
-                                                    joinButton.setText("Leave Pool");
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    attendingLabel.setVisibility(View.GONE);
-                                                    // remove user from waitingList when Leave Pool is clicked
-                                                    joinButton.setOnClickListener(v -> {
-                                                        event.registrationList.addToCancelledList(userId);
-                                                    });
-                                                } else if (event.registrationList.getRemovedList().contains(userId)) {
-                                                    // user is on removed list
+                                                    eventDeadline.setVisibility(View.VISIBLE);
+                                                    waitingListCount.setVisibility(View.VISIBLE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+
                                                     joinButton.setVisibility(View.GONE);
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    attendingLabel.setVisibility(View.VISIBLE);
-                                                    attendingLabel.setText("You have been removed.");
-                                                } else {
-                                                    // user is not on any list so show Join Pool button
-                                                    joinButton.setVisibility(View.VISIBLE);
-                                                    joinButton.setText("Join Pool");
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
+                                                    leaveButton.setVisibility(View.VISIBLE);
+                                                    selectButtonSet.setVisibility(View.GONE);
                                                     attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.GONE);
+
+                                                    infoButton.setVisibility(View.VISIBLE);
+
+                                                    // remove user from waitingList when Leave Pool is clicked
+                                                    leaveButton.setOnClickListener(v ->
+                                                        event.registrationList.addToCancelledList(userId)
+                                                    );
+                                                } else if (event.registrationList.getRemovedList().contains(userId)) {
+                                                    eventDeadline.setVisibility(View.GONE);
+                                                    waitingListCount.setVisibility(View.GONE);
+                                                    attendeesCount.setVisibility(View.GONE);
+
+                                                    joinButton.setVisibility(View.GONE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.VISIBLE);
+
+                                                    infoButton.setVisibility(View.GONE);
+                                                } else { //TODO: add cannot attend when capacity full and after due date
+                                                    eventDeadline.setVisibility(View.VISIBLE);
+                                                    waitingListCount.setVisibility(View.VISIBLE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+
+                                                    joinButton.setVisibility(View.VISIBLE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.GONE);
+
+                                                    infoButton.setVisibility(View.VISIBLE);
+
                                                     // add user to waitingList when Join Pool is clicked
                                                     joinButton.setOnClickListener(v -> {
-                                                        event.registrationList.addToWaitingList(userId);
+                                                        int e = event.registrationList.addToWaitingList(userId);
+                                                        if (e > 0) {
+                                                            Log.e(TAG, "Could not add user to waiting list: " + e);
+                                                        }
                                                     });
                                                 }
                                             }

@@ -1,4 +1,4 @@
-package com.example.auroraevents;
+package com.example.auroraevents.registration_tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

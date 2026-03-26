@@ -1,6 +1,6 @@
-package com.example.auroraevents;
+package com.example.auroraevents.registration_tests;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAllLists;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAllLists;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
@@ -36,7 +36,8 @@ public class RegistrationListsTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                0);
+                0,
+                null);
         setUpEvent(event);
     }
 

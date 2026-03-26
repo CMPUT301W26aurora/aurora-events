@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.registration_tests.RegistrationWaitingListTest;
 import com.example.auroraevents.server.EventDb;
 
 import org.junit.After;
@@ -53,7 +54,8 @@ public class WaitListSamplingTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                3);
+                3,
+                null);
         myEvent.setEventId("test event");
         setUpEvent(myEvent, 10, TimeUnit.SECONDS);
 
@@ -67,7 +69,8 @@ public class WaitListSamplingTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                3);
+                3,
+                null);
         myEvent2.setEventId("test event");
         setUpEvent(myEvent2, 10, TimeUnit.SECONDS);
 
@@ -81,7 +84,8 @@ public class WaitListSamplingTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                10); //0); for events with unlimited amount
+                10,
+                null);
         myEvent3.setEventId("test event");
         setUpEvent(myEvent3, 10, TimeUnit.SECONDS);
 

@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import android.graphics.Bitmap;
+
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.server.EventDb;
 
@@ -33,6 +35,7 @@ public class OrganizerEventCreationTest {
     private static final String  LOCATION             = "Edmonton Convention Centre";
     private static final boolean GEOLOCATION_REQUIRED = false;
     private static final int     CAPACITY             = 100;
+    private static final Bitmap  POSTER               = null;
 
     private Event myEvent;
 
@@ -91,7 +94,8 @@ public class OrganizerEventCreationTest {
                 LocalDateTime.parse(END_TIME, formatter),
                 LOCATION,
                 GEOLOCATION_REQUIRED,
-                CAPACITY
+                CAPACITY,
+                POSTER
         );
     }
 }

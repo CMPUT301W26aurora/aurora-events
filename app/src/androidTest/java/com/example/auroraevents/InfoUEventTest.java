@@ -29,7 +29,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         event1.setEventId("test-event-1");
         assertEquals("Singing event", event1.getName());
     }
@@ -50,7 +51,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         event1.setEventId("test-event-1");
         assertEquals("Showcase your talent", event1.getDescription());
     }
@@ -71,7 +73,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         event1.setEventId("test-event-1");
         assertEquals("Community Centre", event1.getLocation());
     }
@@ -92,7 +95,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         event1.setEventId("test-event-1");
         assertEquals(40, event1.getCapacity());
     }
@@ -113,7 +117,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         event1.setEventId("test-event-1");
 
         event1.registrationList.getWaitingList().add("user-abc");
@@ -136,7 +141,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         event1.setEventId("test-event-1");
 
         event1.registrationList.getWaitingList().add("user-abc");
@@ -163,7 +169,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         String userId = "user-abc";
 
         boolean showJoinPoolButton = !event.registrationList.getWaitingList().contains(userId) && !event.registrationList.getSelectedList().contains(userId) && !event.registrationList.getAttendingList().contains(userId);
@@ -186,7 +193,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         String userId = "user-abc";
         event.registrationList.getWaitingList().add(userId);
 
@@ -211,7 +219,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         String userId = "user-abc";
         event.registrationList.getSelectedList().add(userId);
 
@@ -236,7 +245,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         String userId = "user-abc";
         event.registrationList.getSelectedList().add(userId);
         event.registrationList.getSelectedList().remove(userId);
@@ -261,7 +271,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
-                40);
+                40,
+                null);
         String userId = "user-abc";
         event.registrationList.getSelectedList().add(userId);
         event.registrationList.getSelectedList().remove(userId);
@@ -296,7 +307,8 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                     LocalDateTime.of(2026, 6, 1, 23, 59),
                     "Community Centre",
                     false,
-                    40);
+                    40,
+                    null);
             event.setEventId("test-event-1");
             // add event to list
             events.add(event);

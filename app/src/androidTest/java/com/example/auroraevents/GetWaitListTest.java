@@ -12,6 +12,7 @@ import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.registration_tests.RegistrationWaitingListTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +50,8 @@ public class GetWaitListTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                2);
+                2,
+                null);
         myEvent.setEventId("test event");
         setUpEvent(myEvent, 60, TimeUnit.SECONDS);
         list = myEvent.registrationList;
