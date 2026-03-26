@@ -64,7 +64,7 @@ public class EventFragment extends Fragment {
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
             Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
-            if (user != null && User.ROLE_ORGANIZER.equals(user.getRole())) {
+            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()) || User.ROLE_ADMIN.equals(user.getRole()))) {
                 addEventButton.setVisibility(VISIBLE);
             } else {
                 addEventButton.setVisibility(GONE);
@@ -106,6 +106,7 @@ public class EventFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString("eventId", selectedEvent.getEventId());
 
+            // TODO: if (user.getDeviceId == selectedEvent.getOranizer())
             InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
             infoUEventFragment.setArguments(args);
 

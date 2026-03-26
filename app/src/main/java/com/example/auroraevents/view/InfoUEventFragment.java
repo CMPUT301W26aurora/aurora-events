@@ -29,6 +29,8 @@ import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.time.LocalDateTime;
+
 /**
  * Displays event details for the event tapped by the entrant or admin.
  * Gets the event details using the event ID.
@@ -113,7 +115,7 @@ public class InfoUEventFragment extends Fragment {
         attendingLabel    = view.findViewById(R.id.attending_label);       //
         cannotAttendLabel = view.findViewById(R.id.cannot_attend_label);   //
 
-        infoButton        = view.findViewById(R.id.selection_info_button); //
+        infoButton        = view.findViewById(R.id.selection_info_button); // TODO
 
         /*
         eventDeadline.setVisibility(View.GONE);
@@ -166,12 +168,38 @@ public class InfoUEventFragment extends Fragment {
                                             eventPrice.setText(event.getPrice());
                                             eventLocation.setText(event.getLocation());
                                             eventDescription.setText(event.getDescription());
+                                            String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
+                                            eventDeadline.setText(deadlineText);
+                                            String waitingCountText = event.registrationList.getWaitingList().size() + "people are waiting";
+                                            waitingListCount.setText(waitingCountText);
+                                            String atendeesCountText = event.registrationList.getAttendingList() + ((event.getCapacity() == 0) ? "" : ("/" + event.getCapacity())) + "people are participating";
+                                            attendeesCount.setText(atendeesCountText);
+
+                                            // set info button functionality
+                                            infoButton.setOnClickListener( //TODO
+                                                v -> {
+                                                    Log.w(TAG, "Info button not implemented");
+                                                    Toast.makeText(v.getContext(), "Info button not implemented", Toast.LENGTH_SHORT).show();
+                                                }
+                                            );
 
                                             if (userIsAdmin) {
                                                 // display event details for admin view
                                                 bottomBar.setVisibility(View.GONE);
                                                 reportButton.setVisibility(View.GONE);
                                                 deleteButton.setVisibility(View.VISIBLE);
+
+                                                eventDeadline.setVisibility(View.VISIBLE);
+                                                waitingListCount.setVisibility(View.VISIBLE);
+                                                attendeesCount.setVisibility(View.VISIBLE);
+
+                                                joinButton.setVisibility(View.GONE);
+                                                leaveButton.setVisibility(View.GONE);
+                                                selectButtonSet.setVisibility(View.GONE);
+                                                attendingLabel.setVisibility(View.GONE);
+                                                cannotAttendLabel.setVisibility(View.GONE);
+
+                                                infoButton.setVisibility(View.VISIBLE);
 
                                                 // allow admin to delete event by clicking delete button
                                                 deleteButton.setOnClickListener(v ->
@@ -181,12 +209,15 @@ public class InfoUEventFragment extends Fragment {
                                                                 Log.d(TAG, "Event deleted by admin");
                                                                 getParentFragmentManager().popBackStack();
                                                             },
-                                                            e -> Log.d(TAG, "Error deleting event: " + e)
+                                                            e -> Log.e(TAG, "Error deleting event: " + e)
                                                     )
                                                 );
                                             }
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
-                                                //TODO: open edit event fragment (if not done by EventFragment)
+                                                //TODO: when event edit opening is done, add:
+                                                /*
+                                                Log.e(TAG, "You shouldn't be here");
+                                                 */
                                                 bottomBar.setVisibility(View.GONE);
                                                 reportButton.setVisibility(View.GONE);
                                                 deleteButton.setVisibility(View.VISIBLE);
@@ -198,7 +229,7 @@ public class InfoUEventFragment extends Fragment {
                                                                 Log.d(TAG, "Event deleted");
                                                                 getParentFragmentManager().popBackStack();
                                                             },
-                                                            e -> Log.d(TAG, "Error deleting event: " + e)
+                                                            e -> Log.e(TAG, "Error deleting event: " + e)
                                                     )
                                                 );
                                             }
@@ -210,15 +241,8 @@ public class InfoUEventFragment extends Fragment {
                                                 // set report button functionality
                                                 reportButton.setOnClickListener( //TODO
                                                         v -> {
-                                                            Log.d(TAG, "Report button not implemented");
+                                                            Log.w(TAG, "Report button not implemented");
                                                             Toast.makeText(v.getContext(), "Report button not implemented", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                );
-                                                // set info button functionality
-                                                infoButton.setOnClickListener( //TODO
-                                                        v -> {
-                                                            Log.d(TAG, "Info button not implemented");
-                                                            Toast.makeText(v.getContext(), "Info button not implemented", Toast.LENGTH_SHORT).show();
                                                         }
                                                 );
 
@@ -289,7 +313,31 @@ public class InfoUEventFragment extends Fragment {
                                                     cannotAttendLabel.setVisibility(View.VISIBLE);
 
                                                     infoButton.setVisibility(View.GONE);
-                                                } else { //TODO: add cannot attend when capacity full and after due date
+                                                } else if (event.getEmptySlotAmount() == 0) {
+                                                    eventDeadline.setVisibility(View.GONE);
+                                                    waitingListCount.setVisibility(View.GONE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+
+                                                    joinButton.setVisibility(View.GONE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.VISIBLE);
+
+                                                    infoButton.setVisibility(View.VISIBLE);
+                                                } else if (event.getRegistrationTimeEndAsDateTime().isBefore(LocalDateTime.now())) {
+                                                    eventDeadline.setVisibility(View.VISIBLE);
+                                                    waitingListCount.setVisibility(View.GONE);
+                                                    attendeesCount.setVisibility(View.GONE);
+
+                                                    joinButton.setVisibility(View.GONE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.VISIBLE);
+
+                                                    infoButton.setVisibility(View.VISIBLE);
+                                                } else {
                                                     eventDeadline.setVisibility(View.VISIBLE);
                                                     waitingListCount.setVisibility(View.VISIBLE);
                                                     attendeesCount.setVisibility(View.VISIBLE);
@@ -312,13 +360,13 @@ public class InfoUEventFragment extends Fragment {
                                                 }
                                             }
                                         } else {
-                                            Log.d(TAG, "No such event available");
+                                            Log.e(TAG, "No such event available");
                                         }
                                     },
-                                    e -> Log.d(TAG, "Error fetching event: " + e)
+                                    e -> Log.e(TAG, "Error fetching event: " + e)
                             );
                 },
-                e -> Log.d(TAG, "Error fetching user" + e)
+                e -> Log.e(TAG, "Error fetching user" + e)
         );
     }
 
