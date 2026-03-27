@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                android:text="Event Name"
+                android:text="@string/default_event_name"
                 android:textSize="14pt"
                 android:textColor="@color/blue"
                 android:fontFamily="@font/roboto_bold"/>
@@ -54,7 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Every Thursday and Friday @ 2:30 p.m. - 5:00 p.m. from 2026-03-05 - 2026-04-24"
+                android:text="@string/default_event_date_time"
                 android:textSize="7pt"
                 android:textColor="@color/green"
                 android:fontFamily="@font/roboto"/>
@@ -69,8 +69,9 @@
                 <TextView
                     android:id="@+id/event_organizer"
                     android:layout_width="wrap_content"
+                    android:maxWidth="300dp"
                     android:layout_height="wrap_content"
-                    android:text="put on by Aurora LLC"
+                    android:text="@string/default_event_organizer"
                     android:textColor="@color/purple"
                     android:textSize="7pt"
                     android:fontFamily="@font/roboto"/>
@@ -78,9 +79,10 @@
                 <!--Event Price-->
                 <TextView
                     android:id="@+id/event_price"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
+                    android:minWidth="50dp"
                     android:layout_height="wrap_content"
-                    android:text="$999"
+                    android:text="@string/default_event_price"
                     android:textColor="@color/purple"
                     android:textSize="7pt"
                     android:gravity="end"
@@ -94,7 +96,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="in Edmonton, Alberta, Canada"
+                android:text="@string/default_event_location"
                 android:textColor="@color/green"
                 android:textSize="7pt"
                 android:fontFamily="@font/roboto"/>
@@ -126,6 +128,7 @@
             </LinearLayout>
 
             <LinearLayout
+                style="?android:attr/buttonBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -135,6 +138,7 @@
                 <!--Delete Button-->
                 <Button
                     android:id="@+id/delete_button"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -148,11 +152,12 @@
                     android:textColor="@color/dark_text"
                     android:fontFamily="@font/roboto_bold"
                     app:icon="@drawable/rounded_delete_forever_24"
-                    app:iconTint="@color/dark_text"/>
+                    app:iconTint="@color/dark_text" />
 
                 <!--Report Button-->
                 <Button
                     android:id="@+id/report_button"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -186,9 +191,10 @@
                     android:id="@+id/event_deadline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sign up before 2:30 p.m. on 2026-02-26"
+                    android:text="@string/default_event_deadline"
                     android:textColor="@color/purple"
                     android:textSize="7pt"
+                    android:gravity="center"
                     android:fontFamily="@font/roboto_bold" />
 
                 <!--Waiting List Count-->
@@ -196,9 +202,10 @@
                     android:id="@+id/waiting_list_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="67 people are waiting"
+                    android:text="@string/default_waiting_list_count"
                     android:textColor="@color/blue"
                     android:textSize="6pt"
+                    android:gravity="center"
                     android:fontFamily="@font/roboto"/>
 
                 <!--Attendees Count-->
@@ -206,9 +213,10 @@
                     android:id="@+id/attendees_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="10/32 people are participating"
+                    android:text="@string/default_attendees_count"
                     android:textColor="@color/green"
                     android:textSize="7pt"
+                    android:gravity="center"
                     android:fontFamily="@font/roboto_bold"/>
 
                 <LinearLayout
@@ -292,6 +300,8 @@
                             android:id="@+id/attending_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:paddingHorizontal="20dp"
+                            android:paddingVertical="10dp"
                             android:text="@string/attending_label_text"
                             android:textSize="7pt"
                             android:textColor="@color/dark_text"
@@ -307,6 +317,8 @@
                             android:id="@+id/cannot_attend_label"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:paddingHorizontal="20dp"
+                            android:paddingVertical="10dp"
                             android:text="@string/cannot_attend_label_text"
                             android:textSize="7pt"
                             android:textColor="@color/light_text"

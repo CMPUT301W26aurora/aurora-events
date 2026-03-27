@@ -61,7 +61,7 @@ public class InfoUEventFragment extends Fragment {
     private ImageButton infoButton;
 
     /**
-     *
+     * @author Alina Iqbal & Jared Strandlund
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
      * @param container If non-null, this is the parent view that the fragment's
@@ -89,47 +89,33 @@ public class InfoUEventFragment extends Fragment {
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // get views to display event details
-        backButton        = view.findViewById(R.id.back_button);           // done
-        poster            = view.findViewById(R.id.poster_image);          // done
-        eventName         = view.findViewById(R.id.event_name);            // done
-        eventDateTime     = view.findViewById(R.id.event_date_time);       // done
-        eventOrganizer    = view.findViewById(R.id.event_organizer);       // done
-        eventPrice        = view.findViewById(R.id.event_price);           // done
-        eventLocation     = view.findViewById(R.id.event_location);        // done
-        eventDescription  = view.findViewById(R.id.event_description);     // done
+        backButton        = view.findViewById(R.id.back_button);
+        poster            = view.findViewById(R.id.poster_image);
+        eventName         = view.findViewById(R.id.event_name);
+        eventDateTime     = view.findViewById(R.id.event_date_time);
+        eventOrganizer    = view.findViewById(R.id.event_organizer);
+        eventPrice        = view.findViewById(R.id.event_price);
+        eventLocation     = view.findViewById(R.id.event_location);
+        eventDescription  = view.findViewById(R.id.event_description);
 
         reportButton      = view.findViewById(R.id.report_button);         // TODO
-        deleteButton      = view.findViewById(R.id.delete_button);         // done
+        deleteButton      = view.findViewById(R.id.delete_button);         // TODO
 
-        bottomBar         = view.findViewById(R.id.bottom_bar);            // done
+        bottomBar         = view.findViewById(R.id.bottom_bar);
 
-        eventDeadline     = view.findViewById(R.id.event_deadline);        //
-        waitingListCount  = view.findViewById(R.id.waiting_list_count);    //
-        attendeesCount    = view.findViewById(R.id.attendees_count);       //
+        eventDeadline     = view.findViewById(R.id.event_deadline);
+        waitingListCount  = view.findViewById(R.id.waiting_list_count);
+        attendeesCount    = view.findViewById(R.id.attendees_count);
 
-        joinButton        = view.findViewById(R.id.join_button);           //
-        leaveButton       = view.findViewById(R.id.leave_button);          //
-        selectButtonSet   = view.findViewById(R.id.select_button_set);     //
-        acceptButton      = view.findViewById(R.id.accept_button);         //
-        declineButton     = view.findViewById(R.id.decline_button);        //
-        attendingLabel    = view.findViewById(R.id.attending_label);       //
-        cannotAttendLabel = view.findViewById(R.id.cannot_attend_label);   //
+        joinButton        = view.findViewById(R.id.join_button);
+        leaveButton       = view.findViewById(R.id.leave_button);
+        selectButtonSet   = view.findViewById(R.id.select_button_set);
+        acceptButton      = view.findViewById(R.id.accept_button);
+        declineButton     = view.findViewById(R.id.decline_button);
+        attendingLabel    = view.findViewById(R.id.attending_label);
+        cannotAttendLabel = view.findViewById(R.id.cannot_attend_label);
 
-        infoButton        = view.findViewById(R.id.selection_info_button); // TODO
-
-        /*
-        eventDeadline.setVisibility(View.GONE);
-        waitingListCount.setVisibility(View.GONE);
-        attendeesCount.setVisibility(View.GONE);
-
-        joinButton.setVisibility(View.GONE);
-        leaveButton.setVisibility(View.GONE);
-        selectButtonSet.setVisibility(View.GONE);
-        attendingLabel.setVisibility(View.GONE);
-        cannotAttendLabel.setVisibility(View.GONE);
-
-        infoButton.setVisibility(View.VISIBLE);
-         */
+        infoButton        = view.findViewById(R.id.selection_info_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -170,16 +156,24 @@ public class InfoUEventFragment extends Fragment {
                                             eventDescription.setText(event.getDescription());
                                             String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
                                             eventDeadline.setText(deadlineText);
-                                            String waitingCountText = event.registrationList.getWaitingList().size() + "people are waiting";
+                                            String waitingCountText;
+                                            if (event.registrationList.getWaitingList().size() == 1) {
+                                                waitingCountText = "1 person is waiting";
+                                            } else {
+                                                waitingCountText = event.registrationList.getWaitingList().size() + " people are waiting";
+                                            }
                                             waitingListCount.setText(waitingCountText);
-                                            String atendeesCountText = event.registrationList.getAttendingList() + ((event.getCapacity() == 0) ? "" : ("/" + event.getCapacity())) + "people are participating";
-                                            attendeesCount.setText(atendeesCountText);
+                                            String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
+                                            if (event.getCapacity() != 0) {
+                                                attendeesCountText += "/" + event.getCapacity();
+                                            }
+                                            attendeesCountText += " people are participating";
+                                            attendeesCount.setText(attendeesCountText);
 
                                             // set info button functionality
-                                            infoButton.setOnClickListener( //TODO
-                                                v -> {
-                                                    Log.w(TAG, "Info button not implemented");
-                                                    Toast.makeText(v.getContext(), "Info button not implemented", Toast.LENGTH_SHORT).show();
+                                            infoButton.setOnClickListener( v -> {
+                                                    SelectionInfoFragment infoFragment = new SelectionInfoFragment();
+                                                    infoFragment.show(requireActivity().getSupportFragmentManager(), "Lottery Info");
                                                 }
                                             );
 
@@ -202,6 +196,7 @@ public class InfoUEventFragment extends Fragment {
                                                 infoButton.setVisibility(View.VISIBLE);
 
                                                 // allow admin to delete event by clicking delete button
+                                                //TODO: confirm pop-up
                                                 deleteButton.setOnClickListener(v ->
                                                     EventDb.getInstance().deleteEvent(
                                                             event.getEventId(),
@@ -239,7 +234,7 @@ public class InfoUEventFragment extends Fragment {
                                                 bottomBar.setVisibility(View.VISIBLE);
 
                                                 // set report button functionality
-                                                reportButton.setOnClickListener( //TODO
+                                                reportButton.setOnClickListener(
                                                         v -> {
                                                             Log.w(TAG, "Report button not implemented");
                                                             Toast.makeText(v.getContext(), "Report button not implemented", Toast.LENGTH_SHORT).show();
