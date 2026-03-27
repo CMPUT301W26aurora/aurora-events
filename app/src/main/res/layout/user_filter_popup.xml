@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Include:"
+            android:textSize="20dp"
+        />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/particpating_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Participating"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/rejected_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Rejected"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/invited_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Invited"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/waiting_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Waiting"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/cancelled_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Cancelled"/>
+
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+        />
+
+        <Button
+            android:id="@+id/export_to_csv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Export to csv"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>
+
+<!-- Resource used https://www.geeksforgeeks.org/android/switch-in-android/ -->

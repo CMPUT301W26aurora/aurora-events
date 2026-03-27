@@ -44,28 +44,15 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         }
         User user = getItem(position);
         TextView userName = view.findViewById(R.id.user_name);
-        TextView userEmail = view.findViewById(R.id.user_email);
-        TextView userPhoneNumber = view.findViewById(R.id.user_phone_number);
         TextView userStatus = view.findViewById(R.id.user_status);
-        TextView userCancelledReason = view.findViewById(R.id.user_cancelled_reason);
 
         deleteButton = view.findViewById(R.id.delete_user_button);
 
         if (user != null) {
             userName.setText(user.getName());
             String status = user.getStatus();
-            String reason = user.getCancelledReason();
-            if (user.getEmail() != null) {
-                userEmail.setText(user.getEmail());
-            }
-            if (user.getPhoneNumber() != null) {
-                userPhoneNumber.setText(user.getPhoneNumber());
-            }
             if (status != null) {
                 userStatus.setText(status);
-            }
-            if (reason != null) {
-                userCancelledReason.setText(reason);
             }
         }
         return view;

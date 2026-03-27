@@ -172,6 +172,7 @@ public class Event {
      * The list of user's device IDs
      * @return
      * The list of user objects that were fetched with given device IDs
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
@@ -208,6 +209,7 @@ public class Event {
      * Gets the array list of user objects that are in the waiting list
      * @return
      * Return the array list of user objects in the waiting list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getWaitingListOfUsers() {
@@ -222,6 +224,7 @@ public class Event {
      * Gets the array list of user objects that are in the selected list
      * @return
      * Return the array list of user objects in the selected list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getSelectedListOfUsers() {
@@ -236,6 +239,7 @@ public class Event {
      * Gets the array list of user objects that are in the attending list
      * @return
      * Return the array list of user objects in the attending list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getAttendingListOfUsers() {
@@ -250,6 +254,7 @@ public class Event {
      * Gets the array list of user objects that are in the declined list
      * @return
      * Return the array list of user objects in the declined list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getDeclinedListOfUsers() {
@@ -264,6 +269,7 @@ public class Event {
      * Gets the array list of user objects that are in the cancelled list
      * @return
      * Return the array list of user objects in the cancelled list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getCancelledListOfUsers() {
@@ -278,6 +284,7 @@ public class Event {
      * Gets the array list of user objects that are in the removed list
      * @return
      * Return the array list of user objects in the removed list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getRemovedListOfUsers() {
@@ -288,6 +295,12 @@ public class Event {
         return users;
     }
 
+    /**
+     * Gets the array list of user objects that are in any of the event's lists
+     * @return
+     * Return the array list of all the users that were in any of the event's lists
+     * @author Won Koh
+     */
     public ArrayList<User> getListOfAllUsers() {
         ArrayList<User> users = new ArrayList<User>();
         users.addAll(this.getAttendingListOfUsers());
@@ -302,6 +315,7 @@ public class Event {
     /**
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
      * then send notification to both the users who were selected and not
+     * @author Won Koh
      */
     @Exclude
     public void randomSampling() {

@@ -2,32 +2,21 @@ package com.example.auroraevents.view;
 
 import static android.content.ContentValues.TAG;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
-import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserArrayAdapter;
 import com.example.auroraevents.server.EventDb;
@@ -35,6 +24,7 @@ import com.example.auroraevents.server.EventDb;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class UserListFragment extends DialogFragment {
     private Event currentEvent;
@@ -92,25 +82,39 @@ public class UserListFragment extends DialogFragment {
                 });
 
         // Filter by status TODO Figure out UI
-        ArrayList<String> filter = new ArrayList<String>();
-        if (!(filter.isEmpty())) {
-            userList = new ArrayList<User>();
-            if (filter.contains("Waiting")) {
-                userList.addAll(currentEvent.getWaitingListOfUsers());
-            }
-            if (filter.contains("Invited")) {
-                userList.addAll(currentEvent.getSelectedListOfUsers());
-            }
-            if (filter.contains("Rejected")) {
-                userList.addAll(currentEvent.getDeclinedListOfUsers());
-            }
-            if (filter.contains("Participating")) {
-                userList.addAll(currentEvent.getDeclinedListOfUsers());
-            }
-            if (filter.contains("Cancelled")) {
-                userList.addAll(currentEvent.getDeclinedListOfUsers());
-            }
-        }
+        filterButton = view.findViewById(R.id.filter_button);
+        var lambdaContext = new Object() {
+            SwitchCompat participating_filter;
+            SwitchCompat invited_filter;
+            SwitchCompat rejected_filter;
+            SwitchCompat waiting_filter;
+            SwitchCompat cancelled_filter;
+        };
+        filterButton.setOnClickListener(v -> {
+            new FilterUserPopUpFragment().show(
+                    getChildFragmentManager(), null);
+            lambdaContext.participating_filter = v.findViewById(R.id.particpating_switch);
+            lambdaContext.invited_filter = v.findViewById(R.id.invited_switch);
+            lambdaContext.rejected_filter = v.findViewById(R.id.rejected_switch);
+            lambdaContext.waiting_filter = v.findViewById(R.id.waiting_switch);
+            lambdaContext.cancelled_filter = v.findViewById(R.id.cancelled_switch);
+        });
+        userList = new ArrayList<User>();
+        lambdaContext.participating_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
+            userList.addAll(currentEvent.getAttendingListOfUsers());
+        });
+        lambdaContext.invited_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
+            userList.addAll(currentEvent.getSelectedListOfUsers());
+        });
+        lambdaContext.rejected_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
+            userList.addAll(currentEvent.getDeclinedListOfUsers());
+        });
+        lambdaContext.waiting_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
+            userList.addAll(currentEvent.getWaitingListOfUsers());
+        });
+        lambdaContext.cancelled_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
+            userList.addAll(currentEvent.getCancelledListOfUsers());
+        });
         userListAdapter.notifyDataSetChanged();
 
         // Delete users TODO figure out how to link with delete button
@@ -121,6 +125,7 @@ public class UserListFragment extends DialogFragment {
                 currentEvent.registrationList.addToCancelledList(selectedUserID);
             }
         });
+        userListAdapter.notifyDataSetChanged();
 
         // Sort users TODO figure out how to get dates and sort them as well as UI
 
