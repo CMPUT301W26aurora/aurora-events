@@ -256,7 +256,6 @@ public class Event {
         ArrayList<User> users = getUsersFromDB(registrationList.getDeclinedList());
         for (User user: users) {
             user.setStatus("Declined");
-            user.setCancelledReason("User Declined Invitation");
         }
         return users;
     }
@@ -271,7 +270,6 @@ public class Event {
         ArrayList<User> users = getUsersFromDB(registrationList.getCancelledList());
         for (User user: users) {
             user.setStatus("Cancelled");
-            user.setCancelledReason("User Left Waiting List");
         }
         return users;
     }
@@ -286,9 +284,6 @@ public class Event {
         ArrayList<User> users = getUsersFromDB(registrationList.getRemovedList());
         for (User user: users) {
             user.setStatus("Removed");
-            if (user.getCancelledReason() == null) {
-                user.setCancelledReason("Removed by Organizer");
-            }
         }
         return users;
     }

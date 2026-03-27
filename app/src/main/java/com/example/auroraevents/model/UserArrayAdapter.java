@@ -1,22 +1,36 @@
 package com.example.auroraevents.model;
 
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static androidx.core.content.ContextCompat.getSystemService;
+
+import android.app.AlertDialog;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
 
 import java.util.ArrayList;
 
 public class UserArrayAdapter extends ArrayAdapter<User> {
-    public UserArrayAdapter(Context context, ArrayList<User> users) {
+    private Event currentEvent;
+    private ImageButton deleteButton;
+    public UserArrayAdapter(Context context, ArrayList<User> users, Event event) {
         super(context, 0, users);
+        currentEvent = event;
     }
 
     @NonNull
@@ -34,6 +48,8 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         TextView userPhoneNumber = view.findViewById(R.id.user_phone_number);
         TextView userStatus = view.findViewById(R.id.user_status);
         TextView userCancelledReason = view.findViewById(R.id.user_cancelled_reason);
+
+        deleteButton = view.findViewById(R.id.delete_user_button);
 
         if (user != null) {
             userName.setText(user.getName());
@@ -55,3 +71,5 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         return view;
     }
 }
+
+// Resources used https://androidforbeginners.blogspot.com/2010/03/clicking-buttons-in-listview-row.html

@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!---Resource used https://stackoverflow.com/questions/5944987/how-to-create-a-popup-window-popupwindow-in-android -->
+    <ImageButton
+        android:id="@+id/cancel_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/gradient_confirm_button"
+        android:src="@drawable/rounded_delete_forever_24"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:backgroundTint="@color/zxing_transparent"
+        android:layout_gravity="top|end"
+        app:tint="@color/dark_red"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="30dp"
+            android:textSize="30sp"
+            android:text="WARNING"
+            android:layout_gravity="center|top"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="30dp"
+            android:textSize="15sp"
+            android:text="This action is permenant. Do you wish to proceed?"
+            android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="confirm"
+            android:layout_gravity="bottom|center_horizontal"
+            app:tint="@drawable/gradient_confirm_button"
+            />
+    </LinearLayout>
 
 </RelativeLayout>

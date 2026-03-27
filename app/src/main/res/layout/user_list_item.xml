@@ -33,29 +33,6 @@
             android:text="No Status" />
 
         <TextView
-            android:id="@+id/user_cancelled_reason"
-            android:layout_width="300dp"
-            android:layout_height="16sp"
-            android:text="Unspecified Reason"
-            android:visibility="gone"/>
-
-        <TextView
-            android:id="@+id/user_email"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="Email not registered"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/user_phone_number"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="Phone not registered"
-            android:visibility="gone" />
-
-        <TextView
             android:id="@+id/invite_duration"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
