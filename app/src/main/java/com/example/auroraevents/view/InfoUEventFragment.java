@@ -99,7 +99,7 @@ public class InfoUEventFragment extends Fragment {
         eventDescription  = view.findViewById(R.id.event_description);
 
         reportButton      = view.findViewById(R.id.report_button);         // TODO
-        deleteButton      = view.findViewById(R.id.delete_button);         // TODO
+        deleteButton      = view.findViewById(R.id.delete_button);
 
         bottomBar         = view.findViewById(R.id.bottom_bar);
 
@@ -196,17 +196,19 @@ public class InfoUEventFragment extends Fragment {
                                                 infoButton.setVisibility(View.VISIBLE);
 
                                                 // allow admin to delete event by clicking delete button
-                                                //TODO: confirm pop-up
-                                                deleteButton.setOnClickListener(v ->
-                                                    EventDb.getInstance().deleteEvent(
-                                                            event.getEventId(),
-                                                            () -> {
-                                                                Log.d(TAG, "Event deleted by admin");
-                                                                getParentFragmentManager().popBackStack();
-                                                            },
-                                                            e -> Log.e(TAG, "Error deleting event: " + e)
-                                                    )
-                                                );
+                                                deleteButton.setOnClickListener(v -> {
+                                                    PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(
+                                                            () -> EventDb.getInstance().deleteEvent(
+                                                                event.getEventId(),
+                                                                () -> {
+                                                                    Log.d(TAG, "Event deleted by admin");
+                                                                    getParentFragmentManager().popBackStack();
+                                                                },
+                                                                e -> Log.e(TAG, "Error deleting event: " + e)
+                                                            )
+                                                    );
+                                                    fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Delete");
+                                                });
                                             }
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
                                                 //TODO: when event edit opening is done, add:
@@ -234,8 +236,7 @@ public class InfoUEventFragment extends Fragment {
                                                 bottomBar.setVisibility(View.VISIBLE);
 
                                                 // set report button functionality
-                                                reportButton.setOnClickListener(
-                                                        v -> {
+                                                reportButton.setOnClickListener(v -> { //TODO
                                                             Log.w(TAG, "Report button not implemented");
                                                             Toast.makeText(v.getContext(), "Report button not implemented", Toast.LENGTH_SHORT).show();
                                                         }

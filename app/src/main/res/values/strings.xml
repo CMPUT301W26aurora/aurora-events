@@ -35,11 +35,14 @@
     <string name="lottery_info_description">When you sign up, your name gets put into a pool, then the organizer can randomly select people to invite.\n\nIf you get invited, you can choose to accept or decline. If you don\'t accept by the deadline, you are automatically declined.</string>
     <string name="lottery_info_title">How the lottery works</string>
     <string name="default_event_name">Default Event Name (you shouldn\'t see this)</string>
-    <string name="default_event_date_time">Every Thursday and Friday @ 2:30 p.m. - 5:00 p.m. from 2026-03-05 - 2026-04-24 (you shouldn\'t see this)</string>
+    <string name="default_event_date_time">Every Thursday and Friday @ 2:30 p.m. – 5:00 p.m. from 2026-03-05 – 2026-04-24 (you shouldn\'t see this)</string>
     <string name="default_event_organizer">put on by Aurora LLC (you shouldn\'t see this)</string>
     <string name="default_event_price">$999 (you shouldn\'t see this)</string>
     <string name="default_event_location">in Edmonton, Alberta, Canada (you shouldn\'t see this)</string>
     <string name="default_event_deadline">Sign up before 2:30 p.m. on 2026-02-26 (you shouldn\'t see this)</string>
     <string name="default_waiting_list_count">67 people are waiting (you shouldn\'t see this)</string>
     <string name="default_attendees_count">10/32 people are participating (you shouldn\'t see this)</string>
+    <string name="delete_button_text">Delete</string>
+    <string name="permanent_warning_description">This action is permanent. Do you wish to proceed?</string>
+    <string name="permanent_warning_title">WARNING</string>
 </resources>
