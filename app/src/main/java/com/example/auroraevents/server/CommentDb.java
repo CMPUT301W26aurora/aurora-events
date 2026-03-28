@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Singleton Class for Firestore operations on "Comments" collection
+ */
 public class CommentDb {
     private static final String TAG             = "CommentDb";
     private static final String COLLECTION_NAME = "Comments";
