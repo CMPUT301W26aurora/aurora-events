@@ -40,7 +40,7 @@
     <string name="default_event_price">$999 (you shouldn\'t see this)</string>
     <string name="default_event_location">in Edmonton, Alberta, Canada (you shouldn\'t see this)</string>
     <string name="default_event_deadline">Sign up before 2:30 p.m. on 2026-02-26 (you shouldn\'t see this)</string>
-    <string name="default_waiting_list_count">67 people are waiting (you shouldn\'t see this)</string>
+    <string name="default_waiting_list_count">67/420 people are waiting (you shouldn\'t see this)</string>
     <string name="default_attendees_count">10/32 people are participating (you shouldn\'t see this)</string>
     <string name="delete_button_text">Delete</string>
     <string name="permanent_warning_description">This action is permanent. Do you wish to proceed?</string>

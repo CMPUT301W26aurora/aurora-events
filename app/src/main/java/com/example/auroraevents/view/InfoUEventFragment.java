@@ -166,26 +166,6 @@ public class InfoUEventFragment extends Fragment {
                                             eventDescription.setText(event.getDescription());
                                             String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
                                             eventDeadline.setText(deadlineText);
-                                            // set waiting count grammatically
-                                            String waitingCountText;
-                                            if (event.registrationList.getWaitingList().size() == 1) {
-                                                waitingCountText = "1 person is waiting";
-                                            } else {
-                                                waitingCountText = event.registrationList.getWaitingList().size() + " people are waiting";
-                                            }
-                                            waitingListCount.setText(waitingCountText);
-                                            // set attendees count grammatically
-                                            String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
-                                            // don't display the capacity if there is no capacity
-                                            if (event.getCapacity() != 0) {
-                                                attendeesCountText += "/" + event.getCapacity();
-                                            }
-                                            if (attendeesCountText.equals("1") && event.getCapacity() == 0) {
-                                                attendeesCountText += " person is participating";
-                                            } else {
-                                                attendeesCountText += " people are participating";
-                                            }
-                                            attendeesCount.setText(attendeesCountText);
 
                                             // set info button functionality
                                             infoButton.setOnClickListener( v -> {
@@ -279,13 +259,37 @@ public class InfoUEventFragment extends Fragment {
                                                     fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Report");
                                                 });
 
+                                                // set waiting count grammatically
+                                                String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
+                                                // don't display the capacity if there is unlimited capacity
+                                                if (event.registrationList.getWaitingCapacity() > -1) {
+                                                    waitingCountText += "/" + event.registrationList.getWaitingCapacity();
+                                                }
+                                                if (waitingCountText.equals("1") && event.registrationList.getWaitingCapacity() > -1) {
+                                                    waitingCountText += " person is waiting";
+                                                } else {
+                                                    waitingCountText += " people are waiting";
+                                                }
+                                                waitingListCount.setText(waitingCountText);
+
+                                                // set attendees count grammatically
+                                                String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
+                                                // don't display the capacity if there is unlimited capacity
+                                                if (event.registrationList.getAttendingCapacity() > -1) {
+                                                    attendeesCountText += "/" + event.registrationList.getAttendingCapacity();
+                                                }
+                                                if (attendeesCountText.equals("1") && event.registrationList.getAttendingCapacity() > -1) {
+                                                    attendeesCountText += " person is participating";
+                                                } else {
+                                                    attendeesCountText += " people are participating";
+                                                }
+                                                attendeesCount.setText(attendeesCountText);
+
                                                 // check which list user is in and display corresponding content
                                                 if (event.registrationList.getAttendingList().contains(userId)) {
                                                     eventDeadline.setVisibility(View.GONE);
                                                     waitingListCount.setVisibility(View.GONE);
                                                     attendeesCount.setVisibility(View.VISIBLE);
-                                                    String attendeesText = event.registrationList.getAttendingList().size() + "/" + event.getCapacity() + " people are participating ";
-                                                    attendeesCount.setText(attendeesText);
 
                                                     joinButton.setVisibility(View.GONE);
                                                     leaveButton.setVisibility(View.GONE);
@@ -346,9 +350,21 @@ public class InfoUEventFragment extends Fragment {
                                                     cannotAttendLabel.setVisibility(View.VISIBLE);
 
                                                     infoButton.setVisibility(View.GONE);
-                                                } else if (event.getEmptySlotAmount() == 0) {
+                                                } else if (event.registrationList.getEmptySlotAmount() == 0) {
                                                     eventDeadline.setVisibility(View.GONE);
                                                     waitingListCount.setVisibility(View.GONE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+
+                                                    joinButton.setVisibility(View.GONE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.VISIBLE);
+
+                                                    infoButton.setVisibility(View.VISIBLE);
+                                                } else if (event.registrationList.getWaitingCapacity() > -1 && event.registrationList.getWaitingList().size() >= event.registrationList.getWaitingCapacity()) {
+                                                    eventDeadline.setVisibility(View.GONE);
+                                                    waitingListCount.setVisibility(View.VISIBLE);
                                                     attendeesCount.setVisibility(View.VISIBLE);
 
                                                     joinButton.setVisibility(View.GONE);
@@ -383,7 +399,6 @@ public class InfoUEventFragment extends Fragment {
 
                                                     infoButton.setVisibility(View.VISIBLE);
 
-                                                    // add user to waitingList when Join Pool is clicked
                                                     joinButton.setOnClickListener(v -> {
                                                         int e = event.registrationList.addToWaitingList(userId);
                                                         if (e > 0) {

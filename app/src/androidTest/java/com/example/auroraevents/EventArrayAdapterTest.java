@@ -28,6 +28,7 @@ public class EventArrayAdapterTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
 
@@ -54,6 +55,7 @@ public class EventArrayAdapterTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
 
@@ -80,6 +82,7 @@ public class EventArrayAdapterTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         event.registrationList.getSelectedList().add("test-device-id");
@@ -101,6 +104,7 @@ public class EventArrayAdapterTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         event.registrationList.getWaitingList().add("test-device-id");
@@ -122,6 +126,7 @@ public class EventArrayAdapterTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         assertFalse(event.registrationList.getAttendingList().contains("test-device-id"));

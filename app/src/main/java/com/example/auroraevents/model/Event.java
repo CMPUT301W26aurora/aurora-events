@@ -33,7 +33,6 @@ public class Event {
     private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String location;
     private boolean geolocationRequired;
-    private int    capacity;              // 0 = unlimited
     private String qrCodeData;            // String payload encoded in the QR code
     private Bitmap qR;
     private Bitmap poster;
@@ -57,7 +56,8 @@ public class Event {
             LocalDateTime registrationEnd,
             String location,
             boolean geolocationRequired,
-            int capacity,
+            int waitingCapacity,
+            int attendingCapacity,
             Bitmap poster) {
         this();
         this.organizerDeviceId     = organizerDeviceId;
@@ -69,7 +69,8 @@ public class Event {
         this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location              = location;
         this.geolocationRequired   = geolocationRequired;
-        this.capacity              = capacity;
+        this.registrationList.setWaitingCapacity(waitingCapacity);
+        this.registrationList.setAttendingCapacity(attendingCapacity);
         this.poster                = poster;
     }
 
@@ -109,9 +110,6 @@ public class Event {
 
     public boolean getGeolocationRequired()                            { return geolocationRequired; }
     public void    setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
-
-    public int    getCapacity()             { return capacity; }
-    public void   setCapacity(int capacity) { this.capacity = capacity; }
 
     public String getQrCodeData()                  { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData) { this.qrCodeData = qrCodeData; }
@@ -168,27 +166,4 @@ public class Event {
 
     @Exclude
     public Bitmap getQrCode() { return this.qR; }
-
-    // ── Sampling ──────────────────────────────────────────────────
-    /**
-     * Returns the amount of empty slots that is available in the event
-     * @return
-     * Amount of empty slots available (-1 is infinite)
-     */
-    @Exclude
-    public int getEmptySlotAmount() {
-        if (capacity == 0)
-            return -1;
-        return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
-    }
-
-    /**
-     * Randomly samples users in the waiting list and adds the selected ones to the selected list
-     * then send notification to both the users who were selected and not
-     */
-    @Exclude
-    public void randomSampling() {
-        registrationList.randomSampling(getEmptySlotAmount(), getCapacity());
-    }
-
 }

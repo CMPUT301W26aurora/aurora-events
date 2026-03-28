@@ -45,6 +45,7 @@ public class NotificationArrayAdapter extends ArrayAdapter<Notification> {
         TextView body      = view.findViewById(R.id.notification_body);
         TextView timestamp = view.findViewById(R.id.notification_timestamp);
 
+        assert notification != null;
         title.setText(notification.getTitle());
         body.setText(notification.getBody());
         timestamp.setText(notification.getTimestamp() != null

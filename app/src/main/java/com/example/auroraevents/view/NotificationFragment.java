@@ -67,6 +67,7 @@ public class NotificationFragment extends Fragment {
 
             Bundle args = new Bundle();
             args.putString("eventId", selected.getEventId());
+            new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(requireActivity(), u -> args.putString("userId", u.getDeviceId()));
 
             InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
             infoUEventFragment.setArguments(args);

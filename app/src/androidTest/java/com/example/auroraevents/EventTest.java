@@ -44,6 +44,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         assertEquals("organizer-xyz", event.getOrganizerDeviceId());
@@ -65,6 +66,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         assertEquals("Sports Event", event.getName());
@@ -86,6 +88,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         assertEquals("Explore your favourite sport", event.getDescription());
@@ -106,6 +109,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null
         );
@@ -128,6 +132,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null
         );
@@ -151,6 +156,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null
         );
@@ -175,6 +181,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         assertEquals("Rec Centre", event.getLocation());
@@ -195,9 +202,10 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
-        assertEquals(20, event.getCapacity());
+        assertEquals(20, event.registrationList.getAttendingCapacity());
     }
 
     /**

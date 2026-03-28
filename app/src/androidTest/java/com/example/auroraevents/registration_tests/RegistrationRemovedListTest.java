@@ -51,7 +51,8 @@ public class RegistrationRemovedListTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                0,
+                -1,
+                -1,
                 null);
         setUpEvent(event);
         list = event.registrationList;

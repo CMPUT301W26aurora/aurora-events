@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RegistrationList { //TODO: check if enough capacity on waiting, selected, and attending lists
+public class RegistrationList {
     private String eventId;
     private final List<String> waitingList;     // signed up, awaiting lottery
     private final List<String> selectedList;    // drawn / invited but not yet confirmed
@@ -30,6 +30,8 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
     private final List<String> declinedList;    // invited then self declined
     private final List<String> cancelledList;   // self cancelled
     private final List<String> removedList;     // force removed
+    private int attendingCapacity;
+    private int waitingCapacity;
     private Integer databaseTimeout = 10;
     private TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
@@ -52,10 +54,23 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
         this.eventId = eventId;
     }
 
+    public int getAttendingCapacity() {
+        return attendingCapacity;
+    }
+    public void setAttendingCapacity(int attendingCapacity) {
+        this.attendingCapacity = attendingCapacity;
+    }
+
+    public int getWaitingCapacity() {
+        return waitingCapacity;
+    }
+    public void setWaitingCapacity(int waitingCapacity) {
+        this.waitingCapacity = waitingCapacity;
+    }
+
     public Integer getDatabaseTimeout() {
         return databaseTimeout;
     }
-
     public void setDatabaseTimeout(Integer databaseTimeout) {
         this.databaseTimeout = databaseTimeout;
     }
@@ -63,7 +78,6 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
     public TimeUnit getTimeoutUnit() {
         return timeoutUnit;
     }
-
     public void setTimeoutUnit(TimeUnit unit) {
         timeoutUnit = unit;
     }
@@ -117,14 +131,17 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
      *
      * @param userID The entrant's device ID
      * @return
-     *     {@code 0} when successful add
+     *     {@code 0}  when successful add
      *     {@code -1} when already on list
-     *     {@code 1} when already on blocking list
-     *     {@code 2} when database change fails
+     *     {@code 1}  when already on blocking list
+     *     {@code 2}  when database change fails
+     *     {@code 3}  when not enough capacity
      * @author Jared Strandlund
      */
     public int addToWaitingList(String userID) {
-        if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID))
+        if (waitingCapacity > -1 && waitingList.size() >= waitingCapacity) {
+            return 3;
+        } else if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID))
             return 1;
         else if (waitingList.contains(userID))
             return -1;
@@ -194,11 +211,14 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
      *     {@code -1} when already on list
      *     {@code 1} when already on blocking list
      *     {@code 2} when database change fails
+     *     {@code 3} when not enough capacity
      * @author Jared Strandlund
      */
 
     public int addToSelectedList(String userID) {
-        if (waitingList.remove(userID)) {
+        if (attendingCapacity > -1 && attendingList.size() >= attendingCapacity) {
+            return 3;
+        } else if (waitingList.remove(userID)) {
             boolean status = changeDb(LIST_WAITING, LIST_SELECTED, userID);
             if (status) {
                 selectedList.add(userID);
@@ -677,6 +697,19 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
             return new ArrayList<>();
     }
 
+    // ── Sampling ──────────────────────────────────────────────────
+    /**
+     * Returns the amount of empty slots that is available in the event
+     * @return
+     * Amount of empty slots available (-1 is infinite)
+     */
+    @Exclude
+    public int getEmptySlotAmount() {
+        if (getAttendingCapacity() < 0)
+            return -1;
+        return getAttendingCapacity() - getAttendingList().size() - getSelectedList().size();
+    }
+
     /**
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
      * then send notification to both the users who were selected and not
@@ -699,5 +732,14 @@ public class RegistrationList { //TODO: check if enough capacity on waiting, sel
                 addToSelectedList(selectedUserID);
             }
         }
+    }
+
+    /**
+     * Randomly samples users in the waiting list and adds the selected ones to the selected list
+     * then send notification to both the users who were selected and not
+     */
+    @Exclude
+    public void randomSampling() {
+        randomSampling(getEmptySlotAmount(), getAttendingCapacity());
     }
 }

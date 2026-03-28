@@ -75,7 +75,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0,
+                -1,
+                -1,
                 null);
         selectedEvent = new Event(
                 "test organizer",
@@ -87,7 +88,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0,
+                -1,
+                -1,
                 null);
         attendingEvent = new Event(
                 "test organizer",
@@ -99,7 +101,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0,
+                -1,
+                -1,
                 null);
         declinedEvent = new Event(
                 "test organizer",
@@ -111,7 +114,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0,
+                -1,
+                -1,
                 null);
         cancelledEvent = new Event(
                 "test organizer",
@@ -123,7 +127,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0,
+                -1,
+                -1,
                 null);
         removedEvent = new Event(
                 "test organizer",
@@ -135,7 +140,8 @@ public class UserDeleteTest {
                 LocalDateTime.now().plusDays(1),
                 TAG,
                 false,
-                0,
+                -1,
+                -1,
                 null);
 
         setUpEvent(waitingEvent);

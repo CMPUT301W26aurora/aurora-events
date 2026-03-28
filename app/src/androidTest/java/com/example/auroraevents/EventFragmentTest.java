@@ -34,6 +34,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Rec Centre",
                 false,
+                -1,
                 20,
                 null);
         event.setEventId("test-event-1");
@@ -57,6 +58,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 3, 10, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
@@ -72,6 +74,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 3, 10, 23, 59),
                 "Arts Centre",
                 false,
+                -1,
                 50,
                 null);
         event2.setEventId("test-event-2");
@@ -96,6 +99,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 3, 10, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");

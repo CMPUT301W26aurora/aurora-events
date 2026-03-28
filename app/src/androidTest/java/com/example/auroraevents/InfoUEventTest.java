@@ -29,6 +29,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
@@ -51,6 +52,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
@@ -73,6 +75,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
@@ -95,10 +98,11 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
-        assertEquals(40, event1.getCapacity());
+        assertEquals(40, event1.registrationList.getAttendingCapacity());
     }
 
     /**
@@ -117,6 +121,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
@@ -141,6 +146,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         event1.setEventId("test-event-1");
@@ -169,6 +175,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         String userId = "user-abc";
@@ -193,6 +200,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         String userId = "user-abc";
@@ -219,6 +227,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         String userId = "user-abc";
@@ -245,6 +254,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         String userId = "user-abc";
@@ -271,6 +281,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                 LocalDateTime.of(2026, 6, 1, 23, 59),
                 "Community Centre",
                 false,
+                -1,
                 40,
                 null);
         String userId = "user-abc";
@@ -307,6 +318,7 @@ public class InfoUEventTest { //TODO 2: make the tests test what they say they t
                     LocalDateTime.of(2026, 6, 1, 23, 59),
                     "Community Centre",
                     false,
+                    -1,
                     40,
                     null);
             event.setEventId("test-event-1");

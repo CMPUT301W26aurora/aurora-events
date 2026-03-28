@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.journeyapps.barcodescanner.ScanContract;
@@ -39,6 +41,9 @@ public class CameraFragment extends Fragment {
     public void handleValid(String qr){
         Bundle bundle = new Bundle();
         bundle.putString("eventId", qr);
+        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(requireActivity(), u -> {
+            bundle.putString("userId", u.getDeviceId());
+        });
 
         InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
         infoUEventFragment.setArguments(bundle);

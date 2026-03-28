@@ -54,6 +54,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
+                -1,
                 3,
                 null);
         myEvent.setEventId("test event");
@@ -69,6 +70,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
+                -1,
                 3,
                 null);
         myEvent2.setEventId("test event");
@@ -84,6 +86,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
+                -1,
                 10,
                 null);
         myEvent3.setEventId("test event");
@@ -131,7 +134,7 @@ public class WaitListSamplingTest {
         // Randomly sample waiting list
         organizer.sampleWaitList(myEvent);
         // Check if empty slots is 0
-        assertEquals(0, myEvent.getEmptySlotAmount());
+        assertEquals(0, myEvent.registrationList.getEmptySlotAmount());
         // Check if the waitlist shrunk to 1
         assertEquals(1, organizer.getEventWaitList(myEvent).size());
         // Check if the selected list increased by 3
@@ -181,7 +184,7 @@ public class WaitListSamplingTest {
         organizer.sampleWaitList(myEvent3);
 
         // Check that there are still 6 more empty slots
-        assertEquals(6, myEvent3.getEmptySlotAmount());
+        assertEquals(6, myEvent3.registrationList.getEmptySlotAmount());
         // Check the amounts for waiting list and selected list
         assertEquals(0, myEvent3.registrationList.getWaitingList().size());
         assertEquals(4, myEvent3.registrationList.getSelectedList().size());

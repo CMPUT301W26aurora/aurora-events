@@ -154,8 +154,9 @@ public class EventCreationFragment extends Fragment {
                             registerEnd,
                             location,
                             geolocationRequired,
-                            Integer.parseInt(eventCap),
-                            null //TODO
+                            -1,
+                            capacityValue,
+                            null
                     );
                     getParentFragmentManager().popBackStack();
                 }

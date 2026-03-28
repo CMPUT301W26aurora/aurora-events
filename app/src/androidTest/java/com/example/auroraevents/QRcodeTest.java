@@ -25,7 +25,8 @@ public class QRcodeTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
-                0,
+                -1,
+                -1,
                 null);
         event.setEventId("sample id for QR Code testing");
         event.generateQrCode();

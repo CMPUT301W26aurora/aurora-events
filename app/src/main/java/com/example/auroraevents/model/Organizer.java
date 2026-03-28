@@ -29,14 +29,18 @@ public class Organizer extends User {
     }
 
     /**
-     * @param organizerDeviceId  The organizer's device ID
-     * @param title              The title of the event
-     * @param description        The event description
-     * @param date               The date of the event, format: yyyy-MM-dd HH:mm:ss
-     * @param startTime          The start of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param endTime            The end of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param location           The event location
-     * @param capacity           The event capacity
+     * @param organizerDeviceId   The organizer's device ID
+     * @param title               The title of the event
+     * @param description         The event description
+     * @param price               The event's price
+     * @param date                The date of the event, format: yyyy-MM-dd HH:mm:ss
+     * @param startTime           The start of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param endTime             The end of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param location            The event location
+     * @param geolocationRequired Whether entrants need to be in the location to sign up
+     * @param waitingCapacity     The total number of entrants that could attend the event
+     * @param attendingCapacity   The total number of entrants that can join the waiting list
+     * @param poster              A pretty picture for the event info screen
      */
     public void CreateEvent(
             String organizerDeviceId,
@@ -48,7 +52,8 @@ public class Organizer extends User {
             String endTime,
             String location,
             boolean geolocationRequired,
-            int capacity,
+            int waitingCapacity,
+            int attendingCapacity,
             Bitmap poster) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -68,7 +73,8 @@ public class Organizer extends User {
                 eventRegistrationEnd,
                 location,
                 geolocationRequired,
-                capacity,
+                waitingCapacity,
+                attendingCapacity,
                 poster);
 
         // Bug 3 fix: only add to local list after Firestore confirms success
@@ -90,7 +96,7 @@ public class Organizer extends User {
         if (!(myEvents.contains(event))) {
             throw new IllegalArgumentException("Event not found");
         } else {
-            event.randomSampling();
+            event.registrationList.randomSampling();
         }
     }
 

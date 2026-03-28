@@ -50,6 +50,7 @@ public class GetWaitListTest {
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 false,
+                -1,
                 2,
                 null);
         myEvent.setEventId("test event");
