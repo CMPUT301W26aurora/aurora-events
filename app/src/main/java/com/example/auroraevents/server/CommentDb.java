@@ -7,11 +7,16 @@ import com.example.auroraevents.model.Event;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CommentDb {
     private static final String TAG             = "CommentDb";
@@ -32,6 +37,42 @@ public class CommentDb {
         }
         return instance;
     }
+    // --Helper Function------------------------------------------------------
+
+    /**
+     * Takes a list of comments and sorts the replies by oldest first
+     *
+     * @param allComments the list of comments to sort
+     * @return the sorted list with the required order
+     */
+    private List<Comment> threadSort(List<Comment> allComments){
+        List<Comment> main = new ArrayList<>();
+        //hashmap to make replies faster
+        Map<String, List<Comment>> replyMap = new HashMap<>();
+
+        //iterate over all comments, determine if reply or main
+        for(Comment c: allComments){
+            if(c.getParentId() == null || c.getParentId().isEmpty()){
+                main.add(c);
+            }else{
+                replyMap.computeIfAbsent(c.getParentId(), k->new ArrayList<>()).add(c);
+            }
+        }
+
+        //result list to return
+        List<Comment> result = new ArrayList<>();
+        for(Comment c: main){
+            result.add(c);
+            List<Comment> repliesForThisParent = replyMap.get(c.getId());
+            if(repliesForThisParent != null){
+                Collections.reverse(repliesForThisParent);
+                result.addAll(repliesForThisParent);
+            }
+        }
+        return result;
+
+    }
+
 
     // ── CREATE ─────────────────────────────────────────────────────────────
 
@@ -74,13 +115,14 @@ public class CommentDb {
     public void getCommentsForEvent(String eventId, CommentDb.OnCommentsFetchedCallback onFetched, CommentDb.OnFailureCallback onFailure){
         db.collection(COLLECTION_NAME)
                 .whereEqualTo("eventId", eventId)
-                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Comment> comments = queryDocumentSnapshots.toObjects(Comment.class);
+                    List<Comment> threadedList = threadSort(comments);
 
                     Log.d(TAG, "Fetched " + comments.size() + " comments for event: " + eventId);
-                    onFetched.onFetched(comments);
+                    onFetched.onFetched(threadedList);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to fetch event comments: " + eventId, e);
@@ -98,7 +140,10 @@ public class CommentDb {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     List<Comment> comments = querySnapshot.toObjects(Comment.class);
-                    onFetched.onFetched(comments);
+                    List<Comment> threadedList = threadSort(comments);
+
+                    Log.d(TAG, "Fetched all Comments");
+                    onFetched.onFetched(threadedList);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to fetch all comments", e);
