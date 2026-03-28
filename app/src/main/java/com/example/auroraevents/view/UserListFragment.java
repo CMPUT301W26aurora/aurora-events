@@ -123,9 +123,9 @@ public class UserListFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selectedUserID = Objects.requireNonNull(userListAdapter.getItem(position)).getDeviceId();
                 currentEvent.registrationList.addToCancelledList(selectedUserID);
+                userListAdapter.notifyDataSetChanged();
             }
         });
-        userListAdapter.notifyDataSetChanged();
 
         // Sort users TODO figure out how to get dates and sort them as well as UI
 
