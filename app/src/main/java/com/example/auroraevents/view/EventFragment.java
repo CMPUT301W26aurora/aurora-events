@@ -108,7 +108,7 @@ public class EventFragment extends Fragment {
 
             Fragment eventFragment;
             if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
-                //TODO: open event edit
+                //TODO 5: open event edit
                 eventFragment = new InfoUEventFragment();
                 eventFragment.setArguments(args);
             } else {

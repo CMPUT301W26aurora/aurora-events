@@ -7,16 +7,25 @@ import static org.junit.Assert.assertTrue;
 import com.example.auroraevents.model.RegistrationList;
 
 public class RegistrationListTestsSupport {
+    /**
+     * @author Jared Strandlund
+     */
     public static void checkSingle(RegistrationList list, String entrantID) {
         assertEquals(1, list.getAllEntrantsList().size());
         assertTrue(list.getAllEntrantsList().contains(entrantID));
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void checkNone(RegistrationList list, String entrantID) {
         assertEquals(0, list.getAllEntrantsList().size());
         assertFalse(list.getAllEntrantsList().contains(entrantID));
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpWaitingList(RegistrationList list, String entrantID) {
         int initAllSize = list.getAllEntrantsList().size();
         boolean onList = list.getAllEntrantsList().contains(entrantID);
@@ -30,6 +39,9 @@ public class RegistrationListTestsSupport {
             assertEquals(initAllSize+1, list.getAllEntrantsList().size());
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpSelectedList(RegistrationList list, String entrantID) {
         setUpWaitingList(list, entrantID);
         int initAllSize = list.getAllEntrantsList().size();
@@ -43,6 +55,9 @@ public class RegistrationListTestsSupport {
         assertEquals(initAllSize, list.getAllEntrantsList().size());
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpAttendingList(RegistrationList list, String entrantID) {
         setUpSelectedList(list, entrantID);
         int initAllSize = list.getAllEntrantsList().size();
@@ -56,6 +71,9 @@ public class RegistrationListTestsSupport {
         assertEquals(initAllSize, list.getAllEntrantsList().size());
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpDeclinedList(RegistrationList list, String entrantID) {
         setUpSelectedList(list, entrantID);
         int initAllSize = list.getAllEntrantsList().size();
@@ -69,6 +87,9 @@ public class RegistrationListTestsSupport {
         assertEquals(initAllSize, list.getAllEntrantsList().size());
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpCancelledList(RegistrationList list, String entrantID) {
         setUpWaitingList(list, entrantID);
         int initAllSize = list.getAllEntrantsList().size();
@@ -82,6 +103,9 @@ public class RegistrationListTestsSupport {
         assertEquals(initAllSize, list.getAllEntrantsList().size());
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpRemovedList(RegistrationList list, String entrantID) {
         int initAllSize = list.getAllEntrantsList().size();
         boolean onList = list.getAllEntrantsList().contains(entrantID);
@@ -95,6 +119,9 @@ public class RegistrationListTestsSupport {
             assertEquals(initAllSize+1, list.getAllEntrantsList().size());
     }
 
+    /**
+     * @author Jared Strandlund
+     */
     public static void setUpAllLists(
             RegistrationList registrationList,
             String waitingEntrant,

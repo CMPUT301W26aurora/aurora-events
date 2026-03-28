@@ -115,7 +115,7 @@ public class InfoUEventFragment extends Fragment {
         attendingLabel    = view.findViewById(R.id.attending_label);
         cannotAttendLabel = view.findViewById(R.id.cannot_attend_label);
 
-        infoButton        = view.findViewById(R.id.selection_info_button);
+        infoButton        = view.findViewById(R.id.lottery_info_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -164,8 +164,6 @@ public class InfoUEventFragment extends Fragment {
                                             eventPrice.setText(event.getPrice());
                                             eventLocation.setText(event.getLocation());
                                             eventDescription.setText(event.getDescription());
-                                            String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
-                                            eventDeadline.setText(deadlineText);
 
                                             // set info button functionality
                                             infoButton.setOnClickListener( v -> {
@@ -258,6 +256,9 @@ public class InfoUEventFragment extends Fragment {
                                                     );
                                                     fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Report");
                                                 });
+
+                                                String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
+                                                eventDeadline.setText(deadlineText);
 
                                                 // set waiting count grammatically
                                                 String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
