@@ -4,7 +4,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,11 +36,12 @@ public class EventFragment extends Fragment {
     private static final String TAG = "EventFragment";
     private FloatingActionButton addEventButton;
     private UserViewModel userViewModel;
+    private String userId;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
     /**
-     *
+     * @author Alina Iqbal
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
      * @param container If non-null, this is the parent view that the fragment's
@@ -49,8 +49,6 @@ public class EventFragment extends Fragment {
      * but this can be used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
-     *
-     * @return
      */
     @Nullable
     @Override
@@ -63,6 +61,10 @@ public class EventFragment extends Fragment {
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                userId = user.getDeviceId();
+            }
+
             Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
             if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()) || User.ROLE_ADMIN.equals(user.getRole()))) {
                 addEventButton.setVisibility(VISIBLE);
@@ -71,25 +73,22 @@ public class EventFragment extends Fragment {
             }
         });
 
-        ListView listView = root.findViewById(R.id.events_list);
-
-        // Inflate and add the header
-        View header = inflater.inflate(R.layout.header_event_fragment, listView, false);
-        listView.addHeaderView(header, null, false);
-
-        ArrayList<com.example.auroraevents.model.Event>eventList = new ArrayList<>();
         ListView eventsListView = root.findViewById(R.id.events_list);
 
-        // get user's device ID to determine user's status for the event
-        String userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        // Inflate and add the header
+        View header = inflater.inflate(R.layout.header_event_fragment, eventsListView, false);
+        eventsListView.addHeaderView(header, null, false);
+
+        ArrayList<Event>eventList = new ArrayList<>();
+
         // create adapter with eventList
-        com.example.auroraevents.model.EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
+        EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
         eventsListView.setAdapter(eventsAdapter);
 
         // resource used: https://stackoverflow.com/questions/7309259/get-list-of-attributes-of-an-object-in-an-list
         // get all events from firestore
         EventDb.getInstance().getAllEvents(events -> {
-            for (com.example.auroraevents.model.Event event : events) {
+            for (Event event : events) {
                 Log.d(TAG, "Event" +  event.getName() + " in " + event.getLocation());
                 eventList.add(event);
             }
@@ -105,30 +104,32 @@ public class EventFragment extends Fragment {
             // pass eventID to InfoUFragment using bundle
             Bundle args = new Bundle();
             args.putString("eventId", selectedEvent.getEventId());
+            args.putString("userId", userId);
 
-            // TODO: if (user.getDeviceId == selectedEvent.getOranizer())
-            InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
-            infoUEventFragment.setArguments(args);
-
+            Fragment eventFragment;
+            if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
+                //TODO: open event edit
+                eventFragment = new InfoUEventFragment();
+                eventFragment.setArguments(args);
+            } else {
+                eventFragment = new InfoUEventFragment();
+                eventFragment.setArguments(args);
+            }
             // resource used: https://developer.android.com/guide/fragments/fragmentmanager
             // navigate to InfoUEventFragment
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, infoUEventFragment)
+                    .replace(R.id.fragment_container, eventFragment)
                     .addToBackStack(null)
                     .commit();
         });
 
-        addEventButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        addEventButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, new EventCreationFragment())
-                        .addToBackStack(null)
-                        .commit();
-            }
-        });
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new EventCreationFragment())
+                    .addToBackStack(null)
+                    .commit());
 
         return root;
     }

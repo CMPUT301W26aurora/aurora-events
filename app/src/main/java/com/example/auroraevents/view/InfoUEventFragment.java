@@ -6,7 +6,6 @@
 package com.example.auroraevents.view;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,8 +52,9 @@ public class InfoUEventFragment extends Fragment {
     private ImageButton backButton;
     private ImageView poster;
     private TextView eventName, eventDateTime, eventOrganizer, eventPrice, eventLocation, eventDescription;
+    private TextView reportedNum;
     private Button reportButton, deleteButton;
-    private LinearLayout bottomBar, selectButtonSet;
+    private LinearLayout bottomBar, selectButtonSet, adminInfo;
     private TextView eventDeadline, waitingListCount, attendeesCount;
     private Button joinButton, leaveButton, acceptButton, declineButton;
     private TextView attendingLabel, cannotAttendLabel;
@@ -74,18 +75,16 @@ public class InfoUEventFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
-        // get event ID from bundle
+        // get event ID and user ID from bundle
         Bundle args = getArguments();
-        if (args == null || args.getString("eventId") == null) {
+        if (args == null || args.getString("eventId") == null || args.getString("userId") == null) {
             Log.e(TAG, "Missing eventId argument");
             getParentFragmentManager().popBackStack();
             return view;
+        } else {
+            eventId = args.getString("eventId");
+            userId = args.getString("userId");
         }
-
-        eventId = args.getString("eventId");
-
-        // get device Id to identify user
-        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // get views to display event details
         backButton        = view.findViewById(R.id.back_button);
@@ -98,6 +97,8 @@ public class InfoUEventFragment extends Fragment {
         eventDescription  = view.findViewById(R.id.event_description);
 
         reportButton      = view.findViewById(R.id.report_button);
+        adminInfo         = view.findViewById(R.id.admin_info);
+        reportedNum       = view.findViewById(R.id.reported_num);
         deleteButton      = view.findViewById(R.id.delete_button);
 
         bottomBar         = view.findViewById(R.id.bottom_bar);
@@ -141,20 +142,31 @@ public class InfoUEventFragment extends Fragment {
                     eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
                                     eventId,
                                     event -> { if (event != null) {
-                                            // display event details for all user roles
-                                            if (event.getPoster() == null)
+                                            /* display event details for all user roles */
+                                            // only display poster if there is an image
+                                            if (event.getPoster() == null) {
                                                 poster.setVisibility(View.GONE);
-                                            else
+                                            } else {
                                                 poster.setImageBitmap(event.getPoster());
+                                            }
                                             eventName.setText(event.getName());
                                             eventDateTime.setText(event.getDateTime());
-                                            String organizerText = "organized by " + event.getOrganizerDeviceId();
+                                            // get organizer name
+                                            String organizerText = getString(R.string.organized_by_text) + event.getOrganizerDeviceId();
                                             eventOrganizer.setText(organizerText);
+                                            UserDb.getInstance().getUser(event.getOrganizerDeviceId(),
+                                                    u -> {
+                                                        String organizerName = getString(R.string.organized_by_text) + u.getName();
+                                                        eventOrganizer.setText(organizerName);
+                                                    },
+                                                    e -> {}
+                                            );
                                             eventPrice.setText(event.getPrice());
                                             eventLocation.setText(event.getLocation());
                                             eventDescription.setText(event.getDescription());
                                             String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
                                             eventDeadline.setText(deadlineText);
+                                            // set waiting count grammatically
                                             String waitingCountText;
                                             if (event.registrationList.getWaitingList().size() == 1) {
                                                 waitingCountText = "1 person is waiting";
@@ -162,11 +174,17 @@ public class InfoUEventFragment extends Fragment {
                                                 waitingCountText = event.registrationList.getWaitingList().size() + " people are waiting";
                                             }
                                             waitingListCount.setText(waitingCountText);
+                                            // set attendees count grammatically
                                             String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
+                                            // don't display the capacity if there is no capacity
                                             if (event.getCapacity() != 0) {
                                                 attendeesCountText += "/" + event.getCapacity();
                                             }
-                                            attendeesCountText += " people are participating";
+                                            if (attendeesCountText.equals("1") && event.getCapacity() == 0) {
+                                                attendeesCountText += " person is participating";
+                                            } else {
+                                                attendeesCountText += " people are participating";
+                                            }
                                             attendeesCount.setText(attendeesCountText);
 
                                             // set info button functionality
@@ -180,7 +198,7 @@ public class InfoUEventFragment extends Fragment {
                                                 // display event details for admin view
                                                 bottomBar.setVisibility(View.GONE);
                                                 reportButton.setVisibility(View.GONE);
-                                                deleteButton.setVisibility(View.VISIBLE);
+                                                adminInfo.setVisibility(View.VISIBLE);
 
                                                 eventDeadline.setVisibility(View.VISIBLE);
                                                 waitingListCount.setVisibility(View.VISIBLE);
@@ -194,9 +212,15 @@ public class InfoUEventFragment extends Fragment {
 
                                                 infoButton.setVisibility(View.VISIBLE);
 
-                                                // allow admin to delete event by clicking delete button
-                                                //TODO: add `event.getNumReports()` text
-                                                //    convert all `reportButton.setVisibility(...)` to `adminInfo.setVisibility(...)` that includes reports text and delete button
+                                                // set the number of people that reported this event grammatically
+                                                String reportedNumText = "Reported by " + event.getNumReports();
+                                                if (event.getNumReports() == 1) {
+                                                    reportedNumText += " person";
+                                                } else {
+                                                    reportedNumText += " people";
+                                                }
+                                                reportedNum.setText(reportedNumText);
+                                                // set delete button functionality
                                                 deleteButton.setOnClickListener(v -> {
                                                     PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
                                                             EventDb.getInstance().deleteEvent(
@@ -212,28 +236,39 @@ public class InfoUEventFragment extends Fragment {
                                                 });
                                             }
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
-                                                //TODO: when event edit opening is done, add:
-                                                /*
                                                 Log.e(TAG, "You shouldn't be here");
-                                                 */
+                                                Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
+
                                                 bottomBar.setVisibility(View.GONE);
                                                 reportButton.setVisibility(View.GONE);
-                                                deleteButton.setVisibility(View.VISIBLE);
+                                                adminInfo.setVisibility(View.VISIBLE);
 
-                                                deleteButton.setOnClickListener(v ->
-                                                    EventDb.getInstance().deleteEvent(
-                                                            event.getEventId(),
-                                                            () -> {
-                                                                Log.d(TAG, "Event deleted");
-                                                                getParentFragmentManager().popBackStack();
-                                                            },
-                                                            e -> Log.e(TAG, "Error deleting event: " + e)
-                                                    )
-                                                );
+                                                // set the number of people that reported this event grammatically
+                                                String reportedNumText = "Reported by " + event.getNumReports();
+                                                if (event.getNumReports() == 1) {
+                                                    reportedNumText += " person";
+                                                } else {
+                                                    reportedNumText += " people";
+                                                }
+                                                reportedNum.setText(reportedNumText);
+                                                // set delete button functionality
+                                                deleteButton.setOnClickListener(v -> {
+                                                    PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
+                                                            EventDb.getInstance().deleteEvent(
+                                                                    event.getEventId(),
+                                                                    () -> {
+                                                                        Log.d(TAG, "Event deleted by admin");
+                                                                        getParentFragmentManager().popBackStack();
+                                                                    },
+                                                                    e -> Log.e(TAG, "Error deleting event: " + e)
+                                                            )
+                                                    );
+                                                    fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Delete");
+                                                });
                                             }
                                             else {
                                                 reportButton.setVisibility(View.VISIBLE);
-                                                deleteButton.setVisibility(View.GONE);
+                                                adminInfo.setVisibility(View.GONE);
                                                 bottomBar.setVisibility(View.VISIBLE);
 
                                                 // set report button functionality

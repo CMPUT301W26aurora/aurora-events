@@ -50,4 +50,6 @@
     <string name="report_dialog_list">• No violence\n• No references to the 2008 film The Dark Night</string>
     <string name="cancel_button_text">Cancel</string>
     <string name="report_button_text">Report</string>
+    <string name="organized_by_text">"organized by "</string>
+    <string name="default_reported_num">Reported by 21 users\n(you shouldn\'t seee this)</string>
 </resources>
