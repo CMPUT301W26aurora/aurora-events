@@ -21,7 +21,10 @@ public class Comment {
     * */
     @Exclude //so firebase will ignore
     public long getTimeStamp(){
-        if (timestamp instanceof Long){
+        if (timestamp instanceof com.google.firebase.Timestamp) {
+            return ((com.google.firebase.Timestamp) timestamp).toDate().getTime();
+        }else if (timestamp instanceof Long){
+            //exact implementation tbd, this might be useless
             return (long) timestamp;
         }
         return 0L; //default val, low likelyhood of being called
