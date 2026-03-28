@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +39,9 @@ public class EventFragment extends Fragment {
     private static final String TAG = "EventFragment";
     private FloatingActionButton addEventButton;
     private UserViewModel userViewModel;
+    private ArrayList<Event> allEventsList;
+    private TextView noEventText;
+    private EventArrayAdapter eventsAdapter;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -77,28 +82,35 @@ public class EventFragment extends Fragment {
         View header = inflater.inflate(R.layout.header_event_fragment, listView, false);
         listView.addHeaderView(header, null, false);
 
-        ArrayList<com.example.auroraevents.model.Event>eventList = new ArrayList<>();
+        allEventsList = new ArrayList<>();
+        ArrayList<com.example.auroraevents.model.Event> eventList = new ArrayList<>();
         ListView eventsListView = root.findViewById(R.id.events_list);
 
         // get user's device ID to determine user's status for the event
         String userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         // create adapter with eventList
-        com.example.auroraevents.model.EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
+        eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
         eventsListView.setAdapter(eventsAdapter);
+
+        noEventText = root.findViewById(R.id.no_event_found_text);
 
         // resource used: https://stackoverflow.com/questions/7309259/get-list-of-attributes-of-an-object-in-an-list
         // get all events from firestore
         EventDb.getInstance().getAllEvents(events -> {
-            for (com.example.auroraevents.model.Event event : events) {
-                Log.d(TAG, "Event" +  event.getName() + " in " + event.getLocation());
-                eventList.add(event);
-            }
-            eventsAdapter.notifyDataSetChanged();
-        }, e -> Log.d(TAG, "Error fetching events" + e.getMessage())
-        );
+                    for (com.example.auroraevents.model.Event event : events) {
+                        Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
+                        // TODO: add isPublic event to Event.java
+                        // Boolean isPublic = event.isPublic();
+                        // if (isPublic == null || isPublic) {
+                        allEventsList.add(event);
+                        eventList.add(event);
+                    // }
+                    }
+                    eventsAdapter.notifyDataSetChanged();
+                }, e -> Log.d(TAG, "Error fetching events" + e.getMessage()));
 
-        // handle event taps by user to get the event's position
-        eventsListView.setOnItemClickListener((parent, v, position, id) -> {
+            // handle event taps by user to get the event's position
+            eventsListView.setOnItemClickListener((parent, v, position, id) -> {
             Event selectedEvent = eventList.get(position - 1);
 
             // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
@@ -128,7 +140,68 @@ public class EventFragment extends Fragment {
                         .commit();
             }
         });
+        // Set SearchView query text listener
+        SearchView searchView = root.findViewById(R.id.search_event);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.trim().isEmpty()) {
+                    keywordSearchEvents("", eventList);
+                }
+                return true;
+            }
 
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                keywordSearchEvents(query.trim(), eventList);
+                searchView.clearFocus();
+                return true;
+            }
+        });
         return root;
     }
+
+    /**
+     * Filters the event list based on event name and description when a user searches for a keyword.
+     * Event list returns to all events view when there is no keyword.
+     * No such event text is displayed when no search results match.
+     * @param searchKeyword keyword entered by user to search for
+     * @param eventArrayList filtered event list
+     */
+        public void keywordSearchEvents(String searchKeyword, ArrayList<Event> eventArrayList) {
+            String searchedQuery = searchKeyword.toLowerCase();
+            eventArrayList.clear();
+
+            if (searchedQuery.isEmpty()) {
+                eventArrayList.addAll(allEventsList);
+            } else {
+                for (Event event : allEventsList) {
+                    String searchedEventName = event.getName();
+                    if (searchedEventName != null) {
+                        searchedEventName = searchedEventName.toLowerCase();
+                    } else {
+                        searchedEventName = "";
+                    }
+                    String searchedEventDescription = event.getDescription();
+                    if (searchedEventDescription != null) {
+                        searchedEventDescription = searchedEventDescription.toLowerCase();
+                    } else {
+                        searchedEventDescription = "";
+                    }
+                    if (searchedEventName.contains(searchedQuery) || searchedEventDescription.contains(searchedQuery)) {
+                        eventArrayList.add(event);
+                    }
+                }
+            }
+            eventsAdapter.notifyDataSetChanged();
+
+            // show no such event text when there are no search results
+            if (noEventText != null) {
+                if (eventArrayList.isEmpty() && !searchedQuery.isEmpty()) {
+                    noEventText.setVisibility(VISIBLE);
+                } else {
+                    noEventText.setVisibility(GONE);
+                }
+            }
+        }
 }

@@ -77,4 +77,6 @@ public class EventFragmentTest {
         Event tappedEvent = eventList.get(0);
         assertEquals("test-event-1", tappedEvent.getEventId());
     }
+
+
 }
