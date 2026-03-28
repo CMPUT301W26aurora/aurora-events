@@ -3,6 +3,7 @@ package com.example.auroraevents.server;
 import android.util.Log;
 
 import com.example.auroraevents.model.Comment;
+import com.example.auroraevents.model.Event;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -86,6 +87,25 @@ public class CommentDb {
                     onFailure.onFailure(e);
                 });
     }
+
+    /**
+     *
+     * @param onFetched Called with Fulled list of Comment Objects
+     * @param onFailure Called with exception if read fails
+     */
+    public void getAllComments(CommentDb.OnCommentsFetchedCallback onFetched, CommentDb.OnFailureCallback onFailure){
+        db.collection(COLLECTION_NAME)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Comment> comments = querySnapshot.toObjects(Comment.class);
+                    onFetched.onFetched(comments);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to fetch all comments", e);
+                    onFailure.onFailure(e);
+                });
+    }
+
     //--Delete----------------------------------------------------------------------------------
     /**
      * Deletes an comment document from Firestore and all of its children.
