@@ -6,6 +6,7 @@ import com.example.auroraevents.model.Comment;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
@@ -59,6 +60,32 @@ public class CommentDb {
                 onFailure.onFailure(e);
                 });
     }
+    //--Read------------------------------------------------------------------------------------
+
+    /**
+     * Fetches the comments for a given event in ascending order of timestamps
+     * IE most recent first.
+     *
+     * @param eventId The Event to fetch comments from
+     * @param onFetched Called with Comment objects, or null if not found
+     * @param onFailure Called with exception if read fails
+     */
+    public void getCommentsForEvent(String eventId, CommentDb.OnCommentsFetchedCallback onFetched, CommentDb.OnFailureCallback onFailure){
+        db.collection(COLLECTION_NAME)
+                .whereEqualTo("eventId", eventId)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Comment> comments = queryDocumentSnapshots.toObjects(Comment.class);
+
+                    Log.d(TAG, "Fetched " + comments.size() + " comments for event: " + eventId);
+                    onFetched.onFetched(comments);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to fetch event comments: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
     //--Delete----------------------------------------------------------------------------------
     /**
      * Deletes an comment document from Firestore and all of its children.
@@ -89,7 +116,7 @@ public class CommentDb {
                     //commit the batch delete
                     batch.commit()
                             .addOnSuccessListener(unused -> {
-                                Log.d(TAG, "Comments and Replies Deleted: " + id);
+                                Log.d(TAG, "Comment and Replies Deleted: " + id);
                                 onSuccess.onSuccess();
                             })
                             .addOnFailureListener(e -> {
