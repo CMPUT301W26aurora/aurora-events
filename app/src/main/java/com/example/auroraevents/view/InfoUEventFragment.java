@@ -16,7 +16,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,7 +71,7 @@ public class InfoUEventFragment extends Fragment {
      */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) { //TODO 1: update to work with new UI
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
         // get event ID from bundle
@@ -98,7 +97,7 @@ public class InfoUEventFragment extends Fragment {
         eventLocation     = view.findViewById(R.id.event_location);
         eventDescription  = view.findViewById(R.id.event_description);
 
-        reportButton      = view.findViewById(R.id.report_button);         // TODO
+        reportButton      = view.findViewById(R.id.report_button);
         deleteButton      = view.findViewById(R.id.delete_button);
 
         bottomBar         = view.findViewById(R.id.bottom_bar);
@@ -196,9 +195,11 @@ public class InfoUEventFragment extends Fragment {
                                                 infoButton.setVisibility(View.VISIBLE);
 
                                                 // allow admin to delete event by clicking delete button
+                                                //TODO: add `event.getNumReports()` text
+                                                //    convert all `reportButton.setVisibility(...)` to `adminInfo.setVisibility(...)` that includes reports text and delete button
                                                 deleteButton.setOnClickListener(v -> {
-                                                    PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(
-                                                            () -> EventDb.getInstance().deleteEvent(
+                                                    PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
+                                                            EventDb.getInstance().deleteEvent(
                                                                 event.getEventId(),
                                                                 () -> {
                                                                     Log.d(TAG, "Event deleted by admin");
@@ -236,11 +237,12 @@ public class InfoUEventFragment extends Fragment {
                                                 bottomBar.setVisibility(View.VISIBLE);
 
                                                 // set report button functionality
-                                                reportButton.setOnClickListener(v -> { //TODO
-                                                            Log.w(TAG, "Report button not implemented");
-                                                            Toast.makeText(v.getContext(), "Report button not implemented", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                );
+                                                reportButton.setOnClickListener(v -> {
+                                                    ReportFragment fragment = ReportFragment.newInstance(() ->
+                                                            event.setNumReports(event.getNumReports()+1)
+                                                    );
+                                                    fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Report");
+                                                });
 
                                                 // check which list user is in and display corresponding content
                                                 if (event.registrationList.getAttendingList().contains(userId)) {

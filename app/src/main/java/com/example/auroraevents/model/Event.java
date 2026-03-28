@@ -37,6 +37,7 @@ public class Event {
     private String qrCodeData;            // String payload encoded in the QR code
     private Bitmap qR;
     private Bitmap poster;
+    private int numReports;
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
@@ -118,6 +119,9 @@ public class Event {
     public Bitmap getPoster()              { return poster; }
     public void   setPoster(Bitmap poster) { this.poster = poster; }
 
+    public int  getNumReports()               { return numReports; }
+    public void setNumReports(int numReports) { this.numReports = numReports; }
+
     // Converters
     @Exclude
     public LocalDate getDateTimeAsLocalDate() {
@@ -133,8 +137,6 @@ public class Event {
     public LocalDateTime getRegistrationTimeEndAsDateTime() {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
-
-    public Bitmap       getQrCode()                                    { return this.qR; }
 
     // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
     /**
@@ -163,6 +165,9 @@ public class Event {
             Log.e("EVENT","Error encoding QR code", e);
         }
     }
+
+    @Exclude
+    public Bitmap getQrCode() { return this.qR; }
 
     // ── Sampling ──────────────────────────────────────────────────
     /**

@@ -45,4 +45,9 @@
     <string name="delete_button_text">Delete</string>
     <string name="permanent_warning_description">This action is permanent. Do you wish to proceed?</string>
     <string name="permanent_warning_title">WARNING</string>
+    <string name="report_dialog_title">Do you want to report this event?</string>
+    <string name="report_dialog_warning">Only report this event if it violates at least one of the rules:</string>
+    <string name="report_dialog_list">• No violence\n• No references to the 2008 film The Dark Night</string>
+    <string name="cancel_button_text">Cancel</string>
+    <string name="report_button_text">Report</string>
 </resources>

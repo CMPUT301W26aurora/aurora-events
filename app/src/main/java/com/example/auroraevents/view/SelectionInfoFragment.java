@@ -1,5 +1,7 @@
 package com.example.auroraevents.view;
 
+import static androidx.core.content.ContextCompat.getColor;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -20,6 +22,18 @@ public class SelectionInfoFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.DarkGlassDialog);
         return builder
                 .setView(view)
+                .setPositiveButton("Okay", null)
                 .create();
+    }
+
+    // Source - https://stackoverflow.com/a/27913325
+    // Posted by Jared Rummler
+    // Retrieved 2026-03-27, License - CC BY-SA 3.0
+    @Override
+    public void onStart() {
+        super.onStart();
+        assert getDialog() != null;
+        // with help from https://developer.android.com/reference/androidx/core/content/ContextCompat.html#getColor(android.content.Context,int)
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getColor(requireContext(), R.color.purple));
     }
 }
