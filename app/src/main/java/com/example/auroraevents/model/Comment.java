@@ -29,7 +29,7 @@ public class Comment {
             //exact implementation tbd, this might be useless
             return (long) timestamp;
         }
-        return 0L; //default val, low likelyhood of being called
+        return System.currentTimeMillis(); //default val, low likelyhood of being called
     }
 
     /**

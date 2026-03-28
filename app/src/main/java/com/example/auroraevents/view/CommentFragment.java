@@ -1,4 +1,6 @@
 package com.example.auroraevents.view;
 
-public class CommentFragment {
+import androidx.fragment.app.Fragment;
+
+public class CommentFragment extends Fragment {
 }
