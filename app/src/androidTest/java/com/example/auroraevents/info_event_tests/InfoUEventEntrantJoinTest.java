@@ -1,6 +1,5 @@
 package com.example.auroraevents.info_event_tests;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
@@ -11,8 +10,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.bottomBarShowTest;
+import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.openEvent;
+import static org.junit.Assert.fail;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
@@ -27,32 +27,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class InfoUEventEntrantJoinTest {
-    /*TODO:
-    - no list shows:
-            - event_deadline
-            - waiting_list_count
-            - attendees_count
-            - join_button
-            - lottery_info_button
-    - cancelled shows:
-            - event_deadline
-            - waiting_list_count
-            - attendees_count
-            - join_button
-            - lottery_info_button
-    - declined shows:
-            - event_deadline
-            - waiting_list_count
-            - attendees_count
-            - join_button
-            - lottery_info_button
-    - join_button joins
-     */
-
     Event event;
 
     @Rule
@@ -65,12 +41,10 @@ public class InfoUEventEntrantJoinTest {
 
     @Before
     public void before() {
-        String eventName = "event info screen test";
-
         event = new Event(
                 "dummy",
-                eventName,
-                "event for info screen attending test",
+                "event info screen test",
+                "event for info screen join test",
                 "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
@@ -81,13 +55,6 @@ public class InfoUEventEntrantJoinTest {
                 -1,
                 null);
         setUpEvent(event);
-
-        onView(withId(R.id.nav_browse)).perform(click());
-        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
-        try {
-            new CountDownLatch(1).await(1, TimeUnit.SECONDS);
-        } catch (InterruptedException ignored) {}
-        onView(withText(eventName)).check(matches(isDisplayed()));
     }
 
     @After
@@ -96,11 +63,15 @@ public class InfoUEventEntrantJoinTest {
     }
 
     /**
-     * Checks if the info button popup works
+     * Tests if the info button popup works
      * @author Jared Strandlund
      */
     @Test
     public void infoButton() {
+        // Set up
+        openEvent(scenario, event);
+
+        // Test
         onView(withId(R.id.lottery_info_button)).check(matches(isDisplayed()));
         onView(withId(R.id.lottery_info_button)).perform(click());
         onView(withText(R.string.lottery_info_title)).check(matches(isDisplayed()));
@@ -108,5 +79,114 @@ public class InfoUEventEntrantJoinTest {
         onView(withText(R.string.okay_button_text)).perform(click());
         onView(withText(R.string.lottery_info_title)).check(doesNotExist());
         onView(withText(R.string.lottery_info_description)).check(doesNotExist());
+    }
+
+    /**
+     * Tests if the join button works when the user is on no lists of the event
+     * @author Jared Strandlund
+     */
+    @Test
+    public void onNoList() {
+        // Set up
+        openEvent(scenario, event);
+
+        // Test
+        bottomBarShowTest(
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                true
+        );
+        onView(withId(R.id.join_button)).perform(click());
+        bottomBarShowTest(
+                true,
+                true,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true
+        );
+    }
+
+    /**
+     * Tests if the join button works when the user is on the cancelled list
+     * @author Jared Strandlund
+     */
+    @Test
+    public void onCancelledList() {
+        // Set up
+        //TODO: add to cancelled list
+        fail("TODO: add to cancelled list");
+        openEvent(scenario, event);
+
+        // Test
+        bottomBarShowTest(
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                true
+        );
+        onView(withId(R.id.join_button)).perform(click());
+        bottomBarShowTest(
+                true,
+                true,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true
+        );
+    }
+
+    /**
+     * Tests if the join button works when the user is on the declined list
+     * @author Jared Strandlund
+     */
+    @Test
+    public void onDeclinedList() {
+        // Set up
+        //TODO: add to declined list
+        fail("TODO: add to declined list");
+        openEvent(scenario, event);
+
+        // Test
+        bottomBarShowTest(
+                true,
+                true,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                true
+        );
+        onView(withId(R.id.join_button)).perform(click());
+        bottomBarShowTest(
+                true,
+                true,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true
+        );
     }
 }

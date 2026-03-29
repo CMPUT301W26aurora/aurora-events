@@ -14,6 +14,8 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -37,7 +39,7 @@ public class Event {
     private String qrCodeData;            // String payload encoded in the QR code
     private Bitmap qR;
     private Bitmap poster;
-    private int numReports;
+    private List<String> reports;
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
@@ -45,6 +47,7 @@ public class Event {
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
         registrationList = new RegistrationList();
+        reports = new ArrayList<>();
     }
 
     public Event(
@@ -138,8 +141,21 @@ public class Event {
     public Bitmap getPoster()              { return poster; }
     public void   setPoster(Bitmap poster) { this.poster = poster; }
 
-    public int  getNumReports()               { return numReports; }
-    public void setNumReports(int numReports) { this.numReports = numReports; }
+    public int  getNumReports()          { return reports.size(); }
+    /**
+     * Adds a report
+     * @param userId The device ID of the user reporting the event
+     * @return
+     *     {@code 0}  when success
+     *     {@code -1} when the user has already reported the event
+     */
+    public int addReport(String userId) {
+        if (!reports.contains(userId)) {
+            reports.add(userId);
+            return 0;
+        } else
+            return -1;
+    }
 
     // Converters
     @Exclude

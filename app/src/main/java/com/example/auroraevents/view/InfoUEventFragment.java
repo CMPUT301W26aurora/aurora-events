@@ -157,7 +157,7 @@ public class InfoUEventFragment extends Fragment {
                                             UserDb.getInstance().getUser(event.getOrganizerDeviceId(),
                                                     u -> {
                                                         if (u != null) {
-                                                            String organizerName = getString(R.string.organized_by_text) + u.getName();
+                                                            String organizerName = getString(R.string.organized_by_text) + u.getName() + " (" + event.getOrganizerDeviceId() + ")";
                                                             eventOrganizer.setText(organizerName);
                                                         }
                                                     },
@@ -253,9 +253,15 @@ public class InfoUEventFragment extends Fragment {
 
                                                 // set report button functionality
                                                 reportButton.setOnClickListener(v -> {
-                                                    ReportFragment fragment = ReportFragment.newInstance(() ->
-                                                            event.setNumReports(event.getNumReports()+1)
-                                                    );
+                                                    ReportFragment fragment = ReportFragment.newInstance(() -> {
+                                                        event.addReport(userId);
+                                                        EventDb.getInstance().updateEvent(event,
+                                                                () -> {
+                                                                    Log.d(TAG, "Event updated with new report");
+                                                                    Toast.makeText(getContext(), "Event reported.", Toast.LENGTH_SHORT).show();
+                                                                },
+                                                                e -> Toast.makeText(getContext(), "Database connection failed. Please try again.", Toast.LENGTH_SHORT).show());
+                                                    });
                                                     fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Report");
                                                 });
 

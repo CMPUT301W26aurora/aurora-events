@@ -1,31 +1,30 @@
 package com.example.auroraevents.info_event_tests;
 
-import static androidx.test.espresso.Espresso.onData;
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.bottomBarShowTest;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.openEvent;
+import static org.junit.Assert.fail;
 
-import com.example.auroraevents.R;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+
+import com.example.auroraevents.MainActivity;
 import com.example.auroraevents.model.Event;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 
 public class InfoUEventEntrantAttendingTest {
     Event event;
+
+    @Rule
+    public ActivityScenarioRule<MainActivity> scenario = new ActivityScenarioRule<>(MainActivity.class);
 
     @BeforeClass
     public static void prepare() {
@@ -34,9 +33,11 @@ public class InfoUEventEntrantAttendingTest {
 
     @Before
     public void before() {
+        String eventName = "event info screen test";
+
         event = new Event(
                 "dummy",
-                "event info screen test",
+                eventName,
                 "event for info screen attending test",
                 "free",
                 LocalDateTime.now().plusDays(2),
@@ -49,9 +50,10 @@ public class InfoUEventEntrantAttendingTest {
                 null);
         setUpEvent(event);
 
-        onView(withId(R.id.nav_browse)).perform(click());
-        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
-        onView(withText(event.getName())).check(matches(isDisplayed()));
+        //TODO: add user to attending list
+        fail("TODO: add user to attending list");
+
+        openEvent(scenario, event);
     }
 
     @After
@@ -60,7 +62,7 @@ public class InfoUEventEntrantAttendingTest {
     }
 
     /**
-     * - shows:
+     * Tests that when the user is on the attending list, the bottom bar shows only:
      *     - attendees_count
      *     - attending_label
      * @author Jared Strandlund

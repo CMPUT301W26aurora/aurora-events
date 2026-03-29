@@ -1,31 +1,34 @@
 package com.example.auroraevents.info_event_tests;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.bottomBarShowTest;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.openEvent;
+import static org.junit.Assert.fail;
 
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+
+import com.example.auroraevents.MainActivity;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 
 public class InfoUEventEntrantWaitingTest {
     Event event;
+
+    @Rule
+    public ActivityScenarioRule<MainActivity> scenario = new ActivityScenarioRule<>(MainActivity.class);
 
     @BeforeClass
     public static void prepare() {
@@ -49,9 +52,10 @@ public class InfoUEventEntrantWaitingTest {
                 null);
         setUpEvent(event);
 
-        onView(withId(R.id.nav_browse)).perform(click());
-        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
-        onView(withText(event.getName())).check(matches(isDisplayed()));
+        //TODO: add entrant to waiting list
+        fail("TODO: add entrant to waiting list");
+
+        openEvent(scenario, event);
     }
 
     @After
@@ -60,16 +64,11 @@ public class InfoUEventEntrantWaitingTest {
     }
 
     /**
-     * - shows:
-     *     - event_deadline
-     *     - waiting_list_count
-     *     - attendees_count
-     *     - leave_button
-     *     - lottery_info_button
+     * Tests if the leave button works
      * @author Jared Strandlund
      */
     @Test
-    public void showsElements() {
+    public void leaveButton() {
         bottomBarShowTest(
                 true,
                 true,
@@ -81,14 +80,6 @@ public class InfoUEventEntrantWaitingTest {
                 false,
                 true
         );
-    }
-
-    /**
-     * Tests if the leave button works
-     * @author Jared Strandlund
-     */
-    @Test
-    public void leaveButton() {
         onView(withId(R.id.leave_button)).perform(click());
         bottomBarShowTest(
                 true,
