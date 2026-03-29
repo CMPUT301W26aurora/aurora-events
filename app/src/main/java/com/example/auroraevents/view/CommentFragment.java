@@ -68,15 +68,20 @@ public class CommentFragment extends Fragment {
         //initialize RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments);
 
+        View replyIndicator = view.findViewById(R.id.reply_indicator);
+        TextView replyText = view.findViewById(R.id.text_replying_to);
+        View cancelReply = view.findViewById(R.id.button_cancel_reply);
         //initialize commentAdapter
         adapter = new CommentAdapter(new ArrayList<>(), comment -> {
             //handles reply logic
             selectedParentComment = comment;
-            View replyIndicator = view.findViewById(R.id.reply_indicator);
-            TextView replyText = view.findViewById(R.id.text_replying_to);
 
             replyText.setText("Replying to @" + comment.getUsername());
             replyIndicator.setVisibility(View.VISIBLE);
+        });
+        cancelReply.setOnClickListener(v -> {
+            selectedParentComment = null;
+            replyIndicator.setVisibility(View.GONE);
         });
 
         //set recyclerView

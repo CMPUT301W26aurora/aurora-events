@@ -288,4 +288,9 @@ public class Event {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.name; // Or whatever variable holds "test for comment"
+    }
+
 }
