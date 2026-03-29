@@ -9,6 +9,10 @@ android {
         version = release(36)
     }
 
+    testOptions {
+        animationsDisabled = true
+    }
+
     defaultConfig {
         applicationId = "com.example.auroraevents"
         minSdk = 24

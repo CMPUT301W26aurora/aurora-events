@@ -6,6 +6,7 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -45,9 +46,13 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * tests the comment Fragment
+ */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CommentFragmentTest {
     Event event;
+    //rules so it works
     @Rule
     public ActivityScenarioRule<MainActivity> activityRule =
             new ActivityScenarioRule<>(MainActivity.class);
@@ -67,7 +72,7 @@ public class CommentFragmentTest {
         onView(withId(R.id.nav_browse)).check(matches(isDisplayed()));
         event = new Event(
                 "orgId",
-                "test for comment",
+                "extremeTurkeyTactics",
                 "description",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
@@ -79,11 +84,11 @@ public class CommentFragmentTest {
         setUpEvent(event);
 
         onView(withId(R.id.nav_browse)).perform(click());
-        onData(hasToString(containsString("test for comment")))
+        onData(hasToString(containsString("extremeTurkeyTactics")))
                 .inAdapterView(withId(R.id.events_list))
                 .perform(click());
         try { Thread.sleep(2000); } catch (InterruptedException e) {}
-        onView(withId(R.id.event_name)).check(matches(withText("test for comment")));
+        onView(withId(R.id.event_name)).check(matches(withText("extremeTurkeyTactics")));
         onView(withId(R.id.comment_button)).perform(click());
     }
 
@@ -95,8 +100,9 @@ public class CommentFragmentTest {
     }
 
 
-
-
+    /**
+     * tests if you can post a comment
+     */
     @Test
     public void test02_testPostComment() {
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -105,7 +111,7 @@ public class CommentFragmentTest {
                 .perform(typeText(testComment), pressImeActionButton(), closeSoftKeyboard());
 
         try { Thread.sleep(500); } catch (InterruptedException e) {}
-        onView(withId(R.id.button_post)).perform(click(),click());
+        onView(withId(R.id.button_post)).perform(click());
 
         try { Thread.sleep(3500); } catch (InterruptedException e) {}
         onView(withId(R.id.recycler_view_comments))
@@ -113,6 +119,10 @@ public class CommentFragmentTest {
 
 
     }
+
+    /**
+     * tests bar visibility
+     */
     @Test
     public void test01_barVisibility(){
         onView(withId(R.id.recycler_view_comments)).check(matches(isDisplayed()));
@@ -120,6 +130,9 @@ public class CommentFragmentTest {
     }
 
 
+    /**
+     * tests replying
+     */
     @Test
     public void test03_testPostComment2() {
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -128,7 +141,7 @@ public class CommentFragmentTest {
                 .perform(typeText(testComment), pressImeActionButton(), closeSoftKeyboard());
 
         try { Thread.sleep(500); } catch (InterruptedException e) {}
-        onView(withId(R.id.button_post)).perform(click(),click());
+        onView(withId(R.id.button_post)).perform(click());
 
         try { Thread.sleep(3500); } catch (InterruptedException e) {}
         onView(withId(R.id.recycler_view_comments))
@@ -152,6 +165,9 @@ public class CommentFragmentTest {
 
     }
 
+    /**
+     * tests canceling replies
+     */
     @Test
     public void test04_cancelReply(){
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -160,7 +176,7 @@ public class CommentFragmentTest {
                 .perform(typeText(testComment), pressImeActionButton(), closeSoftKeyboard());
 
         try { Thread.sleep(500); } catch (InterruptedException e) {}
-        onView(withId(R.id.button_post)).perform(click(),click());
+        onView(withId(R.id.button_post)).perform(click());
 
         try { Thread.sleep(3500); } catch (InterruptedException e) {}
         onView(withId(R.id.recycler_view_comments))
@@ -177,5 +193,27 @@ public class CommentFragmentTest {
 
     }
 
+    /**
+     * tests post deletion
+     */
+    @Test
+    public void test05_deletePost(){
+        String testComment = "This is a test comment " + System.currentTimeMillis();
+
+        onView(withId(R.id.edit_text_comment))
+                .perform(typeText(testComment), pressImeActionButton(), closeSoftKeyboard());
+
+        try { Thread.sleep(500); } catch (InterruptedException e) {}
+        onView(withId(R.id.button_post)).perform(click());
+
+        try { Thread.sleep(3500); } catch (InterruptedException e) {}
+        onView(withId(R.id.recycler_view_comments))
+                .check(matches(hasDescendant(withText(testComment))));
+
+        onView(withId(R.id.recycler_view_comments))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, clickChildViewWithId(R.id.comment_button_delete)));
+        try { Thread.sleep(3000); } catch (InterruptedException e) {}
+        onView(withText(testComment)).check(doesNotExist());
+    }
 
 }
