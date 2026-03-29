@@ -8,6 +8,7 @@ import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
@@ -212,6 +213,10 @@ public class CommentFragmentTest {
 
         onView(withId(R.id.recycler_view_comments))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, clickChildViewWithId(R.id.comment_button_delete)));
+        onView(withText("Delete"))
+                .inRoot(isDialog())
+                .check(matches(isDisplayed()))
+                .perform(click());
         try { Thread.sleep(3000); } catch (InterruptedException e) {}
         onView(withText(testComment)).check(doesNotExist());
     }

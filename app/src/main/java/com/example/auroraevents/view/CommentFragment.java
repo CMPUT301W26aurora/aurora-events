@@ -1,5 +1,6 @@
 package com.example.auroraevents.view;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -154,10 +155,19 @@ public class CommentFragment extends Fragment {
             }
             @Override
             public void onDeleteClicked(Comment comment) {
-                CommentDb.getInstance().deleteComment(comment.getId(),
-                        () -> Log.d(TAG, "Deleted successfully"),
-                        e -> Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show()
-                );
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Delete Comment")
+                        .setMessage("Are you sure you want to remove this comment?")
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            CommentDb.getInstance().deleteComment(comment.getId(),
+                                    () -> Log.d(TAG, "Deleted successfully"),
+                                    e -> Log.e(TAG, "Delete Failed")
+                            );
+                        })
+                        .setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss())
+                        .create()
+                        .show();
+
             }
         }, userId, userRole, eventOrganizerId);
         cancelReply.setOnClickListener(v -> {
