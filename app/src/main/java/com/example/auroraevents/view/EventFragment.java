@@ -97,20 +97,19 @@ public class EventFragment extends Fragment {
         // resource used: https://stackoverflow.com/questions/7309259/get-list-of-attributes-of-an-object-in-an-list
         // get all events from firestore
         EventDb.getInstance().getAllEvents(events -> {
-                    for (com.example.auroraevents.model.Event event : events) {
-                        Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
-                        // TODO: add isPublic event to Event.java
-                        // Boolean isPublic = event.isPublic();
-                        // if (isPublic == null || isPublic) {
-                        allEventsList.add(event);
-                        eventList.add(event);
-                    // }
-                    }
-                    eventsAdapter.notifyDataSetChanged();
-                }, e -> Log.d(TAG, "Error fetching events" + e.getMessage()));
+            for (com.example.auroraevents.model.Event event : events) {
+                Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
+                Boolean isPrivate = event.isPrivate();
+                if (isPrivate == null || !isPrivate) {
+                    allEventsList.add(event);
+                    eventList.add(event);
+                }
+            }
+            eventsAdapter.notifyDataSetChanged();
+        }, e -> Log.d(TAG, "Error fetching events" + e.getMessage()));
 
-            // handle event taps by user to get the event's position
-            eventsListView.setOnItemClickListener((parent, v, position, id) -> {
+        // handle event taps by user to get the event's position
+        eventsListView.setOnItemClickListener((parent, v, position, id) -> {
             Event selectedEvent = eventList.get(position - 1);
 
             // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
@@ -125,7 +124,8 @@ public class EventFragment extends Fragment {
             // navigate to InfoUEventFragment
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, infoUEventFragment)
+                    .hide(this)
+                    .add(R.id.fragment_container, infoUEventFragment)
                     .addToBackStack(null)
                     .commit();
         });
@@ -140,7 +140,8 @@ public class EventFragment extends Fragment {
                         .commit();
             }
         });
-        // Set SearchView query text listener
+
+        // set SearchView query text listener
         SearchView searchView = root.findViewById(R.id.search_event);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -162,46 +163,72 @@ public class EventFragment extends Fragment {
     }
 
     /**
-     * Filters the event list based on event name and description when a user searches for a keyword.
-     * Event list returns to all events view when there is no keyword.
-     * No such event text is displayed when no search results match.
+     * filter events to match searched keywords
+     * return all events when nothing is being searched
+     * private events are never included in results
+     *
      * @param searchKeyword keyword entered by user to search for
-     * @param eventArrayList filtered event list
+     * @param eventList original list of events to search through
+     * @return filtered list of events matching the keyword
      */
-        public void keywordSearchEvents(String searchKeyword, ArrayList<Event> eventArrayList) {
-            String searchedQuery = searchKeyword.toLowerCase();
-            eventArrayList.clear();
+    public ArrayList<Event> filterKeywordEvents(String searchKeyword, ArrayList<com.example.auroraevents.model.Event> eventList) {
+        String searchedQuery = searchKeyword.toLowerCase();
+        ArrayList<com.example.auroraevents.model.Event> filteredEventsList = new ArrayList<>();
 
-            if (searchedQuery.isEmpty()) {
-                eventArrayList.addAll(allEventsList);
-            } else {
-                for (Event event : allEventsList) {
-                    String searchedEventName = event.getName();
-                    if (searchedEventName != null) {
-                        searchedEventName = searchedEventName.toLowerCase();
-                    } else {
-                        searchedEventName = "";
-                    }
-                    String searchedEventDescription = event.getDescription();
-                    if (searchedEventDescription != null) {
-                        searchedEventDescription = searchedEventDescription.toLowerCase();
-                    } else {
-                        searchedEventDescription = "";
-                    }
-                    if (searchedEventName.contains(searchedQuery) || searchedEventDescription.contains(searchedQuery)) {
-                        eventArrayList.add(event);
-                    }
+        if (searchedQuery.isEmpty()) {
+            // display all public events when search is cleared
+            for (com.example.auroraevents.model.Event event : eventList) {
+                if (!event.isPrivate()) {
+                    filteredEventsList.add(event);
                 }
             }
-            eventsAdapter.notifyDataSetChanged();
-
-            // show no such event text when there are no search results
-            if (noEventText != null) {
-                if (eventArrayList.isEmpty() && !searchedQuery.isEmpty()) {
-                    noEventText.setVisibility(VISIBLE);
+        } else {
+            for (com.example.auroraevents.model.Event event : eventList) {
+                // don't include private events for keyword search
+                if (event.isPrivate()) continue;
+                // convert event name to lower case
+                String searchedEventName = event.getName();
+                if (searchedEventName != null) {
+                    searchedEventName = searchedEventName.toLowerCase();
                 } else {
-                    noEventText.setVisibility(GONE);
+                    searchedEventName = "";
+                }
+                // convert event description to lower case
+                String searchedEventDescription = event.getDescription();
+                if (searchedEventDescription != null) {
+                    searchedEventDescription = searchedEventDescription.toLowerCase();
+                } else {
+                    searchedEventDescription = "";
+                }
+                // add event to filtered list if keyword matches
+                if (searchedEventName.contains(searchedQuery) || searchedEventDescription.contains(searchedQuery)) {
+                    filteredEventsList.add(event);
                 }
             }
         }
+        return filteredEventsList;
+    }
+
+    /**
+     * display required event list when keyword matches
+     * displays message when no keyword matches
+     *
+     * @param searchKeyword  keyword entered by user to search for
+     * @param eventArrayList filtered event list
+     */
+    public void keywordSearchEvents(String searchKeyword, ArrayList<Event> eventArrayList) {
+        ArrayList<Event> searchResults = filterKeywordEvents(searchKeyword, allEventsList);
+        eventArrayList.clear();
+        eventArrayList.addAll(searchResults);
+        eventsAdapter.notifyDataSetChanged();
+
+        // show no such event message when there are no search results
+        if (noEventText != null) {
+            if (eventArrayList.isEmpty() && !searchKeyword.trim().isEmpty()) {
+                noEventText.setVisibility(VISIBLE);
+            } else {
+                noEventText.setVisibility(GONE);
+            }
+        }
+    }
 }
