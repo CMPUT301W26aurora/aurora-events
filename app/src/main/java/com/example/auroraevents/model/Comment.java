@@ -1,6 +1,8 @@
 package com.example.auroraevents.model;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.ServerTimestamp;
 
 /**
  * Represents the comment in application
@@ -13,7 +15,9 @@ public class Comment {
     private String userId;
     private String parentId;
     private String eventId;
-    private Object timestamp;
+    @ServerTimestamp
+    private Timestamp timestamp;
+    private String username;
     public Comment() {/*for firebase*/}
 
     /**
@@ -22,14 +26,12 @@ public class Comment {
      * @return A timestamp time, or a long which can be converted with dateutils
      */
     @Exclude //so firebase will ignore
-    public long getTimeStamp(){
-        if (timestamp instanceof com.google.firebase.Timestamp) {
+    public long getTimeStampLong(){
+        if (timestamp != null) {
             return ((com.google.firebase.Timestamp) timestamp).toDate().getTime();
-        }else if (timestamp instanceof Long){
-            //exact implementation tbd, this might be useless
-            return (long) timestamp;
         }
         return System.currentTimeMillis(); //default val, low likelyhood of being called
+
     }
 
     /**
@@ -41,13 +43,14 @@ public class Comment {
      * @param eventId EventId the comment is connected to
      * @param timestamp The time of the comment
      */
-    public Comment(String comment, String userId, String parentId, String id, String eventId, Object timestamp){
+    public Comment(String comment, String userId, String parentId, String id, String eventId, Timestamp timestamp, String username){
         this.id = id;
         this.comment = comment;
         this.parentId = parentId;
         this.userId = userId;
         this.eventId = eventId;
         this.timestamp = timestamp;
+        this.username = username;
     }
     /*Getter and setters--------------------------------------------*/
     public String getComment() {return comment;}
@@ -63,6 +66,12 @@ public class Comment {
     public String getEventId() {return eventId;}
 
     public void setEventId(String eventId) {this.eventId = eventId;}
-    public Object getTimestamp() {return timestamp;}
-    public void setTimestamp(Object timestamp) {this.timestamp = timestamp;}
+    public Timestamp getTimestamp() {return timestamp;}
+    public void setTimestamp(Object timestamp) {
+        if (timestamp instanceof Timestamp) {
+            this.timestamp = (Timestamp) timestamp;
+        }
+    }
+    public String getUsername() {return username;}
+    public void setUsername(String username) {this.username = username;}
 }

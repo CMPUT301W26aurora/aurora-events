@@ -13,12 +13,13 @@
         android:paddingEnd="16dp"
         android:paddingBottom="24dp">
 
-        <!--Back Button-->
+        <!--Allows comment and back to be side by side-->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp">
 
+            <!--Back Button-->
             <Button
                 android:id="@+id/back_button"
                 android:layout_width="95dp"
@@ -28,6 +29,7 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"/>
 
+            <!--Comment Button-->
             <Button
                 android:id="@+id/comment_button"
                 android:layout_width="wrap_content"

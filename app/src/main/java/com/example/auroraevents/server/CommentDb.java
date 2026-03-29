@@ -197,4 +197,33 @@ public class CommentDb {
                     onFailure.onFailure(e);
                 });
     }
+
+    /*Listener----------------------------------------------------------------------------------------*/
+
+    /**
+     * A basic listener to live update comments
+     *
+     * @param eventId The event to listen to
+     * @param onFetched Returned with the threaded sort list
+     * @param onFailure Returns with error on failure
+     * @return ListenerRegistration - make sure to remove after use
+     */
+    public ListenerRegistration commentListener(String eventId, OnCommentsFetchedCallback onFetched, OnFailureCallback onFailure){
+        return db.collection(COLLECTION_NAME)
+                .whereEqualTo("eventId", eventId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener(com.google.firebase.firestore.MetadataChanges.INCLUDE, (value, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        onFailure.onFailure(e);
+                        return;
+                    }
+
+                    if (value != null) {
+                        List<Comment> comments = value.toObjects(Comment.class);
+                        List<Comment> threadedList = threadSort(comments);
+                        onFetched.onFetched(threadedList);
+                    }
+                });
+    }
 }
