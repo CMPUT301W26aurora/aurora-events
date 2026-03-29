@@ -24,7 +24,6 @@ import com.example.auroraevents.server.EventDb;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class UserListFragment extends DialogFragment {
     private Event currentEvent;
@@ -68,7 +67,7 @@ public class UserListFragment extends DialogFragment {
 
         // Get list of entrants and make a user array adapter
         userList = currentEvent.getListOfAllUsers();
-        userListAdapter = new UserArrayAdapter(requireContext(), userList, currentEvent);
+        userListAdapter = new UserArrayAdapter(requireContext(), userList, currentEvent, userListAdapter, this);
         userListView.setAdapter(userListAdapter);
 
         // Inflate and add the header
@@ -81,43 +80,18 @@ public class UserListFragment extends DialogFragment {
             getParentFragmentManager().popBackStack();
                 });
 
-        // Filter by status TODO Figure out UI
+        // Filter by status
         filterButton = view.findViewById(R.id.filter_button);
-        var lambdaContext = new Object() {
-            SwitchCompat participating_filter;
-            SwitchCompat invited_filter;
-            SwitchCompat rejected_filter;
-            SwitchCompat waiting_filter;
-            SwitchCompat cancelled_filter;
-        };
         filterButton.setOnClickListener(v -> {
-            new FilterUserPopUpFragment().show(
-                    getChildFragmentManager(), null);
-            lambdaContext.participating_filter = v.findViewById(R.id.particpating_switch);
-            lambdaContext.invited_filter = v.findViewById(R.id.invited_switch);
-            lambdaContext.rejected_filter = v.findViewById(R.id.rejected_switch);
-            lambdaContext.waiting_filter = v.findViewById(R.id.waiting_switch);
-            lambdaContext.cancelled_filter = v.findViewById(R.id.cancelled_switch);
+            FilterUserPopUpDialog dialog = FilterUserPopUpDialog.newInstance(
+                    currentEvent,
+                    userList,
+                    userListView
+            );
+            dialog.show(getParentFragmentManager(), "filter_users");
         });
-        userList = new ArrayList<User>();
-        lambdaContext.participating_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
-            userList.addAll(currentEvent.getAttendingListOfUsers());
-        });
-        lambdaContext.invited_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
-            userList.addAll(currentEvent.getSelectedListOfUsers());
-        });
-        lambdaContext.rejected_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
-            userList.addAll(currentEvent.getDeclinedListOfUsers());
-        });
-        lambdaContext.waiting_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
-            userList.addAll(currentEvent.getWaitingListOfUsers());
-        });
-        lambdaContext.cancelled_filter.setOnCheckedChangeListener( (buttonView, isChecked)->{
-            userList.addAll(currentEvent.getCancelledListOfUsers());
-        });
-        userListAdapter.notifyDataSetChanged();
 
-        // Delete users TODO figure out how to link with delete button
+        // Cancell users
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -126,8 +100,6 @@ public class UserListFragment extends DialogFragment {
                 userListAdapter.notifyDataSetChanged();
             }
         });
-
-        // Sort users TODO figure out how to get dates and sort them as well as UI
 
         return view;
     }

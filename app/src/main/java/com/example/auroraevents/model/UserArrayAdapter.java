@@ -6,24 +6,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.auroraevents.R;
-import com.example.auroraevents.view.FilterUserPopUpFragment;
-import com.example.auroraevents.view.RemoveUserPopUpFragment;
+import com.example.auroraevents.view.RemoveUserPopUpDialog;
+import com.example.auroraevents.view.UserListFragment;
 
 import java.util.ArrayList;
 
 public class UserArrayAdapter extends ArrayAdapter<User> {
     private Event currentEvent;
     private ImageButton deleteButton;
-    public UserArrayAdapter(Context context, ArrayList<User> users, Event event) {
+    private UserListFragment parentFragment;
+    private UserArrayAdapter userListAdapter;
+    public UserArrayAdapter(Context context, ArrayList<User> users, Event event, UserArrayAdapter userListAdapter, UserListFragment parentFragment) {
         super(context, 0, users);
         currentEvent = event;
+        this.parentFragment = parentFragment;
+        this.userListAdapter = userListAdapter;
     }
 
     @NonNull
@@ -47,14 +50,17 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
             }
         }
 
-        // Delete user button TODO popup window, and getting the user id so the confirm button removes it
+        // Remove user button
         deleteButton = view.findViewById(R.id.delete_user_button);
         deleteButton.setOnClickListener(v -> {
-            //TODO
+            RemoveUserPopUpDialog dialog = RemoveUserPopUpDialog.newInstance(
+                    currentEvent.registrationList,
+                    getItem(position).getDeviceId(),
+                    userListAdapter
+            );
+            dialog.show(parentFragment.getParentFragmentManager(), getItem(position).getDeviceId());
         });
 
         return view;
     }
 }
-
-// Resources used https://androidforbeginners.blogspot.com/2010/03/clicking-buttons-in-listview-row.html
