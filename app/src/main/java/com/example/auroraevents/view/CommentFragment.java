@@ -36,6 +36,8 @@ public class CommentFragment extends Fragment {
     private String eventId;
     private String userId;
     private String userName;
+    private String userRole;
+    private String eventOrganizerId;
     private CommentAdapter adapter;
     private CommentDb commentDb;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistration;
@@ -63,57 +65,18 @@ public class CommentFragment extends Fragment {
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         if (getArguments() != null) { //pass event id in args from infouevent
             eventId = getArguments().getString("eventId");
+            eventOrganizerId = getArguments().getString("organizerId");
         }
 
-        //initialize RecyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments);
 
-        View replyIndicator = view.findViewById(R.id.reply_indicator);
-        TextView replyText = view.findViewById(R.id.text_replying_to);
-        View cancelReply = view.findViewById(R.id.button_cancel_reply);
-        //initialize commentAdapter
-        adapter = new CommentAdapter(new ArrayList<>(), comment -> {
-            //handles reply logic
-            selectedParentComment = comment;
-
-            replyText.setText("Replying to @" + comment.getUsername());
-            replyIndicator.setVisibility(View.VISIBLE);
-        });
-        cancelReply.setOnClickListener(v -> {
-            selectedParentComment = null;
-            replyIndicator.setVisibility(View.GONE);
-        });
-
-        //set recyclerView
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
-
-        //back button
-        view.findViewById(R.id.back_button).setOnClickListener(v ->
-                getParentFragmentManager().popBackStack()
-        );
-
-        //post button logic
-        view.findViewById(R.id.button_post).setOnClickListener(v -> {
-            EditText editComment = view.findViewById(R.id.edit_text_comment);
-            String text = editComment.getText().toString().trim();
-
-            if (text.isEmpty() || userName == null) return;
-            String parentId = (selectedParentComment != null) ? selectedParentComment.getId() : null;
-
-            Comment newComment = new Comment(text, userId, parentId, null, eventId, null, userName);
-
-            CommentDb.getInstance().postComment(newComment, id -> {
-                editComment.setText("");
-                selectedParentComment = null;
-                view.findViewById(R.id.reply_indicator).setVisibility(View.GONE);
-            }, e -> Log.e(TAG, "Post failed", e));
-        });
 
         UserDb.getInstance().getUser(userId, //grab user info
                 user -> {
                     if (user != null) {
                         userName = user.getName(); //on success, grab comments
+                        userRole = user.getRole();
+
+                        setUp(view);
                         commentListenerRegistration = CommentDb.getInstance().commentListener(eventId, comments -> {
                             if (comments != null) {
                                 adapter.setComments(comments);
@@ -172,5 +135,60 @@ public class CommentFragment extends Fragment {
                 navBar.setVisibility(visibility);
             }
         }
+    }
+
+    private void setUp(View view){
+        //initialize RecyclerView
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments);
+
+        View replyIndicator = view.findViewById(R.id.reply_indicator);
+        TextView replyText = view.findViewById(R.id.text_replying_to);
+        View cancelReply = view.findViewById(R.id.button_cancel_reply);
+        //initialize commentAdapter
+        adapter = new CommentAdapter(new ArrayList<>(), new CommentAdapter.OnCommentInteractionListener() {
+            @Override
+            public void onReplyClicked(Comment comment) {
+                selectedParentComment = comment;
+                replyText.setText("Replying to @" + comment.getUsername());
+                replyIndicator.setVisibility(View.VISIBLE);
+            }
+            @Override
+            public void onDeleteClicked(Comment comment) {
+                CommentDb.getInstance().deleteComment(comment.getId(),
+                        () -> Log.d(TAG, "Deleted successfully"),
+                        e -> Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show()
+                );
+            }
+        }, userId, userRole, eventOrganizerId);
+        cancelReply.setOnClickListener(v -> {
+            selectedParentComment = null;
+            replyIndicator.setVisibility(View.GONE);
+        });
+
+        //set recyclerView
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+
+        //back button
+        view.findViewById(R.id.back_button).setOnClickListener(v ->
+                getParentFragmentManager().popBackStack()
+        );
+
+        //post button logic
+        view.findViewById(R.id.button_post).setOnClickListener(v -> {
+            EditText editComment = view.findViewById(R.id.edit_text_comment);
+            String text = editComment.getText().toString().trim();
+
+            if (text.isEmpty() || userName == null) return;
+            String parentId = (selectedParentComment != null) ? selectedParentComment.getId() : null;
+
+            Comment newComment = new Comment(text, userId, parentId, null, eventId, null, userName);
+
+            CommentDb.getInstance().postComment(newComment, id -> {
+                editComment.setText("");
+                selectedParentComment = null;
+                view.findViewById(R.id.reply_indicator).setVisibility(View.GONE);
+            }, e -> Log.e(TAG, "Post failed", e));
+        });
     }
 }

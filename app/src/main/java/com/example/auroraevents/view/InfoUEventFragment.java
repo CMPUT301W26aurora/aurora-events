@@ -139,6 +139,7 @@ public class InfoUEventFragment extends Fragment {
                                             commentButton.setOnClickListener(v->{
                                                 Bundle bundle = new Bundle();
                                                 bundle.putString("eventId", event.getEventId());
+                                                bundle.putString("organizerId", event.getOrganizerDeviceId());
 
                                                 CommentFragment commentFragment = new CommentFragment();
                                                 commentFragment.setArguments(bundle);

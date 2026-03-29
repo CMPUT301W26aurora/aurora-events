@@ -19,9 +19,15 @@ import java.util.List;
  */
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
 
-    public interface OnCommentInteractionListener { void onReplyClicked(Comment comment);}
+    public interface OnCommentInteractionListener {
+        void onReplyClicked(Comment comment);
+        void onDeleteClicked(Comment comment);
+    }
     private OnCommentInteractionListener listener;
     private List<Comment> commentList;
+    private String currentUserId;
+    private String currentUserRole;
+    private String eventOrganizerId;
 
     /**
      * Constructor for the comment adapter
@@ -29,9 +35,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
      * @param list the list to adapt
      * @param listener a listener for live updates
      */
-    public CommentAdapter(List<Comment> list, OnCommentInteractionListener listener) {
+    public CommentAdapter(List<Comment> list, OnCommentInteractionListener listener, String currentUserId, String currentUserRole,String eventOrganizerId) {
         this.listener = listener;
         this.commentList = list;
+        this.currentUserId = currentUserId;
+        this.currentUserRole = currentUserRole;
+        this.eventOrganizerId = eventOrganizerId;
     }
 
     /**
@@ -43,6 +52,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         private  final TextView comment_body;
         private  final TextView comment_timestamp;
         private  final TextView comment_reply_button;
+        private final TextView comment_delete_button;
         private final View rootLayout;
         private final View threadLine;
         private final Guideline guideline;
@@ -62,6 +72,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             comment_reply_button = itemView.findViewById(R.id.comment_button_reply);
             threadLine = itemView.findViewById(R.id.thread_line);
             guideline = itemView.findViewById(R.id.guideline_start);
+            comment_delete_button = itemView.findViewById(R.id.comment_button_delete);
 
         }
 
@@ -72,7 +83,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
          * @param comment the comment in reference
          * @param listener for live updates
          */
-        public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener) {
+        public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener, String currentUserId, String currentUserRole, String eventOrganizerId) {
             //sets fields
             comment_username.setText(comment.getUsername());
             comment_body.setText(comment.getComment());
@@ -89,6 +100,21 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                     listener.onReplyClicked(comment);
                 }
             });
+
+            boolean isCommentOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
+            boolean isEventOrganizer = currentUserId != null && currentUserId.equals(eventOrganizerId);
+            boolean isAdmin = "admin".equals(currentUserRole);
+
+            if (isCommentOwner || isEventOrganizer || isAdmin) {
+                comment_delete_button.setVisibility(View.VISIBLE);
+                comment_delete_button.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onDeleteClicked(comment);
+                    }
+                });
+            } else {
+                comment_delete_button.setVisibility(View.GONE);
+            }
 
             //checks if a comment has replies
             boolean hasReplyFollowing = (position + 1 < commentList.size()) && comment.getId().equals(commentList.get(position + 1).getParentId());
@@ -151,7 +177,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
      */
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
-        holder.bind(position, commentList, commentList.get(position), listener);
+        holder.bind(position, commentList, commentList.get(position), listener, currentUserId, currentUserRole, eventOrganizerId);
     }
 
     /**
