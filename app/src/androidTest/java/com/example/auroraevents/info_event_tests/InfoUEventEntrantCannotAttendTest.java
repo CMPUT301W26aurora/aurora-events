@@ -1,12 +1,21 @@
 package com.example.auroraevents.info_event_tests;
 
+import static androidx.test.espresso.Espresso.onData;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.bottomBarShowTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 
+import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
-import com.example.auroraevents.registration_tests.RegistrationListTestsSupport;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,7 +26,6 @@ import java.time.LocalDateTime;
 
 public class InfoUEventEntrantCannotAttendTest {
     Event event;
-    String deviceId;
 
     @BeforeClass
     public static void prepare() {
@@ -26,7 +34,7 @@ public class InfoUEventEntrantCannotAttendTest {
 
     @Before
     public void before() {
-        //TODO: open InfoUEventFragment
+
     }
 
     @After
@@ -43,7 +51,7 @@ public class InfoUEventEntrantCannotAttendTest {
     public void onRemovedList() {
         // Set up
         event = new Event(
-                "test device",
+                "dummy",
                 "event info screen test",
                 "event for info screen attending test",
                 "free",
@@ -56,8 +64,10 @@ public class InfoUEventEntrantCannotAttendTest {
                 -1,
                 null);
         setUpEvent(event);
-        //TODO: get deviceId
-        RegistrationListTestsSupport.setUpRemovedList(event.registrationList, deviceId);
+
+        onView(withId(R.id.nav_browse)).perform(click());
+        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
+        onView(withText(event.getName())).check(matches(isDisplayed()));
 
         // Test
         bottomBarShowTest(
@@ -84,7 +94,7 @@ public class InfoUEventEntrantCannotAttendTest {
     public void noSlots() {
         // Set up
         event = new Event(
-                "test device",
+                "dummy",
                 "event info screen test",
                 "event for info screen attending test",
                 "free",
@@ -97,6 +107,10 @@ public class InfoUEventEntrantCannotAttendTest {
                 0,
                 null);
         setUpEvent(event);
+
+        onView(withId(R.id.nav_browse)).perform(click());
+        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
+        onView(withText(event.getName())).check(matches(isDisplayed()));
 
         // Test
         bottomBarShowTest(
@@ -124,7 +138,7 @@ public class InfoUEventEntrantCannotAttendTest {
     public void noWaitingRoom() {
         // Set up
         event = new Event(
-                "test device",
+                "dummy",
                 "event info screen test",
                 "event for info screen attending test",
                 "free",
@@ -137,6 +151,10 @@ public class InfoUEventEntrantCannotAttendTest {
                 -1,
                 null);
         setUpEvent(event);
+
+        onView(withId(R.id.nav_browse)).perform(click());
+        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
+        onView(withText(event.getName())).check(matches(isDisplayed()));
 
         // Test
         bottomBarShowTest(
@@ -163,7 +181,7 @@ public class InfoUEventEntrantCannotAttendTest {
     public void registrationClosed() {
         // Set up
         event = new Event(
-                "test device",
+                "dummy",
                 "event info screen test",
                 "event for info screen attending test",
                 "free",
@@ -176,6 +194,10 @@ public class InfoUEventEntrantCannotAttendTest {
                 -1,
                 null);
         setUpEvent(event);
+
+        onView(withId(R.id.nav_browse)).perform(click());
+        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
+        onView(withText(event.getName())).check(matches(isDisplayed()));
 
         // Test
         bottomBarShowTest(

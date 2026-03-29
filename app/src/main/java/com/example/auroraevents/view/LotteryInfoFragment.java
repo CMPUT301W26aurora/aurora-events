@@ -13,16 +13,16 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.auroraevents.R;
 
-public class SelectionInfoFragment extends DialogFragment {
+public class LotteryInfoFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        View view = getLayoutInflater().inflate(R.layout.fragment_selection_info, null);
+        View view = getLayoutInflater().inflate(R.layout.fragment_lottery_info, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.DarkGlassDialog);
         return builder
                 .setView(view)
-                .setPositiveButton("Okay", null)
+                .setPositiveButton(R.string.okay_button_text, null)
                 .create();
     }
 

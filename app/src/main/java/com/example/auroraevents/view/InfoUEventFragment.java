@@ -156,8 +156,10 @@ public class InfoUEventFragment extends Fragment {
                                             eventOrganizer.setText(organizerText);
                                             UserDb.getInstance().getUser(event.getOrganizerDeviceId(),
                                                     u -> {
-                                                        String organizerName = getString(R.string.organized_by_text) + u.getName();
-                                                        eventOrganizer.setText(organizerName);
+                                                        if (u != null) {
+                                                            String organizerName = getString(R.string.organized_by_text) + u.getName();
+                                                            eventOrganizer.setText(organizerName);
+                                                        }
                                                     },
                                                     e -> {}
                                             );
@@ -167,7 +169,7 @@ public class InfoUEventFragment extends Fragment {
 
                                             // set info button functionality
                                             infoButton.setOnClickListener( v -> {
-                                                    SelectionInfoFragment infoFragment = new SelectionInfoFragment();
+                                                    LotteryInfoFragment infoFragment = new LotteryInfoFragment();
                                                     infoFragment.show(requireActivity().getSupportFragmentManager(), "Lottery Info");
                                                 }
                                             );

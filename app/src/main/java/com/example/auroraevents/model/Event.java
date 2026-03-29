@@ -14,6 +14,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 /**
  * Represents an event in the application.
@@ -74,6 +75,26 @@ public class Event {
         this.poster                = poster;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Event event = (Event) o;
+        return
+                Objects.equals(getEventId(), event.getEventId()) &&
+                Objects.equals(getOrganizerDeviceId(), event.getOrganizerDeviceId()) &&
+                Objects.equals(getName(), event.getName()) &&
+                Objects.equals(getDescription(), event.getDescription()) &&
+                Objects.equals(getPrice(), event.getPrice()) &&
+                Objects.equals(getDateTime(), event.getDateTime()) &&
+                Objects.equals(getRegistrationTimeStart(), event.getRegistrationTimeStart()) &&
+                Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
+                Objects.equals(getLocation(), event.getLocation()) &&
+                getGeolocationRequired() == event.getGeolocationRequired() &&
+                Objects.equals(getPoster(), event.getPoster()) &&
+                getNumReports() == event.getNumReports() &&
+                Objects.equals(registrationList, event.registrationList)
+                ;
+    }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
 

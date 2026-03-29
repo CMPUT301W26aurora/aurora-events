@@ -52,4 +52,5 @@
     <string name="report_button_text">Report</string>
     <string name="organized_by_text">"organized by "</string>
     <string name="default_reported_num">Reported by 21 users\n(you shouldn\'t seee this)</string>
+    <string name="okay_button_text">Okay</string>
 </resources>

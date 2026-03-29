@@ -15,6 +15,7 @@ import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -50,8 +51,25 @@ public class RegistrationList {
         this.timeoutUnit = timeoutUnit;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        RegistrationList that = (RegistrationList) o;
+        Log.d("RegistrationList", eventId + " vs. " + that.eventId);
+        return
+                new HashSet<>(getWaitingList()).containsAll(that.getWaitingList()) &&
+                new HashSet<>(getSelectedList()).containsAll(that.getSelectedList()) &&
+                new HashSet<>(getAttendingList()).containsAll(that.getAttendingList()) &&
+                new HashSet<>(getDeclinedList()).containsAll(that.getDeclinedList()) &&
+                new HashSet<>(getCancelledList()).containsAll(that.getCancelledList()) &&
+                new HashSet<>(getRemovedList()).containsAll(that.getRemovedList()) &&
+                getAttendingCapacity() == that.getAttendingCapacity() &&
+                getWaitingCapacity() == that.getWaitingCapacity();
+    }
+
     public void setEventId(String eventId) {
         this.eventId = eventId;
+        Log.d("RegistrationList", "set event ID to: " + eventId);
     }
 
     public int getAttendingCapacity() {

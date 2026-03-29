@@ -1,16 +1,21 @@
 package com.example.auroraevents.info_event_tests;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
 import static com.example.auroraevents.info_event_tests.InfoUEventTestsSupport.bottomBarShowTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
-import com.example.auroraevents.registration_tests.RegistrationListTestsSupport;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +26,6 @@ import java.time.LocalDateTime;
 
 public class InfoUEventEntrantWaitingTest {
     Event event;
-    String deviceId;
 
     @BeforeClass
     public static void prepare() {
@@ -31,7 +35,7 @@ public class InfoUEventEntrantWaitingTest {
     @Before
     public void before() {
         event = new Event(
-                "test device",
+                "dummy",
                 "event info screen test",
                 "event for info screen waiting test",
                 "free",
@@ -44,10 +48,10 @@ public class InfoUEventEntrantWaitingTest {
                 -1,
                 null);
         setUpEvent(event);
-        //TODO: get deviceId
-        RegistrationListTestsSupport.setUpWaitingList(event.registrationList, deviceId);
 
-        //TODO: open InfoUEventFragment
+        onView(withId(R.id.nav_browse)).perform(click());
+        onData(is(equalTo(event))).inAdapterView(withId(R.id.events_list)).perform(click());
+        onView(withText(event.getName())).check(matches(isDisplayed()));
     }
 
     @After
