@@ -36,7 +36,7 @@ public class Organizer extends User {
      * @param capacity           The event capacity
      */
     public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String startTime, String endTime, String location, int capacity) {
+                            String startTime, String endTime, String location, int capacity, String imageUrl) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -49,9 +49,8 @@ public class Organizer extends User {
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
-                location, capacity);
+                location, capacity, imageUrl);
 
-        // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,
                 eventId -> {
                     Log.d("Organizer", "Event successfully created with ID: " + eventId);

@@ -1,16 +1,12 @@
 package com.example.auroraevents.view;
 
 import static android.app.Activity.RESULT_OK;
-import static androidx.core.util.TypedValueCompat.dpToPx;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,38 +16,25 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 
 import com.bumptech.glide.Glide;
 import com.example.auroraevents.R;
-import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import android.provider.Settings;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.util.Objects;
 import java.util.UUID;
 
 public class EventCreationFragment extends Fragment {
@@ -75,8 +58,6 @@ public class EventCreationFragment extends Fragment {
     private User user;
     private UserViewModel userViewModel;
 
-    // Camera
-    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     // Image upload
     FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -84,31 +65,47 @@ public class EventCreationFragment extends Fragment {
     private Button addImageButton;
     Uri image;
     ImageView imageView;
+    private ImageView dialogImageView;
+    private Uri cameraImageUri;
+    private String uploadedImageUrl = null;
 
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        image = result.getData().getData();
-                        addImageButton.setEnabled(true);
+                    if (result.getData() != null && result.getData().getData() != null) {
+                        image = result.getData().getData(); // Pick from gallery
+                    } else if (cameraImageUri != null) {
+                        image = cameraImageUri;             // Image capture
+                    }
+
+                    if (image != null) {
                         Glide.with(requireContext()).load(image).into(imageView);
+                        if (dialogImageView != null) {
+                            Glide.with(requireContext()).load(image).into(dialogImageView);
+                        }
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Please upload an image", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "No image selected", Toast.LENGTH_SHORT).show();
                 }
             }
     );
 
     private void dispatchTakePictureIntent() {
+        // Create temp image URI
+        java.io.File photoFile = new java.io.File(
+                requireContext().getCacheDir(),
+                "camera_photo_" + System.currentTimeMillis() + ".jpg"
+        );
+        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                photoFile
+        );
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(Objects.requireNonNull(getActivity()).getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        } else {
-            // Display an error message if no camera app is found
-            Toast.makeText(getContext(), "No camera application found", Toast.LENGTH_SHORT).show();
-        }
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+        activityResultLauncher.launch(takePictureIntent);
     }
 
     @Override
@@ -135,6 +132,7 @@ public class EventCreationFragment extends Fragment {
         confirmButton = view.findViewById(R.id.btn_confirm);
 
         imageView = view.findViewById(R.id.iv_event_image);
+        imageView.setVisibility(View.VISIBLE);
 
         // Hide nav bar
         requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
@@ -225,7 +223,8 @@ public class EventCreationFragment extends Fragment {
                             registerStart,
                             registerEnd,
                             location,
-                            Integer.parseInt(eventCap)
+                            Integer.parseInt(eventCap),
+                            uploadedImageUrl
                     );
                     getParentFragmentManager().popBackStack();
                 }
@@ -248,6 +247,8 @@ public class EventCreationFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
         builder.setView((dialogView));
+
+        dialogImageView = dialogView.findViewById(R.id.image_view);
 
         AlertDialog dialog = builder.create();
 
@@ -277,7 +278,12 @@ public class EventCreationFragment extends Fragment {
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadImage(image);
+                if (image == null) {
+                    Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                uploadImage(image, dialog);
+                imageView.setVisibility(View.GONE);
             }
         });
 
@@ -360,18 +366,18 @@ public class EventCreationFragment extends Fragment {
     Resource used: https://medium.com/@everydayprogrammer/
     uploading-files-to-firebase-storage-in-android-studio-using-java-63f43b4c8d72
      */
-    private void uploadImage(Uri image) {
+    private void uploadImage(Uri image, AlertDialog dialog) {
         StorageReference reference = storageRef.child("images/" + UUID.randomUUID().toString());
-        reference.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(requireContext(), "Error uploading image", Toast.LENGTH_SHORT).show();
-            }
-        });
+        reference.putFile(image)
+                .addOnSuccessListener(taskSnapshot ->
+                        reference.getDownloadUrl().addOnSuccessListener(uri -> {
+                            uploadedImageUrl = uri.toString(); // Save URL to field
+                            Toast.makeText(requireContext(), "Image uploaded!", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 }

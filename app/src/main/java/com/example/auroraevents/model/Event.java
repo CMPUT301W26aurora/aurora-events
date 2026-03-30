@@ -41,6 +41,7 @@ public class Event {
     private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String  location;
     private int     capacity;         // 0 = unlimited
+    private String  imageUrl;
     private String  qrCodeData;       // String payload encoded in the QR code
     private Bitmap qR;
 
@@ -61,7 +62,7 @@ public class Event {
 
     public Event(String organizerDeviceId, String name, String description,
                  LocalDateTime dateTime, LocalDateTime registrationStart,
-                 LocalDateTime registrationEnd, String location, int capacity) {
+                 LocalDateTime registrationEnd, String location, int capacity, String imageUrl) {
         this();
         this.organizerDeviceId = organizerDeviceId;
         this.name              = name;
@@ -71,6 +72,7 @@ public class Event {
         this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location          = location;
         this.capacity          = capacity;
+        this.imageUrl          = imageUrl;
     }
 
 
@@ -106,6 +108,9 @@ public class Event {
 
     public int    getCapacity()                      { return capacity; }
     public void   setCapacity(int capacity)          { this.capacity = capacity; }
+
+    public String getImageUrl()                      { return imageUrl; }
+    public void setImageUrl(String imageUrl)         { this.imageUrl = imageUrl; }
 
     public String getQrCodeData()                    { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
