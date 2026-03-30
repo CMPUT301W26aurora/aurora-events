@@ -65,4 +65,6 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.7.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }

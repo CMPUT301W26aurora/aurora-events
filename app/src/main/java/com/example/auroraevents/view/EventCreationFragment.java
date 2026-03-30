@@ -3,6 +3,8 @@ package com.example.auroraevents.view;
 import static androidx.core.util.TypedValueCompat.dpToPx;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -19,6 +22,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 
+import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
@@ -29,6 +33,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.provider.Settings;
+import android.widget.Toast;
 
 public class EventCreationFragment extends Fragment {
     private ImageButton backButton;
@@ -37,6 +42,7 @@ public class EventCreationFragment extends Fragment {
     private TextInputEditText eventDescInput;
     private TextInputEditText eventCapInput;
     private Button locationButton;
+    private Button geolocationButton;
     private Button startDateButton;
     private Button endDateButton;
     private Button dateButton;
@@ -51,6 +57,19 @@ public class EventCreationFragment extends Fragment {
     private Organizer organizer;
     private User user;
     private UserViewModel userViewModel;
+
+    private LocationToggleListener locationToggleListener;
+    private boolean geolocationToggled;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof LocationToggleListener) {
+            locationToggleListener = (LocationToggleListener) context;
+        } else {
+            throw new RuntimeException(context.toString() + " must implement LocationToggleListener");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,6 +89,7 @@ public class EventCreationFragment extends Fragment {
         eventDescInput = view.findViewById(R.id.et_event_desc);
         eventCapInput = view.findViewById(R.id.et_event_capacity);
         locationButton = view.findViewById(R.id.btn_select_location);
+        geolocationButton = view.findViewById(R.id.btn_geolocation_lock);
         startDateButton = view.findViewById(R.id.btn_start_date);
         endDateButton = view.findViewById(R.id.btn_end_date);
         dateButton = view.findViewById(R.id.btn_signup_deadline);
@@ -85,11 +105,13 @@ public class EventCreationFragment extends Fragment {
         confirmButton.setEnabled(false);
         confirmButton.setAlpha(0.5f);
 
+        // Get device ID
         String deviceId = Settings.Secure.getString(
                 getContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
 
+        // Fetch organizer to enable/disable button
         userViewModel.fetchOrganizer(deviceId);
         userViewModel.getOrganizer().observe(getViewLifecycleOwner(), org -> {
             if (org != null) {
@@ -113,6 +135,55 @@ public class EventCreationFragment extends Fragment {
         startDateButton.setOnClickListener(v -> showDateTimePicker(startDateButton, val -> registerStart = val));
         endDateButton.setOnClickListener(v -> showDateTimePicker(endDateButton, val -> registerEnd = val));
         dateButton.setOnClickListener(v -> showDateTimePicker(dateButton, val -> date = val));
+
+        geolocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!geolocationToggled) {
+
+                    AlertDialog.Builder geolocationDialog = new AlertDialog.Builder(requireContext());
+                    geolocationDialog.setTitle("Geolocation Services");
+                    geolocationDialog.setMessage("Would you like to enable Geolocation?");
+                    geolocationDialog.setCancelable(false);
+
+                    geolocationDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            geolocationToggled = true;
+                            Toast.makeText(requireContext(), "Geolocation enabled", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    geolocationDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    AlertDialog dialog = geolocationDialog.create();
+                    dialog.show();
+                } else {
+                    AlertDialog.Builder geolocationDialog = new AlertDialog.Builder(requireContext());
+                    geolocationDialog.setTitle("Geolocation Services");
+                    geolocationDialog.setMessage("Would you like to disable Geolocation?");
+                    geolocationDialog.setCancelable(false);
+
+                    geolocationDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            geolocationToggled = false;
+                            Toast.makeText(requireContext(), "Geolocation disabled", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    geolocationDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    AlertDialog dialog = geolocationDialog.create();
+                    dialog.show();
+                }
+
+            }
+        });
 
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,6 +247,15 @@ public class EventCreationFragment extends Fragment {
         }
     }
 
+    /**
+     * Input dialog for location button
+     * @param targetButton
+     * Button to be updated
+     * @param hint
+     * Default text
+     * @param onConfirm
+     * Updated text on confirm
+     */
     private void showInputDialog(Button targetButton, String hint, java.util.function.Consumer<String> onConfirm) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.custom_input, null);
@@ -213,6 +293,13 @@ public class EventCreationFragment extends Fragment {
         dialog.show();
     }
 
+    /**
+     * Date and time selection
+     * @param targetButton
+     * Button to be updated
+     * @param onConfirm
+     * Updated timestamp on confirm
+     */
     private void showDateTimePicker(Button targetButton, java.util.function.Consumer<String> onConfirm) {
         java.util.Calendar calendar = java.util.Calendar.getInstance();
 

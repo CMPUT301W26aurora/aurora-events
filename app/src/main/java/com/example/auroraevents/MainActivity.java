@@ -1,8 +1,18 @@
 package com.example.auroraevents;
 
+import static androidx.core.location.LocationManagerCompat.getCurrentLocation;
+
+import android.Manifest;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -10,9 +20,13 @@ import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 //import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,6 +38,16 @@ import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.NotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -31,7 +55,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Collections;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationToggleListener {
 
     private static final String TAG = "MainActivity";
     private static final String NOTIFICATION_CHANNEL_ID = "default";
@@ -41,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
     private UserViewModel userViewModel;
 
     private ImageButton navScan, navBrowse, navNotifications, navProfile;
+
+    private FusedLocationProviderClient fusedLocationClient;
+    private com.google.android.gms.location.LocationCallback locationCallback;
 
 
     @Override
@@ -55,6 +82,21 @@ public class MainActivity extends AppCompatActivity {
         navProfile = findViewById(R.id.nav_profile);
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        // Geolocation services
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Initialize location callback
+        locationCallback = new com.google.android.gms.location.LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull com.google.android.gms.location.LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    Log.d(TAG, "Location update: " + latitude + ", " + longitude);
+                }
+            }
+        };
 
         // create notification channel
         createNotificationChannel();
@@ -213,5 +255,48 @@ public class MainActivity extends AppCompatActivity {
                     NOTIFICATION_PERMISSION_REQUEST_CODE
             );
         }
+    }
+
+    @Override
+    public void onLocationToggle(boolean isChecked) {
+        if (isChecked) {
+            // Check permissions and start location updates/requests
+            checkPermissionsAndRequestLocation();
+        } else {
+            // Stop location updates
+            stopLocationUpdates();
+        }
+    }
+
+    /**
+     * Check for location perms and provide current location
+     */
+    private void checkPermissionsAndRequestLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+
+            com.google.android.gms.location.LocationRequest locationRequest =
+                    com.google.android.gms.location.LocationRequest.create()
+                            .setPriority(com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY)
+                            .setInterval(10000)       // 10 seconds
+                            .setFastestInterval(5000); // 5 seconds
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, getMainLooper());
+        }
+    }
+
+    /**
+     * Stop location updates
+     */
+    private void stopLocationUpdates() {
+        if (locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
     }
 }
