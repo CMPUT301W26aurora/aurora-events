@@ -43,6 +43,8 @@ public class Event {
     private int     capacity;         // 0 = unlimited
     private String  qrCodeData;       // String payload encoded in the QR code
     private Bitmap qR;
+    private boolean geolocationToggled;
+    private boolean geolocation; // Boolean for enabling geolocation toggle
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
@@ -61,7 +63,8 @@ public class Event {
 
     public Event(String organizerDeviceId, String name, String description,
                  LocalDateTime dateTime, LocalDateTime registrationStart,
-                 LocalDateTime registrationEnd, String location, int capacity) {
+                 LocalDateTime registrationEnd, String location,
+                 int capacity, boolean geolocationToggled) {
         this();
         this.organizerDeviceId = organizerDeviceId;
         this.name              = name;
@@ -71,6 +74,7 @@ public class Event {
         this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location          = location;
         this.capacity          = capacity;
+        this.geolocationToggled = geolocationToggled;
     }
 
 
@@ -109,6 +113,9 @@ public class Event {
 
     public String getQrCodeData()                    { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
+
+    public boolean isGeolocationToggled() { return geolocationToggled; }
+    public void setGeolocationToggled(boolean geolocationToggled) { this.geolocationToggled = geolocationToggled; }
 
     // Converters
     @Exclude

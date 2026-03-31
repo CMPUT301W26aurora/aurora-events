@@ -5,6 +5,11 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
+import static com.example.auroraevents.MainActivity.LOCATION_PERMISSION_REQUEST_CODE;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -15,19 +20,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+
 
 /**
  * Displays event details for the event tapped by the entrant or admin.
@@ -52,6 +68,8 @@ public class InfoUEventFragment extends Fragment {
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
     private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton;
+    private FusedLocationProviderClient fusedLocationClient;
+    private com.example.auroraevents.model.Event pendingJoinEvent;
 
     /**
      *
@@ -79,6 +97,8 @@ public class InfoUEventFragment extends Fragment {
         }
 
         eventId = args.getString("eventId");
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // get device Id to identify user
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -251,9 +271,7 @@ public class InfoUEventFragment extends Fragment {
                                                     declineButton.setVisibility(View.GONE);
                                                     attendingLabel.setVisibility(View.GONE);
                                                     // add user to waitingList when Join Pool is clicked
-                                                    joinButton.setOnClickListener(v -> {
-                                                        event.registrationList.addToWaitingList(userId);
-                                                    });
+                                                    joinButton.setOnClickListener(v -> attemptJoinWaitingList(event));
                                                 }
                                             }
                                         } else {
@@ -265,6 +283,80 @@ public class InfoUEventFragment extends Fragment {
                 },
                 e -> Log.d(TAG, "Error fetching user" + e)
         );
+    }
+
+    private void attemptJoinWaitingList(Event event) {
+        if (event.isGeolocationToggled()) {
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                // Permission already granted
+                fetchLocationAndJoin(pendingJoinEvent);
+            } else {
+                // Prompt for permission first
+                pendingJoinEvent = event;
+                ActivityCompat.requestPermissions(
+                        requireActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        LOCATION_PERMISSION_REQUEST_CODE
+                );
+            }
+        } else {
+            // Join directly if geolocation disabled
+            joinWaitingList(event, null, null);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchLocationAndJoin(pendingJoinEvent);
+            } else {
+                Toast.makeText(requireContext(),
+                        "Location permission is required to join this event.",
+                        Toast.LENGTH_LONG).show();
+                // Do NOT join — entrant blocked until permission is granted
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")  // checked above
+    private void fetchLocationAndJoin(Event event) {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        joinWaitingList(event, location.getLatitude(), location.getLongitude());
+                    } else {
+                        // Last location unavailable — request a fresh one
+                        Toast.makeText(requireContext(),
+                                "Unable to get location. Please try again.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void joinWaitingList(Event event, Double latitude, Double longitude) {
+        // Save signup to firestore, including coordinates if geolocation enabled
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("userId", userId);
+        if (latitude != null && longitude != null) {
+            entry.put("latitude", latitude);
+            entry.put("longitude", longitude);
+        }
+        FirebaseFirestore.getInstance()
+                .collection("Events")
+                .document(event.getEventId())
+                .collection("waitingList")
+                .document(userId)
+                .set(entry)
+                .addOnSuccessListener(unused ->
+                        Toast.makeText(requireContext(), "Joined waiting list!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), "Failed to join.", Toast.LENGTH_SHORT).show());
     }
 
     /**

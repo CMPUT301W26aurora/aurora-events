@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
     private static final String NOTIFICATION_CHANNEL_ID = "default";
     private static final String NOTIFICATION_CHANNEL_NAME = "Default";
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1;
+    public static final int LOCATION_PERMISSION_REQUEST_CODE = 2;
     private String deviceId;
     private UserViewModel userViewModel;
 
@@ -268,6 +269,11 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         }
     }
 
+    @Override
+    public void onLocationPermissionResult(boolean granted) {
+
+    }
+
     /**
      * Check for location perms and provide current location
      */
@@ -298,5 +304,32 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+            // Notify the fragment of the result
+            Fragment current = getSupportFragmentManager()
+                    .findFragmentById(R.id.fragment_container);
+            if (current instanceof LocationToggleListener) {
+                ((LocationToggleListener) current).onLocationPermissionResult(granted);
+            }
+
+            if (!granted) {
+                Toast.makeText(this,
+                        "Location permission denied. Geolocation tracking disabled.",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                checkPermissionsAndRequestLocation();
+            }
+        }
     }
 }

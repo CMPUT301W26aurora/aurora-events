@@ -59,7 +59,7 @@ public class EventCreationFragment extends Fragment {
     private UserViewModel userViewModel;
 
     private LocationToggleListener locationToggleListener;
-    private boolean geolocationToggled;
+    public boolean geolocationToggled;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -228,7 +228,8 @@ public class EventCreationFragment extends Fragment {
                             registerStart,
                             registerEnd,
                             location,
-                            Integer.parseInt(eventCap)
+                            Integer.parseInt(eventCap),
+                            geolocationToggled
                     );
                     getParentFragmentManager().popBackStack();
                 }
