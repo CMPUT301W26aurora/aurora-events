@@ -50,7 +50,7 @@ public class RegistrationDeclinedListTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                0);
+                0, false);
         setUpEvent(event);
         list = event.registrationList;
         entrantID = "aurora";

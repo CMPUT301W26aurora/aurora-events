@@ -34,7 +34,7 @@ public class RegistrationListsTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                0);
+                0, false);
         setUpEvent(event);
     }
 

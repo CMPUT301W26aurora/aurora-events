@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
-                    user.setRole(User.ROLE_ORGANIZER);
+                    user.setRole(User.ROLE_ENTRANT;
                     userViewModel.selectItem(user);
                 },
                 e -> Log.e(TAG, "User info not available")

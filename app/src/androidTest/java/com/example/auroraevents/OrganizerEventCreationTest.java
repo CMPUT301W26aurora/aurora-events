@@ -87,7 +87,8 @@ public class OrganizerEventCreationTest {
                 LocalDateTime.parse(START_TIME, formatter),
                 LocalDateTime.parse(END_TIME, formatter),
                 LOCATION,
-                CAPACITY
+                CAPACITY,
+                false
         );
     }
 }

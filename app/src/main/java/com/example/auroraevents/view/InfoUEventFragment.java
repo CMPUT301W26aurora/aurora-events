@@ -9,6 +9,7 @@ import static com.example.auroraevents.MainActivity.LOCATION_PERMISSION_REQUEST_
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -287,22 +288,31 @@ public class InfoUEventFragment extends Fragment {
 
     private void attemptJoinWaitingList(Event event) {
         if (event.isGeolocationToggled()) {
-            if (ContextCompat.checkSelfPermission(requireContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                // Permission already granted
-                fetchLocationAndJoin(pendingJoinEvent);
-            } else {
-                // Prompt for permission first
-                pendingJoinEvent = event;
-                ActivityCompat.requestPermissions(
-                        requireActivity(),
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        LOCATION_PERMISSION_REQUEST_CODE
-                );
-            }
+            // Geolocation warning
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Location Required")
+                    .setMessage("This event requires your location to join the waiting list. Do you want to share your location?")
+                    .setCancelable(false)
+                    .setPositiveButton("Allow", (dialog, id) -> {
+                        if (ContextCompat.checkSelfPermission(requireContext(),
+                                Manifest.permission.ACCESS_FINE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            // Perms already granted
+                            fetchLocationAndJoin(event);
+                        } else {
+                            // Store event, prompt for permission
+                            pendingJoinEvent = event;
+                            ActivityCompat.requestPermissions(
+                                    requireActivity(),
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    LOCATION_PERMISSION_REQUEST_CODE
+                            );
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss())
+                    .show();
         } else {
-            // Join directly if geolocation disabled
+            // Join directly, geolocation not required
             joinWaitingList(event, null, null);
         }
     }
@@ -340,23 +350,22 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void joinWaitingList(Event event, Double latitude, Double longitude) {
-        // Save signup to firestore, including coordinates if geolocation enabled
-        Map<String, Object> entry = new HashMap<>();
-        entry.put("userId", userId);
+        // Use registrationList to stay consistent with the rest of the app
+        event.registrationList.addToWaitingList(userId);
+
+        // Store coordinates separately if geolocation is enabled
         if (latitude != null && longitude != null) {
-            entry.put("latitude", latitude);
-            entry.put("longitude", longitude);
+            Map<String, Object> locationEntry = new HashMap<>();
+            locationEntry.put("latitude", latitude);
+            locationEntry.put("longitude", longitude);
+            FirebaseFirestore.getInstance()
+                    .collection("Events")
+                    .document(event.getEventId())
+                    .collection("entrantLocations")
+                    .document(userId)
+                    .set(locationEntry)
+                    .addOnFailureListener(e -> Log.e(TAG, "Failed to save location", e));
         }
-        FirebaseFirestore.getInstance()
-                .collection("Events")
-                .document(event.getEventId())
-                .collection("waitingList")
-                .document(userId)
-                .set(entry)
-                .addOnSuccessListener(unused ->
-                        Toast.makeText(requireContext(), "Joined waiting list!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(), "Failed to join.", Toast.LENGTH_SHORT).show());
     }
 
     /**
