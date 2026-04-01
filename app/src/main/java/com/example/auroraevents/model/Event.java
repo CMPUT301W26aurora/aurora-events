@@ -55,6 +55,7 @@ public class Event {
     private List<String> declinedList;    // invited then self declined
     private List<String> cancelledList;   // self cancelled
     private List<String> removedList;     // force removed
+    private boolean isPrivate;
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
@@ -179,6 +180,7 @@ public class Event {
      * The list of user's device IDs
      * @return
      * The list of user objects that were fetched with given device IDs
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
@@ -215,65 +217,113 @@ public class Event {
      * Gets the array list of user objects that are in the waiting list
      * @return
      * Return the array list of user objects in the waiting list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getWaitingListOfUsers() {
-        return getUsersFromDB(registrationList.getWaitingList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getWaitingList());
+        for (User user: users) {
+            user.setStatus("Waiting");
+        }
+        return users;
     }
 
     /**
      * Gets the array list of user objects that are in the selected list
      * @return
      * Return the array list of user objects in the selected list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getSelectedListOfUsers() {
-        return getUsersFromDB(registrationList.getSelectedList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getSelectedList());
+        for (User user: users) {
+            user.setStatus("Invited");
+        }
+        return users;
     }
 
     /**
      * Gets the array list of user objects that are in the attending list
      * @return
      * Return the array list of user objects in the attending list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getAttendingListOfUsers() {
-        return getUsersFromDB(registrationList.getAttendingList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getAttendingList());
+        for (User user: users) {
+            user.setStatus("Attending");
+        }
+        return users;
     }
 
     /**
      * Gets the array list of user objects that are in the declined list
      * @return
      * Return the array list of user objects in the declined list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getDeclinedListOfUsers() {
-        return getUsersFromDB(registrationList.getDeclinedList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getDeclinedList());
+        for (User user: users) {
+            user.setStatus("Declined");
+        }
+        return users;
     }
 
     /**
      * Gets the array list of user objects that are in the cancelled list
      * @return
      * Return the array list of user objects in the cancelled list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getCancelledListOfUsers() {
-        return getUsersFromDB(registrationList.getCancelledList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getCancelledList());
+        for (User user: users) {
+            user.setStatus("Cancelled");
+        }
+        return users;
     }
 
     /**
      * Gets the array list of user objects that are in the removed list
      * @return
      * Return the array list of user objects in the removed list
+     * @author Won Koh
      */
     @Exclude
     public ArrayList<User> getRemovedListOfUsers() {
-        return getUsersFromDB(registrationList.getRemovedList());
+        ArrayList<User> users = getUsersFromDB(registrationList.getRemovedList());
+        for (User user: users) {
+            user.setStatus("Removed");
+        }
+        return users;
+    }
+
+    /**
+     * Gets the array list of user objects that are in any of the event's lists
+     * @return
+     * Return the array list of all the users that were in any of the event's lists
+     * @author Won Koh
+     */
+    public ArrayList<User> getListOfAllUsers() {
+        ArrayList<User> users = new ArrayList<User>();
+        users.addAll(this.getAttendingListOfUsers());
+        users.addAll(this.getSelectedListOfUsers());
+        users.addAll(this.getWaitingListOfUsers());
+        users.addAll(this.getCancelledListOfUsers());
+        users.addAll(this.getDeclinedListOfUsers());
+        users.addAll(this.getRemovedListOfUsers());
+        return users;
     }
 
     /**
      * Randomly samples users in the waiting list and adds the selected ones to the selected list
      * then send notification to both the users who were selected and not
+     * @author Won Koh
      */
     @Exclude
     public void randomSampling() {
@@ -295,4 +345,16 @@ public class Event {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
 }

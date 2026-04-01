@@ -69,6 +69,7 @@ public class InfoUEventFragment extends Fragment {
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
     private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton;
+  
     private FusedLocationProviderClient fusedLocationClient;
     private com.example.auroraevents.model.Event pendingJoinEvent;
 
@@ -121,6 +122,10 @@ public class InfoUEventFragment extends Fragment {
         declineButton = view.findViewById(R.id.decline_button);
         deleteButton  = view.findViewById(R.id.delete_button);
         sampleButton = view.findViewById(R.id.sample_button);
+        viewEntrantsButton = view.findViewById(R.id.view_entrants_button);
+        commentButton = view.findViewById(R.id.comment_button);
+
+        notificationButton = view.findViewById(R.id.notification_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -155,6 +160,27 @@ public class InfoUEventFragment extends Fragment {
                                             eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
                                             poster.setVisibility(View.GONE);
 
+                                            commentButton.setOnClickListener(v->{
+                                                Bundle bundle = new Bundle();
+                                                bundle.putString("eventId", event.getEventId());
+                                                bundle.putString("organizerId", event.getOrganizerDeviceId());
+
+                                                CommentFragment commentFragment = new CommentFragment();
+                                                commentFragment.setArguments(bundle);
+
+                                                getParentFragmentManager()
+                                                        .beginTransaction()
+                                                        .setCustomAnimations(
+                                                                android.R.anim.slide_in_left,
+                                                                android.R.anim.fade_out,
+                                                                android.R.anim.fade_in,
+                                                                android.R.anim.slide_out_right
+                                                        )
+                                                        .replace(R.id.fragment_container, commentFragment)
+                                                        .addToBackStack(null)
+                                                        .commit();
+                                            });
+
                                             if (userIsAdmin) {
                                                 // display event details for admin view
                                                 joinButton.setVisibility(View.GONE);
@@ -164,6 +190,7 @@ public class InfoUEventFragment extends Fragment {
                                                 waitingListCount.setVisibility(View.GONE);
                                                 attendeesCount.setVisibility(View.GONE);
                                                 deleteButton.setVisibility(View.VISIBLE);
+                                                notificationButton.setVisibility(View.VISIBLE);
 
                                                 // allow admin to delete event by clicking delete button
                                                 deleteButton.setOnClickListener(v -> {
@@ -180,6 +207,16 @@ public class InfoUEventFragment extends Fragment {
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
                                                 sampleButton.setVisibility(View.VISIBLE);
                                                 deleteButton.setVisibility(View.VISIBLE);
+                                                viewEntrantsButton.setVisibility(View.VISIBLE);
+                                                notificationButton.setVisibility(View.VISIBLE);
+                                                notificationButton.setOnClickListener(v -> {
+                                                    SendNotificationDialog dialog = SendNotificationDialog.newInstance(
+                                                            event.getEventId(),
+                                                            event.getName(),
+                                                            event.registrationList
+                                                    );
+                                                    dialog.show(getParentFragmentManager(), "send_notification");
+                                                });
                                                 joinButton.setVisibility(View.GONE);
                                                 acceptButton.setVisibility(View.GONE);
                                                 declineButton.setVisibility(View.GONE);
@@ -213,6 +250,19 @@ public class InfoUEventFragment extends Fragment {
                                                 else {
                                                     sampleButton.setBackgroundColor(Color.GRAY);
                                                 }
+
+                                                // View Entrants Button
+                                                viewEntrantsButton.setOnClickListener(v -> {
+                                                    Bundle args = new Bundle();
+                                                    args.putString("eventId", event.getEventId());
+                                                    UserListFragment userListFragment = new UserListFragment();
+                                                    userListFragment.setArguments(args);
+                                                    getParentFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, userListFragment)
+                                                            .addToBackStack(null)
+                                                            .commit();
+                                                });
                                             }
                                             else {
                                                 // show waiting list and attendees count for entrant
