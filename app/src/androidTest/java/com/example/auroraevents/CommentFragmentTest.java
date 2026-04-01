@@ -10,20 +10,26 @@ import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.clickChildViewWithId;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
+import static com.example.auroraevents.TestsSupport.setUpUser;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
+import static com.example.auroraevents.TestsSupport.takeDownUser;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasToString;
+
+import static org.hamcrest.Matchers.allOf;
 
 import android.Manifest;
 import android.os.Build;
@@ -34,6 +40,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.User;
 
 import org.junit.After;
 import org.junit.Before;
@@ -89,7 +96,7 @@ public class CommentFragmentTest {
                 .inAdapterView(withId(R.id.events_list))
                 .perform(click());
         try { Thread.sleep(2000); } catch (InterruptedException e) {}
-        onView(withId(R.id.event_name)).check(matches(withText("extremeTurkeyTactics")));
+        onView(allOf(withId(R.id.event_name),isDescendantOfA(isAssignableFrom(android.widget.ScrollView.class)))).check(matches(withText("extremeTurkeyTactics")));
         onView(withId(R.id.comment_button)).perform(click());
     }
 
@@ -98,6 +105,7 @@ public class CommentFragmentTest {
         if (event != null) {
             takeDownEvent(event);
         }
+
     }
 
 
