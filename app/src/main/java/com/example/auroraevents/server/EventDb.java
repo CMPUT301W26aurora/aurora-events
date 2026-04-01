@@ -13,7 +13,9 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.List;
 
@@ -312,22 +314,34 @@ public class EventDb {
     // ── DELETE ─────────────────────────────────────────────────────────────
 
     /**
-     * Deletes an event document from Firestore.
+     * Deletes an event document from Firestore along with the comments
      *
      * @param eventId   The document ID of the event to delete.
      * @param onSuccess Called when the deletion succeeds.
      * @param onFailure Called with the exception if the deletion fails.
      */
     public void deleteEvent(String eventId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        db.collection(COLLECTION_NAME)
-                .document(eventId)
-                .delete()
-                .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "Event deleted: " + eventId);
-                    onSuccess.onSuccess();
+        db.collection("Comments")
+                .whereEqualTo("eventId", eventId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    WriteBatch batch = db.batch();
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        batch.delete(doc.getReference());
+                    }
+                    batch.delete(db.collection(COLLECTION_NAME).document(eventId));
+                    batch.commit()
+                            .addOnSuccessListener(unused -> {
+                                Log.d(TAG, "Event and comments deleted: " + eventId);
+                                onSuccess.onSuccess();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Batch delete failed", e);
+                                onFailure.onFailure(e);
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to delete event: " + eventId, e);
+                    Log.e(TAG, "Failed to fetch comments for deletion", e);
                     onFailure.onFailure(e);
                 });
     }

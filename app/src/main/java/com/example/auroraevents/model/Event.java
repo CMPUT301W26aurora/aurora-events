@@ -53,6 +53,7 @@ public class Event {
     private List<String> declinedList;    // invited then self declined
     private List<String> cancelledList;   // self cancelled
     private List<String> removedList;     // force removed
+    private boolean isPrivate;
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
@@ -337,4 +338,16 @@ public class Event {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
 }
