@@ -91,7 +91,7 @@ public class UserListFragment extends DialogFragment {
             dialog.show(getParentFragmentManager(), "filter_users");
         });
 
-        // Cancel users
+        // Cancell users
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
