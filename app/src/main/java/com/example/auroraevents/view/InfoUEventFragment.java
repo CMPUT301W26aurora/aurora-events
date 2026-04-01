@@ -51,7 +51,7 @@ public class InfoUEventFragment extends Fragment {
     private TextView eventName, eventDescription, eventLocation, eventDateTime;
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
-    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton, notificationButton;
+    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton, notificationButton, commentButton;
 
     /**
      *
@@ -100,6 +100,8 @@ public class InfoUEventFragment extends Fragment {
         declineButton = view.findViewById(R.id.decline_button);
         deleteButton  = view.findViewById(R.id.delete_button);
         sampleButton = view.findViewById(R.id.sample_button);
+        commentButton = view.findViewById(R.id.comment_button);
+
         notificationButton = view.findViewById(R.id.notification_button);
 
         // back button to return to events list
@@ -134,6 +136,27 @@ public class InfoUEventFragment extends Fragment {
                                             eventDateTime.setText(event.getDateTime());
                                             eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
                                             poster.setVisibility(View.GONE);
+
+                                            commentButton.setOnClickListener(v->{
+                                                Bundle bundle = new Bundle();
+                                                bundle.putString("eventId", event.getEventId());
+                                                bundle.putString("organizerId", event.getOrganizerDeviceId());
+
+                                                CommentFragment commentFragment = new CommentFragment();
+                                                commentFragment.setArguments(bundle);
+
+                                                getParentFragmentManager()
+                                                        .beginTransaction()
+                                                        .setCustomAnimations(
+                                                                android.R.anim.slide_in_left,
+                                                                android.R.anim.fade_out,
+                                                                android.R.anim.fade_in,
+                                                                android.R.anim.slide_out_right
+                                                        )
+                                                        .replace(R.id.fragment_container, commentFragment)
+                                                        .addToBackStack(null)
+                                                        .commit();
+                                            });
 
                                             if (userIsAdmin) {
                                                 // display event details for admin view
