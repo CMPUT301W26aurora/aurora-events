@@ -1,15 +1,22 @@
 package com.example.auroraevents;
 
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.util.Log;
+import android.view.View;
+
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
 
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
+
+import org.hamcrest.Matcher;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -130,4 +137,30 @@ public class TestsSupport {
         takeDownUser(user, 10, TimeUnit.SECONDS);
     }
 
+
+    /**
+     * Solution for clicking a specific child view inside a RecyclerView item.
+     * from: https://stackoverflow.com/questions/28476507/using-espresso-to-click-view-inside-recyclerview-item
+     * answer:https://stackoverflow.com/a/30338665
+     * Author: blade
+     */
+    public static ViewAction clickChildViewWithId(final int id) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isDisplayed();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Click on a child view with specified id.";
+            }
+
+            @Override
+            public void perform(UiController uiController, View view) {
+                View v = view.findViewById(id);
+                v.performClick();
+            }
+        };
+    }
 }
