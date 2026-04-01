@@ -83,9 +83,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
 
-        /*
-        Hardcode user role for testing purposes
-         */
+
+        //Hardcode user role for testing purposes
         /*
         UserDb.getInstance().getUser(deviceId,
                 user -> {

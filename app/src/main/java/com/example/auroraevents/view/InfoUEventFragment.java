@@ -51,7 +51,7 @@ public class InfoUEventFragment extends Fragment {
     private TextView eventName, eventDescription, eventLocation, eventDateTime;
     private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
     private ImageView poster;
-    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton, notificationButton, commentButton;
+    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton, viewEntrantsButton, notificationButton, commentButton;
 
     /**
      *
@@ -100,6 +100,7 @@ public class InfoUEventFragment extends Fragment {
         declineButton = view.findViewById(R.id.decline_button);
         deleteButton  = view.findViewById(R.id.delete_button);
         sampleButton = view.findViewById(R.id.sample_button);
+        viewEntrantsButton = view.findViewById(R.id.view_entrants_button);
         commentButton = view.findViewById(R.id.comment_button);
 
         notificationButton = view.findViewById(R.id.notification_button);
@@ -184,6 +185,7 @@ public class InfoUEventFragment extends Fragment {
                                             else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
                                                 sampleButton.setVisibility(View.VISIBLE);
                                                 deleteButton.setVisibility(View.VISIBLE);
+                                                viewEntrantsButton.setVisibility(View.VISIBLE);
                                                 notificationButton.setVisibility(View.VISIBLE);
                                                 notificationButton.setOnClickListener(v -> {
                                                     SendNotificationDialog dialog = SendNotificationDialog.newInstance(
@@ -226,6 +228,19 @@ public class InfoUEventFragment extends Fragment {
                                                 else {
                                                     sampleButton.setBackgroundColor(Color.GRAY);
                                                 }
+
+                                                // View Entrants Button
+                                                viewEntrantsButton.setOnClickListener(v -> {
+                                                    Bundle args = new Bundle();
+                                                    args.putString("eventId", event.getEventId());
+                                                    UserListFragment userListFragment = new UserListFragment();
+                                                    userListFragment.setArguments(args);
+                                                    getParentFragmentManager()
+                                                            .beginTransaction()
+                                                            .replace(R.id.fragment_container, userListFragment)
+                                                            .addToBackStack(null)
+                                                            .commit();
+                                                });
                                             }
                                             else {
                                                 // show waiting list and attendees count for entrant
