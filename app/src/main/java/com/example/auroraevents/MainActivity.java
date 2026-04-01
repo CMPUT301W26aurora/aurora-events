@@ -24,6 +24,9 @@ import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.NotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.appcheck.FirebaseAppCheck;
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -82,6 +85,12 @@ public class MainActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
+
+        // Initialize AppCheckProvider
+        FirebaseApp.initializeApp(this);
+        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+        );
 
         /*
         Hardcode user role for testing purposes

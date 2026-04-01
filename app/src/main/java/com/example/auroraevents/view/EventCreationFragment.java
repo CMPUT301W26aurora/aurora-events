@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -37,6 +38,10 @@ import android.widget.Toast;
 
 import java.util.UUID;
 
+/*
+Image loading handled by resource Glide:
+https://github.com/bumptech/glide
+ */
 public class EventCreationFragment extends Fragment {
     private ImageButton backButton;
     private TextInputEditText eventNameInput;
@@ -68,21 +73,30 @@ public class EventCreationFragment extends Fragment {
     private ImageView dialogImageView;
     private Uri cameraImageUri;
     private String uploadedImageUrl = null;
+    private View dialogView;
 
+    private Uri drawableToUri(int drawableResId) {
+        return Uri.parse("android.resource://" + requireContext().getPackageName() + "/" + drawableResId);
+    }
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
                     if (result.getData() != null && result.getData().getData() != null) {
-                        image = result.getData().getData(); // Pick from gallery
+                        image = result.getData().getData();
                     } else if (cameraImageUri != null) {
-                        image = cameraImageUri;             // Image capture
+                        image = cameraImageUri;
                     }
 
                     if (image != null) {
-                        Glide.with(requireContext()).load(image).into(imageView);
+
+                        // Update image upload dialog
                         if (dialogImageView != null) {
-                            Glide.with(requireContext()).load(image).into(dialogImageView);
+                            dialogImageView.setVisibility(View.VISIBLE);
+                            dialogView.findViewById(R.id.image_placeholder).setVisibility(View.GONE);
+                            dialogImageView.post(() ->
+                                    Glide.with(requireContext()).load(image).into(dialogImageView)
+                            );
                         }
                     }
                 } else {
@@ -134,6 +148,8 @@ public class EventCreationFragment extends Fragment {
         imageView = view.findViewById(R.id.iv_event_image);
         imageView.setVisibility(View.VISIBLE);
 
+        addImageButton.setVisibility(view.VISIBLE);
+
         // Hide nav bar
         requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
 
@@ -158,6 +174,8 @@ public class EventCreationFragment extends Fragment {
                 confirmButton.setAlpha(1.0f);
             }
         });
+
+        addMockImageToGallery();
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,6 +248,7 @@ public class EventCreationFragment extends Fragment {
                 }
             }
         });
+
         return view;
     }
 
@@ -245,10 +264,10 @@ public class EventCreationFragment extends Fragment {
 
     private void showInputDialogImage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
+        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
         builder.setView((dialogView));
 
-        dialogImageView = dialogView.findViewById(R.id.image_view);
+        dialogImageView = dialogView.findViewById(R.id.image_preview);
 
         AlertDialog dialog = builder.create();
 
@@ -260,11 +279,11 @@ public class EventCreationFragment extends Fragment {
             dialog.getWindow().setAttributes(params);
         }
 
-        ImageView imageView = dialogView.findViewById(R.id.image_view);
         Button btnCamera = dialogView.findViewById(R.id.btn_take_photo);
         Button btnGallery = dialogView.findViewById(R.id.btn_choose_gallery);
         Button btnCancel = dialogView.findViewById(R.id.btn_image_cancel);
         Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
+        FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
 
         btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -282,8 +301,8 @@ public class EventCreationFragment extends Fragment {
                     Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                uploadImage(image, dialog);
-                imageView.setVisibility(View.GONE);
+                uploadImage(image, dialog, v);
+                dialogImageView.setVisibility(View.GONE);
             }
         });
 
@@ -362,22 +381,52 @@ public class EventCreationFragment extends Fragment {
     }
 
     /*
-    Upload image to firebase
-    Resource used: https://medium.com/@everydayprogrammer/
+    Upload image to firebase storage
+    Based of resource: https://medium.com/@everydayprogrammer/
     uploading-files-to-firebase-storage-in-android-studio-using-java-63f43b4c8d72
      */
-    private void uploadImage(Uri image, AlertDialog dialog) {
+    private void uploadImage(Uri image, AlertDialog dialog, View view) {
         StorageReference reference = storageRef.child("images/" + UUID.randomUUID().toString());
         reference.putFile(image)
                 .addOnSuccessListener(taskSnapshot ->
                         reference.getDownloadUrl().addOnSuccessListener(uri -> {
-                            uploadedImageUrl = uri.toString(); // Save URL to field
+                            uploadedImageUrl = uri.toString();
                             Toast.makeText(requireContext(), "Image uploaded!", Toast.LENGTH_SHORT).show();
+
+                            // Update main imageview
+                            Glide.with(requireContext()).load(uploadedImageUrl).into(imageView);
+                            addImageButton.setVisibility(view.GONE);
+
                             dialog.dismiss();
                         })
                 )
                 .addOnFailureListener(e -> {
                     Toast.makeText(requireContext(), "Upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private void addMockImageToGallery() {
+        // Copy drawable to external storage
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeResource(
+                getResources(), R.drawable.test_image);
+
+        String fileName = "test_image_" + System.currentTimeMillis() + ".jpg";
+        android.content.ContentValues values = new android.content.ContentValues();
+        values.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/");
+
+        android.net.Uri uri = requireContext().getContentResolver()
+                .insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            java.io.OutputStream outputStream = requireContext().getContentResolver()
+                    .openOutputStream(uri);
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.close();
+            Toast.makeText(requireContext(), "Mock image added to gallery", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            android.util.Log.e("MockImage", "Failed to add mock image: " + e.getMessage());
+        }
     }
 }
