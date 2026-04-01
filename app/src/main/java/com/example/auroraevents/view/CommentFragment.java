@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +22,7 @@ import com.example.auroraevents.R;
 import com.example.auroraevents.model.Comment;
 import com.example.auroraevents.model.CommentAdapter;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.CommentDb;
 import com.example.auroraevents.server.UserDb;
 
@@ -36,11 +38,13 @@ public class CommentFragment extends Fragment {
     private Comment selectedParentComment = null;
     private String eventId;
     private String userId;
+    private User user;
     private String userName;
     private String userRole;
     private String eventOrganizerId;
     private CommentAdapter adapter;
     private CommentDb commentDb;
+    private UserViewModel userViewModel;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistration;
     private final String TAG = "CommentFragment";
 
@@ -68,29 +72,24 @@ public class CommentFragment extends Fragment {
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
         }
+        setUp(view);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+            user = u;
 
+            userName = user.getName(); //set user details
+            userRole = user.getRole();
 
+        });
 
-        UserDb.getInstance().getUser(userId, //grab user info
-                user -> {
-                    if (user != null) {
-                        userName = user.getName(); //on success, grab comments
-                        userRole = user.getRole();
-
-                        setUp(view);
-                        commentListenerRegistration = CommentDb.getInstance().commentListener(eventId, comments -> {
-                            if (comments != null) {
-                                adapter.setComments(comments);
-                            }
-                        }, e -> {
-                            Log.d(TAG, "Error fetching comments" + e); //log errors if any
-                        });
-                    }
-                },
-                e -> {
-                    Log.d(TAG, "Error fetching user" + e);
-                }
-        );
+        commentListenerRegistration = CommentDb.getInstance().commentListener(eventId, comments -> {
+            if (comments != null) {
+                adapter.setComments(comments);
+            }
+        }, e -> {
+            Log.d(TAG, "Error fetching comments" + e); //log errors if any
+        });
+        
         return view; //return view
     }
 
