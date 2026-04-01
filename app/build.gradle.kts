@@ -41,6 +41,7 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        animationsDisabled = true
     }
 }
 
@@ -57,7 +58,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
-
+    implementation(libs.firebase.functions)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.ext.junit)

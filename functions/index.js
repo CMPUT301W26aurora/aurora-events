@@ -1,4 +1,5 @@
 const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onCall } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
@@ -38,6 +39,28 @@ async function notifyNewEntrants(beforeList, afterList, eventId, eventName, titl
         await sendNotification(deviceId, eventId, title, body);
     }
 }
+
+/**
+ * Callable Cloud Function that lets the organizer send a custom push
+ * notification to a specific device. Called from NotificationSender.java.
+ */
+exports.sendNotification = onCall(async (request) => {
+    const { token, title, body, eventId } = request.data;
+    if (!token || !title || !body) {
+        throw new Error("Missing required fields: token, title, body");
+    }
+    try {
+        const result = await admin.messaging().send({
+            token: token,
+            data: { eventId: eventId || "", title, body }
+        });
+        console.log("Custom notification sent:", result);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to send custom notification:", error);
+        throw new Error("Failed to send notification: " + error.message);
+    }
+});
 
 /**
  * Looks up a user's FCM token and sends them a push notification via FCM.
