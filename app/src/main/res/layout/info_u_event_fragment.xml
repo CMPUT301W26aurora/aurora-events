@@ -172,22 +172,6 @@
                 android:textStyle="bold"
                 android:visibility="gone"/>
 
-            <!--Sample Button-->
-            <Button
-                android:id="@+id/sample_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="26dp"
-                android:paddingStart="20dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="10dp"
-                android:text="Sample"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:visibility="gone"/>
-
             <!--Delete Button-->
             <Button
                 android:id="@+id/delete_button"
