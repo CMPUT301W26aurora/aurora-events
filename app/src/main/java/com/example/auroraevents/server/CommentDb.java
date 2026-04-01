@@ -134,6 +134,7 @@ public class CommentDb {
     }
 
     /**
+     * Gets a list of all comments from every event.
      *
      * @param onFetched Called with Fulled list of Comment Objects
      * @param onFailure Called with exception if read fails
@@ -156,7 +157,7 @@ public class CommentDb {
 
     //--Delete----------------------------------------------------------------------------------
     /**
-     * Deletes an comment document from Firestore and all of its children.
+     * Deletes a comment document from Firestore and all of its children.
      *
      * @param id   The document ID of the comment to delete.
      * @param onSuccess Called when the deletion succeeds.
