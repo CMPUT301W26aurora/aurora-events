@@ -170,6 +170,23 @@
                 android:textStyle="bold"
                 android:visibility="gone"/>
 
+            <!--Send Notification Button-->
+            <Button
+                android:id="@+id/notification_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="26dp"
+                android:backgroundTint="#20FFFFFF"
+                android:paddingStart="20dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="10dp"
+                android:text="Send Notification"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
             <!--Attending Label-->
             <TextView
                 android:id="@+id/attending_label"
