@@ -29,6 +29,18 @@
                 android:textColor="@color/black"
                 android:textSize="20sp"/>
 
+            <!--Comment Button-->
+            <Button
+                android:id="@+id/comment_button"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_alignParentEnd="true"
+                android:text="Comments"
+                android:textColor="@color/black"
+                android:textSize="18sp"/>
+
+        </RelativeLayout>
+
             <!--Optional poster image-->
             <ImageView
                 android:id="@+id/poster_image"
