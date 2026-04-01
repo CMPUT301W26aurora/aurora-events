@@ -60,7 +60,6 @@ import java.util.concurrent.TimeUnit;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CommentFragmentTest {
     Event event;
-    User user;
     //rules so it works
     @Rule
     public ActivityScenarioRule<MainActivity> activityRule =
@@ -90,9 +89,6 @@ public class CommentFragmentTest {
                 10
         );
 
-        user = new User("woowlol","name","email@email.com","","entrant");
-
-        setUpUser(user);
         setUpEvent(event);
 
         onView(withId(R.id.nav_browse)).perform(click());
@@ -109,9 +105,7 @@ public class CommentFragmentTest {
         if (event != null) {
             takeDownEvent(event);
         }
-        if(user!= null){
-            takeDownUser(user);
-        }
+
     }
 
 
