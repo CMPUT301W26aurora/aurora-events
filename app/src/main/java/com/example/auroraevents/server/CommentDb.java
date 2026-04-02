@@ -202,7 +202,7 @@ public class CommentDb {
     /*Listener----------------------------------------------------------------------------------------*/
 
     /**
-     * A basic listener to live update comments
+     * A basic listener to live update comments per event
      *
      * @param eventId The event to listen to
      * @param onFetched Returned with the threaded sort list
@@ -212,6 +212,31 @@ public class CommentDb {
     public ListenerRegistration commentListener(String eventId, OnCommentsFetchedCallback onFetched, OnFailureCallback onFailure){
         return db.collection(COLLECTION_NAME)
                 .whereEqualTo("eventId", eventId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener(com.google.firebase.firestore.MetadataChanges.INCLUDE, (value, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        onFailure.onFailure(e);
+                        return;
+                    }
+
+                    if (value != null) {
+                        List<Comment> comments = value.toObjects(Comment.class);
+                        List<Comment> threadedList = threadSort(comments);
+                        onFetched.onFetched(threadedList);
+                    }
+                });
+    }
+
+    /**
+     * A basic listener to live update all comments
+     *
+     * @param onFetched Returned with the threaded sort list
+     * @param onFailure Returns with error on failure
+     * @return ListenerRegistration - make sure to remove after use
+     */
+    public ListenerRegistration commentListenerAll(OnCommentsFetchedCallback onFetched, OnFailureCallback onFailure){
+        return db.collection(COLLECTION_NAME)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener(com.google.firebase.firestore.MetadataChanges.INCLUDE, (value, e) -> {
                     if (e != null) {

@@ -2,6 +2,7 @@ package com.example.auroraevents.view;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,10 +60,16 @@ public class CommentFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @androidx.annotation.Nullable ViewGroup container, @androidx.annotation.Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
+        
+        return view; //return view
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         //grab userid
-        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(),
-                user -> userId = user.getDeviceId());
+        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         if (getArguments() != null) { //pass event id in args from infouevent
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
@@ -70,11 +77,14 @@ public class CommentFragment extends Fragment {
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
 
             userName = user.getName(); //set user details
             isAdmin = user.getAdmin();
+
+            adapter.setIsAdmin(isAdmin);
+            adapter.notifyDataSetChanged();
 
         });
 
@@ -85,10 +95,7 @@ public class CommentFragment extends Fragment {
         }, e -> {
             Log.d(TAG, "Error fetching comments" + e); //log errors if any
         });
-        
-        return view; //return view
     }
-
     /**
      * Deletes listener on view destruction
      */
@@ -163,7 +170,7 @@ public class CommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, isAdmin, eventOrganizerId);
+        }, userId, isAdmin, eventOrganizerId, false);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
             replyIndicator.setVisibility(View.GONE);

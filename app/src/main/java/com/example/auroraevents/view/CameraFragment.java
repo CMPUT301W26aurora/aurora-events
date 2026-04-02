@@ -3,6 +3,7 @@ package com.example.auroraevents.view;
 import static android.widget.Toast.LENGTH_LONG;
 
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,9 +41,11 @@ public class CameraFragment extends Fragment {
     public void handleValid(String qr){
         Bundle bundle = new Bundle();
         bundle.putString("eventId", qr);
-        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(),
-                user -> bundle.putString("userId", user.getDeviceId()));
-        Toast.makeText(requireContext(), "user ID: " + bundle.getString("userId"), LENGTH_LONG).show();
+        String deviceId = Settings.Secure.getString(
+                requireContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+        bundle.putString("userId", deviceId);
 
         InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
         infoUEventFragment.setArguments(bundle);
