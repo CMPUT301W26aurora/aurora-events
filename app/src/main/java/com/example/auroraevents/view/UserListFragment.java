@@ -24,6 +24,7 @@ import com.example.auroraevents.server.EventDb;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class UserListFragment extends DialogFragment {
     private Event currentEvent;
@@ -52,6 +53,7 @@ public class UserListFragment extends DialogFragment {
         String eventId = args.getString("eventId");
 
         // get current event from EventDB
+        System.out.println(eventId); //Debugging
         CountDownLatch latch = new CountDownLatch(1);
         EventDb.getInstance().getEvent(eventId,
                 event -> {
@@ -63,7 +65,13 @@ public class UserListFragment extends DialogFragment {
                     latch.countDown();
                 }
         );
-        currentEvent = ref.fetchedEvent;
+        try {
+            assert latch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {}
+        if (ref.fetchedEvent != null) {
+            currentEvent = ref.fetchedEvent;
+        }
+        System.out.println(ref.fetchedEvent);//Debugging
 
         // Get list of entrants and make a user array adapter
         userList = currentEvent.getListOfAllUsers();

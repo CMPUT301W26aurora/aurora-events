@@ -5,6 +5,8 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
+import static android.content.ContentValues.TAG;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -21,12 +23,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -182,7 +187,7 @@ public class InfoUEventFragment extends Fragment {
                                                     );
                                                 });
                                             }
-                                            else if (userIsOrganizer && user.getDeviceId().equals(event.getOrganizerDeviceId())) {
+                                            else if (userIsOrganizer && userId.equals(event.getOrganizerDeviceId())) {
                                                 sampleButton.setVisibility(View.VISIBLE);
                                                 deleteButton.setVisibility(View.VISIBLE);
                                                 viewEntrantsButton.setVisibility(View.VISIBLE);
@@ -230,6 +235,30 @@ public class InfoUEventFragment extends Fragment {
                                                 }
 
                                                 // View Entrants Button
+                                                /*
+                                                Event currentEvent;
+                                                var ref = new Object() {
+                                                    Event fetchedEvent;
+                                                };
+
+                                                CountDownLatch latch = new CountDownLatch(1);
+                                                EventDb.getInstance().getEvent(eventId,
+                                                        thisevent -> {
+                                                            ref.fetchedEvent = thisevent;
+                                                            latch.countDown();
+                                                        },
+                                                        e -> {
+                                                            Log.d(TAG, "Error fetching event" + e);
+                                                            latch.countDown();
+                                                        }
+                                                );
+                                                try {
+                                                    assert latch.await(10, TimeUnit.SECONDS);
+                                                } catch (InterruptedException e) {}
+                                                if (ref.fetchedEvent != null) {
+                                                    currentEvent = ref.fetchedEvent;
+                                                }*/
+
                                                 viewEntrantsButton.setOnClickListener(v -> {
                                                     Bundle args = new Bundle();
                                                     args.putString("eventId", event.getEventId());
@@ -243,6 +272,9 @@ public class InfoUEventFragment extends Fragment {
                                                 });
                                             }
                                             else {
+                                                System.out.println(userId); //Debugging
+                                                System.out.println(event.getEventId()); //Debugging
+                                                System.out.println(event.getOrganizerDeviceId()); //Debugging
                                                 // show waiting list and attendees count for entrant
                                                 waitingListCount.setVisibility(View.VISIBLE);
                                                 attendeesCount.setVisibility(View.VISIBLE);

@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
         navProfile.setOnClickListener(v -> {
             setActiveTab(navProfile);
             loadFragment(new ProfileFragment());
+            System.out.println(deviceId); //Debugging
         });
     }
 
