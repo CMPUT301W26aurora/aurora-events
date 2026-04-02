@@ -25,6 +25,10 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Displays list of all entrants with any and all status
+ * Allows Organizers to filter and cancel entrants
+ */
 public class UserListFragment extends DialogFragment {
     private Event currentEvent;
     private List<User> userList;
@@ -32,12 +36,16 @@ public class UserListFragment extends DialogFragment {
     private ListView userListView;
     private Button doneButton, mapButton, filterButton, sortButton;
     private ImageButton deleteButton;
+    //private LayoutInflater inflater;
+    //private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        //this.inflater = inflater;
         View view = inflater.inflate(R.layout.user_list_fragment, container, false);
+        //this.view = view;
 
         // get Event ID from bundle
         Bundle args = getArguments();
@@ -52,6 +60,7 @@ public class UserListFragment extends DialogFragment {
         String eventId = args.getString("eventId");
 
         // get current event from EventDB
+        /*
         System.out.println(eventId); //Debugging
         CountDownLatch latch = new CountDownLatch(1);
         EventDb.getInstance().getEvent(eventId,
@@ -70,8 +79,19 @@ public class UserListFragment extends DialogFragment {
         if (ref.fetchedEvent != null) {
             currentEvent = ref.fetchedEvent;
         }
-        System.out.println(ref.fetchedEvent);//Debugging
+        System.out.println(ref.fetchedEvent);//Debugging*/
+        userListView = new ListView(getContext());
+        EventDb.getInstance().getEvent(eventId,
+                event -> {
+                    ref.fetchedEvent = event;
+                    loadEntrantsList(event, inflater, view, userListView);
+                },
+                e -> {
+                    Log.d(TAG, "Error fetching event" + e);
+                }
+        );
 
+        /*
         // Get list of entrants and make a user array adapter
         userList = currentEvent.registrationList.getUsersFromDB(currentEvent.registrationList.getAllEntrantsList());
         userListAdapter = new UserArrayAdapter(requireContext(), userList, currentEvent, userListAdapter, this);
@@ -97,6 +117,7 @@ public class UserListFragment extends DialogFragment {
             );
             dialog.show(getParentFragmentManager(), "filter_users");
         });
+        */
 
         // Cancel users
         /* Previous implementation of cancelling users without delete button
@@ -110,5 +131,38 @@ public class UserListFragment extends DialogFragment {
         });*/
 
         return view;
+    }
+
+    /**
+     * Get the current event's entrants and display them, as well as implementing the buttons for filter and done button
+     * @param event Current Event
+     * @author Won Koh
+     */
+    public void loadEntrantsList(Event event, LayoutInflater inflater, View view, ListView userListView) {
+        // Get list of entrants and make a user array adapter
+        userList = event.registrationList.getUsersFromDB(event.registrationList.getAllEntrantsList());
+        userListAdapter = new UserArrayAdapter(requireContext(), userList, event, userListAdapter, this);
+        userListView.setAdapter(userListAdapter);
+
+        // Inflate and add the header
+        View header = inflater.inflate(R.layout.header_entrant_fragment, userListView, false);
+        userListView.addHeaderView(header, null, false);
+
+        // Go back
+        doneButton = view.findViewById(R.id.done_button);
+        doneButton.setOnClickListener( v -> {
+            getParentFragmentManager().popBackStack();
+        });
+
+        // Filter by status
+        filterButton = view.findViewById(R.id.filter_button);
+        filterButton.setOnClickListener(v -> {
+            FilterUserPopUpDialog dialog = FilterUserPopUpDialog.newInstance(
+                    event,
+                    userList,
+                    userListView
+            );
+            dialog.show(getParentFragmentManager(), "filter_users");
+        });
     }
 }
