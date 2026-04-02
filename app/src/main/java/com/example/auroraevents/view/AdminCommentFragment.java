@@ -35,7 +35,7 @@ public class AdminCommentFragment extends Fragment {
     private User user;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistrationAll;
 
-    
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
