@@ -79,4 +79,84 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/nav_bar_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="68dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/nav_bar_background"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical"
+        android:elevation="12dp"
+        android:animateLayoutChanges="true"
+        android:visibility="gone">
+
+        <!-- Admin event tab -->
+        <ImageButton
+            android:id="@+id/admin_event"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_qr"
+            android:scaleType="center"
+            android:contentDescription="View Events"
+            android:layout_marginEnd="6dp"
+            app:tint="#1C1B2E" />
+
+        <!-- Admin image tab (active by default) -->
+        <ImageButton
+            android:id="@+id/admin_image"
+            android:layout_width="88dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_active"
+            android:src="@drawable/ic_nav_browse"
+            android:scaleType="center"
+            android:contentDescription="Browse Images"
+            android:layout_marginEnd="6dp"
+            app:tint="#1C1B2E" />
+
+        <!-- admin organizer tab -->
+        <ImageButton
+            android:id="@+id/admin_organizer"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_notifications"
+            android:scaleType="center"
+            android:contentDescription="organizers"
+            android:layout_marginEnd="6dp"
+            app:tint="#1C1B2E" />
+
+        <!-- Admin profile tab -->
+        <ImageButton
+            android:id="@+id/admin_profiles"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_profile"
+            android:scaleType="center"
+            android:contentDescription="Profile"
+            app:tint="#1C1B2E" />
+
+        <!-- Admin All Comments tab-->
+        <ImageButton
+            android:id="@+id/admin_comments"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_profile"
+            android:scaleType="center"
+            android:contentDescription="Comments"
+            app:tint="#1C1B2E" />
+
+
+
+
+    </LinearLayout>
+
 </FrameLayout>

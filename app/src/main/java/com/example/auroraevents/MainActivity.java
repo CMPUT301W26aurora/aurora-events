@@ -89,17 +89,21 @@ public class MainActivity extends AppCompatActivity {
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
-                    user.setRole(User.ROLE_ORGANIZER);
+                    user.setAdmin(Boolean.TRUE);
                     userViewModel.selectItem(user);
                 },
                 e -> Log.e(TAG, "User info not available")
         );
         */
 
+
         // Get user
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
+                    if(user.getAdmin() == null){
+                        user.setAdmin(false);
+                    }
                     if (user.getRole() == null || user.getRole().isEmpty())
                         user.setRole(User.ROLE_ENTRANT);
                     userViewModel.selectItem(user);

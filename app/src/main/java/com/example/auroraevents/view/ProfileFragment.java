@@ -139,7 +139,7 @@ public class ProfileFragment extends Fragment {
         });
 
         /* Switch to admin mode */
-        if (user == null || user.getRole() == null || !user.getRole().equals(User.ROLE_ADMIN))
+        if (user == null || user.getRole() == null || !user.getAdmin())
             adminToggle.setVisibility(GONE);
         else
             adminToggle.setVisibility(VISIBLE);
