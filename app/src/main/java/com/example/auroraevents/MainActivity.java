@@ -137,7 +137,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default tab
         setActiveTab(navBrowse);
-        loadFragment(new EventFragment());
+        EventFragment defaultFragment = new EventFragment();
+        Bundle defaultArgs = new Bundle();
+        defaultArgs.putBoolean("inAdmin", false); // Explicitly set default
+        defaultFragment.setArguments(defaultArgs);
+        loadFragment(defaultFragment);
 
         navScan.setOnClickListener(v -> {
             setActiveTab(navScan);

@@ -63,9 +63,9 @@ public class EventFragment extends Fragment {
 
         addEventButton = root.findViewById(R.id.eventAddButton);
         addEventButton.setVisibility(GONE);
-
-        if (getArguments() != null) {
-            inAdmin = getArguments().getBoolean("inAdmin");
+        Bundle passed = getArguments();
+        if (passed != null) {
+            inAdmin = passed.getBoolean("inAdmin");
         }
 
         // Show add event button only if the user is an organizer
