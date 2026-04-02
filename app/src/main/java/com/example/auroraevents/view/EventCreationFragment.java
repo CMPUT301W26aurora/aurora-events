@@ -3,6 +3,9 @@ package com.example.auroraevents.view;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Gravity;
@@ -14,7 +17,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -26,11 +28,18 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import android.provider.Settings;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.util.List;
+
+import com.example.auroraevents.view.MapPickerFragment;
+
+/*
+Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
+Maps handled by Google Maps SDK:
+ */
 public class EventCreationFragment extends Fragment {
     //TODO 4: copy into edit event fragment
     private ImageButton backButton;
@@ -56,6 +65,17 @@ public class EventCreationFragment extends Fragment {
     private Organizer organizer;
     private User user;
     private UserViewModel userViewModel;
+    private double eventLat;
+    private double eventLong;
+
+    private android.net.Uri image;
+    private android.widget.ImageView imageView;
+    private android.widget.ImageView dialogImageView;
+    private android.net.Uri cameraImageUri;
+    private Bitmap uploadedImageUrl = null;
+    private View dialogView;
+    private com.google.firebase.storage.FirebaseStorage storage;
+    private com.google.firebase.storage.StorageReference storageRef;
 
     private LocationToggleListener locationToggleListener;
     public boolean geolocationToggled;
@@ -122,6 +142,11 @@ public class EventCreationFragment extends Fragment {
             }
         });
 
+        // Fetch firebase cloud storage
+        storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");
+        storageRef = storage.getReference();
+        imageView = view.findViewById(R.id.iv_event_image);
+
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,8 +154,20 @@ public class EventCreationFragment extends Fragment {
             }
         });
 
-        locationButton.setOnClickListener(v ->
-                showInputDialog(locationButton, "Location", val -> location = val));
+        locationButton.setOnClickListener(v -> {
+            MapPickerFragment mapPicker = new MapPickerFragment();
+            mapPicker.setOnLocationPickedListener((address, lat, lng) -> {
+                location = address;
+                eventLat = lat;     // Store latitude and longitude
+                eventLong = lng;
+                locationButton.setText(address);
+            });
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, mapPicker)
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         startDateButton.setOnClickListener(v -> showDateTimePicker(startDateButton, val -> registerStart = val));
         endDateButton.setOnClickListener(v -> showDateTimePicker(endDateButton, val -> registerEnd = val));
@@ -149,6 +186,20 @@ public class EventCreationFragment extends Fragment {
                     geolocationDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             geolocationToggled = true;
+
+                            Geocoder geocoder = new Geocoder(requireContext());
+                            List<Address> addresses = null;
+                            try {
+                                addresses = geocoder.getFromLocationName(location, 1);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            if (addresses != null && !addresses.isEmpty()) {
+                                // Store latitude and longitude of event location
+                                double lat = addresses.get(0).getLatitude();
+                                double lng = addresses.get(0).getLongitude();
+                            }
+
                             Toast.makeText(requireContext(), "Geolocation enabled", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -229,8 +280,10 @@ public class EventCreationFragment extends Fragment {
                             registerStart,
                             registerEnd,
                             location,
+                            geolocationToggled,
                             Integer.parseInt(eventCap),
-                            geolocationToggled
+                            Integer.parseInt(eventCap),
+                            uploadedImageUrl
                     );
                     getParentFragmentManager().popBackStack();
                 }

@@ -38,8 +38,11 @@ public class Event {
     private boolean geolocationRequired;
     private String qrCodeData;            // String payload encoded in the QR code
     private Bitmap qR;
-    private boolean geolocationToggled;
-    private boolean geolocation; // Boolean for enabling geolocation toggle
+    private Bitmap poster;
+    private boolean isPrivate;
+    private List<String> reports;
+    private double latitude;
+    private double longitude;
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
@@ -50,10 +53,19 @@ public class Event {
         reports = new ArrayList<>();
     }
 
-    public Event(String organizerDeviceId, String name, String description,
-                 LocalDateTime dateTime, LocalDateTime registrationStart,
-                 LocalDateTime registrationEnd, String location,
-                 int capacity, boolean geolocationToggled) {
+    public Event(
+            String organizerDeviceId,
+            String name,
+            String description,
+            String price,
+            LocalDateTime dateTime,
+            LocalDateTime registrationStart,
+            LocalDateTime registrationEnd,
+            String location,
+            boolean geolocationRequired,
+            int waitingCapacity,
+            int attendingCapacity,
+            Bitmap poster) {
         this();
         this.organizerDeviceId     = organizerDeviceId;
         this.name                  = name;
@@ -62,9 +74,11 @@ public class Event {
         this.dateTime              = dateTime.format(FORMATTER); // "yyyy-MM-dd"
         this.registrationTimeStart = registrationStart.format(FORMATTER);
         this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
-        this.location          = location;
-        this.capacity          = capacity;
-        this.geolocationToggled = geolocationToggled;
+        this.location              = location;
+        this.geolocationRequired   = geolocationRequired;
+        this.registrationList.setWaitingCapacity(waitingCapacity);
+        this.registrationList.setAttendingCapacity(attendingCapacity);
+        this.poster                = poster;
     }
 
     @Override
@@ -134,6 +148,13 @@ public class Event {
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
 
     public int  getNumReports() { return reports.size(); }
+
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude()  { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
     /**
      * Adds a report
      * @param userId The device ID of the user reporting the event
@@ -148,9 +169,6 @@ public class Event {
         } else
             return -1;
     }
-
-    public boolean isGeolocationToggled() { return geolocationToggled; }
-    public void setGeolocationToggled(boolean geolocationToggled) { this.geolocationToggled = geolocationToggled; }
 
     // Converters
     @Exclude

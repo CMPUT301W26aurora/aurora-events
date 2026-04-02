@@ -41,8 +41,19 @@ public class Organizer extends User {
      * @param attendingCapacity   The total number of entrants that can join the waiting list
      * @param poster              A pretty picture for the event info screen
      */
-    public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String startTime, String endTime, String location, int capacity, boolean geolocationRequired) {
+    public void CreateEvent(
+            String organizerDeviceId,
+            String title,
+            String description,
+            String price,
+            String date,
+            String startTime,
+            String endTime,
+            String location,
+            boolean geolocationRequired,
+            int waitingCapacity,
+            int attendingCapacity,
+            Bitmap poster) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -59,8 +70,12 @@ public class Organizer extends User {
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
-                location, capacity, geolocationRequired);
-        event.setGeolocationToggled(geolocationRequired);
+                location,
+                geolocationRequired,
+                waitingCapacity,
+                attendingCapacity,
+                poster);
+        event.setGeolocationRequired(geolocationRequired);
 
         // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,

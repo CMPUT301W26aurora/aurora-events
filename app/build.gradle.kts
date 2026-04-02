@@ -59,6 +59,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
     implementation(libs.firebase.functions)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.ext.junit)
@@ -75,4 +76,5 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
 }

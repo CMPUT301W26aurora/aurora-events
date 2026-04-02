@@ -55,6 +55,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Collections;
 
+/*
+Last known location based off FusedLocationProviderClient: https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient
+ */
 public class MainActivity extends AppCompatActivity implements LocationToggleListener {
 
     private static final String TAG = "MainActivity";
@@ -270,9 +273,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
     }
 
     @Override
-    public void onLocationPermissionResult(boolean granted) {
-
-    }
+    public void onLocationPermissionResult(boolean granted) {}
 
     /**
      * Check for location perms and provide current location

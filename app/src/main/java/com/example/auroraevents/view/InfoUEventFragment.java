@@ -13,6 +13,7 @@ import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.RadiusUtil;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
@@ -68,7 +70,15 @@ public class InfoUEventFragment extends Fragment {
 
     private ImageButton backButton;
     private ImageView poster;
-    private Button backButton, joinButton, acceptButton, declineButton, deleteButton, sampleButton;
+    private Button sampleButton, viewEntrantsButton, notificationButton, commentButton;
+    private TextView eventName, eventDateTime, eventOrganizer, eventPrice, eventLocation, eventDescription;
+    private TextView reportedNum;
+    private Button reportButton, deleteButton;
+    private LinearLayout bottomBar, selectButtonSet, adminInfo;
+    private TextView eventDeadline, waitingListCount, attendeesCount;
+    private Button joinButton, leaveButton, acceptButton, declineButton;
+    private TextView attendingLabel, cannotAttendLabel;
+    private ImageButton infoButton;
   
     private FusedLocationProviderClient fusedLocationClient;
     private com.example.auroraevents.model.Event pendingJoinEvent;
@@ -410,7 +420,7 @@ public class InfoUEventFragment extends Fragment {
                                                         event.registrationList.addToDeclinedList(userId)
                                                     );
                                                 }
-                                                else if (event.registrationList.getWaitingList().contains(userId)) {
+                                                else if (event.registrationList.getWaitingList().contains(userId)) { // User on waiting list
                                                     eventDeadline.setVisibility(View.VISIBLE);
                                                     waitingListCount.setVisibility(View.VISIBLE);
                                                     attendeesCount.setVisibility(View.VISIBLE);
@@ -419,7 +429,24 @@ public class InfoUEventFragment extends Fragment {
                                                     leaveButton.setVisibility(View.VISIBLE);
                                                     selectButtonSet.setVisibility(View.GONE);
                                                     attendingLabel.setVisibility(View.GONE);
-                                                    // add user to waitingList when Join Pool is clicked
+                                                    cannotAttendLabel.setVisibility(View.GONE);
+                                                    infoButton.setVisibility(View.VISIBLE);
+
+                                                    leaveButton.setOnClickListener(v ->
+                                                            event.registrationList.addToCancelledList(userId)
+                                                    );
+                                                } else { // User not on waiting list - able to join pool
+                                                    eventDeadline.setVisibility(View.VISIBLE);
+                                                    waitingListCount.setVisibility(View.VISIBLE);
+                                                    attendeesCount.setVisibility(View.VISIBLE);
+
+                                                    joinButton.setVisibility(View.VISIBLE);
+                                                    leaveButton.setVisibility(View.GONE);
+                                                    selectButtonSet.setVisibility(View.GONE);
+                                                    attendingLabel.setVisibility(View.GONE);
+                                                    cannotAttendLabel.setVisibility(View.GONE);
+                                                    infoButton.setVisibility(View.VISIBLE);
+
                                                     joinButton.setOnClickListener(v -> attemptJoinWaitingList(event));
                                                 }
                                             }
@@ -435,7 +462,7 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void attemptJoinWaitingList(Event event) {
-        if (event.isGeolocationToggled()) {
+        if (event.getGeolocationRequired()) {
             // Geolocation warning
             new AlertDialog.Builder(requireContext())
                     .setTitle("Location Required")
@@ -482,14 +509,28 @@ public class InfoUEventFragment extends Fragment {
         }
     }
 
-    @SuppressLint("MissingPermission")  // checked above
+    @SuppressLint("MissingPermission")
     private void fetchLocationAndJoin(Event event) {
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
+                        // Only check radius if the event has coordinates set
+                        if (event.getLatitude() != 0 && event.getLongitude() != 0) {
+                            float radiusMeters = 500; // e.g. 500m — make this configurable
+                            boolean withinRange = RadiusUtil.isWithinRadius(
+                                    event.getLatitude(), event.getLongitude(),
+                                    location.getLatitude(), location.getLongitude(),
+                                    radiusMeters
+                            );
+                            if (!withinRange) {
+                                Toast.makeText(requireContext(),
+                                        "You must be within " + (int)(radiusMeters) + "m of the event to join.",
+                                        Toast.LENGTH_LONG).show();
+                                return; // block join
+                            }
+                        }
                         joinWaitingList(event, location.getLatitude(), location.getLongitude());
                     } else {
-                        // Last location unavailable — request a fresh one
                         Toast.makeText(requireContext(),
                                 "Unable to get location. Please try again.",
                                 Toast.LENGTH_SHORT).show();
