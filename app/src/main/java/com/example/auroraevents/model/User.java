@@ -31,6 +31,7 @@ public class User {
     private Integer databaseTimeout;
     private TimeUnit timeoutUnit;
     private final String TAG = "User";
+    private Boolean isAdmin;
 
 
     // Notification history (stored as notification IDs or message strings)
@@ -52,13 +53,14 @@ public class User {
         timeoutUnit = TimeUnit.SECONDS;
     }
 
-    public User(String deviceId, String name, String email, String phoneNumber, String role) {
+    public User(String deviceId, String name, String email, String phoneNumber, String role, Boolean isAdmin) {
         this();
         this.deviceId        = deviceId;
         this.name            = name;
         this.email           = email;
         this.phoneNumber     = phoneNumber;
         this.role            = role;
+        this.isAdmin = isAdmin;
     }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
@@ -77,6 +79,9 @@ public class User {
 
     public String getRole()                            { return role; }
     public void   setRole(String role)                 { this.role = role; }
+
+    public Boolean getAdmin()                          {return isAdmin;}
+    public void setAdmin(Boolean admin)                {isAdmin = admin;}
 
     public String getStatus() { return status; }
 
@@ -171,5 +176,6 @@ public class User {
 
         return status.get();
     }
+
 
 }

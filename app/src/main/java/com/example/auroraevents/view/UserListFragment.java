@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.auroraevents.R;
@@ -21,14 +20,14 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserArrayAdapter;
 import com.example.auroraevents.server.EventDb;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class UserListFragment extends DialogFragment {
     private Event currentEvent;
-    private ArrayList<User> userList;
+    private List<User> userList;
     private UserArrayAdapter userListAdapter;
     private ListView userListView;
     private Button doneButton, mapButton, filterButton, sortButton;
@@ -74,7 +73,7 @@ public class UserListFragment extends DialogFragment {
         System.out.println(ref.fetchedEvent);//Debugging
 
         // Get list of entrants and make a user array adapter
-        userList = currentEvent.getListOfAllUsers();
+        userList = currentEvent.registrationList.getUsersFromDB(currentEvent.registrationList.getAllEntrantsList());
         userListAdapter = new UserArrayAdapter(requireContext(), userList, currentEvent, userListAdapter, this);
         userListView.setAdapter(userListAdapter);
 

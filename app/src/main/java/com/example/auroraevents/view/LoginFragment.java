@@ -53,7 +53,8 @@ public class LoginFragment extends Fragment {
                         nameEdit.getText().toString(),
                         emailEdit.getText().toString(),
                         phoneEdit.getText().toString(),
-                        User.ROLE_ENTRANT
+                        User.ROLE_ENTRANT,
+                        false
                 );
                 // update db
                 CountDownLatch latch = new CountDownLatch(1);

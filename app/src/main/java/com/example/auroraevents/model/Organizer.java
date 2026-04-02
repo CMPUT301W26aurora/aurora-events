@@ -1,12 +1,14 @@
 package com.example.auroraevents.model;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
@@ -14,7 +16,7 @@ public class Organizer extends User {
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
-        myEvents = new ArrayList<Event>();
+        myEvents = new ArrayList<>();
     }
 
     public ArrayList<Event> getMyEvents() {
@@ -26,17 +28,32 @@ public class Organizer extends User {
     }
 
     /**
-     * @param organizerDeviceId  The organizer's device ID
-     * @param title              The title of the event
-     * @param description        The event description
-     * @param date               The date of the event, format: yyyy-MM-dd HH:mm:ss
-     * @param startTime          The start of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param endTime            The end of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param location           The event location
-     * @param capacity           The event capacity
+     * @param organizerDeviceId   The organizer's device ID
+     * @param title               The title of the event
+     * @param description         The event description
+     * @param price               The event's price
+     * @param date                The date of the event, format: yyyy-MM-dd HH:mm:ss
+     * @param startTime           The start of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param endTime             The end of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param location            The event location
+     * @param geolocationRequired Whether entrants need to be in the location to sign up
+     * @param waitingCapacity     The total number of entrants that could attend the event
+     * @param attendingCapacity   The total number of entrants that can join the waiting list
+     * @param poster              A pretty picture for the event info screen
      */
-    public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String startTime, String endTime, String location, int capacity) {
+    public void CreateEvent(
+            String organizerDeviceId,
+            String title,
+            String description,
+            String price,
+            String date,
+            String startTime,
+            String endTime,
+            String location,
+            boolean geolocationRequired,
+            int waitingCapacity,
+            int attendingCapacity,
+            Bitmap poster) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -45,11 +62,19 @@ public class Organizer extends User {
         LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
 
         // Create event from parameters
-        Event event = new Event(organizerDeviceId, title, description,
+        Event event = new Event(
+                organizerDeviceId,
+                title,
+                description,
+                price,
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
-                location, capacity);
+                location,
+                geolocationRequired,
+                waitingCapacity,
+                attendingCapacity,
+                poster);
 
         // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,
@@ -71,7 +96,7 @@ public class Organizer extends User {
         if (!(myEvents.contains(event))) {
             throw new IllegalArgumentException("Event not found");
         } else {
-            event.randomSampling();
+            event.registrationList.randomSampling();
         }
     }
 
@@ -83,9 +108,9 @@ public class Organizer extends User {
      * Return the waiting list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getEventWaitList(Event event) {
+    public List<User> getEventWaitList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getWaitingListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_WAITING);
         } else {
             throw new IllegalArgumentException("Event not found");
         }
@@ -99,9 +124,9 @@ public class Organizer extends User {
      * Return the selected list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getEventSelectedList(Event event) {
+    public List<User> getEventSelectedList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getSelectedListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_SELECTED);
         } else {
             throw new IllegalArgumentException("Event not found");
         }
@@ -115,9 +140,9 @@ public class Organizer extends User {
      * Return the attending list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getEventAttendingList(Event event) {
+    public List<User> getEventAttendingList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getAttendingListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_ATTENDING);
         } else {
             throw new IllegalArgumentException("Event not found");
         }
@@ -131,9 +156,9 @@ public class Organizer extends User {
      * Return the cancelled list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getCancelledWaitList(Event event) {
+    public List<User> getCancelledWaitList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getWaitingListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_CANCELLED);
         } else {
             throw new IllegalArgumentException("Event not found");
         }

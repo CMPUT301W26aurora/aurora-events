@@ -2,14 +2,12 @@ package com.example.auroraevents.view;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -17,16 +15,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.auroraevents.MainActivity;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Comment;
 import com.example.auroraevents.model.CommentAdapter;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.CommentDb;
-import com.example.auroraevents.server.UserDb;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -40,10 +35,9 @@ public class CommentFragment extends Fragment {
     private String userId;
     private User user;
     private String userName;
-    private String userRole;
+    private Boolean isAdmin;
     private String eventOrganizerId;
     private CommentAdapter adapter;
-    private CommentDb commentDb;
     private UserViewModel userViewModel;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistration;
     private final String TAG = "CommentFragment";
@@ -67,18 +61,20 @@ public class CommentFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
 
         //grab userid
-        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(),
+                user -> userId = user.getDeviceId());
         if (getArguments() != null) { //pass event id in args from infouevent
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
         }
+        isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(requireActivity(), u -> {
             user = u;
 
             userName = user.getName(); //set user details
-            userRole = user.getRole();
+            isAdmin = user.getAdmin();
 
         });
 
@@ -157,18 +153,17 @@ public class CommentFragment extends Fragment {
                 new AlertDialog.Builder(getContext())
                         .setTitle("Delete Comment")
                         .setMessage("Are you sure you want to remove this comment?")
-                        .setPositiveButton("Delete", (dialog, which) -> {
-                            CommentDb.getInstance().deleteComment(comment.getId(),
+                        .setPositiveButton("Delete", (dialog, which) ->
+                                CommentDb.getInstance().deleteComment(comment.getId(),
                                     () -> Log.d(TAG, "Deleted successfully"),
                                     e -> Log.e(TAG, "Delete Failed")
-                            );
-                        })
+                                ))
                         .setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss())
                         .create()
                         .show();
 
             }
-        }, userId, userRole, eventOrganizerId);
+        }, userId, isAdmin, eventOrganizerId);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
             replyIndicator.setVisibility(View.GONE);

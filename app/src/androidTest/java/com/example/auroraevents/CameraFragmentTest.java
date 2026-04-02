@@ -11,12 +11,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import android.Manifest;
 import android.os.Build;
 
-import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import com.example.auroraevents.view.CameraFragment;
-
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,10 +47,7 @@ public class CameraFragmentTest {
      */
     @Test
     public void testInValid(){
-
-        ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
-
-        scenario.onActivity(activity -> {
+        activityRule.getScenario().onActivity(activity -> {
 
             CameraFragment fragment = new CameraFragment();
 
@@ -69,10 +64,7 @@ public class CameraFragmentTest {
     }
     @Test
     public void testValid(){
-
-        ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
-
-        scenario.onActivity(activity -> {
+        activityRule.getScenario().onActivity(activity -> {
 
             CameraFragment fragment = new CameraFragment();
 
