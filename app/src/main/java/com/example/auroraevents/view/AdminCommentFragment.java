@@ -28,11 +28,12 @@ import java.util.ArrayList;
 
 public class AdminCommentFragment extends Fragment {
     private final static String TAG = "AdminCommentFragment";
-    private String userId, userName;
+    private String userId;
     private Boolean isAdmin;
     private CommentAdapter adapter;
     private UserViewModel userViewModel;
     private User user;
+    private com.google.firebase.firestore.ListenerRegistration commentListenerRegistrationAll;
 
     @Nullable
     @Override
@@ -40,20 +41,36 @@ public class AdminCommentFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_admin_comment, container, false);
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
 
-            userName = user.getName(); //set user details
             isAdmin = user.getAdmin();
+            adapter.setIsAdmin(isAdmin);
+            adapter.notifyDataSetChanged();
 
         });
 
-        return view;
+        commentListenerRegistrationAll = CommentDb.getInstance().commentListenerAll( comments ->{
+            if (comments != null) {
+                adapter.setComments(comments);
+            }
+        }, e -> {
+            Log.d(TAG, "Error fetching comments" + e); //log errors if any
+        });
+
     }
 
     private void setUp(View view){
@@ -85,5 +102,17 @@ public class AdminCommentFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
 
+    }
+
+    /**
+     * Deletes listener on view destruction
+     */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (commentListenerRegistrationAll != null) {
+            commentListenerRegistrationAll.remove();
+            commentListenerRegistrationAll = null;
+        }
     }
 }

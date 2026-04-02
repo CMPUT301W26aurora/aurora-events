@@ -60,6 +60,13 @@ public class CommentFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @androidx.annotation.Nullable ViewGroup container, @androidx.annotation.Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
+        
+        return view; //return view
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         //grab userid
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -70,11 +77,14 @@ public class CommentFragment extends Fragment {
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
 
             userName = user.getName(); //set user details
             isAdmin = user.getAdmin();
+
+            adapter.setIsAdmin(isAdmin);
+            adapter.notifyDataSetChanged();
 
         });
 
@@ -85,10 +95,7 @@ public class CommentFragment extends Fragment {
         }, e -> {
             Log.d(TAG, "Error fetching comments" + e); //log errors if any
         });
-        
-        return view; //return view
     }
-
     /**
      * Deletes listener on view destruction
      */

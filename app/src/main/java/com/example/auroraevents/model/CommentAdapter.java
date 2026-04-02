@@ -116,9 +116,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 comment_delete_button.setVisibility(View.GONE);
             }
 
-            if (inAdmin){
-                comment_reply_button.setVisibility(View.GONE);
-            }
 
             //checks if a comment has replies
             boolean hasReplyFollowing = (position + 1 < commentList.size()) && comment.getId().equals(commentList.get(position + 1).getParentId());
@@ -150,7 +147,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 rowParams.topMargin = (int) (12 * density);
                 //checks if it has replies and adjusts accordingly
                 rowParams.bottomMargin = hasReplyFollowing ? 0 : (int) (12 * density);
-                comment_reply_button.setVisibility(View.VISIBLE);
+                comment_reply_button.setVisibility(inAdmin ? View.GONE : View.VISIBLE);
             }
 
             //set parameters
@@ -199,5 +196,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     public void setComments(List<Comment> newList) {
         this.commentList = newList;
         notifyDataSetChanged();
+    }
+
+    public void setIsAdmin(Boolean isAdmin){
+        this.isAdmin = isAdmin;
     }
 }
