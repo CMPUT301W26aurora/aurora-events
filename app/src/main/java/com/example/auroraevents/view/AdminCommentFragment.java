@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.auroraevents.R;
 
-public class AdminCommentFragment extends Fragment {
+public class AdminCommentFragment extends CommentFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
