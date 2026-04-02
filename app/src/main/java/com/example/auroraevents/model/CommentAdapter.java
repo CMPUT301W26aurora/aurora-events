@@ -84,7 +84,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
          * @param comment the comment in reference
          * @param listener for live updates
          */
-        public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener, String currentUserId, boolean isAdmin, String eventOrganizerId, Boolean inAdmin) {
+        public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener, String currentUserId, String eventOrganizerId, Boolean inAdmin) {
             //sets fields
             comment_username.setText(comment.getUsername());
             comment_body.setText(comment.getComment());
@@ -105,7 +105,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             boolean isCommentOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
             boolean isEventOrganizer = currentUserId != null && currentUserId.equals(eventOrganizerId);
 
-            if (isCommentOwner || isEventOrganizer || isAdmin) {
+            if (isCommentOwner || isEventOrganizer || inAdmin) {
                 comment_delete_button.setVisibility(View.VISIBLE);
                 comment_delete_button.setOnClickListener(v -> {
                     if (listener != null) {
@@ -178,7 +178,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
      */
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
-        holder.bind(position, commentList, commentList.get(position), listener, currentUserId, isAdmin, eventOrganizerId, inAdmin);
+        holder.bind(position, commentList, commentList.get(position), listener, currentUserId, eventOrganizerId, inAdmin);
     }
 
     /**

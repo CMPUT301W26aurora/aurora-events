@@ -74,16 +74,12 @@ public class CommentFragment extends Fragment {
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
         }
-        isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
 
             userName = user.getName(); //set user details
-            isAdmin = user.getAdmin();
-
-            adapter.setIsAdmin(isAdmin);
             adapter.notifyDataSetChanged();
 
         });
