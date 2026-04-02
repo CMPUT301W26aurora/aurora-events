@@ -60,26 +60,6 @@ public class UserListFragment extends DialogFragment {
         String eventId = args.getString("eventId");
 
         // get current event from EventDB
-        /*
-        System.out.println(eventId); //Debugging
-        CountDownLatch latch = new CountDownLatch(1);
-        EventDb.getInstance().getEvent(eventId,
-                event -> {
-                    ref.fetchedEvent = event;
-                    latch.countDown();
-                },
-                e -> {
-                    Log.d(TAG, "Error fetching event" + e);
-                    latch.countDown();
-                }
-        );
-        try {
-            assert latch.await(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {}
-        if (ref.fetchedEvent != null) {
-            currentEvent = ref.fetchedEvent;
-        }
-        System.out.println(ref.fetchedEvent);//Debugging*/
         userListView = new ListView(getContext());
         EventDb.getInstance().getEvent(eventId,
                 event -> {
@@ -90,34 +70,6 @@ public class UserListFragment extends DialogFragment {
                     Log.d(TAG, "Error fetching event" + e);
                 }
         );
-
-        /*
-        // Get list of entrants and make a user array adapter
-        userList = currentEvent.registrationList.getUsersFromDB(currentEvent.registrationList.getAllEntrantsList());
-        userListAdapter = new UserArrayAdapter(requireContext(), userList, currentEvent, userListAdapter, this);
-        userListView.setAdapter(userListAdapter);
-
-        // Inflate and add the header
-        View header = inflater.inflate(R.layout.header_entrant_fragment, userListView, false);
-        userListView.addHeaderView(header, null, false);
-
-        // Go back
-        doneButton = view.findViewById(R.id.done_button);
-        doneButton.setOnClickListener( v -> {
-            getParentFragmentManager().popBackStack();
-                });
-
-        // Filter by status
-        filterButton = view.findViewById(R.id.filter_button);
-        filterButton.setOnClickListener(v -> {
-            FilterUserPopUpDialog dialog = FilterUserPopUpDialog.newInstance(
-                    currentEvent,
-                    userList,
-                    userListView
-            );
-            dialog.show(getParentFragmentManager(), "filter_users");
-        });
-        */
 
         // Cancel users
         /* Previous implementation of cancelling users without delete button
