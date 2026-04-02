@@ -62,10 +62,7 @@ public class CommentFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
 
         //grab userid
-        String userId = Settings.Secure.getString(
-                requireContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
+        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         if (getArguments() != null) { //pass event id in args from infouevent
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
@@ -166,7 +163,7 @@ public class CommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, isAdmin, eventOrganizerId);
+        }, userId, isAdmin, eventOrganizerId, false);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
             replyIndicator.setVisibility(View.GONE);

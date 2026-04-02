@@ -26,7 +26,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     private OnCommentInteractionListener listener;
     private List<Comment> commentList;
     private String currentUserId;
-    private Boolean isAdmin;
+    private Boolean isAdmin, inAdmin;
     private String eventOrganizerId;
 
     /**
@@ -35,12 +35,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
      * @param list the list to adapt
      * @param listener a listener for live updates
      */
-    public CommentAdapter(List<Comment> list, OnCommentInteractionListener listener, String currentUserId, Boolean isAdmin,String eventOrganizerId) {
+    public CommentAdapter(List<Comment> list, OnCommentInteractionListener listener, String currentUserId, Boolean isAdmin,String eventOrganizerId, Boolean inAdmin) {
         this.listener = listener;
         this.commentList = list;
         this.currentUserId = currentUserId;
         this.isAdmin = isAdmin;
         this.eventOrganizerId = eventOrganizerId;
+        this.inAdmin = inAdmin;
     }
 
     /**
@@ -83,7 +84,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
          * @param comment the comment in reference
          * @param listener for live updates
          */
-        public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener, String currentUserId, boolean isAdmin, String eventOrganizerId) {
+        public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener, String currentUserId, boolean isAdmin, String eventOrganizerId, Boolean inAdmin) {
             //sets fields
             comment_username.setText(comment.getUsername());
             comment_body.setText(comment.getComment());
@@ -113,6 +114,10 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 });
             } else {
                 comment_delete_button.setVisibility(View.GONE);
+            }
+
+            if (inAdmin){
+                comment_reply_button.setVisibility(View.GONE);
             }
 
             //checks if a comment has replies
@@ -176,7 +181,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
      */
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
-        holder.bind(position, commentList, commentList.get(position), listener, currentUserId, isAdmin, eventOrganizerId);
+        holder.bind(position, commentList, commentList.get(position), listener, currentUserId, isAdmin, eventOrganizerId, inAdmin);
     }
 
     /**
