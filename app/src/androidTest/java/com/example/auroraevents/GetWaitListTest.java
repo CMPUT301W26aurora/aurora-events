@@ -53,7 +53,7 @@ public class GetWaitListTest {
         setUpEvent(myEvent, 60, TimeUnit.SECONDS);
         list = myEvent.registrationList;
         entrantID = "aurora";
-        user = new User("TestID","user","email","phone","getWaitListTest");
+        user = new User("TestID","user","email","phone","getWaitListTest",false);
         setUpUser(user,60, TimeUnit.SECONDS);
     }
 

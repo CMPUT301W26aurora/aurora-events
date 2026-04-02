@@ -40,7 +40,7 @@ public class CommentFragment extends Fragment {
     private String userId;
     private User user;
     private String userName;
-    private String userRole;
+    private Boolean isAdmin;
     private String eventOrganizerId;
     private CommentAdapter adapter;
     private CommentDb commentDb;
@@ -72,13 +72,14 @@ public class CommentFragment extends Fragment {
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
         }
+        isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(requireActivity(), u -> {
             user = u;
 
             userName = user.getName(); //set user details
-            userRole = user.getRole();
+            isAdmin = user.getAdmin();
 
         });
 
@@ -168,7 +169,7 @@ public class CommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, userRole, eventOrganizerId);
+        }, userId, isAdmin, eventOrganizerId);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
             replyIndicator.setVisibility(View.GONE);
