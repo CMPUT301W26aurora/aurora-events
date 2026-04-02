@@ -35,6 +35,18 @@ public class AdminCommentFragment extends Fragment {
     private User user;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistrationAll;
 
+    /**
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return view
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -45,6 +57,12 @@ public class AdminCommentFragment extends Fragment {
         return view;
     }
 
+    /**
+     *
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -54,6 +72,7 @@ public class AdminCommentFragment extends Fragment {
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        //https://developer.android.com/guide/fragments/lifecycle
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
 
@@ -73,6 +92,10 @@ public class AdminCommentFragment extends Fragment {
 
     }
 
+    /**
+     * helper function to setup view
+     * @param view the view to setup the ui on
+     */
     private void setUp(View view){
         //initialize RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments_admin);
