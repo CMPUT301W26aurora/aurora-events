@@ -97,15 +97,13 @@ public class GetWaitListTest {
     public void getWaitListExceptionTest() {
         // Initialize objects
         Organizer organizer = new Organizer();
+        organizer.setName("organizer");
         ArrayList<Event> myEvents = new ArrayList<>();
-        Event myEvent = new Event();
         myEvents.add(myEvent);
         organizer.setMyEvents(myEvents);
 
         // Test that the organizer cannot access event that they did not create
-        assertThrows(IllegalArgumentException.class, () -> {
-            organizer.getEventWaitList(new Event());
-        });
+        assertThrows(IllegalArgumentException.class, () -> organizer.getEventWaitList(new Event()));
     }
 
 }

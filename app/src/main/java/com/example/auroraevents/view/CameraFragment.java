@@ -3,19 +3,18 @@ package com.example.auroraevents.view;
 import static android.widget.Toast.LENGTH_LONG;
 
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.UserViewModel;
@@ -41,9 +40,8 @@ public class CameraFragment extends Fragment {
     public void handleValid(String qr){
         Bundle bundle = new Bundle();
         bundle.putString("eventId", qr);
-        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(requireActivity(), u -> {
-            bundle.putString("userId", u.getDeviceId());
-        });
+        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(), user -> bundle.putString("userId", user.getDeviceId()));
+        Toast.makeText(requireContext(), "user ID: " + bundle.getString("userId"), LENGTH_LONG).show();
 
         InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
         infoUEventFragment.setArguments(bundle);
@@ -51,7 +49,6 @@ public class CameraFragment extends Fragment {
         getParentFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, infoUEventFragment)
-                .addToBackStack(null)
                 .commit();
     }
 
@@ -75,9 +72,7 @@ public class CameraFragment extends Fragment {
                                         handleInvalid();
                                     }
                                 },
-                                e -> {
-                                    Log.d(TAG, "Error fetching event:" + e);
-                                }
+                                e -> Log.d(TAG, "Error fetching event:" + e)
 
                         );
                     }
