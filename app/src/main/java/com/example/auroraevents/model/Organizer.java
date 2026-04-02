@@ -1,13 +1,12 @@
 package com.example.auroraevents.model;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,7 +110,7 @@ public class Organizer extends User {
      */
     public List<User> getEventWaitList(Event event) {
         if (myEvents.contains(event)) {
-            return event.registrationList.getUsersFromDB(event.registrationList.getWaitingList());
+            return event.registrationList.getUsersFromDB(EventDb.LIST_WAITING);
         } else {
             throw new IllegalArgumentException("Event not found");
         }
@@ -125,9 +124,9 @@ public class Organizer extends User {
      * Return the selected list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getEventSelectedList(Event event) {
+    public List<User> getEventSelectedList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getSelectedListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_SELECTED);
         } else {
             throw new IllegalArgumentException("Event not found");
         }
@@ -141,9 +140,9 @@ public class Organizer extends User {
      * Return the attending list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getEventAttendingList(Event event) {
+    public List<User> getEventAttendingList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getAttendingListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_ATTENDING);
         } else {
             throw new IllegalArgumentException("Event not found");
         }
@@ -157,9 +156,9 @@ public class Organizer extends User {
      * Return the cancelled list of users in the specified event
      * @author Won Koh
      */
-    public ArrayList<User> getCancelledWaitList(Event event) {
+    public List<User> getCancelledWaitList(Event event) {
         if (myEvents.contains(event)) {
-            return event.getWaitingListOfUsers();
+            return event.registrationList.getUsersFromDB(EventDb.LIST_CANCELLED);
         } else {
             throw new IllegalArgumentException("Event not found");
         }

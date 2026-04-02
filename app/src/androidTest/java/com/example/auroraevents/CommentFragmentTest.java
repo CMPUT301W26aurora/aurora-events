@@ -18,29 +18,17 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.auroraevents.TestsSupport.clickChildViewWithId;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
-import static com.example.auroraevents.TestsSupport.setUpUser;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
-import static com.example.auroraevents.TestsSupport.takeDownUser;
-
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasToString;
-
 import static org.hamcrest.Matchers.allOf;
-
-import android.Manifest;
-import android.os.Build;
+import static org.hamcrest.Matchers.hasToString;
 
 import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.rule.GrantPermissionRule;
 
 import com.example.auroraevents.model.Event;
-import com.example.auroraevents.model.User;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,8 +39,6 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * tests the comment Fragment
@@ -64,11 +50,6 @@ public class CommentFragmentTest {
     @Rule
     public ActivityScenarioRule<MainActivity> activityRule =
             new ActivityScenarioRule<>(MainActivity.class);
-    @Rule
-    public GrantPermissionRule permissionRule = GrantPermissionRule.grant(
-            Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.CAMERA
-    );
 
     @BeforeClass
     public static void prepare(){
@@ -82,12 +63,15 @@ public class CommentFragmentTest {
                 "orgId",
                 "extremeTurkeyTactics",
                 "description",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 "Location",
-                10
-        );
+                false,
+                -1,
+                10,
+                null);
 
         setUpEvent(event);
 

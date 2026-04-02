@@ -40,7 +40,8 @@ public class CameraFragment extends Fragment {
     public void handleValid(String qr){
         Bundle bundle = new Bundle();
         bundle.putString("eventId", qr);
-        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(), user -> bundle.putString("userId", user.getDeviceId()));
+        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(),
+                user -> bundle.putString("userId", user.getDeviceId()));
         Toast.makeText(requireContext(), "user ID: " + bundle.getString("userId"), LENGTH_LONG).show();
 
         InfoUEventFragment infoUEventFragment = new InfoUEventFragment();

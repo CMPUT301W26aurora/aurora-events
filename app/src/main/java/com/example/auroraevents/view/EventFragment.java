@@ -86,7 +86,6 @@ public class EventFragment extends Fragment {
 
         allEventsList = new ArrayList<>();
         ArrayList<Event> eventList = new ArrayList<>();
-        ListView eventsListView = root.findViewById(R.id.events_list);
 
         // create adapter with eventList
         eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
@@ -99,8 +98,8 @@ public class EventFragment extends Fragment {
         EventDb.getInstance().getAllEvents(events -> {
             for (Event event : events) {
                 Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
-                Boolean isPrivate = event.isPrivate();
-                if (isPrivate == null || !isPrivate) {
+                boolean isPrivate = event.isPrivate();
+                if (!isPrivate) {
                     allEventsList.add(event);
                     eventList.add(event);
                 }
@@ -132,7 +131,7 @@ public class EventFragment extends Fragment {
             getParentFragmentManager()
                     .beginTransaction()
                     .hide(this)
-                    .add(R.id.fragment_container, infoUEventFragment)
+                    .add(R.id.fragment_container, eventFragment)
                     .addToBackStack(null)
                     .commit();
         });
