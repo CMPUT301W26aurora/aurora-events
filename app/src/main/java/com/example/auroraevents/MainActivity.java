@@ -20,6 +20,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
+import com.example.auroraevents.view.AdminCommentFragment;
+import com.example.auroraevents.view.AdminEventFragment;
+import com.example.auroraevents.view.AdminImageFragment;
+import com.example.auroraevents.view.AdminOrganizerFragment;
+import com.example.auroraevents.view.AdminProfileFragment;
 import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.NotificationFragment;
@@ -40,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private String deviceId;
     private UserViewModel userViewModel;
 
-    private ImageButton navScan, navBrowse, navNotifications, navProfile;
+    private ImageButton navScan, navBrowse, navNotifications, navAdminBrowseProfile,navAdminImage,navAdminEvent,navAdminComment,navAdminOrganizer;
+    public ImageButton navProfile,navAdminProfile;
 
 
     @Override
@@ -53,6 +59,12 @@ public class MainActivity extends AppCompatActivity {
         navBrowse        = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
         navProfile = findViewById(R.id.nav_profile);
+        navAdminComment = findViewById(R.id.nav_admin_comments);
+        navAdminProfile = findViewById(R.id.nav_profile_admin);
+        navAdminEvent = findViewById(R.id.nav_admin_event);
+        navAdminImage = findViewById(R.id.nav_admin_image);
+        navAdminOrganizer = findViewById(R.id.nav_admin_organizer);
+        navAdminBrowseProfile = findViewById(R.id.nav_admin_browse_profiles);
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -102,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 user -> {
                     user.setDeviceId(deviceId);
                     if(user.getAdmin() == null){
-                        user.setAdmin(false);
+                        user.setAdmin(true); //this is ONLY for testing purposes
                     }
                     if (user.getRole() == null || user.getRole().isEmpty())
                         user.setRole(User.ROLE_ENTRANT);
@@ -147,6 +159,36 @@ public class MainActivity extends AppCompatActivity {
             setActiveTab(navProfile);
             loadFragment(new ProfileFragment());
         });
+
+        navAdminBrowseProfile.setOnClickListener(v->{
+            setActiveTab(navAdminBrowseProfile);
+            loadFragment(new AdminProfileFragment());
+        });
+
+        navAdminOrganizer.setOnClickListener(v->{
+            setActiveTab(navAdminOrganizer);
+            loadFragment(new AdminOrganizerFragment());
+        });
+
+        navAdminImage.setOnClickListener(v->{
+            setActiveTab(navAdminImage);
+            loadFragment(new AdminImageFragment());
+        });
+
+        navAdminEvent.setOnClickListener(v->{
+            setActiveTab(navAdminEvent);
+            loadFragment(new AdminEventFragment());
+        });
+
+        navAdminComment.setOnClickListener(v->{
+            setActiveTab(navAdminComment);
+            loadFragment(new AdminCommentFragment());
+        });
+
+        navAdminProfile.setOnClickListener(v->{
+            setActiveTab(navAdminProfile);
+            loadFragment(new ProfileFragment());
+        });
     }
 
     private void loadFragment(Fragment fragment) {
@@ -156,8 +198,17 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void setActiveTab(ImageButton selected) {
-        ImageButton[] tabs = { navScan, navBrowse, navNotifications, navProfile };
+    public void setActiveTab(ImageButton selected) {
+        ImageButton[] tabs = { navScan,
+                navBrowse,
+                navNotifications,
+                navProfile,
+                navAdminProfile,
+                navAdminBrowseProfile,
+                navAdminImage,
+                navAdminEvent,
+                navAdminComment,
+                navAdminOrganizer};
 
         for (ImageButton tab : tabs) {
             int targetWidth = dpToPx(tab == selected ? 88 : 52);

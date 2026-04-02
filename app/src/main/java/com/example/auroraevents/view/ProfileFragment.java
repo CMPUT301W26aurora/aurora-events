@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.auroraevents.MainActivity;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
@@ -144,7 +145,24 @@ public class ProfileFragment extends Fragment {
         else
             adminToggle.setVisibility(VISIBLE);
 
-        adminToggle.setOnClickListener(v -> Toast.makeText(view.getContext(), "Admin screen not ready", Toast.LENGTH_SHORT).show());
+        adminToggle.setOnClickListener(v -> {
+            View navBar = getActivity().findViewById(R.id.nav_bar);
+            View adminBar = getActivity().findViewById(R.id.nav_bar_admin);
+            if (navBar != null) {
+                if(navBar.getVisibility() == GONE){
+                    navBar.setVisibility(VISIBLE);
+                    adminBar.setVisibility(GONE);
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).setActiveTab(((MainActivity) getActivity()).navProfile);
+                    }
+                }else{
+                    navBar.setVisibility(GONE);
+                    adminBar.setVisibility(VISIBLE);
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).setActiveTab(((MainActivity) getActivity()).navAdminProfile);}
+                }
+            }
+        });
     }
 
     @Override

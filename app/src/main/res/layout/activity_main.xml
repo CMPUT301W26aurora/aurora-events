@@ -98,23 +98,24 @@
 
         <!-- Admin event tab -->
         <ImageButton
-            android:id="@+id/admin_event"
+            android:id="@+id/nav_admin_event"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:background="@drawable/nav_item_inactive"
-            android:src="@drawable/ic_nav_qr"
+            android:src="@drawable/ic_nav_browse"
             android:scaleType="center"
             android:contentDescription="View Events"
             android:layout_marginEnd="6dp"
-            app:tint="#1C1B2E" />
+            app:tint="#1C1B2E"
+            />
 
-        <!-- Admin image tab (active by default) -->
+        <!-- Admin image tab -->
         <ImageButton
-            android:id="@+id/admin_image"
-            android:layout_width="88dp"
+            android:id="@+id/nav_admin_image"
+            android:layout_width="52dp"
             android:layout_height="52dp"
-            android:background="@drawable/nav_item_active"
-            android:src="@drawable/ic_nav_browse"
+            android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_image"
             android:scaleType="center"
             android:contentDescription="Browse Images"
             android:layout_marginEnd="6dp"
@@ -122,11 +123,11 @@
 
         <!-- admin organizer tab -->
         <ImageButton
-            android:id="@+id/admin_organizer"
+            android:id="@+id/nav_admin_organizer"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:background="@drawable/nav_item_inactive"
-            android:src="@drawable/ic_nav_notifications"
+            android:src="@drawable/ic_nav_browse_org"
             android:scaleType="center"
             android:contentDescription="organizers"
             android:layout_marginEnd="6dp"
@@ -134,24 +135,37 @@
 
         <!-- Admin profile tab -->
         <ImageButton
-            android:id="@+id/admin_profiles"
+            android:id="@+id/nav_admin_browse_profiles"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:background="@drawable/nav_item_inactive"
-            android:src="@drawable/ic_nav_profile"
+            android:src="@drawable/ic_nav_browse_profile"
             android:scaleType="center"
+            android:layout_marginEnd="6dp"
             android:contentDescription="Profile"
             app:tint="#1C1B2E" />
 
         <!-- Admin All Comments tab-->
         <ImageButton
-            android:id="@+id/admin_comments"
+            android:id="@+id/nav_admin_comments"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:background="@drawable/nav_item_inactive"
+            android:src="@drawable/ic_nav_comment"
+            android:scaleType="center"
+            android:layout_marginEnd="6dp"
+            android:contentDescription="Comments"
+            app:tint="#1C1B2E" />
+
+        <!-- The profile tab (active by default)-->
+        <ImageButton
+            android:id="@+id/nav_profile_admin"
+            android:layout_width="88dp"
+            android:layout_height="52dp"
+            android:background="@drawable/nav_item_active"
             android:src="@drawable/ic_nav_profile"
             android:scaleType="center"
-            android:contentDescription="Comments"
+            android:contentDescription="profile"
             app:tint="#1C1B2E" />
 
 
