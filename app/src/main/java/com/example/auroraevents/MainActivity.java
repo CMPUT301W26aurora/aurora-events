@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 user -> {
                     user.setDeviceId(deviceId);
                     if(user.getAdmin() == null){
-                        user.setAdmin(true); //this is ONLY for testing purposes
+                        user.setAdmin(false); 
                     }
                     if (user.getRole() == null || user.getRole().isEmpty())
                         user.setRole(User.ROLE_ENTRANT);
