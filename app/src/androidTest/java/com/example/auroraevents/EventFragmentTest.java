@@ -1,12 +1,14 @@
 package com.example.auroraevents;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.view.EventFragment;
 
 public class EventFragmentTest {
     /**
@@ -109,4 +111,152 @@ public class EventFragmentTest {
         Event tappedEvent = eventList.get(0);
         assertEquals("test-event-1", tappedEvent.getEventId());
     }
+
+    /**
+     * Tests if search keyword matches event name
+     */
+    @Test
+    public void testEventSearchName() {
+        EventFragment eventFragment = new EventFragment();
+        ArrayList<Event> allEventsList = new ArrayList<>();
+
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",
+                LocalDateTime.of(2026, 3, 15, 17, 0),
+                LocalDateTime.of(2026, 3, 1, 9, 0),
+                LocalDateTime.of(2026, 3, 10, 23, 59),
+                "Community Centre", 40);
+        event1.setEventId("test-event-1");
+        allEventsList.add(event1);
+
+        ArrayList<Event> searchResult = eventFragment.filterKeywordEvents("singing", allEventsList);
+        assertEquals(1, searchResult.size());
+        assertEquals("test-event-1", searchResult.get(0).getEventId());
+    }
+
+    /**
+     * Tests if search keyword matched event description
+     */
+    @Test
+    public void testEventSearchDescription() {
+        EventFragment eventFragment = new EventFragment();
+        ArrayList<Event> allEventsList = new ArrayList<>();
+
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",
+                LocalDateTime.of(2026, 3, 15, 17, 0),
+                LocalDateTime.of(2026, 3, 1, 9, 0),
+                LocalDateTime.of(2026, 3, 10, 23, 59),
+                "Community Centre", 40);
+        event1.setEventId("test-event-1");
+        allEventsList.add(event1);
+
+        ArrayList<Event> result = eventFragment.filterKeywordEvents("talent", allEventsList);
+        assertEquals(1, result.size());
+        assertEquals("test-event-1", result.get(0).getEventId());
+    }
+
+    /**
+     * Tests lower case conversion
+     */
+    @Test
+    public void testLowerCaseConversion() {
+        EventFragment eventFragment = new EventFragment();
+        ArrayList<Event> allEventsList = new ArrayList<>();
+
+        Event event1 = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
+        event1.setEventId("test-event-1");
+        allEventsList.add(event1);
+
+        ArrayList<Event> result = eventFragment.filterKeywordEvents("SPORT", allEventsList);
+        assertEquals(1, result.size());
+    }
+
+    /**
+     * Tests if empty list is returned when there are no search results
+     */
+    @Test
+    public void testSearchNoResults() {
+        EventFragment eventFragment = new EventFragment();
+        ArrayList<Event> allEventsList = new ArrayList<>();
+
+        Event event1 = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
+        event1.setEventId("test-event-1");
+        allEventsList.add(event1);
+
+        ArrayList<Event> searchResult = eventFragment.filterKeywordEvents("Music", allEventsList);
+        assertTrue(searchResult.isEmpty());
+    }
+
+    /**
+     * Tests if all events are displayed when search bar is cleared
+     */
+    @Test
+    public void testClearedSearch() {
+        EventFragment eventFragment = new EventFragment();
+        ArrayList<Event> allEventsList = new ArrayList<>();
+
+        Event event1 = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", 20);
+        event1.setEventId("test-event-1");
+
+        Event event2 = new Event("organizer-def", "Art Event", "Display your work",
+                LocalDateTime.of(2026, 3, 15, 17, 0),
+                LocalDateTime.of(2026, 3, 1, 9, 0),
+                LocalDateTime.of(2026, 3, 10, 23, 59),
+                "Arts Centre", 50);
+        event2.setEventId("test-event-2");
+
+        allEventsList.add(event1);
+        allEventsList.add(event2);
+
+        // search to match keyword
+        ArrayList<Event> filteredEvents = eventFragment.filterKeywordEvents("sport", allEventsList);
+        assertEquals(1, filteredEvents.size());
+
+        // clear search bar
+        ArrayList<Event> originalEvents = eventFragment.filterKeywordEvents("", allEventsList);
+        assertEquals(2, originalEvents.size());
+    }
+
+    /**
+     * Tests that private events are not displayed during keyword search
+     */
+ @Test
+ public void testPrivateEventNotShownInResults() {
+     EventFragment eventFragment = new EventFragment();
+     ArrayList<Event> allEventsList = new ArrayList<>();
+
+     Event publicEvent = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+             LocalDateTime.of(2026, 6, 4, 18, 0),
+             LocalDateTime.of(2026, 5, 20, 9, 0),
+             LocalDateTime.of(2026, 6, 1, 23, 59),
+             "Rec Centre", 20);
+     publicEvent.setEventId("test-event-1");
+     publicEvent.setPrivate(false);
+
+     Event privateEvent = new Event("organizer-def", "Art Event", "Display your work",
+             LocalDateTime.of(2026, 3, 15, 17, 0),
+             LocalDateTime.of(2026, 3, 1, 9, 0),
+             LocalDateTime.of(2026, 3, 10, 23, 59),
+             "Arts Centre", 50);
+     privateEvent.setEventId("test-event-2");
+     privateEvent.setPrivate(true);
+
+     allEventsList.add(publicEvent);
+     allEventsList.add(privateEvent);
+
+     ArrayList<Event> result = eventFragment.filterKeywordEvents("", allEventsList);
+     assertEquals(1, result.size());
+     assertEquals("test-event-1", result.get(0).getEventId());
+ }
 }

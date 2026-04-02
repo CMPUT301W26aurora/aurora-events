@@ -83,9 +83,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
 
-        /*
-        Hardcode user role for testing purposes
-         */
+
+        //Hardcode user role for testing purposes
         /*
         UserDb.getInstance().getUser(deviceId,
                 user -> {
@@ -111,13 +110,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Set user
         userViewModel.getSelectedItem().observe(this,u -> {
-            UserDb.getInstance().updateUser(u,
-                    () -> {
-                        Log.d(TAG, "User info updated");
-//                        Toast.makeText(this, "User info updated!", Toast.LENGTH_SHORT).show();
-                    },
-                    e -> Log.w(TAG, "User info not updated")
-            );
+            if (u != null && u.getName() != null) {
+                UserDb.getInstance().updateUser(u,
+                        () -> Log.d(TAG, "User info updated"),
+                        e -> Log.w(TAG, "User info not updated")
+                );
+            } else {
+                Log.d(TAG, "Sync skipped: User object is empty or not yet loaded.");
+            }
         });
 
         // Set default tab

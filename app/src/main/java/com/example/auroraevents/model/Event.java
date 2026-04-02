@@ -39,6 +39,7 @@ public class Event {
     private String qrCodeData;            // String payload encoded in the QR code
     private Bitmap qR;
     private Bitmap poster;
+    private boolean isPrivate;
     private List<String> reports;
 
     // Participant lists — each list holds device IDs (User.deviceId)
@@ -76,6 +77,11 @@ public class Event {
         this.registrationList.setWaitingCapacity(waitingCapacity);
         this.registrationList.setAttendingCapacity(attendingCapacity);
         this.poster                = poster;
+    }
+  
+    @Override
+    public String toString() {
+        return this.name;
     }
 
     @Override
@@ -140,8 +146,11 @@ public class Event {
 
     public Bitmap getPoster()              { return poster; }
     public void   setPoster(Bitmap poster) { this.poster = poster; }
+  
+    public boolean isPrivate()                   { return isPrivate; }
+    public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
 
-    public int  getNumReports()          { return reports.size(); }
+    public int  getNumReports() { return reports.size(); }
     /**
      * Adds a report
      * @param userId The device ID of the user reporting the event
