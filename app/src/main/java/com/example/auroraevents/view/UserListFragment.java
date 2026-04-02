@@ -98,7 +98,8 @@ public class UserListFragment extends DialogFragment {
             dialog.show(getParentFragmentManager(), "filter_users");
         });
 
-        // Cancell users
+        // Cancel users
+        /* Previous implementation of cancelling users without delete button
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -106,7 +107,7 @@ public class UserListFragment extends DialogFragment {
                 currentEvent.registrationList.addToCancelledList(selectedUserID);
                 userListAdapter.notifyDataSetChanged();
             }
-        });
+        });*/
 
         return view;
     }
