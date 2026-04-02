@@ -1,11 +1,10 @@
 package com.example.auroraevents.view;
 
-import static androidx.core.util.TypedValueCompat.dpToPx;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,14 +16,11 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 
 import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
-import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
@@ -36,6 +32,7 @@ import android.provider.Settings;
 import android.widget.Toast;
 
 public class EventCreationFragment extends Fragment {
+    //TODO 4: copy into edit event fragment
     private ImageButton backButton;
     private Button addImageButton;
     private TextInputEditText eventNameInput;
@@ -49,8 +46,10 @@ public class EventCreationFragment extends Fragment {
     private Button confirmButton;
     private String eventName;
     private String eventDescription;
+    private String price;
     private String eventCap;
     private String location;
+    private boolean geolocationRequired;
     private String date;
     private String registerStart;
     private String registerEnd;
@@ -79,6 +78,7 @@ public class EventCreationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // TODO 3: update to add price, geolocation requirement
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_creation, container, false);
 
@@ -224,6 +224,7 @@ public class EventCreationFragment extends Fragment {
                             organizer.getDeviceId(),
                             eventName,
                             eventDescription,
+                            price,
                             date,
                             registerStart,
                             registerEnd,

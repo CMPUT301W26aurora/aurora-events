@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:layout_margin="15dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/report_dialog_title"
+        android:textSize="12pt"
+        android:textColor="@color/green"
+        android:fontFamily="@font/roboto"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/report_dialog_warning"
+        android:textSize="7pt"
+        android:textColor="@color/light_red"
+        android:fontFamily="@font/roboto_bold"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="2.5dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/report_dialog_list"
+        android:textSize="7pt"
+        android:textColor="@color/light_text"
+        android:fontFamily="@font/roboto"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="5dp">
+
+        <Button
+            android:id="@+id/cancel_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/cancel_button_text"
+            android:textColor="@color/purple"
+            android:fontFamily="@font/roboto"
+            android:background="#00000000" />
+
+        <Button
+            android:id="@+id/report_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/report_button_text"
+            android:textColor="@color/light_text"
+            android:fontFamily="@font/roboto_bold"
+            android:backgroundTint="@color/light_red"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

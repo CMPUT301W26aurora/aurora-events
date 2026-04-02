@@ -12,6 +12,8 @@ import static org.junit.Assert.assertTrue;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.registration_tests.RegistrationWaitingListTest;
+import com.example.auroraevents.server.EventDb;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +22,6 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +47,8 @@ public class WaitListSamplingTest {
         myEvent = new Event(
                 "test device",
                 "wait list sampling test",
-                "event for wait list sampling test\"",
+                "event for wait list sampling test",
+                "free!",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
@@ -59,6 +61,7 @@ public class WaitListSamplingTest {
                 "test device 2",
                 "wait list sampling test (Redo random sampling to test randomness)",
                 "event for testing if random sampling is actually random",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
@@ -71,6 +74,7 @@ public class WaitListSamplingTest {
                 "test device 3",
                 "wait list sampling test (waitlist less than empty slots)",
                 "event for testing if waitlist simply selects everyone if there are more empty slots",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
@@ -111,7 +115,7 @@ public class WaitListSamplingTest {
         organizer.setMyEvents(myEvents);
 
         // Add multiple users to waitlist
-        List<String> waitlistWithID = new ArrayList<String>();
+        List<String> waitlistWithID = new ArrayList<>();
         waitlistWithID.add(user1.getDeviceId());
         waitlistWithID.add(user2.getDeviceId());
         waitlistWithID.add(user3.getDeviceId());
@@ -121,21 +125,21 @@ public class WaitListSamplingTest {
         // Randomly sample waiting list
         organizer.sampleWaitList(myEvent);
         // Check if empty slots is 0
-        assertEquals(0, myEvent.getEmptySlotAmount());
+        assertEquals(0, myEvent.registrationList.getEmptySlotAmount());
         // Check if the waitlist shrunk to 1
         assertEquals(1, organizer.getEventWaitList(myEvent).size());
         // Check if the selected list increased by 3
-        assertEquals(3, myEvent.getSelectedListOfUsers().size());
+        assertEquals(3, myEvent.registrationList.getSelectedList().size());
         // Check if the users from waitlist were selected
         // Also store current waiting list and the current selected list for the next section
-        List<String> checkList = new ArrayList<String>();
+        List<String> checkList = new ArrayList<>();
         List<String> previousWaitListWithID;
         List<String> previousSelectedListWithID;
         for (User user: organizer.getEventWaitList(myEvent)) {
             checkList.add(user.getDeviceId());
         }
         previousWaitListWithID = myEvent.registrationList.getWaitingList();
-        for (User user: myEvent.getSelectedListOfUsers()) {
+        for (User user: myEvent.registrationList.getUsersFromDB(EventDb.LIST_SELECTED)) {
             checkList.add(user.getDeviceId());
         }
         previousSelectedListWithID = myEvent.registrationList.getSelectedList();
@@ -160,7 +164,7 @@ public class WaitListSamplingTest {
         organizer.setMyEvents(myEvents);
 
         // Add all 4 users to waiting list
-        List<String> waitlistWithID = new ArrayList<String>();
+        List<String> waitlistWithID = new ArrayList<>();
         waitlistWithID.add(user1.getDeviceId());
         waitlistWithID.add(user2.getDeviceId());
         waitlistWithID.add(user3.getDeviceId());
@@ -171,7 +175,7 @@ public class WaitListSamplingTest {
         organizer.sampleWaitList(myEvent3);
 
         // Check that there are still 6 more empty slots
-        assertEquals(6, myEvent3.getEmptySlotAmount());
+        assertEquals(6, myEvent3.registrationList.getEmptySlotAmount());
         // Check the amounts for waiting list and selected list
         assertEquals(0, myEvent3.registrationList.getWaitingList().size());
         assertEquals(4, myEvent3.registrationList.getSelectedList().size());

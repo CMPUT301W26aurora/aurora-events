@@ -3,12 +3,12 @@ package com.example.auroraevents;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.example.auroraevents.model.Event;
+
 import org.junit.Test;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import com.example.auroraevents.model.Event;
 
 public class EventTest {
     /**
@@ -34,7 +34,11 @@ public class EventTest {
     @Test
     public void testConstructorEventOrganizerId() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -48,7 +52,11 @@ public class EventTest {
     @Test
     public void testConstructorEventName() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -62,7 +70,11 @@ public class EventTest {
     @Test
     public void testConstructorEventDescription() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -79,6 +91,7 @@ public class EventTest {
                 "organizer-xyz",
                 "Sports Event",
                 "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -98,6 +111,7 @@ public class EventTest {
                 "organizer-xyz",
                 "Sports Event",
                 "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -118,6 +132,7 @@ public class EventTest {
                 "organizer-xyz",
                 "Sports Event",
                 "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -135,7 +150,11 @@ public class EventTest {
     @Test
     public void testConstructorEventLocation() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
@@ -148,7 +167,11 @@ public class EventTest {
     @Test
     public void testEventCapacity() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),

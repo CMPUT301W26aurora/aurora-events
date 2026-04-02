@@ -9,7 +9,7 @@
         android:id="@+id/back_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/round_arrow_back_24"
+        android:src="@drawable/rounded_arrow_back_24"
         android:scaleType="fitCenter"
         android:padding="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"

@@ -1,8 +1,6 @@
 package com.example.auroraevents;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+public class InfoUEventTest { //TODO 2: make the tests test what they say they test
 
 import org.junit.Test;
 

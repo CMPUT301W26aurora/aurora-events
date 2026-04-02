@@ -12,6 +12,7 @@ import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.registration_tests.RegistrationWaitingListTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +21,6 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class GetWaitListTest {
@@ -44,6 +44,7 @@ public class GetWaitListTest {
                 "test device",
                 "wait list sampling test",
                 "event for wait list sampling test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
@@ -93,15 +94,13 @@ public class GetWaitListTest {
     public void getWaitListExceptionTest() {
         // Initialize objects
         Organizer organizer = new Organizer();
+        organizer.setName("organizer");
         ArrayList<Event> myEvents = new ArrayList<>();
-        Event myEvent = new Event();
         myEvents.add(myEvent);
         organizer.setMyEvents(myEvents);
 
         // Test that the organizer cannot access event that they did not create
-        assertThrows(IllegalArgumentException.class, () -> {
-            organizer.getEventWaitList(new Event());
-        });
+        assertThrows(IllegalArgumentException.class, () -> organizer.getEventWaitList(new Event()));
     }
 
 }

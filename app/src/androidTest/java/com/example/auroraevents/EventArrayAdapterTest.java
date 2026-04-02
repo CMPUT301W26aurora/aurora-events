@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.example.auroraevents.model.Event;
+
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import com.example.auroraevents.model.Event;
 
 public class EventArrayAdapterTest {
     /**
@@ -18,7 +18,12 @@ public class EventArrayAdapterTest {
     @Test
     public void testEventPosition() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
 
@@ -35,7 +40,12 @@ public class EventArrayAdapterTest {
     @Test
     public void testAttendingTag() {
         // create an event
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
 
@@ -52,7 +62,12 @@ public class EventArrayAdapterTest {
      */
     @Test
     public void testInvitedTag() {
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
         event.registrationList.getSelectedList().add("test-device-id");
@@ -64,7 +79,12 @@ public class EventArrayAdapterTest {
      */
     @Test
     public void testWaitingTag() {
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
         event.registrationList.getWaitingList().add("test-device-id");
@@ -76,7 +96,12 @@ public class EventArrayAdapterTest {
      */
     @Test
     public void testEmptyTag() {
-        Event event = new Event("organizer-xyz", "Sports Event", "Explore your favourite sport",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
+                "free",
+                LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
         assertFalse(event.registrationList.getAttendingList().contains("test-device-id"));

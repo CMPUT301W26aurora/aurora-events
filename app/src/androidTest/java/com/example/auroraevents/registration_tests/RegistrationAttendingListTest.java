@@ -1,15 +1,15 @@
-package com.example.auroraevents;
+package com.example.auroraevents.registration_tests;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.checkNone;
-import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAllLists;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.checkNone;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAllLists;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpWaitingList;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
 
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RegistrationSelectedListTest {
+public class RegistrationAttendingListTest {
     Event event;
     RegistrationList list;
     String entrantID;
@@ -45,12 +45,14 @@ public class RegistrationSelectedListTest {
         event = new Event(
                 "test device",
                 "registration test",
-                "event for registration selected list test",
+                "event for registration attending list test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
                 0, false);
+
         setUpEvent(event);
         list = event.registrationList;
         entrantID = "aurora";
@@ -62,64 +64,64 @@ public class RegistrationSelectedListTest {
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that isn't on any entrant lists
+     * Tests {@code addToAttendingList()} on an entrant that isn't on any entrant lists
      * @author Jared Strandlund
      */
     @Test
-    public void noneToSelectedTest() {
-        assertEquals(1, list.addToSelectedList(entrantID));
-        assertEquals(0, list.getSelectedList().size());
-        assertFalse(list.getSelectedList().contains(entrantID));
+    public void noneToAttendingTest() {
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
 
         checkNone(list, entrantID);
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that is on the waiting list
+     * Tests {@code addToAttendingList()} on an entrant that is on the waiting list
      * @author Jared Strandlund
      */
     @Test
-    public void waitingToSelectedTest() {
+    public void waitingToAttendingTest() {
         setUpWaitingList(list, entrantID);
         checkSingle(list, entrantID);
 
-        assertEquals(0, list.addToSelectedList(entrantID));
-        assertEquals(1, list.getSelectedList().size());
-        assertTrue(list.getSelectedList().contains(entrantID));
-        assertEquals(0, list.getWaitingList().size());
-        assertFalse(list.getWaitingList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
+        assertEquals(1, list.getWaitingList().size());
+        assertTrue(list.getWaitingList().contains(entrantID));
 
         checkSingle(list, entrantID);
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that is on the selected list
+     * Tests {@code addToAttendingList()} on an entrant that is on the selected list
      * @author Jared Strandlund
      */
     @Test
-    public void selectedToSelectedTest() {
+    public void selectedToAttendingTest() {
         setUpSelectedList(list, entrantID);
         checkSingle(list, entrantID);
 
-        assertEquals(-1, list.addToSelectedList(entrantID));
-        assertEquals(1, list.getSelectedList().size());
-        assertTrue(list.getSelectedList().contains(entrantID));
+        assertEquals(0, list.addToAttendingList(entrantID));
+        assertEquals(1, list.getAttendingList().size());
+        assertTrue(list.getAttendingList().contains(entrantID));
+        assertEquals(0, list.getSelectedList().size());
+        assertFalse(list.getSelectedList().contains(entrantID));
 
         checkSingle(list, entrantID);
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that is on the attending list
+     * Tests {@code addToAttendingList()} on an entrant that is on the attending list
      * @author Jared Strandlund
      */
     @Test
-    public void attendingToSelectedTest() {
+    public void attendingToAttendingTest() {
         setUpAttendingList(list, entrantID);
         checkSingle(list, entrantID);
 
-        assertEquals(1, list.addToSelectedList(entrantID));
-        assertEquals(0, list.getSelectedList().size());
-        assertFalse(list.getSelectedList().contains(entrantID));
+        assertEquals(-1, list.addToAttendingList(entrantID));
         assertEquals(1, list.getAttendingList().size());
         assertTrue(list.getAttendingList().contains(entrantID));
 
@@ -127,17 +129,17 @@ public class RegistrationSelectedListTest {
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that is on the declined list
+     * Tests {@code addToAttendingList()} on an entrant that is on the declined list
      * @author Jared Strandlund
      */
     @Test
-    public void declinedToSelectedTest() {
+    public void declinedToAttendingTest() {
         setUpDeclinedList(list, entrantID);
         checkSingle(list, entrantID);
 
-        assertEquals(1, list.addToSelectedList(entrantID));
-        assertEquals(0, list.getSelectedList().size());
-        assertFalse(list.getSelectedList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getDeclinedList().size());
         assertTrue(list.getDeclinedList().contains(entrantID));
 
@@ -145,17 +147,17 @@ public class RegistrationSelectedListTest {
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that is on the cancelled list
+     * Tests {@code addToAttendingList()} on an entrant that is on the cancelled list
      * @author Jared Strandlund
      */
     @Test
-    public void cancelledToSelectedTest() {
+    public void cancelledToAttendingTest() {
         setUpCancelledList(list, entrantID);
         checkSingle(list, entrantID);
 
-        assertEquals(1, list.addToSelectedList(entrantID));
-        assertEquals(0, list.getSelectedList().size());
-        assertFalse(list.getSelectedList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getCancelledList().size());
         assertTrue(list.getCancelledList().contains(entrantID));
 
@@ -163,17 +165,17 @@ public class RegistrationSelectedListTest {
     }
 
     /**
-     * Tests {@code addToSelectedList()} on an entrant that is on the removed list
+     * Tests {@code addToAttendingList()} on an entrant that is on the removed list
      * @author Jared Strandlund
      */
     @Test
-    public void removedToSelectedTest() {
+    public void removedToAttendingTest() {
         setUpRemovedList(list, entrantID);
         checkSingle(list, entrantID);
 
-        assertEquals(1, list.addToSelectedList(entrantID));
-        assertEquals(0, list.getSelectedList().size());
-        assertFalse(list.getSelectedList().contains(entrantID));
+        assertEquals(1, list.addToAttendingList(entrantID));
+        assertEquals(0, list.getAttendingList().size());
+        assertFalse(list.getAttendingList().contains(entrantID));
         assertEquals(1, list.getRemovedList().size());
         assertTrue(list.getRemovedList().contains(entrantID));
 
@@ -181,10 +183,10 @@ public class RegistrationSelectedListTest {
     }
 
     /**
-     * Tests {@code addAllToSelectedList()} on entrants on each of the lists
+     * Tests {@code addAllToAttendingList()} on entrants on each of the lists
      */
     @Test
-    public void allToSelectedList() {
+    public void allToAttendingList() {
         // Set up
         String noneEntrant = "none user";
         String waitingEntrant = "waiting user";
@@ -206,25 +208,25 @@ public class RegistrationSelectedListTest {
 
         // Test
         List<Integer> statuses;
-        statuses = event.registrationList.addAllToSelectedList(entrants);
+        statuses = event.registrationList.addAllToAttendingList(entrants);
         // Check statuses
         assertEquals(1, (long) statuses.get(0));  // none
-        assertEquals(0, (long) statuses.get(1));  // waiting
-        assertEquals(-1, (long) statuses.get(2)); // selected
-        assertEquals(1, (long) statuses.get(3));  // attending
+        assertEquals(1, (long) statuses.get(1));  // waiting
+        assertEquals(0, (long) statuses.get(2));  // selected
+        assertEquals(-1, (long) statuses.get(3)); // attending
         assertEquals(1, (long) statuses.get(4));  // declined
         assertEquals(1, (long) statuses.get(5));  // cancelled
         assertEquals(1, (long) statuses.get(6));  // removed
         // Check list sizes
-        assertEquals(0, event.registrationList.getWaitingList().size());
-        assertEquals(2, event.registrationList.getSelectedList().size());
-        assertEquals(1, event.registrationList.getAttendingList().size());
+        assertEquals(1, event.registrationList.getWaitingList().size());
+        assertEquals(0, event.registrationList.getSelectedList().size());
+        assertEquals(2, event.registrationList.getAttendingList().size());
         assertEquals(1, event.registrationList.getDeclinedList().size());
         assertEquals(1, event.registrationList.getCancelledList().size());
         assertEquals(1, event.registrationList.getRemovedList().size());
         // Check list content
-        List<String> expectedList = new ArrayList<>(Arrays.asList(waitingEntrant, selectedEntrant));
-        List<String> actualList = event.registrationList.getSelectedList();
+        List<String> expectedList = new ArrayList<>(Arrays.asList(selectedEntrant, attendingEntrant));
+        List<String> actualList = event.registrationList.getAttendingList();
         assertTrue(actualList.containsAll(expectedList));
         assertTrue(expectedList.containsAll(actualList));
     }

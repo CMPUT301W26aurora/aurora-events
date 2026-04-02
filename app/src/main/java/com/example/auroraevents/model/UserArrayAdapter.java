@@ -15,14 +15,14 @@ import com.example.auroraevents.R;
 import com.example.auroraevents.view.RemoveUserPopUpDialog;
 import com.example.auroraevents.view.UserListFragment;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class UserArrayAdapter extends ArrayAdapter<User> {
     private Event currentEvent;
     private ImageButton deleteButton;
     private UserListFragment parentFragment;
     private UserArrayAdapter userListAdapter;
-    public UserArrayAdapter(Context context, ArrayList<User> users, Event event, UserArrayAdapter userListAdapter, UserListFragment parentFragment) {
+    public UserArrayAdapter(Context context, List<User> users, Event event, UserArrayAdapter userListAdapter, UserListFragment parentFragment) {
         super(context, 0, users);
         currentEvent = event;
         this.parentFragment = parentFragment;
