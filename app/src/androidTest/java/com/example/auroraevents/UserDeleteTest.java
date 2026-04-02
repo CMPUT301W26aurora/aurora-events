@@ -1,12 +1,12 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpWaitingList;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.setUpUser;
 import static com.example.auroraevents.TestsSupport.signIn;
@@ -69,56 +69,80 @@ public class UserDeleteTest {
                 "test organizer",
                 "waiting",
                 "event for user on the waiting list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                false,
+                -1,
+                -1,
+                null);
         selectedEvent = new Event(
                 "test organizer",
                 "selected",
                 "event for user on the selected list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                false,
+                -1,
+                -1,
+                null);
         attendingEvent = new Event(
                 "test organizer",
                 "attending",
                 "event for user on the attending list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                false,
+                -1,
+                -1,
+                null);
         declinedEvent = new Event(
                 "test organizer",
                 "declined",
                 "event for user on the declined list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                false,
+                -1,
+                -1,
+                null);
         cancelledEvent = new Event(
                 "test organizer",
                 "cancelled",
                 "event for user on the cancelled list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                false,
+                -1,
+                -1,
+                null);
         removedEvent = new Event(
                 "test organizer",
                 "removed",
                 "event for user on the removed list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                false,
+                -1,
+                -1,
+                null);
 
         setUpEvent(waitingEvent);
         setUpWaitingList(waitingEvent.registrationList, user.getDeviceId());

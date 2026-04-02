@@ -7,12 +7,19 @@ import static com.example.auroraevents.server.EventDb.LIST_REMOVED;
 import static com.example.auroraevents.server.EventDb.LIST_SELECTED;
 import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 
+import android.util.Log;
+
 import com.example.auroraevents.server.EventDb;
+import com.example.auroraevents.server.UserDb;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,6 +31,8 @@ public class RegistrationList {
     private final List<String> declinedList;    // invited then self declined
     private final List<String> cancelledList;   // self cancelled
     private final List<String> removedList;     // force removed
+    private int attendingCapacity;
+    private int waitingCapacity;
     private Integer databaseTimeout = 10;
     private TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
@@ -42,14 +51,44 @@ public class RegistrationList {
         this.timeoutUnit = timeoutUnit;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        RegistrationList that = (RegistrationList) o;
+        Log.d("RegistrationList", eventId + " vs. " + that.eventId);
+        return
+                new HashSet<>(getWaitingList()).containsAll(that.getWaitingList()) &&
+                new HashSet<>(getSelectedList()).containsAll(that.getSelectedList()) &&
+                new HashSet<>(getAttendingList()).containsAll(that.getAttendingList()) &&
+                new HashSet<>(getDeclinedList()).containsAll(that.getDeclinedList()) &&
+                new HashSet<>(getCancelledList()).containsAll(that.getCancelledList()) &&
+                new HashSet<>(getRemovedList()).containsAll(that.getRemovedList()) &&
+                getAttendingCapacity() == that.getAttendingCapacity() &&
+                getWaitingCapacity() == that.getWaitingCapacity();
+    }
+
     public void setEventId(String eventId) {
         this.eventId = eventId;
+        Log.d("RegistrationList", "set event ID to: " + eventId);
+    }
+
+    public int getAttendingCapacity() {
+        return attendingCapacity;
+    }
+    public void setAttendingCapacity(int attendingCapacity) {
+        this.attendingCapacity = attendingCapacity;
+    }
+
+    public int getWaitingCapacity() {
+        return waitingCapacity;
+    }
+    public void setWaitingCapacity(int waitingCapacity) {
+        this.waitingCapacity = waitingCapacity;
     }
 
     public Integer getDatabaseTimeout() {
         return databaseTimeout;
     }
-
     public void setDatabaseTimeout(Integer databaseTimeout) {
         this.databaseTimeout = databaseTimeout;
     }
@@ -57,7 +96,6 @@ public class RegistrationList {
     public TimeUnit getTimeoutUnit() {
         return timeoutUnit;
     }
-
     public void setTimeoutUnit(TimeUnit unit) {
         timeoutUnit = unit;
     }
@@ -111,14 +149,17 @@ public class RegistrationList {
      *
      * @param userID The entrant's device ID
      * @return
-     *     {@code 0} when successful add
+     *     {@code 0}  when successful add
      *     {@code -1} when already on list
-     *     {@code 1} when already on blocking list
-     *     {@code 2} when database change fails
+     *     {@code 1}  when already on blocking list
+     *     {@code 2}  when database change fails
+     *     {@code 3}  when not enough capacity
      * @author Jared Strandlund
      */
     public int addToWaitingList(String userID) {
-        if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID))
+        if (waitingCapacity > -1 && waitingList.size() >= waitingCapacity) {
+            return 3;
+        } else if (selectedList.contains(userID) || attendingList.contains(userID) || removedList.contains(userID))
             return 1;
         else if (waitingList.contains(userID))
             return -1;
@@ -188,11 +229,14 @@ public class RegistrationList {
      *     {@code -1} when already on list
      *     {@code 1} when already on blocking list
      *     {@code 2} when database change fails
+     *     {@code 3} when not enough capacity
      * @author Jared Strandlund
      */
 
     public int addToSelectedList(String userID) {
-        if (waitingList.remove(userID)) {
+        if (attendingCapacity > -1 && attendingList.size() >= attendingCapacity) {
+            return 3;
+        } else if (waitingList.remove(userID)) {
             boolean status = changeDb(LIST_WAITING, LIST_SELECTED, userID);
             if (status) {
                 selectedList.add(userID);
@@ -606,5 +650,114 @@ public class RegistrationList {
 
         output.set(0, Collections.max(output));
         return output;
+    }
+
+    // ── Sampling ──────────────────────────────────────────────────
+    /**
+     * Connects and fetches user objects from database using their device IDs and returns an array list of them
+     * @author Won Koh & Jared Strandlund
+     * @param listOfDeviceIDs
+     * The list of user's device IDs
+     * @return
+     * The list of user objects that were fetched with given device IDs
+     */
+    @Exclude
+    public List<User> getUsersFromDB(List<String> listOfDeviceIDs) {
+        ArrayList<User> listOfUsers = new ArrayList<>();
+        // Fetch users from database
+        AtomicReference<User> user = new AtomicReference<>(null);
+        for (String userId : listOfDeviceIDs) {
+            CountDownLatch latch = new CountDownLatch(1);
+            UserDb.getInstance().getUser(userId,
+                    u -> {
+                        user.set(u);
+                        latch.countDown();
+                    },
+                    e -> {
+                        Log.e("Main", "Error fetching user", e);
+                        latch.countDown();
+                    }
+            );
+            try {
+                assert latch.await(databaseTimeout, timeoutUnit);
+            } catch (InterruptedException e) {
+                continue;
+            }
+            if (user.get() != null) {
+                listOfUsers.add(user.get());
+            }
+        }
+        return listOfUsers;
+    }
+
+    /**
+     * Connects and fetches user objects from database using their device IDs and returns an array list of them
+     * @author Won Koh & Jared Strandlund
+     * @param listName
+     * The name of the list of user's device IDs (one of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED)
+     * @return
+     * The list of user objects that were fetched with given device IDs
+     */
+    public List<User> getUsersFromDB(String listName) {
+        if (Objects.equals(listName, LIST_WAITING)) {
+            return getUsersFromDB(getWaitingList());
+        } else if (Objects.equals(listName, LIST_SELECTED)) {
+            return getUsersFromDB(getSelectedList());
+        } else if (Objects.equals(listName, LIST_ATTENDING)) {
+            return getUsersFromDB(getAttendingList());
+        } else if (Objects.equals(listName, LIST_DECLINED)) {
+            return getUsersFromDB(getDeclinedList());
+        } else if (Objects.equals(listName, LIST_CANCELLED)) {
+            return getUsersFromDB(getCancelledList());
+        } else if (Objects.equals(listName, LIST_REMOVED)) {
+            return getUsersFromDB(getRemovedList());
+        } else
+            return new ArrayList<>();
+    }
+
+    // ── Sampling ──────────────────────────────────────────────────
+    /**
+     * Returns the amount of empty slots that is available in the event
+     * @return
+     * Amount of empty slots available (-1 is infinite)
+     */
+    @Exclude
+    public int getEmptySlotAmount() {
+        if (getAttendingCapacity() < 0)
+            return -1;
+        return getAttendingCapacity() - getAttendingList().size() - getSelectedList().size();
+    }
+
+    /**
+     * Randomly samples users in the waiting list and adds the selected ones to the selected list
+     * then send notification to both the users who were selected and not
+     * @author Won Koh & Jared Strandlund
+     */
+    @Exclude
+    public void randomSampling(int amount, int capacity) {
+        // There are more empty slots than there are users in waiting list: Select everyone from waiting list
+        // Also do the same if the capacity = 0 (This is when there is no limit)
+        if (capacity == 0 || amount >= waitingList.size()) {
+            addAllToSelectedList(waitingList);
+        }
+        else { // Random sampling
+            Random random = new Random();
+            int limit = Math.min(amount, capacity);
+            for (int i = 0; i < limit; i++) {
+                // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
+                int randomIndex = random.nextInt(waitingList.size());
+                String selectedUserID = waitingList.get(randomIndex);
+                addToSelectedList(selectedUserID);
+            }
+        }
+    }
+
+    /**
+     * Randomly samples users in the waiting list and adds the selected ones to the selected list
+     * then send notification to both the users who were selected and not
+     */
+    @Exclude
+    public void randomSampling() {
+        randomSampling(getEmptySlotAmount(), getAttendingCapacity());
     }
 }

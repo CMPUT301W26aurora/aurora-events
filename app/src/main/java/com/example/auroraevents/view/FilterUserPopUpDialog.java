@@ -14,17 +14,19 @@ import android.widget.ListView;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.server.EventDb;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FilterUserPopUpDialog extends DialogFragment {
 
     private Event currentEvent;
-    private ArrayList<User> userList = new ArrayList<User>();
+    private List<User> userList;
 
     private ListView userListView;
-    public static FilterUserPopUpDialog newInstance(Event currentEvent, ArrayList<User> userList, ListView userListView) {
+    public static FilterUserPopUpDialog newInstance(Event currentEvent, List<User> userList, ListView userListView) {
         FilterUserPopUpDialog dialog = new FilterUserPopUpDialog();
         dialog.currentEvent = currentEvent;
         dialog.userList = userList;
@@ -36,8 +38,7 @@ public class FilterUserPopUpDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        View view = LayoutInflater.from(requireContext())
-                .inflate(R.layout.user_filter_popup, null);
+        View view = getLayoutInflater().inflate(R.layout.user_filter_popup, null);
 
         SwitchMaterial switchParticipating = view.findViewById(R.id.particpating_switch);
         SwitchMaterial switchRejected      = view.findViewById(R.id.rejected_switch);
@@ -54,19 +55,20 @@ public class FilterUserPopUpDialog extends DialogFragment {
         // After pressing Confirm, Update userlist with the filter
         confirmButton.setOnClickListener(v -> {
             ArrayList<User> filteredUsers = new ArrayList<>();
-            if (switchParticipating.isChecked()) filteredUsers.addAll(currentEvent.getAttendingListOfUsers());
-            if (switchRejected.isChecked())      filteredUsers.addAll(currentEvent.getDeclinedListOfUsers());
-            if (switchInvited.isChecked())       filteredUsers.addAll(currentEvent.getSelectedListOfUsers());
-            if (switchWaiting.isChecked())       filteredUsers.addAll(currentEvent.getWaitingListOfUsers());
-            if (switchCancelled.isChecked())     filteredUsers.addAll(currentEvent.getCancelledListOfUsers());
+            if (switchParticipating.isChecked()) filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_ATTENDING));
+            if (switchRejected.isChecked())      filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_DECLINED));
+            if (switchInvited.isChecked())       filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_SELECTED));
+            if (switchWaiting.isChecked())       filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_WAITING));
+            if (switchCancelled.isChecked())     filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_CANCELLED));
             userList.addAll(filteredUsers);
             userListView.deferNotifyDataSetChanged();
             alertDialog.dismiss();
                 });
 
-        alertDialog.setOnShowListener(d ->
-                alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent)
-        );
+        alertDialog.setOnShowListener(d -> {
+            assert alertDialog.getWindow() != null;
+            alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        });
 
         return alertDialog;
     }

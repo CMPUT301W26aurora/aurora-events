@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import android.graphics.Bitmap;
+
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.server.EventDb;
 
@@ -23,14 +25,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class OrganizerEventCreationTest {
-    private static final String ORGANIZER_ID = "device-abc-123";
-    private static final String TITLE        = "Aurora Hackathon";
-    private static final String DESCRIPTION  = "A fun coding competition.";
-    private static final String DATE         = "2025-08-15";
-    private static final String START_TIME   = "2025-07-01 09:00:00";
-    private static final String END_TIME     = "2025-08-10 23:59:59";
-    private static final String LOCATION     = "Edmonton Convention Centre";
-    private static final int    CAPACITY     = 100;
+    private static final String  ORGANIZER_ID          = "device-abc-123";
+    private static final String  TITLE                 = "Aurora Hackathon";
+    private static final String  DESCRIPTION           = "A fun coding competition.";
+    private static final String  PRICE                 = "free";
+    private static final String  DATE                  = "2025-08-15";
+    private static final String  START_TIME            = "2025-07-01 09:00:00";
+    private static final String  END_TIME              = "2025-08-10 23:59:59";
+    private static final String  LOCATION              = "Edmonton Convention Centre";
+    private static final boolean GEOLOCATION_REQUIRED  = false;
+    private static final int     ATTENDING_CAPACITY = 100;
+    private static final int     WAITING_CAPACITY      = -1;
+    private static final Bitmap  POSTER                = null;
 
     private Event myEvent;
 
@@ -70,11 +76,12 @@ public class OrganizerEventCreationTest {
 
         Event event = fetchedEvent.get();
         assertNotNull("Event should exist in the database", event);
-        assertEquals(ORGANIZER_ID, event.getOrganizerDeviceId());
-        assertEquals(TITLE,        event.getName());
-        assertEquals(DESCRIPTION,  event.getDescription());
-        assertEquals(LOCATION,     event.getLocation());
-        assertEquals(CAPACITY,     event.getCapacity());
+        assertEquals(ORGANIZER_ID,       event.getOrganizerDeviceId());
+        assertEquals(TITLE,              event.getName());
+        assertEquals(DESCRIPTION,        event.getDescription());
+        assertEquals(LOCATION,           event.getLocation());
+        assertEquals(ATTENDING_CAPACITY, event.registrationList.getAttendingCapacity());
+        assertEquals(WAITING_CAPACITY,   event.registrationList.getWaitingCapacity());
     }
 
     private Event testEvent() {
@@ -83,11 +90,15 @@ public class OrganizerEventCreationTest {
                 ORGANIZER_ID,
                 TITLE,
                 DESCRIPTION,
+                PRICE,
                 LocalDate.parse(DATE).atStartOfDay(),
                 LocalDateTime.parse(START_TIME, formatter),
                 LocalDateTime.parse(END_TIME, formatter),
                 LOCATION,
-                CAPACITY
+                GEOLOCATION_REQUIRED,
+                WAITING_CAPACITY,
+                ATTENDING_CAPACITY,
+                POSTER
         );
     }
 }

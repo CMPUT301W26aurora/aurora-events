@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DarkGlassDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/rounded_box</item>
+        <item name="android:backgroundTint">@color/dark_glass</item>
+    </style>
+</resources>
