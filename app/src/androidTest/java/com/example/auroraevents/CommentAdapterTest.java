@@ -33,7 +33,7 @@ public class CommentAdapterTest {
         testComments.add(new Comment("Parent", "u1", null, "id1", "e1", null, "User1"));
         testComments.add(new Comment("Reply", "u2", "id1", "id2", "e1", null, "User2"));
 
-        adapter = new CommentAdapter(testComments, null, "wow", "entrant", "oof");
+        adapter = new CommentAdapter(testComments, null, "wow", false, "oof");
     }
 
     /**
