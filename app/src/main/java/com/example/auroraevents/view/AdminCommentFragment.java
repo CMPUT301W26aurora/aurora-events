@@ -13,19 +13,26 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Comment;
 import com.example.auroraevents.model.CommentAdapter;
+import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.CommentDb;
 
 import java.util.ArrayList;
 
 public class AdminCommentFragment extends Fragment {
     private final static String TAG = "AdminCommentFragment";
-    private String userId;
+    private String userId, userName;
+    private Boolean isAdmin;
+    private CommentAdapter adapter;
+    private UserViewModel userViewModel;
+    private User user;
 
     @Nullable
     @Override
@@ -35,17 +42,24 @@ public class AdminCommentFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_admin_comment, container, false);
         userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
+        isAdmin = false;
+        setUp(view);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+            user = u;
+
+            userName = user.getName(); //set user details
+            isAdmin = user.getAdmin();
+
+        });
 
         return view;
     }
 
     private void setUp(View view){
         //initialize RecyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments_admin);
 
-        View replyIndicator = view.findViewById(R.id.reply_indicator);
-        TextView replyText = view.findViewById(R.id.text_replying_to);
-        View cancelReply = view.findViewById(R.id.button_cancel_reply);
         //initialize commentAdapter
         adapter = new CommentAdapter(new ArrayList<>(), new CommentAdapter.OnCommentInteractionListener() {
             @Override
