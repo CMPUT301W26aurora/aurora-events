@@ -21,7 +21,6 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 import com.example.auroraevents.view.AdminCommentFragment;
-import com.example.auroraevents.view.AdminEventFragment;
 import com.example.auroraevents.view.AdminImageFragment;
 import com.example.auroraevents.view.AdminOrganizerFragment;
 import com.example.auroraevents.view.AdminProfileFragment;
@@ -138,7 +137,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default tab
         setActiveTab(navBrowse);
-        loadFragment(new EventFragment());
+        EventFragment defaultFragment = new EventFragment();
+        Bundle defaultArgs = new Bundle();
+        defaultArgs.putBoolean("inAdmin", false); // Explicitly set default
+        defaultFragment.setArguments(defaultArgs);
+        loadFragment(defaultFragment);
 
         navScan.setOnClickListener(v -> {
             setActiveTab(navScan);
@@ -147,7 +150,11 @@ public class MainActivity extends AppCompatActivity {
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            loadFragment(new EventFragment());
+            EventFragment eventFragment = new EventFragment();
+            Bundle args = new Bundle();
+            args.putBoolean("inAdmin", false);
+            eventFragment.setArguments(args);
+            loadFragment(eventFragment);
         });
 
         navNotifications.setOnClickListener(v -> {
@@ -177,7 +184,11 @@ public class MainActivity extends AppCompatActivity {
 
         navAdminEvent.setOnClickListener(v->{
             setActiveTab(navAdminEvent);
-            loadFragment(new AdminEventFragment());
+            EventFragment eventFragment =new EventFragment();
+            Bundle args = new Bundle();
+            args.putBoolean("inAdmin", true);
+            eventFragment.setArguments(args);
+            loadFragment(eventFragment);
         });
 
         navAdminComment.setOnClickListener(v->{
