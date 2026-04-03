@@ -316,7 +316,7 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
-
+    //https://www.geeksforgeeks.org/firebase/how-to-update-an-array-of-objects-with-firestore/
     /**
      * Batch move users from one list to another
      *
@@ -365,34 +365,21 @@ public class EventDb {
     // ── DELETE ─────────────────────────────────────────────────────────────
 
     /**
-     * Deletes an event document from Firestore along with the comments
+     * Deletes an event document from Firestore
      *
      * @param eventId   The document ID of the event to delete.
      * @param onSuccess Called when the deletion succeeds.
      * @param onFailure Called with the exception if the deletion fails.
      */
     public void deleteEvent(String eventId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        db.collection("Comments")
-                .whereEqualTo("eventId", eventId)
-                .get()
+        db.collection(COLLECTION_NAME).document(eventId)
+                .delete()
                 .addOnSuccessListener(querySnapshot -> {
-                    WriteBatch batch = db.batch();
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
-                        batch.delete(doc.getReference());
-                    }
-                    batch.delete(db.collection(COLLECTION_NAME).document(eventId));
-                    batch.commit()
-                            .addOnSuccessListener(unused -> {
-                                Log.d(TAG, "Event and comments deleted: " + eventId);
-                                onSuccess.onSuccess();
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e(TAG, "Batch delete failed", e);
-                                onFailure.onFailure(e);
-                            });
+                    Log.d(TAG, "Event Deleted" + eventId);
+                    onSuccess.onSuccess();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to fetch comments for deletion", e);
+                    Log.e(TAG, "Failed to delete Event", e);
                     onFailure.onFailure(e);
                 });
     }

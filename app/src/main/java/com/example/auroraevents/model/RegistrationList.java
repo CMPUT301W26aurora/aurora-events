@@ -237,4 +237,20 @@ public class RegistrationList {
 
         transitionGroup(winners, waitingList, LIST_WAITING, selectedList, LIST_SELECTED, -1, listener);
     }
+
+    public void removeFromAllLists(String userID, OnDbUpdateListener listener) {
+        EventDb.getInstance().removeUserFromAllLists(eventId, userID,
+                () -> {
+                    waitingList.remove(userID);
+                    selectedList.remove(userID);
+                    attendingList.remove(userID);
+                    declinedList.remove(userID);
+                    cancelledList.remove(userID);
+                    removedList.remove(userID);
+
+                    listener.onComplete(RegistrationResult.SUCCESS);
+                },
+                e -> listener.onComplete(RegistrationResult.DATABASE_ERROR)
+        );
+    }
 }

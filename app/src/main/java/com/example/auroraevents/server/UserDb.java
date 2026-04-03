@@ -220,6 +220,13 @@ public class UserDb {
 
     // ── DELETE ─────────────────────────────────────────────────────────────
 
+    //https://firebase.google.com/docs/functions/1st-gen/auth-events
+    //https://firebase.google.com/docs/firestore/manage-data/transactions
+    //https://firebase.google.com/docs/functions/firestore-events
+    //https://firebase.google.com/docs/firestore/manage-data/add-data
+    //https://cloud.google.com/functions
+    //Before you ask, I only kinda hate myself
+
     /**
      * Deletes a user document from Firestore.
      *
