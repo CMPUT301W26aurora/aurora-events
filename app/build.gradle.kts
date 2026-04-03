@@ -59,6 +59,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
     implementation(libs.firebase.functions)
+    implementation(libs.places)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.ext.junit)

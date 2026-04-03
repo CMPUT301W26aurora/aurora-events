@@ -144,10 +144,10 @@ public class EventFragment extends Fragment {
 
         addEventButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new EventCreationFragment())
-                    .addToBackStack(null)
-                    .commit());
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new EventCreationFragment())
+                        .addToBackStack(null)
+                        .commit());
 
         // set SearchView query text listener
         SearchView searchView = root.findViewById(R.id.search_event);

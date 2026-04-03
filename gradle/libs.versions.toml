@@ -13,6 +13,7 @@ uiautomator = "2.3.0"
 media3Common = "1.9.2"
 firebaseFunctions = "22.1.0"
 espressoContrib = "3.7.0"
+places = "5.1.1"
 
 [libraries]
 core = { module = "androidx.core:core", version.ref = "core" }
@@ -28,6 +29,7 @@ uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", versi
 media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3Common" }
 firebase-functions = { group = "com.google.firebase", name = "firebase-functions", version.ref = "firebaseFunctions" }
 espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espressoContrib" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
