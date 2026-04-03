@@ -113,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
-                    if(user.getAdmin() == null){
-                        user.setAdmin(false); 
+                    if(user.getIsAdmin() == null){
+                        user.setIsAdmin(false);
                     }
                     if (user.getRole() == null || user.getRole().isEmpty())
                         user.setRole(User.ROLE_ENTRANT);

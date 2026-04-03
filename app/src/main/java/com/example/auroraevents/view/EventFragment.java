@@ -65,13 +65,13 @@ public class EventFragment extends Fragment {
 
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 userId = user.getDeviceId();
             }
 
             Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
-            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()) || User.ROLE_ADMIN.equals(user.getRole()))) {
+            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()))) {
                 addEventButton.setVisibility(VISIBLE);
             } else {
                 addEventButton.setVisibility(GONE);

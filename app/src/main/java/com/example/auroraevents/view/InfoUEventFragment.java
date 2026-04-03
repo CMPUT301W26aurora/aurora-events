@@ -148,7 +148,7 @@ public class InfoUEventFragment extends Fragment {
                 userId,
                 user -> {
                     // check if user role is admin
-                    final boolean userIsAdmin = user != null && User.ROLE_ADMIN.equals(user.getRole());
+                    final boolean userIsAdmin = user != null && user.getIsAdmin() &&;
                     final boolean userIsOrganizer = user != null && User.ROLE_ORGANIZER.equals(user.getRole());
 
                     // attach snapshot listener to get event details

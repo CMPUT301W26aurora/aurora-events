@@ -68,23 +68,33 @@ public class CommentFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //grab userid
-        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
         if (getArguments() != null) { //pass event id in args from infouevent
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
         }
+        userId ="";
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
-            user = u;
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), u -> {
+            //grab userid
+            if(u != null){
+                user = u;
+                userId = u.getDeviceId();
 
-            userName = user.getName(); //set user details
-            isAdmin = user.getAdmin();
+                userName = user.getName(); //set user details
+                isAdmin = user.getIsAdmin();
 
-            adapter.setIsAdmin(isAdmin);
-            adapter.notifyDataSetChanged();
+                userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), modeActive -> {
+                    if( modeActive!= null){
+                        adapter.setIsAdmin(isAdmin);
+                        adapter.setInAdmin(modeActive);
+
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+            }
 
         });
 

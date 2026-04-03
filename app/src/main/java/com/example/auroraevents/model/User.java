@@ -21,36 +21,28 @@ public class User {
     // Roles
     public static final String ROLE_ENTRANT   = "entrant";
     public static final String ROLE_ORGANIZER = "organizer";
-    public static final String ROLE_ADMIN     = "admin";
-
     private String deviceId;      // Firestore document ID
     private String name;
     private String email;
     private String phoneNumber;
     private String role;
-    private Integer databaseTimeout;
-    private TimeUnit timeoutUnit;
     private final String TAG = "User";
     private Boolean isAdmin;
-
-
     // Notification history (stored as notification IDs or message strings)
     private List<String> notificationHistory;
 
     // Tags associated with this user
     private List<String> tags;
-
-    // Additional information for users in a specific event; these must change dynamically depending on the event
-    // Status of this user in a specific event,
-    private String status;
-    // For cancelled users: reason behind cancellation
-
     /** Required no-arg constructor for Firestore deserialization */
     public User() {
+        this.name = "";
+        this.email = "";
+        this.phoneNumber = "";
+        this.role = ROLE_ENTRANT;
+        this.isAdmin = false;
+
         notificationHistory  = new ArrayList<>();
         tags                 = new ArrayList<>();
-        databaseTimeout = 10;
-        timeoutUnit = TimeUnit.SECONDS;
     }
 
     public User(String deviceId, String name, String email, String phoneNumber, String role, Boolean isAdmin) {
@@ -79,29 +71,10 @@ public class User {
 
     public String getRole()                            { return role; }
     public void   setRole(String role)                 { this.role = role; }
-
-    public Boolean getAdmin()                          {return isAdmin;}
-    public void setAdmin(Boolean admin)                {isAdmin = admin;}
-
-    public String getStatus() { return status; }
-
-    public void setStatus(String status) { this.status = status; }
-
+    public Boolean getIsAdmin()                          {return isAdmin;}
+    public void setIsAdmin(Boolean admin)                {isAdmin = admin;}
     public List<String> getNotificationHistory()                                   { return notificationHistory; }
     public void         setNotificationHistory(List<String> notificationHistory)   { this.notificationHistory = notificationHistory; }
-    public void         loadNotificationHistory()                                  {
-        FirebaseFirestore.getInstance()
-                .collection("Notifications")
-                .whereEqualTo("deviceId", deviceId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    notificationHistory.clear();
-                    for (QueryDocumentSnapshot doc : snapshot)
-                        notificationHistory.add(doc.getId());
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to load notifications", e));
-    }
 
     public List<String> getTags()                      { return tags; }
     public void         setTags(List<String> tags)     { this.tags = tags; }
