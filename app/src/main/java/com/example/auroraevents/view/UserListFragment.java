@@ -36,16 +36,12 @@ public class UserListFragment extends DialogFragment {
     private ListView userListView;
     private Button doneButton, mapButton, filterButton, sortButton;
     private ImageButton deleteButton;
-    //private LayoutInflater inflater;
-    //private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        //this.inflater = inflater;
         View view = inflater.inflate(R.layout.user_list_fragment, container, false);
-        //this.view = view;
 
         // get Event ID from bundle
         Bundle args = getArguments();
@@ -54,34 +50,18 @@ public class UserListFragment extends DialogFragment {
             getParentFragmentManager().popBackStack();
             return view;
         }
-        var ref = new Object() {
-            Event fetchedEvent;
-        };
         String eventId = args.getString("eventId");
 
         // get current event from EventDB
-        userListView = new ListView(getContext());
+        userListView = view.findViewById(R.id.entrants_list);
         EventDb.getInstance().getEvent(eventId,
                 event -> {
-                    ref.fetchedEvent = event;
                     loadEntrantsList(event, inflater, view, userListView);
                 },
                 e -> {
                     Log.d(TAG, "Error fetching event" + e);
                 }
         );
-
-        // Cancel users
-        /* Previous implementation of cancelling users without delete button
-        userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String selectedUserID = Objects.requireNonNull(userListAdapter.getItem(position)).getDeviceId();
-                currentEvent.registrationList.addToCancelledList(selectedUserID);
-                userListAdapter.notifyDataSetChanged();
-            }
-        });*/
-
         return view;
     }
 
