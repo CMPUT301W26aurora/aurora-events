@@ -139,7 +139,7 @@ public class ProfileFragment extends Fragment {
                             () -> {
                                 requireActivity().runOnUiThread(() -> {
                                     userViewModel.selectItem(user);
-                                    Toast.makeText(getContext(), "Changes Saved!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(view.getContext(), "Changes Saved!", Toast.LENGTH_SHORT).show();
                                     v.setEnabled(true);
                                 });
                             },
@@ -155,8 +155,22 @@ public class ProfileFragment extends Fragment {
             }
         });
         /* Delete Profile */
-        view.findViewById(R.id.delete_profile_button).setOnClickListener(v -> {/*I don't know the implmentation yet...*/});
-
+        view.findViewById(R.id.delete_profile_button).setOnClickListener(v -> {
+            v.setEnabled(false);
+            UserDb.getInstance().deleteUser(user.getDeviceId(), ()->{
+                userViewModel.selectItem(new User());
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new LoginFragment())
+                        .commit();
+                Toast.makeText(view.getContext(), "Profile Deleted", Toast.LENGTH_SHORT).show();
+            }, e->{
+                requireActivity().runOnUiThread(()->{
+                    Toast.makeText(view.getContext(), "Delete Failed", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Failed to Delete User");
+                    v.setEnabled(true);
+                });
+            });
+        });
         adminToggle.setOnClickListener(v -> {
             userViewModel.toggleAdminMode();
         });
