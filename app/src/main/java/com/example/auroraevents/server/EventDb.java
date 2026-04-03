@@ -316,6 +316,34 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
+    /**
+     * Moves a user from the Selected list to the Attending list.
+     */
+    public void userAcceptSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_SELECTED, LIST_ATTENDING, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Moves a user from the Selected list to the Declined list.
+     */
+    public void userDeclineSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_SELECTED, LIST_DECLINED, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Adds a user to the waiting list.
+     */
+    public void joinWaitlist(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        addUserToList(eventId, LIST_WAITING, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Moves a user from the Waiting list to the canceled list (User clicked 'Leave Pool').
+     */
+    public void leaveWaitlist(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_WAITING, LIST_CANCELLED, userId, onSuccess, onFailure);
+    }
+
     //https://www.geeksforgeeks.org/firebase/how-to-update-an-array-of-objects-with-firestore/
     /**
      * Batch move users from one list to another
