@@ -45,6 +45,7 @@ public class LoginFragment extends Fragment {
             if (nameEdit.getText().toString().isEmpty() || emailEdit.getText().toString().isEmpty()) {
                 Toast.makeText(view.getContext(), R.string.mandatory_fields_toast_text, Toast.LENGTH_SHORT).show();
             } else {
+                v.setEnabled(false);
                 Toast.makeText(view.getContext(), "confirm", Toast.LENGTH_SHORT).show();
                 /* Update user info */
                 // create new User
@@ -56,35 +57,19 @@ public class LoginFragment extends Fragment {
                         User.ROLE_ENTRANT,
                         false
                 );
-                // update db
-                CountDownLatch latch = new CountDownLatch(1);
-                AtomicReference<Boolean> status = new AtomicReference<>(true);
-                UserDb.getInstance().addUser(user,
-                        latch::countDown,
-                        e -> {
-                            status.set(false);
-                            latch.countDown();
-                        }
-                );
+                //https://medium.com/@yossisegev/understanding-activity-runonuithread-e102d388fe93
+                UserDb.getInstance().addUser(user, ()->{
+                    requireActivity().runOnUiThread(()->{
+                        Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
+                        getParentFragmentManager().popBackStack();
 
-                try {
-                    if (!latch.await(10, TimeUnit.SECONDS)) {
-                        Log.w("LoginFragment", "user update timed out");
-                    }
-                } catch (InterruptedException e) {
-                    Log.w("LoginFragment", "user update interrupted");
-                }
-
-                if (status.get()) {
-                    Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .remove(this)
-                            .commit();
-                } else {
-                    // show network error
-                    Toast.makeText(view.getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
-                }
+                    });
+                }, e->{
+                    requireActivity().runOnUiThread(() -> {
+                        v.setEnabled(true);
+                        Toast.makeText(getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
+                    });
+                });
             }
         });
     }
