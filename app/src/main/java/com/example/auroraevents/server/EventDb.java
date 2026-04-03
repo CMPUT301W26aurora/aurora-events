@@ -292,6 +292,32 @@ public class EventDb {
     }
 
     /**
+     * Batch move users from one list to another
+     *
+     * @param eventId       The event document ID
+     * @param fromFieldName The list moving from
+     * @param toFieldName   the list moving to
+     * @param ids           the users to batch move
+     * @param onSuccess     Called on success
+     * @param onFailure     called on failure
+     */
+    public void moveGroupUsers(String eventId, String fromFieldName, String toFieldName, List<String> ids,
+                               OnSuccessCallback onSuccess, OnFailureCallback onFailure){
+        WriteBatch batch = db.batch();
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+
+        batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
+        batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+
+        batch.commit()
+                .addOnSuccessListener(unused -> onSuccess.onSuccess())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to group move users between lists. Event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+
+    }
+    /**
      * Stores the QR code data string on the event document.
      *
      * @param eventId    The event document ID.

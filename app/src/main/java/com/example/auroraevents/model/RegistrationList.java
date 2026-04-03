@@ -262,7 +262,7 @@ public class RegistrationList {
     }
 
     //add function in eventDb to switch all entrants from one list to another...
-    
+
     /**
      * Add the specified entrant device ID to the attending list.
      * Does nothing if the entrant is not on the selected list.
