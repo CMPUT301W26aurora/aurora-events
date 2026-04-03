@@ -665,27 +665,17 @@ public class RegistrationList {
     public List<User> getUsersFromDB(List<String> listOfDeviceIDs) {
         ArrayList<User> listOfUsers = new ArrayList<>();
         // Fetch users from database
-        AtomicReference<User> user = new AtomicReference<>(null);
         for (String userId : listOfDeviceIDs) {
-            CountDownLatch latch = new CountDownLatch(1);
             UserDb.getInstance().getUser(userId,
                     u -> {
-                        user.set(u);
-                        latch.countDown();
+                        if (u != null) {
+                            listOfUsers.add(u);
+                        }
                     },
                     e -> {
                         Log.e("Main", "Error fetching user", e);
-                        latch.countDown();
                     }
             );
-            try {
-                assert latch.await(databaseTimeout, timeoutUnit);
-            } catch (InterruptedException e) {
-                continue;
-            }
-            if (user.get() != null) {
-                listOfUsers.add(user.get());
-            }
         }
         return listOfUsers;
     }
