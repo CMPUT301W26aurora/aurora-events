@@ -87,6 +87,7 @@ public class InfoUEventFragment extends Fragment {
     private static final double EDMONTON_LAT = 53.5461;
     private static final double EDMONTON_LNG = -113.4938;
     private static final float EDMONTON_RADIUS_METERS = 15000f;
+    private Boolean inAdmin;
 
     /**
      * @author Alina Iqbal & Jared Strandlund
@@ -112,6 +113,7 @@ public class InfoUEventFragment extends Fragment {
         } else {
             eventId = args.getString("eventId");
             userId = args.getString("userId");
+            inAdmin = args.getBoolean("inAdmin");
         }
 
         eventId = args.getString("eventId");
@@ -175,7 +177,7 @@ public class InfoUEventFragment extends Fragment {
                 userId,
                 user -> {
                     // check if user role is admin
-                    final boolean userIsAdmin = user != null && User.ROLE_ADMIN.equals(user.getRole());
+                    final boolean userIsAdmin = user != null && user.getAdmin() && inAdmin ;
                     final boolean userIsOrganizer = user != null && User.ROLE_ORGANIZER.equals(user.getRole());
 
                     // attach snapshot listener to get event details

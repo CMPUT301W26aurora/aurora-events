@@ -13,7 +13,7 @@
     <string name="login_header">Login</string>
     <string name="edit_profile_title">Edit Profile</string>
     <string name="back_button_content_description">Back Button</string>
-    <string name="switch_to_admin_mode_text">Switch to Admin Mode</string>
+    <string name="switch_to_admin_mode_text">Toggle Admin Mode</string>
     <string name="delete_profile_text">Delete Profile</string>
     <string name="your_profile_picture_content_description">Your profile picture</string>
     <string name="delete_profile_picture_content_description">Delete profile picture</string>
