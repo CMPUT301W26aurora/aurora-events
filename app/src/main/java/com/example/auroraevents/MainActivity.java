@@ -124,18 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 e -> Log.e(TAG, "User info not available")
         );
 
-        // Set user
-        userViewModel.getSelectedItem().observe(this,u -> {
-            if (u != null && u.getName() != null) {
-                UserDb.getInstance().updateUser(u,
-                        () -> Log.d(TAG, "User info updated"),
-                        e -> Log.w(TAG, "User info not updated")
-                );
-            } else {
-                Log.d(TAG, "Sync skipped: User object is empty or not yet loaded.");
-            }
-        });
-
         // Set default tab
         setActiveTab(navBrowse);
         loadFragment(new EventFragment());

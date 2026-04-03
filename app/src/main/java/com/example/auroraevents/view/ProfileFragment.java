@@ -22,6 +22,7 @@ import com.example.auroraevents.MainActivity;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
+import com.example.auroraevents.server.UserDb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,21 +94,27 @@ public class ProfileFragment extends Fragment {
         Button adminToggle = view.findViewById(R.id.switch_to_admin_button);
 
         /* Get user information from the database */
-        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
             nameEdit.setText(user.getName());
             emailEdit.setText(user.getEmail());
             phoneEdit.setText(user.getPhoneNumber());
+
+            if (user == null || user.getRole() == null || !user.getIsAdmin())
+                adminToggle.setVisibility(GONE);
+            else
+                adminToggle.setVisibility(VISIBLE);
         });
-        user.loadNotificationHistory();
 
         /* Update user information */
         view.findViewById(R.id.confirm_button).setOnClickListener(v -> {
+            v.setEnabled(false);
             String name = nameEdit.getText().toString();
             String email = emailEdit.getText().toString();
             String phoneNumber = phoneEdit.getText().toString();
             if (name.isEmpty() || email.isEmpty()) {
                 Toast.makeText(view.getContext(), R.string.mandatory_fields_toast_text, Toast.LENGTH_SHORT).show();
+                v.setEnabled(true);
             } else {
                 /* Update user info */
                 // check phone number
@@ -116,34 +123,39 @@ public class ProfileFragment extends Fragment {
                     phoneNumber = parsePhoneNumber(phoneNumber);
                     validPhoneNumber = !phoneNumber.isEmpty();
                 }
-                if (!validPhoneNumber)
+                if (!validPhoneNumber) {
                     Toast.makeText(view.getContext(), "Please provide a valid phone number", Toast.LENGTH_SHORT).show();
+                    v.setEnabled(true);
+                }
                 // check email
-                else if (!email.contains("@") || !email.contains(".") || email.indexOf('@') > email.lastIndexOf('.'))
+                else if (!email.contains("@") || !email.contains(".") || email.indexOf('@') > email.lastIndexOf('.')) {
                     Toast.makeText(view.getContext(), "Please provide a real email", Toast.LENGTH_SHORT).show();
-                else {
-                    // set new values
-                    user.setName(nameEdit.getText().toString());
-                    user.setEmail(emailEdit.getText().toString());
+                    v.setEnabled(true);
+                }else {
+                    user.setName(name);
+                    user.setEmail(email);
                     user.setPhoneNumber(phoneNumber);
-                    userViewModel.selectItem(user);
+                    UserDb.getInstance().updateUser(user,
+                            () -> {
+                                requireActivity().runOnUiThread(() -> {
+                                    userViewModel.selectItem(user);
+                                    Toast.makeText(getContext(), "Changes Saved!", Toast.LENGTH_SHORT).show();
+                                    v.setEnabled(true);
+                                });
+                            },
+                            e -> {
+                                requireActivity().runOnUiThread(() -> {
+                                    Log.e(TAG, "Failed to save to Firestore");
+                                    v.setEnabled(true);
+                                });
+
+                    });
+
                 }
             }
         });
-
         /* Delete Profile */
-        view.findViewById(R.id.delete_profile_button).setOnClickListener(v -> {
-            if (user.deleteUser() > 0)
-                Log.e(TAG, "User delete failed");
-            else
-                userViewModel.selectItem(user);
-        });
-
-        /* Switch to admin mode */
-        if (user == null || user.getRole() == null || !user.getIsAdmin())
-            adminToggle.setVisibility(GONE);
-        else
-            adminToggle.setVisibility(VISIBLE);
+        view.findViewById(R.id.delete_profile_button).setOnClickListener(v -> {/*I don't know the implmentation yet...*/});
 
         adminToggle.setOnClickListener(v -> {
             View navBar = getActivity().findViewById(R.id.nav_bar);
