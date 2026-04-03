@@ -1,7 +1,11 @@
 package com.example.auroraevents.view;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,10 +39,11 @@ public class CommentFragment extends Fragment {
     private String userId;
     private User user;
     private String userName;
-    private String userRole;
+    private Boolean isAdmin;
     private String eventOrganizerId;
     private CommentAdapter adapter;
     private UserViewModel userViewModel;
+    private Boolean inAdmin;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistration;
     private final String TAG = "CommentFragment";
 
@@ -59,21 +64,27 @@ public class CommentFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @androidx.annotation.Nullable ViewGroup container, @androidx.annotation.Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
+        
+        return view; //return view
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         //grab userid
-        new ViewModelProvider(requireActivity()).get(UserViewModel.class).getSelectedItem().observe(getViewLifecycleOwner(),
-                user -> userId = user.getDeviceId());
+        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         if (getArguments() != null) { //pass event id in args from infouevent
             eventId = getArguments().getString("eventId");
             eventOrganizerId = getArguments().getString("organizerId");
         }
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(requireActivity(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             user = u;
 
             userName = user.getName(); //set user details
-            userRole = user.getRole();
+            adapter.notifyDataSetChanged();
 
         });
 
@@ -84,10 +95,7 @@ public class CommentFragment extends Fragment {
         }, e -> {
             Log.d(TAG, "Error fetching comments" + e); //log errors if any
         });
-        
-        return view; //return view
     }
-
     /**
      * Deletes listener on view destruction
      */
@@ -106,7 +114,16 @@ public class CommentFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        toggleBottomBar(View.GONE);
+        if(getActivity()!= null){
+            View navBar = getActivity().findViewById(R.id.nav_bar);
+            if(navBar.getVisibility()==GONE){
+                inAdmin = true;
+                getActivity().findViewById(R.id.nav_bar_admin).setVisibility(GONE);
+            }else{
+                inAdmin = false;
+                navBar.setVisibility(GONE);
+            }
+        }
     }
 
     /**
@@ -115,20 +132,10 @@ public class CommentFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        toggleBottomBar(View.VISIBLE);
-    }
-
-
-    /**
-     * Sets the visibility of the toolbar
-     * @param visibility The visibility value to be used
-     */
-    private void toggleBottomBar(int visibility) {
-        if (getActivity() != null) {
-            View navBar = getActivity().findViewById(R.id.nav_bar);
-            if (navBar != null) {
-                navBar.setVisibility(visibility);
-            }
+        if(inAdmin){
+            getActivity().findViewById(R.id.nav_bar_admin).setVisibility(VISIBLE);
+        }else{
+            getActivity().findViewById(R.id.nav_bar).setVisibility(VISIBLE);
         }
     }
 
@@ -145,7 +152,7 @@ public class CommentFragment extends Fragment {
             public void onReplyClicked(Comment comment) {
                 selectedParentComment = comment;
                 replyText.setText("Replying to @" + comment.getUsername());
-                replyIndicator.setVisibility(View.VISIBLE);
+                replyIndicator.setVisibility(VISIBLE);
             }
             @Override
             public void onDeleteClicked(Comment comment) {
@@ -162,10 +169,10 @@ public class CommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, userRole, eventOrganizerId);
+        }, userId, isAdmin, eventOrganizerId, false);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
-            replyIndicator.setVisibility(View.GONE);
+            replyIndicator.setVisibility(GONE);
         });
 
         //set recyclerView
@@ -190,7 +197,7 @@ public class CommentFragment extends Fragment {
             CommentDb.getInstance().postComment(newComment, id -> {
                 editComment.setText("");
                 selectedParentComment = null;
-                view.findViewById(R.id.reply_indicator).setVisibility(View.GONE);
+                view.findViewById(R.id.reply_indicator).setVisibility(GONE);
             }, e -> Log.e(TAG, "Post failed", e));
         });
     }

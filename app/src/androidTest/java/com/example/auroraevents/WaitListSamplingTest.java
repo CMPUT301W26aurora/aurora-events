@@ -84,13 +84,13 @@ public class WaitListSamplingTest {
         setUpEvent(myEvent3, 10, TimeUnit.SECONDS);
 
         // These 4 users will be used for the tests
-        user1 = new User("TestID1","user1","email1","phone1","waitListSamplingTest");
+        user1 = new User("TestID1","user1","email1","phone1","waitListSamplingTest",false);
         setUpUser(user1,10, TimeUnit.SECONDS);
-        user2 = new User("TestID2","user2","email2","phone2","waitListSamplingTest");
+        user2 = new User("TestID2","user2","email2","phone2","waitListSamplingTest",false);
         setUpUser(user2,10, TimeUnit.SECONDS);
-        user3 = new User("TestID3","user3","email3","phone3","waitListSamplingTest");
+        user3 = new User("TestID3","user3","email3","phone3","waitListSamplingTest",false);
         setUpUser(user3,10, TimeUnit.SECONDS);
-        user4 = new User("TestID4","user4","email4","phone4","waitListSamplingTest");
+        user4 = new User("TestID4","user4","email4","phone4","waitListSamplingTest",false);
         setUpUser(user4,10, TimeUnit.SECONDS);
     }
 

@@ -34,6 +34,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
+import com.example.auroraevents.view.AdminCommentFragment;
+import com.example.auroraevents.view.AdminImageFragment;
+import com.example.auroraevents.view.AdminOrganizerFragment;
+import com.example.auroraevents.view.AdminProfileFragment;
 import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.NotificationFragment;
@@ -68,7 +72,8 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
     private String deviceId;
     private UserViewModel userViewModel;
 
-    private ImageButton navScan, navBrowse, navNotifications, navProfile;
+    private ImageButton navScan, navBrowse, navNotifications, navAdminBrowseProfile,navAdminImage,navAdminEvent,navAdminComment,navAdminOrganizer;
+    public ImageButton navProfile,navAdminProfile;
 
     private FusedLocationProviderClient fusedLocationClient;
     private com.google.android.gms.location.LocationCallback locationCallback;
@@ -84,6 +89,12 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         navBrowse        = findViewById(R.id.nav_browse);
         navNotifications = findViewById(R.id.nav_notifications);
         navProfile = findViewById(R.id.nav_profile);
+        navAdminComment = findViewById(R.id.nav_admin_comments);
+        navAdminProfile = findViewById(R.id.nav_profile_admin);
+        navAdminEvent = findViewById(R.id.nav_admin_event);
+        navAdminImage = findViewById(R.id.nav_admin_image);
+        navAdminOrganizer = findViewById(R.id.nav_admin_organizer);
+        navAdminBrowseProfile = findViewById(R.id.nav_admin_browse_profiles);
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -136,16 +147,21 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
                 user -> {
                     user.setDeviceId(deviceId);
                     user.setRole(User.ROLE_ENTRANT;
+                    user.setAdmin(Boolean.TRUE);
                     userViewModel.selectItem(user);
                 },
                 e -> Log.e(TAG, "User info not available")
         );
         */
 
+
         // Get user
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
+                    if(user.getAdmin() == null){
+                        user.setAdmin(false); 
+                    }
                     if (user.getRole() == null || user.getRole().isEmpty())
                         user.setRole(User.ROLE_ENTRANT);
                     userViewModel.selectItem(user);
@@ -168,7 +184,11 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
 
         // Set default tab
         setActiveTab(navBrowse);
-        loadFragment(new EventFragment());
+        EventFragment defaultFragment = new EventFragment();
+        Bundle defaultArgs = new Bundle();
+        defaultArgs.putBoolean("inAdmin", false); // Explicitly set default
+        defaultFragment.setArguments(defaultArgs);
+        loadFragment(defaultFragment);
 
         navScan.setOnClickListener(v -> {
             setActiveTab(navScan);
@@ -177,7 +197,11 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            loadFragment(new EventFragment());
+            EventFragment eventFragment = new EventFragment();
+            Bundle args = new Bundle();
+            args.putBoolean("inAdmin", false);
+            eventFragment.setArguments(args);
+            loadFragment(eventFragment);
         });
 
         navNotifications.setOnClickListener(v -> {
@@ -189,6 +213,40 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
             setActiveTab(navProfile);
             loadFragment(new ProfileFragment());
         });
+
+        navAdminBrowseProfile.setOnClickListener(v->{
+            setActiveTab(navAdminBrowseProfile);
+            loadFragment(new AdminProfileFragment());
+        });
+
+        navAdminOrganizer.setOnClickListener(v->{
+            setActiveTab(navAdminOrganizer);
+            loadFragment(new AdminOrganizerFragment());
+        });
+
+        navAdminImage.setOnClickListener(v->{
+            setActiveTab(navAdminImage);
+            loadFragment(new AdminImageFragment());
+        });
+
+        navAdminEvent.setOnClickListener(v->{
+            setActiveTab(navAdminEvent);
+            EventFragment eventFragment =new EventFragment();
+            Bundle args = new Bundle();
+            args.putBoolean("inAdmin", true);
+            eventFragment.setArguments(args);
+            loadFragment(eventFragment);
+        });
+
+        navAdminComment.setOnClickListener(v->{
+            setActiveTab(navAdminComment);
+            loadFragment(new AdminCommentFragment());
+        });
+
+        navAdminProfile.setOnClickListener(v->{
+            setActiveTab(navAdminProfile);
+            loadFragment(new ProfileFragment());
+        });
     }
 
     private void loadFragment(Fragment fragment) {
@@ -198,8 +256,17 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
                 .commit();
     }
 
-    private void setActiveTab(ImageButton selected) {
-        ImageButton[] tabs = { navScan, navBrowse, navNotifications, navProfile };
+    public void setActiveTab(ImageButton selected) {
+        ImageButton[] tabs = { navScan,
+                navBrowse,
+                navNotifications,
+                navProfile,
+                navAdminProfile,
+                navAdminBrowseProfile,
+                navAdminImage,
+                navAdminEvent,
+                navAdminComment,
+                navAdminOrganizer};
 
         for (ImageButton tab : tabs) {
             int targetWidth = dpToPx(tab == selected ? 88 : 52);

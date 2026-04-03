@@ -52,7 +52,8 @@ public class UserDeleteTest {
                 "User for the user delete tests",
                 "user@delete.test",
                 "5559998888",
-                User.ROLE_ENTRANT
+                User.ROLE_ENTRANT,
+                false
         );
         setUpUser(user);
 
@@ -61,7 +62,8 @@ public class UserDeleteTest {
                 "Second user for the user delete test",
                 "user2@delete.test",
                 "1234567890",
-                User.ROLE_ENTRANT
+                User.ROLE_ENTRANT,
+                false
         );
         setUpUser(user2);
 
