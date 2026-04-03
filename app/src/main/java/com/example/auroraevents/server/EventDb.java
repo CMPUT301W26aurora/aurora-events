@@ -315,7 +315,6 @@ public class EventDb {
                     Log.e(TAG, "Failed to group move users between lists. Event: " + eventId, e);
                     onFailure.onFailure(e);
                 });
-
     }
     /**
      * Stores the QR code data string on the event document.
