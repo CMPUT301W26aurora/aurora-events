@@ -111,7 +111,7 @@ public class RegistrationList {
             return;
         }
 
-        if(fromList.contains(userId)){
+        if(toList.contains(userId)){
             listener.onComplete(RegistrationResult.ALREADY_IN_LIST);
             return;
         }
@@ -126,244 +126,115 @@ public class RegistrationList {
             public void onFailure() {
                 listener.onComplete(RegistrationResult.DATABASE_ERROR);
             }
-
             @Override
             public void onComplete(RegistrationResult result) {/*do nothing*/}
         });
 
-
     }
+    private void transitionGroup(List<String> userIDs,
+                                 List<String> fromList,
+                                 String fromName,
+                                 List<String> toList,
+                                 String toName,
+                                 int capacity,
+                                 OnDbUpdateListener listener) {
 
-    /**
-     * Add all the specified entrant device IDs to the removed list (will be blocked from being added to any other entrant list).
-     *
-     * @param userIDs The entrants' device IDs
-     * @return
-     *     {@code 0} when successful add
-     *     {@code -1} when already on list
-     *     {@code 1} when already on blocking list
-     *     {@code 2} when database change fails
-     * @author Jared Strandlund
-     */
-    public List<Integer> addAllToRemovedList(List<String> userIDs) {
-        int size = userIDs.size();
-        List<String> ids = new ArrayList<>(size);
-        ids.addAll(userIDs);
-        List<Integer> output = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            output.add(i, addToRemovedList(ids.get(i)));
+        if (capacity > -1 && (toList.size() + userIDs.size()) > capacity) {
+            listener.onComplete(RegistrationResult.CAPACITY_FULL);
+            return;
         }
-        return output;
+        EventDb.getInstance().moveGroupUsers(eventId, fromName, toName, userIDs,
+                () -> {
+                    fromList.removeAll(userIDs);
+                    toList.addAll(userIDs);
+                    listener.onComplete(RegistrationResult.SUCCESS);
+                },
+                e -> listener.onComplete(RegistrationResult.DATABASE_ERROR)
+        );
     }
 
-    /**
-     * Remove the specified entrant device ID from the removed list (the entrant will be able to be added to entrant lists).
-     * Does nothing if the entrant is not on the removed list.
-     *
-     * @param userID The entrant's device ID
-     * @return
-     *     {@code 0} when successful add
-     *     {@code -1} when not on list
-     *     {@code 2} when database change fails
-     * @author Jared Strandlund
-     */
-    public int removeFromRemovedList(String userID) {
-        if (removedList.remove(userID)) {
-            if (!changeDb(LIST_REMOVED, null, userID)) {
-                removedList.add(userID);
-                return 2;
-            } else return 0;
-        } else return -1;
-    }
-
-    /**
-     * Returns a list of device IDs of entrants on any entrant list.
-     *
-     * @return The list of all entrant device IDs
-     */
-    @Exclude
-    public List<String> getAllEntrantsList() {
-        List<String> output = new ArrayList<>();
-        output.addAll(this.getAttendingList());
-        output.addAll(this.getSelectedList());
-        output.addAll(this.getWaitingList());
-        output.addAll(this.getDeclinedList());
-        output.addAll(this.getCancelledList());
-        output.addAll(this.getRemovedList());
-
-        return output;
-    }
-
-    /**
-     * Removes the specified user from all the lists (for when the user is being deleted)
-     * @param userID The entrant's device ID
-     * @return List of statuses.
-     *     <p> Status: </p>
-     *     <p> - {@code 0} when user removed from the list successfully </p>
-     *     <p> - {@code -1} when not on the list </p>
-     *     <p> - {@code 2} when database error </p>
-     *     <br>
-     *     <p> Index {@code 0}: max. of all list statuses</p>
-     *     <p> Index {@code 1}: waiting list status</p>
-     *     <p> Index {@code 2}: selected list status</p>
-     *     <p> Index {@code 3}: attending list status</p>
-     *     <p> Index {@code 4}: declined list status</p>
-     *     <p> Index {@code 5}: cancelled list status</p>
-     *     <p> Index {@code 5}: removed list status</p>
-     */
-    public List<Integer> removeFromAllLists(String userID) {
-        List<Integer> output = new ArrayList<>(7);
-        output.add(0, Integer.MIN_VALUE);
-
-        if (waitingList.remove(userID)) {
-            if (!changeDb(LIST_WAITING, null, userID)) {
-                waitingList.add(userID);
-                output.add(1, 2);
-            } else
-                output.add(1, 0);
-        } else
-            output.add(1, -1);
-        if (selectedList.remove(userID)) {
-            if (!changeDb(LIST_SELECTED, null, userID)) {
-                selectedList.add(userID);
-                output.add(2, 2);
-            } else
-                output.add(2, 0);
-        } else
-            output.add(2, -1);
-        if (attendingList.remove(userID)) {
-            if (!changeDb(LIST_ATTENDING, null, userID)) {
-                attendingList.add(userID);
-                output.add(3, 2);
-            } else
-                output.add(3, 0);
-        } else
-            output.add(3, -1);
-        if (declinedList.remove(userID)) {
-            if (!changeDb(LIST_DECLINED, null, userID)) {
-                declinedList.add(userID);
-                output.add(4, 2);
-            } else
-                output.add(4, 0);
-        } else
-            output.add(4, -1);
-        if (cancelledList.remove(userID)) {
-            if (!changeDb(LIST_CANCELLED, null, userID)) {
-                cancelledList.add(userID);
-                output.add(5, 2);
-            } else
-                output.add(5, 0);
-        } else
-            output.add(5, -1);
-        if (removedList.remove(userID)) {
-            if (!changeDb(LIST_REMOVED, null, userID)) {
-                removedList.add(userID);
-                output.add(6, 2);
-            } else
-                output.add(6, 0);
-        } else
-            output.add(6, -1);
-
-        output.set(0, Collections.max(output));
-        return output;
-    }
-
-    // ── Sampling ──────────────────────────────────────────────────
-    /**
-     * Connects and fetches user objects from database using their device IDs and returns an array list of them
-     * @author Won Koh & Jared Strandlund
-     * @param listOfDeviceIDs
-     * The list of user's device IDs
-     * @return
-     * The list of user objects that were fetched with given device IDs
-     */
-    @Exclude
-    public List<User> getUsersFromDB(List<String> listOfDeviceIDs) {
-        ArrayList<User> listOfUsers = new ArrayList<>();
-        // Fetch users from database
-        for (String userId : listOfDeviceIDs) {
-            UserDb.getInstance().getUser(userId,
-                    u -> {
-                        if (u != null) {
-                            listOfUsers.add(u);
-                        }
-                    },
-                    e -> {
-                        Log.e("Main", "Error fetching user", e);
-                    }
-            );
+    public void addToSelectedList(String userID, OnDbUpdateListener listener) {
+        if (attendingList.contains(userID) || removedList.contains(userID)) {
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
         }
-        return listOfUsers;
+        transitionUser(userID, selectedList, LIST_SELECTED, waitingList, LIST_WAITING, -1, listener);
     }
 
-    /**
-     * Connects and fetches user objects from database using their device IDs and returns an array list of them
-     * @author Won Koh & Jared Strandlund
-     * @param listName
-     * The name of the list of user's device IDs (one of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED)
-     * @return
-     * The list of user objects that were fetched with given device IDs
-     */
-    public List<User> getUsersFromDB(String listName) {
-        if (Objects.equals(listName, LIST_WAITING)) {
-            return getUsersFromDB(getWaitingList());
-        } else if (Objects.equals(listName, LIST_SELECTED)) {
-            return getUsersFromDB(getSelectedList());
-        } else if (Objects.equals(listName, LIST_ATTENDING)) {
-            return getUsersFromDB(getAttendingList());
-        } else if (Objects.equals(listName, LIST_DECLINED)) {
-            return getUsersFromDB(getDeclinedList());
-        } else if (Objects.equals(listName, LIST_CANCELLED)) {
-            return getUsersFromDB(getCancelledList());
-        } else if (Objects.equals(listName, LIST_REMOVED)) {
-            return getUsersFromDB(getRemovedList());
-        } else
-            return new ArrayList<>();
+    public void addToRemovedList(String userID, OnDbUpdateListener listener, List<String> fromList, String fromName) {
+        if (removedList.contains(userID)) {
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
+        }
+        transitionUser(userID,removedList, LIST_REMOVED,  fromList,fromName , -1, listener);
     }
 
-    // ── Sampling ──────────────────────────────────────────────────
-    /**
-     * Returns the amount of empty slots that is available in the event
-     * @return
-     * Amount of empty slots available (-1 is infinite)
-     */
+    public void addToCancelledList(String userID, OnDbUpdateListener listener, List<String> fromList, String fromName) {
+        if (removedList.contains(userID)) {
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
+        }
+        transitionUser(userID,cancelledList, LIST_CANCELLED, fromList,fromName, -1, listener);
+    }
+
+    public void addToAttendingList(String userID, OnDbUpdateListener listener){
+        if (!selectedList.contains(userID)) {
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
+        }
+        transitionUser(userID, attendingList, LIST_ATTENDING,selectedList,LIST_SELECTED , getAttendingCapacity(), listener);
+    }
+
+    public void addToWaitingList(String userID, OnDbUpdateListener listener, List<String> fromList,String fromName){
+        if(attendingList.contains(userID) || selectedList.contains(userID) || removedList.contains(userID) || waitingList.contains(userID)){
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
+        }
+        transitionUser(userID, waitingList, LIST_WAITING, null, null, getWaitingCapacity(), listener);
+    }
+
+    public void addToDeclinedList(String userID, OnDbUpdateListener listener){
+        if(!selectedList.contains(userID) || removedList.contains(userID)){
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
+        }
+        transitionUser(userID, declinedList, LIST_DECLINED, selectedList, LIST_SELECTED, -1, listener);
+    }
+    public void reinstateUser(String userID, OnDbUpdateListener listener) {
+        if (!removedList.contains(userID)) {
+            listener.onComplete(RegistrationResult.BLOCKED);
+            return;
+        }
+        transitionUser(userID, waitingList, LIST_WAITING, removedList, LIST_REMOVED, getWaitingCapacity(), listener);
+    }
+
+    // add firebase functionality for remove all
+
+    //check userdB and add some more functionality maybe
     @Exclude
     public int getEmptySlotAmount() {
         if (getAttendingCapacity() < 0)
             return -1;
         return getAttendingCapacity() - getAttendingList().size() - getSelectedList().size();
     }
-
-    /**
-     * Randomly samples users in the waiting list and adds the selected ones to the selected list
-     * then send notification to both the users who were selected and not
-     * @author Won Koh & Jared Strandlund
-     */
+    //-- Sample -------------------------------------------------------------------------------------
     @Exclude
-    public void randomSampling(int amount, int capacity) {
-        // There are more empty slots than there are users in waiting list: Select everyone from waiting list
-        // Also do the same if the capacity = 0 (This is when there is no limit)
-        if (capacity == 0 || amount >= waitingList.size()) {
-            addAllToSelectedList(waitingList);
+    public void performLottery(int amount, OnDbUpdateListener listener) {
+        int limit = Math.min(amount, waitingList.size());
+        if (limit <= 0) {
+            listener.onComplete(RegistrationResult.SUCCESS);
+            return;
         }
-        else { // Random sampling
-            Random random = new Random();
-            int limit = Math.min(amount, capacity);
-            for (int i = 0; i < limit; i++) {
-                // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
-                int randomIndex = random.nextInt(waitingList.size());
-                String selectedUserID = waitingList.get(randomIndex);
-                addToSelectedList(selectedUserID);
-            }
-        }
-    }
 
-    /**
-     * Randomly samples users in the waiting list and adds the selected ones to the selected list
-     * then send notification to both the users who were selected and not
-     */
-    @Exclude
-    public void randomSampling() {
-        randomSampling(getEmptySlotAmount(), getAttendingCapacity());
+        List<String> winners = new ArrayList<>();
+        List<String> pool = new ArrayList<>(waitingList);
+        Random random = new Random();
+
+        for (int i = 0; i < limit; i++) {
+            int index = random.nextInt(pool.size());
+            winners.add(pool.remove(index));
+        }
+
+        transitionGroup(winners, waitingList, LIST_WAITING, selectedList, LIST_SELECTED, -1, listener);
     }
 }
