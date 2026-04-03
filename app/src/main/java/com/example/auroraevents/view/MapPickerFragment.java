@@ -147,6 +147,8 @@ public class MapPickerFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        // Hide nav bar when in fragment
+        requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
     }
 
     @Override
@@ -154,4 +156,15 @@ public class MapPickerFragment extends Fragment {
         super.onPause();
         mapView.onPause();
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Show nav bar when leaving fragment
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
+    }
+
 }
