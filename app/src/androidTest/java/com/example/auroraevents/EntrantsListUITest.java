@@ -30,6 +30,7 @@ import androidx.test.rule.GrantPermissionRule;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.registration_tests.RegistrationWaitingListTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,6 +42,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 public class EntrantsListUITest {
+    //Testing with Live database is a big no-no. Refactor with Mockito...
+    /**
     Organizer organizer;
     Event myEvent;
     User user1;
@@ -104,4 +107,5 @@ public class EntrantsListUITest {
     public void viewEntrantsTest() {
 
     }
+    **/
 }
