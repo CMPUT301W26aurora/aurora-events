@@ -185,7 +185,7 @@ public class RegistrationList {
         transitionUser(userID, attendingList, LIST_ATTENDING,selectedList,LIST_SELECTED , getAttendingCapacity(), listener);
     }
 
-    public void addToWaitingList(String userID, OnDbUpdateListener listener, List<String> fromList,String fromName){
+    public void addToWaitingList(String userID, OnDbUpdateListener listener){
         if(attendingList.contains(userID) || selectedList.contains(userID) || removedList.contains(userID) || waitingList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
@@ -220,7 +220,7 @@ public class RegistrationList {
     //-- Sample -------------------------------------------------------------------------------------
     @Exclude
     public void performLottery(int amount, OnDbUpdateListener listener) {
-        int limit = Math.min(amount, waitingList.size());
+        int limit = Math.min(amount, waitingList.size()); // I'm unsure about the lottery reqs, ask later...
         if (limit <= 0) {
             listener.onComplete(RegistrationResult.SUCCESS);
             return;
