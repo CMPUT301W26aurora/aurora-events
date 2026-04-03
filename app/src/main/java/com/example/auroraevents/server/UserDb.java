@@ -4,9 +4,11 @@ import android.util.Log;
 
 import com.example.auroraevents.model.User;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -137,6 +139,31 @@ public class UserDb {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to fetch users by role: " + role, e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
+     * Fetches a set of users from a list of ids
+     *
+     * @param ids       A list of user ids to be fetched
+     * @param onFetched Called with matching user list
+     * @param onFailure Called with exception on failure
+     */
+    public void fetchUsersByIds(List<String> ids, OnUserListFetchedCallback onFetched, OnFailureCallback onFailure) {
+        if (ids == null || ids.isEmpty()) {
+            onFetched.onFetched(new ArrayList<>());
+            return;
+        }
+        db.collection("users")
+                .whereIn(FieldPath.documentId(), ids)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<User> users = querySnapshot.toObjects(User.class);
+                    onFetched.onFetched(users);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("UserDb", "Batch fetch failed", e);
                     onFailure.onFailure(e);
                 });
     }

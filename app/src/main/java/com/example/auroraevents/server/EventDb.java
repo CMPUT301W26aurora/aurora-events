@@ -266,6 +266,32 @@ public class EventDb {
     }
 
     /**
+     * Removes a user by device id from all of a given events lists
+     *
+     * @param eventId   The event to remove from.
+     * @param userID    The user who is being removed.
+     * @param onSuccess Called on Success
+     * @param onFailure Called with exception on failure
+     */
+    public void removeUserFromAllLists(String eventId, String userID, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+
+        eventRef.update(
+                        LIST_WAITING, FieldValue.arrayRemove(userID),
+                        LIST_SELECTED, FieldValue.arrayRemove(userID),
+                        LIST_ATTENDING, FieldValue.arrayRemove(userID),
+                        LIST_DECLINED, FieldValue.arrayRemove(userID),
+                        LIST_CANCELLED, FieldValue.arrayRemove(userID),
+                        LIST_REMOVED, FieldValue.arrayRemove(userID)
+                )
+                .addOnSuccessListener(unused -> onSuccess.onSuccess())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove user from all lists");
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
      * Moves a user from one participant list to another atomically using a Firestore batch write.
      *
      * @param eventId       The event document ID.
