@@ -83,6 +83,11 @@ public class InfoUEventFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private com.example.auroraevents.model.Event pendingJoinEvent;
 
+    // Latitude and longitude for radius check
+    private static final double EDMONTON_LAT = 53.5461;
+    private static final double EDMONTON_LNG = -113.4938;
+    private static final float EDMONTON_RADIUS_METERS = 15000f;
+
     /**
      * @author Alina Iqbal & Jared Strandlund
      * @param inflater The LayoutInflater object that can be used to inflate
@@ -516,15 +521,14 @@ public class InfoUEventFragment extends Fragment {
                     if (location != null) {
                         // Only check radius if the event has coordinates set
                         if (event.getLatitude() != 0 && event.getLongitude() != 0) {
-                            float radiusMeters = 500; // e.g. 500m — make this configurable
                             boolean withinRange = RadiusUtil.isWithinRadius(
-                                    event.getLatitude(), event.getLongitude(),
+                                    EDMONTON_LAT, EDMONTON_LNG,
                                     location.getLatitude(), location.getLongitude(),
-                                    radiusMeters
+                                    EDMONTON_RADIUS_METERS
                             );
                             if (!withinRange) {
                                 Toast.makeText(requireContext(),
-                                        "You must be within " + (int)(radiusMeters) + "m of the event to join.",
+                                        "You must be in Edmonton to join.",
                                         Toast.LENGTH_LONG).show();
                                 return; // block join
                             }

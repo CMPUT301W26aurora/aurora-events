@@ -261,6 +261,11 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         }
     }
 
+    /**
+     * Toggle between sharing/unsharing geolocation
+     * @param isChecked
+     * Toggle boolean
+     */
     @Override
     public void onLocationToggle(boolean isChecked) {
         if (isChecked) {
