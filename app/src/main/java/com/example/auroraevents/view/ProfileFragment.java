@@ -158,22 +158,7 @@ public class ProfileFragment extends Fragment {
         view.findViewById(R.id.delete_profile_button).setOnClickListener(v -> {/*I don't know the implmentation yet...*/});
 
         adminToggle.setOnClickListener(v -> {
-            View navBar = getActivity().findViewById(R.id.nav_bar);
-            View adminBar = getActivity().findViewById(R.id.nav_bar_admin);
-            if (navBar != null) {
-                if(navBar.getVisibility() == GONE){
-                    navBar.setVisibility(VISIBLE);
-                    adminBar.setVisibility(GONE);
-                    if (getActivity() instanceof MainActivity) {
-                        ((MainActivity) getActivity()).setActiveTab(((MainActivity) getActivity()).navProfile);
-                    }
-                }else{
-                    navBar.setVisibility(GONE);
-                    adminBar.setVisibility(VISIBLE);
-                    if (getActivity() instanceof MainActivity) {
-                        ((MainActivity) getActivity()).setActiveTab(((MainActivity) getActivity()).navAdminProfile);}
-                }
-            }
+            userViewModel.toggleAdminMode();
         });
     }
 
@@ -183,4 +168,5 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
+
 }
