@@ -24,7 +24,9 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.auroraevents.model.EventFiltering;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -43,6 +45,14 @@ public class EventFragment extends Fragment {
     private TextView noEventText;
     private EventArrayAdapter eventsAdapter;
     private Boolean inAdmin;
+    private ListView eventsListView;
+    private final ArrayList<Event> filteredEventsList = new ArrayList<>();
+    private final EventFiltering filteringHelper = new EventFiltering();
+    private String filterQuery = "";
+    private String locationFilter = "";
+    private LocalDate startDateFilter = null;
+    private LocalDate endDateFilter = null;
+    private int maxCapacityFilter = 0;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -83,17 +93,17 @@ public class EventFragment extends Fragment {
             }
         });
 
-        ListView eventsListView = root.findViewById(R.id.events_list);
+        eventsListView = root.findViewById(R.id.events_list);
 
         // Inflate and add the header
         View header = inflater.inflate(R.layout.header_event_fragment, eventsListView, false);
         eventsListView.addHeaderView(header, null, false);
 
         allEventsList = new ArrayList<>();
-        ArrayList<Event> eventList = new ArrayList<>();
+        // ArrayList<Event> eventList = new ArrayList<>();
 
         // create adapter with eventList
-        eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
+        eventsAdapter = new EventArrayAdapter(requireContext(), filteredEventsList, userId);
         eventsListView.setAdapter(eventsAdapter);
 
         noEventText = root.findViewById(R.id.no_event_found_text);
@@ -106,15 +116,14 @@ public class EventFragment extends Fragment {
                 boolean isPrivate = event.isPrivate();
                 if (!isPrivate) {
                     allEventsList.add(event);
-                    eventList.add(event);
                 }
             }
-            eventsAdapter.notifyDataSetChanged();
+            applyFilters();
         }, e -> Log.d(TAG, "Error fetching events" + e.getMessage()));
 
         // handle event taps by user to get the event's position
         eventsListView.setOnItemClickListener((parent, v, position, id) -> {
-            Event selectedEvent = eventList.get(position - 1);
+            Event selectedEvent = filteredEventsList.get(position - 1);
 
             // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
             // pass eventID to InfoUFragment using bundle
@@ -154,15 +163,15 @@ public class EventFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.trim().isEmpty()) {
-                    keywordSearchEvents("", eventList);
-                }
-                return true;
+                    filterQuery = newText.trim();
+                    applyFilters();
+                    return true;
             }
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                keywordSearchEvents(query.trim(), eventList);
+                filterQuery = query.trim();
+                applyFilters();
                 searchView.clearFocus();
                 return true;
             }
@@ -170,52 +179,63 @@ public class EventFragment extends Fragment {
         return root;
     }
 
-    /**
-     * filter events to match searched keywords
-     * return all events when nothing is being searched
-     * private events are never included in results
-     *
-     * @param searchKeyword keyword entered by user to search for
-     * @param eventList original list of events to search through
-     * @return filtered list of events matching the keyword
-     */
-    public ArrayList<Event> filterKeywordEvents(String searchKeyword, ArrayList<com.example.auroraevents.model.Event> eventList) {
-        String searchedQuery = searchKeyword.toLowerCase();
-        ArrayList<com.example.auroraevents.model.Event> filteredEventsList = new ArrayList<>();
-
-        if (searchedQuery.isEmpty()) {
-            // display all public events when search is cleared
-            for (com.example.auroraevents.model.Event event : eventList) {
-                if (!event.isPrivate()) {
-                    filteredEventsList.add(event);
-                }
-            }
-        } else {
-            for (com.example.auroraevents.model.Event event : eventList) {
-                // don't include private events for keyword search
-                if (event.isPrivate()) continue;
-                // convert event name to lower case
-                String searchedEventName = event.getName();
-                if (searchedEventName != null) {
-                    searchedEventName = searchedEventName.toLowerCase();
-                } else {
-                    searchedEventName = "";
-                }
-                // convert event description to lower case
-                String searchedEventDescription = event.getDescription();
-                if (searchedEventDescription != null) {
-                    searchedEventDescription = searchedEventDescription.toLowerCase();
-                } else {
-                    searchedEventDescription = "";
-                }
-                // add event to filtered list if keyword matches
-                if (searchedEventName.contains(searchedQuery) || searchedEventDescription.contains(searchedQuery)) {
-                    filteredEventsList.add(event);
-                }
-            }
-        }
-        return filteredEventsList;
+    private void applyFilters() {
+        filteredEventsList.clear();
+        filteredEventsList.addAll(filteringHelper.applyAllFilters(allEventsList, filterQuery, locationFilter, startDateFilter, endDateFilter, maxCapacityFilter));
+        eventsAdapter.notifyDataSetChanged();
+        noEventsFoundText();
     }
+
+    private void noEventsFoundText() {
+        if (noEventText == null) {
+            return;
+        }
+        boolean filtersApplied = false;
+        if (!filterQuery.isEmpty() || !locationFilter.isEmpty() ||
+        startDateFilter != null || endDateFilter != null || maxCapacityFilter < 0) {
+            filtersApplied = true;
+        }
+
+        if (filteredEventsList.isEmpty() && filtersApplied) {
+            noEventText.setVisibility(VISIBLE);
+        } else {
+            noEventText.setVisibility(GONE);
+        }
+    }
+
+    public void setLocationFilter(@ Nullable String location) {
+        if (location != null) {
+            locationFilter = location.trim();
+        } else {
+            location = "";
+        }
+        applyFilters();
+    }
+
+    public void setDateFilter(@Nullable LocalDate startDate, @Nullable LocalDate endDate) {
+        startDateFilter = startDate;
+        endDateFilter = endDate;
+        applyFilters();
+    }
+
+    public void setMaxCapacityFilter(int maxCapacity) {
+        maxCapacityFilter = maxCapacity;
+        applyFilters();
+    }
+
+    public void removeAllFilters() {
+        filterQuery = "";
+        locationFilter = "";
+        startDateFilter = null;
+        endDateFilter = null;
+        maxCapacityFilter = 0;
+        applyFilters();
+    }
+
+    public ArrayList<Event> filterKeywordEvents(String searchKeyword, ArrayList<com.example.auroraevents.model.Event> eventList) {
+        return filteringHelper.filterKeywordEvents(searchKeyword, eventList);
+    }
+
 
     /**
      * display required event list when keyword matches

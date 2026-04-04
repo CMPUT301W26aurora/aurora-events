@@ -120,7 +120,7 @@ public class EventFiltering {
         return capacityFilterResults;
     }
 
-    public ArrayList<Event> applyAllFilter(ArrayList<com.example.auroraevents.model.Event> eventList, String searchKeyword, String locationFilter, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate, int maxEventCapacity) {
+    public ArrayList<Event> applyAllFilters(ArrayList<com.example.auroraevents.model.Event> eventList, String searchKeyword, String locationFilter, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate, int maxEventCapacity) {
         ArrayList<Event> allFilteredEvents = filterKeywordEvents(searchKeyword, eventList);
         allFilteredEvents = applyLocationFilter(allFilteredEvents, locationFilter);
         allFilteredEvents = applyDateFilter(allFilteredEvents, eventStartDate, eventEndDate);
