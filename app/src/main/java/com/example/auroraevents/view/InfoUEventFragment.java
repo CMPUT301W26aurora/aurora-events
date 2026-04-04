@@ -71,7 +71,6 @@ public class InfoUEventFragment extends Fragment {
     private Button joinButton, leaveButton, acceptButton, declineButton;
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
-    private Boolean inAdmin;
 
     /**
      * @author Alina Iqbal & Jared Strandlund
@@ -98,7 +97,6 @@ public class InfoUEventFragment extends Fragment {
         } else {
             eventId = args.getString("eventId");
             userId = args.getString("userId");
-            inAdmin = args.getBoolean("inAdmin");
         }
 
         // get views to display event details
@@ -448,14 +446,14 @@ public class InfoUEventFragment extends Fragment {
         // move user from selectedList to attendingList on acceptance
         acceptButton.setOnClickListener(v  ->{
             v.setEnabled(false);
-                EventDb.getInstance().userAcceptSelection(eventId, userId,
-                        () ->{
-                            Log.d(TAG, "Accepted Invitation");
-                        },
-                        e -> {
-                            Log.e(TAG, "Failed to accept", e);
-                            v.setEnabled(true);}
-                );
+            EventDb.getInstance().userAcceptSelection(eventId, userId,
+                    () ->{
+                        Log.d(TAG, "Accepted Invitation");
+                    },
+                    e -> {
+                        Log.e(TAG, "Failed to accept", e);
+                        v.setEnabled(true);}
+            );
         });
         // move user from selectedList to declinedList on decline
         declineButton.setOnClickListener(v ->{
