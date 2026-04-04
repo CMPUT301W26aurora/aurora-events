@@ -2,13 +2,9 @@ package com.example.auroraevents.view;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,38 +28,38 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.util.List;
-
-import com.example.auroraevents.view.MapPickerFragment;
-
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
 Maps handled by Google Maps SDK:
  */
 public class EventCreationFragment extends Fragment {
     //TODO 4: copy into edit event fragment
-    private ImageButton backButton;
     private final String TAG = "EventCreationFragment";
+    private ImageButton backButton;
     private Button addImageButton;
     private TextInputEditText eventNameInput;
     private TextInputEditText eventDescInput;
+    private TextInputEditText eventPriceInput;
     private TextInputEditText eventCapInput;
+    private TextInputEditText eventWaitingCapInput;
     private Button locationButton;
     private Button geolocationButton;
     private Button startDateButton;
     private Button endDateButton;
     private Button dateButton;
+    private Button privateButton;
     private Button confirmButton;
     private String eventName;
     private String eventDescription;
     private String price;
     private String eventCap;
+    private String waitingCap;
     private String location;
     private boolean geolocationRequired;
-    private String date;
     private String registerStart;
     private String registerEnd;
+    private String date;
+    private boolean isPrivate;
     private Organizer organizer;
     private User user;
     private UserViewModel userViewModel;
@@ -80,7 +76,6 @@ public class EventCreationFragment extends Fragment {
     private com.google.firebase.storage.StorageReference storageRef;
 
     private LocationToggleListener locationToggleListener;
-    public boolean geolocationToggled;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -100,7 +95,6 @@ public class EventCreationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // TODO 3: update to add price, geolocation requirement
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_creation, container, false);
 
@@ -109,12 +103,15 @@ public class EventCreationFragment extends Fragment {
         addImageButton = view.findViewById(R.id.btn_add_image);
         eventNameInput = view.findViewById(R.id.et_event_name);
         eventDescInput = view.findViewById(R.id.et_event_desc);
+        eventPriceInput = view.findViewById(R.id.et_event_price);
         eventCapInput = view.findViewById(R.id.et_event_capacity);
+        eventWaitingCapInput = view.findViewById(R.id.et_event_waiting_capacity);
         locationButton = view.findViewById(R.id.btn_select_location);
         geolocationButton = view.findViewById(R.id.btn_geolocation_lock);
         startDateButton = view.findViewById(R.id.btn_start_date);
         endDateButton = view.findViewById(R.id.btn_end_date);
         dateButton = view.findViewById(R.id.btn_signup_deadline);
+        privateButton = view.findViewById(R.id.btn_is_private);
         confirmButton = view.findViewById(R.id.btn_confirm);
 
         // Hide nav bar
@@ -151,12 +148,7 @@ public class EventCreationFragment extends Fragment {
         storageRef = storage.getReference();
         imageView = view.findViewById(R.id.iv_event_image);
 
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getParentFragmentManager().popBackStack();
-            }
-        });
+        backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
         locationButton.setOnClickListener(v -> {
             MapPickerFragment mapPicker = new MapPickerFragment();
@@ -165,6 +157,7 @@ public class EventCreationFragment extends Fragment {
                 eventLat = lat;     // Store latitude and longitude
                 eventLong = lng;
                 locationButton.setText(address);
+                requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
             });
             getParentFragmentManager()
                     .beginTransaction()
@@ -177,41 +170,23 @@ public class EventCreationFragment extends Fragment {
         endDateButton.setOnClickListener(v -> showDateTimePicker(endDateButton, val -> registerEnd = val));
         dateButton.setOnClickListener(v -> showDateTimePicker(dateButton, val -> date = val));
 
-        geolocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!geolocationToggled) {
+        geolocationButton.setOnClickListener(v -> {
+            if (location == null) {
+                Toast.makeText(getContext(), "Please input a location first", Toast.LENGTH_SHORT).show();
+            } else {
+                if (!geolocationRequired) {
 
                     AlertDialog.Builder geolocationDialog = new AlertDialog.Builder(requireContext());
                     geolocationDialog.setTitle("Geolocation Services");
                     geolocationDialog.setMessage("Would you like to enable Geolocation?");
                     geolocationDialog.setCancelable(false);
 
-                    geolocationDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            geolocationToggled = true;
-
-                            Geocoder geocoder = new Geocoder(requireContext());
-                            List<Address> addresses = null;
-                            try {
-                                addresses = geocoder.getFromLocationName(location, 1);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                            if (addresses != null && !addresses.isEmpty()) {
-                                // Store latitude and longitude of event location
-                                double lat = addresses.get(0).getLatitude();
-                                double lng = addresses.get(0).getLongitude();
-                            }
-
-                            Toast.makeText(requireContext(), "Geolocation enabled", Toast.LENGTH_SHORT).show();
-                        }
+                    geolocationDialog.setPositiveButton("Confirm", (dialog, id) -> {
+                        geolocationRequired = true;
+                        geolocationButton.setText(R.string.geolocation_unlock_text);
+                        Toast.makeText(requireContext(), "Geolocation enabled", Toast.LENGTH_SHORT).show();
                     });
-                    geolocationDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
+                    geolocationDialog.setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss());
 
                     AlertDialog dialog = geolocationDialog.create();
                     dialog.show();
@@ -221,76 +196,118 @@ public class EventCreationFragment extends Fragment {
                     geolocationDialog.setMessage("Would you like to disable Geolocation?");
                     geolocationDialog.setCancelable(false);
 
-                    geolocationDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            geolocationToggled = false;
-                            Toast.makeText(requireContext(), "Geolocation disabled", Toast.LENGTH_SHORT).show();
-                        }
+                    geolocationDialog.setPositiveButton("Confirm", (dialog, id) -> {
+                        geolocationRequired = false;
+                        geolocationButton.setText(R.string.geolocation_lock_text);
+                        Toast.makeText(requireContext(), "Geolocation disabled", Toast.LENGTH_SHORT).show();
                     });
-                    geolocationDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
+                    geolocationDialog.setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss());
 
                     AlertDialog dialog = geolocationDialog.create();
                     dialog.show();
                 }
-
             }
         });
 
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Get values from text input
-                eventName = eventNameInput.getText().toString().trim();
-                eventDescription = eventDescInput.getText().toString().trim();
-                eventCap = eventCapInput.getText().toString().trim();
+        privateButton.setOnClickListener(v -> {
+            if (!isPrivate) {
+                AlertDialog.Builder privateDialog = new AlertDialog.Builder(requireContext());
+                privateDialog.setMessage("Would you like to make this event private?");
+                privateDialog.setCancelable(false);
 
-                // Validate required inputs
-                if (eventName.isEmpty()) {
-                    eventNameInput.setError("Event name is required");
-                    return;
-                }
+                privateDialog.setPositiveButton("Confirm", (dialog, id) -> {
+                    isPrivate = true;
+                    privateButton.setText(R.string.make_public_text);
+                    Toast.makeText(requireContext(), "Event will be private", Toast.LENGTH_SHORT).show();
+                });
+                privateDialog.setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss());
 
-                if (eventCap.isEmpty()) {
-                    eventCapInput.setError("Capacity is required");
-                    return;
-                }
+                AlertDialog dialog = privateDialog.create();
+                dialog.show();
+            } else {
+                AlertDialog.Builder privateDialog = new AlertDialog.Builder(requireContext());
+                privateDialog.setMessage("Would you like to make this event public?");
+                privateDialog.setCancelable(false);
 
-                // Validate int input
-                int capacityValue;
-                try {
-                    capacityValue = Integer.parseInt(eventCap);
-                } catch (NumberFormatException e) {
-                    eventCapInput.setError("Please enter a valid number");
-                    return;
-                }
+                privateDialog.setPositiveButton("Confirm", (dialog, id) -> {
+                    isPrivate = false;
+                    privateButton.setText(R.string.make_private_text);
+                    Toast.makeText(requireContext(), "Event will be public", Toast.LENGTH_SHORT).show();
+                });
+                privateDialog.setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss());
 
-                //
-                if (location == null || date == null) {
-                    return;
-                }
+                AlertDialog dialog = privateDialog.create();
+                dialog.show();
+            }
+        });
 
-                // Create and add event
-                if (organizer != null) {
-                    organizer.CreateEvent(
-                            organizer.getDeviceId(),
-                            eventName,
-                            eventDescription,
-                            price,
-                            date,
-                            registerStart,
-                            registerEnd,
-                            location,
-                            geolocationToggled,
-                            Integer.parseInt(eventCap),
-                            Integer.parseInt(eventCap),
-                            uploadedImageUrl
-                    );
-                    getParentFragmentManager().popBackStack();
-                }
+        confirmButton.setOnClickListener(v -> {
+            // Get values from text input
+            eventName = eventNameInput.getText().toString().trim();
+            eventDescription = eventDescInput.getText().toString().trim();
+            price = eventPriceInput.getText().toString().trim();
+            eventCap = eventCapInput.getText().toString().trim();
+            waitingCap = eventWaitingCapInput.getText().toString().trim();
+
+            // Validate required inputs
+            if (eventName.isEmpty()) {
+                eventNameInput.setError("Event name is required");
+                return;
+            }
+
+            if (eventDescription.isEmpty()) {
+                eventDescInput.setError("Event name is required");
+                return;
+            }
+
+            if (price.isEmpty()) {
+                eventPriceInput.setError("Event name is required");
+                return;
+            }
+
+            if (eventCap.isEmpty()) {
+                eventCapInput.setError("Capacity is required");
+                return;
+            }
+
+            // Validate int input
+            try {
+                Integer.parseInt(eventCap);
+            } catch (NumberFormatException e) {
+                eventCapInput.setError("Please enter a valid number");
+                return;
+            }
+
+            try {
+                Integer.parseInt(waitingCap);
+            } catch (NumberFormatException e) {
+                eventWaitingCapInput.setError("Please enter a valid number");
+                return;
+            }
+
+            //
+            if (location == null || date == null) {
+                return;
+            }
+
+            // Create and add event
+            if (organizer != null) {
+                organizer.CreateEvent(
+                        organizer.getDeviceId(),
+                        eventName,
+                        eventDescription,
+                        price,
+                        date,
+                        registerStart,
+                        registerEnd,
+                        location,
+                        geolocationRequired,
+                        Integer.parseInt(eventCap),
+                        Integer.parseInt(eventCap),
+                        isPrivate,
+                        uploadedImageUrl
+                );
+                getParentFragmentManager().popBackStack();
             }
         });
         return view;

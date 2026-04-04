@@ -18,19 +18,21 @@
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
-            android:background="@drawable/circular_button_bg"
-            android:src="?attr/homeAsUpIndicator"
+            android:contentDescription="@string/back_button_content_description"
+            android:background="@drawable/rounded_box"
+            android:backgroundTint="@color/light_glass"
+            android:src="@drawable/rounded_arrow_back_24"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="#71FACF" />
+            app:tint="@color/blue" />
 
         <TextView
             android:id="@+id/warning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="60dp"
-            android:text="Fields marked with * are required"
-            android:textColor="#BC4646"
+            android:text="@string/required_field_warning_text"
+            android:textColor="@color/dark_red"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -38,7 +40,7 @@
 
         <FrameLayout
             android:id="@+id/addImage"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="189dp"
             android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
@@ -59,6 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
+                    android:contentDescription="@string/iv_event_image_content_description"
                     android:visibility="gone" />
 
                 <Button
@@ -73,16 +76,15 @@
                     android:paddingTop="10dp"
                     android:paddingEnd="20dp"
                     android:paddingBottom="10dp"
-                    android:text="Add an image"
-                    android:textColor="#CCCCCC"
+                    android:text="@string/add_an_image_button_text"
+                    android:textColor="@color/light_text"
                     android:textSize="14sp"
                     app:icon="@android:drawable/ic_input_add"
                     app:iconGravity="start"
-                    app:iconTint="#AAAAAA" />
+                    app:iconTint="@color/light_text" />
             </FrameLayout>
         </FrameLayout>
 
-        <!-- Event Name Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/eventName_input"
             style="@style/PurpleTextInputLayout"
@@ -103,7 +105,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/green"
                 android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -117,7 +119,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="*Event Description"
+            android:hint="*Description"
             app:hintEnabled="true"
             app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -129,7 +131,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Event Price Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/eventPrice_input"
+            style="@style/PurpleTextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:hint="*Price"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/purple_accent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/eventDesc_input">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textColor="@color/green"
                 android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -143,19 +171,45 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="*Event Capacity"
+            android:hint="*Maximum Participants"
             app:hintEnabled="true"
             app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/eventDesc_input">
+            app:layout_constraintTop_toBottomOf="@+id/eventPrice_input">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_event_capacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/green"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Event Capacity Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/waitingCapacity_input"
+            style="@style/PurpleTextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Maximum Waiting List Spots"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/purple_accent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_event_waiting_capacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="@color/green"
                 android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -172,16 +226,16 @@
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:text="*Location"
-            android:textColor="#CCCCCC"
+            android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
             app:ensureMinTouchTargetSize="false"
             app:icon="@android:drawable/ic_menu_mylocation"
             app:iconGravity="start"
-            app:iconTint="#AA66FF"
+            app:iconTint="@color/purple"
             app:layout_constraintEnd_toStartOf="@+id/btn_geolocation_lock"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input" />
+            app:layout_constraintTop_toBottomOf="@+id/waitingCapacity_input" />
 
         <Button
             android:id="@+id/btn_geolocation_lock"
@@ -193,17 +247,17 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="Geolocation Lock"
-            android:textColor="#CCCCCC"
+            android:text="@string/geolocation_lock_text"
+            android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
             app:ensureMinTouchTargetSize="false"
             app:icon="@android:drawable/ic_menu_compass"
             app:iconGravity="start"
-            app:iconTint="#AA66FF"
+            app:iconTint="@color/purple"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_select_location"
-            app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input" />
+            app:layout_constraintTop_toBottomOf="@+id/waitingCapacity_input" />
 
         <!-- Row 2: Sign-Up Start and End -->
         <Button
@@ -217,13 +271,13 @@
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:text="*Sign-Up Start"
-            android:textColor="#CCCCCC"
+            android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
             app:ensureMinTouchTargetSize="false"
             app:icon="@android:drawable/ic_menu_today"
             app:iconGravity="start"
-            app:iconTint="#AA66FF"
+            app:iconTint="@color/purple"
             app:layout_constraintEnd_toStartOf="@+id/btn_end_date"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btn_select_location" />
@@ -239,13 +293,13 @@
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:text="*Sign-Up End"
-            android:textColor="#CCCCCC"
+            android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
             app:ensureMinTouchTargetSize="false"
             app:icon="@android:drawable/ic_menu_today"
             app:iconGravity="start"
-            app:iconTint="#AA66FF"
+            app:iconTint="@color/purple"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_start_date"
             app:layout_constraintTop_toBottomOf="@+id/btn_select_location" />
@@ -259,35 +313,56 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Date"
-            android:textColor="#CCCCCC"
+            android:text="*Event Date"
+            android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
             app:ensureMinTouchTargetSize="false"
             app:icon="@android:drawable/ic_menu_recent_history"
             app:iconGravity="start"
-            app:iconTint="#AA66FF"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:iconTint="@color/purple"
+            app:layout_constraintEnd_toStartOf="@id/btn_is_private"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_start_date" />
+
+        <!-- Row 3: If event is private -->
+        <Button
+            android:id="@+id/btn_is_private"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/glass_pill_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="@string/make_private_text"
+            android:textColor="@color/light_text"
+            android:textSize="13sp"
+            app:backgroundTint="@null"
+            app:ensureMinTouchTargetSize="false"
+            app:icon="@drawable/outline_lock_person_24"
+            app:iconGravity="start"
+            app:iconTint="@color/purple"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_signup_deadline"
             app:layout_constraintTop_toBottomOf="@+id/btn_start_date" />
 
         <!-- Confirm Button -->
         <Button
             android:id="@+id/btn_confirm"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/gradient_confirm_button"
-            android:text="Confirm"
-            android:textColor="#FFFFFF"
+            android:text="@string/confirm_text"
+            android:textColor="@color/dark_text"
             android:textSize="16sp"
             android:textStyle="bold"
             app:backgroundTint="@null"
             app:icon="@drawable/ic_check"
-            app:iconGravity="start"
-            app:iconTint="#FFFFFF"
+            app:iconGravity="textStart"
+            app:iconTint="@color/dark_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btn_signup_deadline" />

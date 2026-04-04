@@ -56,4 +56,12 @@
     <string name="comments_button_text">Comments</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="required_field_warning_text">Fields marked with * are required</string>
+    <string name="iv_event_image_content_description">The event\'s poster image</string>
+    <string name="add_an_image_button_text">Add an image</string>
+    <string name="confirm_text">Confirm</string>
+    <string name="geolocation_unlock_text">Geolocation Unlock</string>
+    <string name="geolocation_lock_text">Geolocation Lock</string>
+    <string name="make_private_text">Make Private</string>
+    <string name="make_public_text">Make Public</string>
 </resources>

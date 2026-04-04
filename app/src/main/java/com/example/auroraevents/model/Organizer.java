@@ -65,6 +65,7 @@ public class Organizer extends User {
             boolean geolocationRequired,
             int waitingCapacity,
             int attendingCapacity,
+            boolean isPrivate,
             Bitmap poster) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -87,6 +88,7 @@ public class Organizer extends User {
                 waitingCapacity,
                 attendingCapacity);
         event.setGeolocationRequired(geolocationRequired);
+        event.setPrivate(isPrivate);
 
         // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,
