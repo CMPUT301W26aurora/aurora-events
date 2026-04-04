@@ -34,11 +34,6 @@ public class Event {
     private String dateTime;              // stored as "yyyy-MM-dd"
     private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
     private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
-    private String  location;
-    private int     capacity;         // 0 = unlimited
-    private String  imageUrl;
-    private String  qrCodeData;       // String payload encoded in the QR code
-    private Bitmap qR;
     private String location;
     private String qrUrl;
     private String posterUrl;
@@ -58,9 +53,6 @@ public class Event {
         reports = new ArrayList<>();
     }
 
-    public Event(String organizerDeviceId, String name, String description,
-                 LocalDateTime dateTime, LocalDateTime registrationStart,
-                 LocalDateTime registrationEnd, String location, int capacity, String imageUrl) {
     public Event(
             String organizerDeviceId,
             String name,
@@ -81,9 +73,6 @@ public class Event {
         this.dateTime              = dateTime.format(FORMATTER); // "yyyy-MM-dd"
         this.registrationTimeStart = registrationStart.format(FORMATTER);
         this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
-        this.location          = location;
-        this.capacity          = capacity;
-        this.imageUrl          = imageUrl;
         this.location              = location;
         this.geolocationRequired   = geolocationRequired;
         this.registrationList.setWaitingCapacity(waitingCapacity);
@@ -148,12 +137,6 @@ public class Event {
   
     public boolean isPrivate()                   { return isPrivate; }
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
-
-    public String getImageUrl()                      { return imageUrl; }
-    public void setImageUrl(String imageUrl)         { this.imageUrl = imageUrl; }
-
-    public String getQrCodeData()                    { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
     public int  getNumReports() { return reports.size(); }
 
     public double getLatitude() { return latitude; }

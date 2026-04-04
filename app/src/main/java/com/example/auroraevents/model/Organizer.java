@@ -53,8 +53,6 @@ public class Organizer extends User {
      * @param attendingCapacity   The total number of entrants that can join the waiting list
      * @param poster              A pretty picture for the event info screen
      */
-    public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String startTime, String endTime, String location, int capacity, String imageUrl) {
     public void CreateEvent(
             String organizerDeviceId,
             String title,
@@ -67,13 +65,14 @@ public class Organizer extends User {
             boolean geolocationRequired,
             int waitingCapacity,
             int attendingCapacity,
-            Bitmap poster) {
+            Bitmap poster,
+            EventDb.OnEventCreatedCallback onCreated) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         LocalDateTime eventDateTime          = LocalDateTime.parse(date, formatter);
-        LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
+        LocalDateTime eventRegistrationStart = (startTime != null) ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime eventRegistrationEnd   = (endTime != null)   ? LocalDateTime.parse(endTime, formatter)   : null;
 
         // Create event from parameters
         Event event = new Event(
@@ -84,7 +83,6 @@ public class Organizer extends User {
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
-                location, capacity, imageUrl);
                 location,
                 geolocationRequired,
                 waitingCapacity,
@@ -95,6 +93,7 @@ public class Organizer extends User {
                 eventId -> {
                     Log.d("Organizer", "Event successfully created with ID: " + eventId);
                     myEvents.add(event);
+                    onCreated.onCreated(eventId);
                 },
                 e -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );

@@ -1,7 +1,11 @@
 package com.example.auroraevents.server;
 
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
@@ -23,6 +27,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -86,19 +91,35 @@ public class EventDb {
                 });
     }
 
-    public void uploadPoster(Uri uri, String eventId) {
-        if (uri == null || eventId == null) return;
+    public void compressAndUpload(Context context, Uri uri, String eventId) {
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
+
+            byte[] bitmapData = outputStream.toByteArray();
+            EventDb.getInstance().uploadPosterBytes(bitmapData, eventId);
+
+        } catch (Exception e) {
+            Log.d(TAG, "Compression failed", e);
+        }
+    }
+
+    public void uploadPosterBytes(byte[] data, String eventId) {
+        if (data == null || eventId == null) return;
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference()
-                        .child(eventId + "/" +"poster.jpg");
+                .child(eventId + "/poster.jpg");
 
-        fileRef.putFile(uri)
+        fileRef.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     fileRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                        saveUrlToFirestore(eventId, downloadUri.toString(), "posterUrl");
+                        saveUrlToFirestore(eventId, downloadUri.toString(), "posterUri");
                     });
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Upload failed for poster", e));
+                .addOnFailureListener(e -> Log.e(TAG, "Upload failed", e));
     }
 
     public void uploadQr(Bitmap qr, String eventId){

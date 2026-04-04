@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 
@@ -38,34 +39,27 @@ import com.example.auroraevents.R;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
+import com.example.auroraevents.server.EventDb;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import android.provider.Settings;
-import android.widget.ImageView;
-import android.widget.Toast;
-
-import java.util.UUID;
-
-/*
-Image loading handled by resource Glide:
-https://github.com/bumptech/glide
 
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
 
-import com.example.auroraevents.view.MapPickerFragment;
+/*
+Image loading handled by resource Glide:
+https://github.com/bumptech/glide
+ */
+
 
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
 Maps handled by Google Maps SDK:
  */
 public class EventCreationFragment extends Fragment {
-    //TODO 4: copy into edit event fragment
     private ImageButton backButton;
     private final String TAG = "EventCreationFragment";
     private Button addImageButton;
@@ -97,10 +91,8 @@ public class EventCreationFragment extends Fragment {
     private android.widget.ImageView imageView;
     private android.widget.ImageView dialogImageView;
     private android.net.Uri cameraImageUri;
-    private Bitmap uploadedImageUrl = null;
+    private Uri selectedImageUri = null;
     private View dialogView;
-    private com.google.firebase.storage.FirebaseStorage storage;
-    private com.google.firebase.storage.StorageReference storageRef;
 
     private LocationToggleListener locationToggleListener;
     public boolean geolocationToggled;
@@ -115,21 +107,6 @@ public class EventCreationFragment extends Fragment {
         }
     }
 
-
-    // Image upload
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef = storage.getReference();
-    private Button addImageButton;
-    Uri image;
-    ImageView imageView;
-    private ImageView dialogImageView;
-    private Uri cameraImageUri;
-    private String uploadedImageUrl = null;
-    private View dialogView;
-
-    private Uri drawableToUri(int drawableResId) {
-        return Uri.parse("android.resource://" + requireContext().getPackageName() + "/" + drawableResId);
-    }
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -233,11 +210,9 @@ public class EventCreationFragment extends Fragment {
                 Settings.Secure.ANDROID_ID
         );
 
-        // Fetch firebase cloud storage
-        storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");
-        storageRef = storage.getReference();
         imageView = view.findViewById(R.id.iv_event_image);
 
+        // Testing purposes
         addMockImageToGallery();
 
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -254,19 +229,16 @@ public class EventCreationFragment extends Fragment {
             }
         });
 
-        locationButton.setOnClickListener(v ->
-                showInputDialog(locationButton, "Location", val -> location = val));
         locationButton.setOnClickListener(v -> {
             MapPickerFragment mapPicker = new MapPickerFragment();
             mapPicker.setOnLocationPickedListener((address, lat, lng) -> {
                 location = address;
                 eventLat = lat;     // Store latitude and longitude
                 eventLong = lng;
-                locationButton.setText(address);
             });
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, mapPicker)
+                    .add(R.id.fragment_container, mapPicker)
                     .addToBackStack(null)
                     .commit();
         });
@@ -375,19 +347,27 @@ public class EventCreationFragment extends Fragment {
                 if (organizer != null) {
                     organizer.CreateEvent(
                             organizer.getDeviceId(),
-                            eventName,
-                            eventDescription,
-                            price,
-                            date,
-                            registerStart,
-                            registerEnd,
-                            location,
+                            eventName, eventDescription, price, date,
+                            registerStart, registerEnd, location,
                             geolocationToggled,
                             Integer.parseInt(eventCap),
                             Integer.parseInt(eventCap),
-                            uploadedImageUrl
+                            null,
+                            eventId -> {
+                                Log.d(TAG, "Callback reached, attempting popBackStack");
+                                if (selectedImageUri != null) {
+                                    EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, eventId);
+                                }
+                                if (isAdded() && getActivity() != null) {
+                                    getActivity().runOnUiThread(() -> {
+                                        Log.d(TAG, "Running popBackStack on UI thread");
+                                        getParentFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                    });
+                                } else {
+                                    Log.d(TAG, "Fragment not added or activity null — skip pop");
+                                }
+                            }
                     );
-                    getParentFragmentManager().popBackStack();
                 }
             }
         });
@@ -444,12 +424,14 @@ public class EventCreationFragment extends Fragment {
                     Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                uploadImage(image, dialog, v);
-                dialogImageView.setVisibility(View.GONE);
+                selectedImageUri = image;
+                Glide.with(requireContext()).load(selectedImageUri).into(imageView);
+                addImageButton.setVisibility(View.GONE);
+                dialog.dismiss();
             }
         });
 
-        btnCamera.setOnClickListener(new View.OnClickListener(){
+        btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dispatchTakePictureIntent();
@@ -458,53 +440,6 @@ public class EventCreationFragment extends Fragment {
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        dialog.show();
-    }
-    /*
-    Show input dialog for location input
-    /**
-     * Input dialog for location button
-     * @param targetButton
-     * Button to be updated
-     * @param hint
-     * Default text
-     * @param onConfirm
-     * Updated text on confirm
-     */
-    private void showInputDialog(Button targetButton, String hint, java.util.function.Consumer<String> onConfirm) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.custom_input, null);
-        builder.setView(dialogView);
-
-        AlertDialog dialog = builder.create();
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-            params.gravity = Gravity.CENTER;
-            params.width = WindowManager.LayoutParams.MATCH_PARENT;
-            dialog.getWindow().setAttributes(params);
-        }
-
-        TextInputEditText input = dialogView.findViewById(R.id.dialog_input);
-        TextInputLayout inputLayout = dialogView.findViewById(R.id.dialog_input_layout);
-        Button btnCancel = dialogView.findViewById(R.id.dialog_btn_cancel);
-        Button btnConfirm = dialogView.findViewById(R.id.dialog_btn_confirm);
-
-        inputLayout.setHint(hint);
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-
-        btnConfirm.setOnClickListener(v -> {
-            String enteredText = input.getText() != null ? input.getText().toString().trim() : "";
-            if (enteredText.isEmpty()) {
-                inputLayout.setError("This field is required");
-            } else {
-                targetButton.setText(enteredText);
-                onConfirm.accept(enteredText);
-                dialog.dismiss();
-            }
-        });
         dialog.show();
     }
 
@@ -536,31 +471,6 @@ public class EventCreationFragment extends Fragment {
 
         }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH),
                 calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
-    }
-
-    /*
-    Upload image to firebase storage
-    Based of resource: https://medium.com/@everydayprogrammer/
-    uploading-files-to-firebase-storage-in-android-studio-using-java-63f43b4c8d72
-     */
-    private void uploadImage(Uri image, AlertDialog dialog, View view) {
-        StorageReference reference = storageRef.child("images/" + UUID.randomUUID().toString());
-        reference.putFile(image)
-                .addOnSuccessListener(taskSnapshot ->
-                        reference.getDownloadUrl().addOnSuccessListener(uri -> {
-                            uploadedImageUrl = uri.toString();
-                            Toast.makeText(requireContext(), "Image uploaded!", Toast.LENGTH_SHORT).show();
-
-                            // Update main imageview
-                            Glide.with(requireContext()).load(uploadedImageUrl).into(imageView);
-                            addImageButton.setVisibility(view.GONE);
-
-                            dialog.dismiss();
-                        })
-                )
-                .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(), "Upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
     }
 
     private void addMockImageToGallery() {
