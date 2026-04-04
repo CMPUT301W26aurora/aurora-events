@@ -3,6 +3,7 @@ package com.example.auroraevents.view;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.google.android.material.textfield.TextInputLayout;
 public class EventCreationFragment extends Fragment {
     //TODO 4: copy into edit event fragment
     private ImageButton backButton;
+    private final String TAG = "EventCreationFragment";
     private Button addImageButton;
     private TextInputEditText eventNameInput;
     private TextInputEditText eventDescInput;
@@ -80,18 +82,17 @@ public class EventCreationFragment extends Fragment {
         confirmButton.setEnabled(false);
         confirmButton.setAlpha(0.5f);
 
-        String deviceId = Settings.Secure.getString(
-                getContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
+            if (u != null) {
+                this.user = u;
 
-        userViewModel.fetchOrganizer(deviceId);
-        userViewModel.getOrganizer().observe(getViewLifecycleOwner(), org -> {
-            if (org != null) {
-                this.organizer = org;
-                this.user = org;
-                confirmButton.setEnabled(true);
-                confirmButton.setAlpha(1.0f);
+                if(u.getRole().equals(User.ROLE_ORGANIZER)) {
+                    this.organizer = new Organizer(u);
+                    confirmButton.setEnabled(true);
+                    confirmButton.setAlpha(1.0f);
+                } else{
+                    Log.e(TAG, "User is not an Organizer instance");
+                }
             }
         });
 

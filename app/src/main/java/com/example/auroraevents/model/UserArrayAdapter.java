@@ -17,6 +17,9 @@ import com.example.auroraevents.view.UserListFragment;
 
 import java.util.List;
 
+/**
+ * Might switch this to a recyclerView
+ */
 public class UserArrayAdapter extends ArrayAdapter<User> {
     private Event currentEvent;
     private ImageButton deleteButton;
@@ -44,10 +47,6 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
 
         if (user != null) {
             userName.setText(user.getName());
-            String status = user.getStatus();
-            if (status != null) {
-                userStatus.setText(status);
-            }
         }
 
         // Remove user button

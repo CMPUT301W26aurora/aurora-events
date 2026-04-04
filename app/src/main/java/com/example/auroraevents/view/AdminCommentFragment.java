@@ -30,6 +30,7 @@ public class AdminCommentFragment extends Fragment {
     private final static String TAG = "AdminCommentFragment";
     private String userId;
     private Boolean isAdmin;
+    private Boolean inAdmin;
     private CommentAdapter adapter;
     private UserViewModel userViewModel;
     private User user;
@@ -51,21 +52,31 @@ public class AdminCommentFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @androidx.annotation.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         //https://developer.android.com/guide/fragments/lifecycle
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
-            user = u;
+            if(u != null){
+                user = u;
+                userId = u.getDeviceId();
+                isAdmin = user.getIsAdmin();
+                adapter.setIsAdmin(isAdmin);
+                adapter.notifyDataSetChanged();
 
-            isAdmin = user.getAdmin();
-            adapter.setIsAdmin(isAdmin);
-            adapter.notifyDataSetChanged();
+
+            }
+
 
         });
+        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), modeActive -> {
+            if(modeActive != null){
+                adapter.setIsAdmin(isAdmin);
+                adapter.setInAdmin(modeActive);
 
+                adapter.notifyDataSetChanged();
+            }
+        });
         commentListenerRegistrationAll = CommentDb.getInstance().commentListenerAll( comments ->{
             if (comments != null) {
                 adapter.setComments(comments);
@@ -103,7 +114,7 @@ public class AdminCommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, isAdmin, null, true);
+        }, userId, isAdmin, null, true, false);
         //set recyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);

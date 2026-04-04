@@ -12,9 +12,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 
 import java.util.concurrent.CountDownLatch;
@@ -27,6 +29,8 @@ public class LoginFragment extends Fragment {
     EditText nameEdit;
     EditText emailEdit;
     EditText phoneEdit;
+
+    UserViewModel userViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,10 +45,13 @@ public class LoginFragment extends Fragment {
         emailEdit = view.findViewById(R.id.user_email);
         phoneEdit = view.findViewById(R.id.user_phone_number);
 
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+
         view.findViewById(R.id.confirm_button).setOnClickListener(v -> {
             if (nameEdit.getText().toString().isEmpty() || emailEdit.getText().toString().isEmpty()) {
                 Toast.makeText(view.getContext(), R.string.mandatory_fields_toast_text, Toast.LENGTH_SHORT).show();
             } else {
+                v.setEnabled(false);
                 Toast.makeText(view.getContext(), "confirm", Toast.LENGTH_SHORT).show();
                 /* Update user info */
                 // create new User
@@ -56,35 +63,29 @@ public class LoginFragment extends Fragment {
                         User.ROLE_ENTRANT,
                         false
                 );
-                // update db
-                CountDownLatch latch = new CountDownLatch(1);
-                AtomicReference<Boolean> status = new AtomicReference<>(true);
-                UserDb.getInstance().addUser(user,
-                        latch::countDown,
-                        e -> {
-                            status.set(false);
-                            latch.countDown();
+                //https://medium.com/@yossisegev/understanding-activity-runonuithread-e102d388fe93
+                UserDb.getInstance().addUser(user, ()->{
+                    requireActivity().runOnUiThread(()->{
+                        Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
+
+                        userViewModel.selectItem(user);
+
+
+                        if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                            getParentFragmentManager().popBackStack();
+                        } else {
+                            getParentFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, new EventFragment())
+                                    .commit();
                         }
-                );
 
-                try {
-                    if (!latch.await(10, TimeUnit.SECONDS)) {
-                        Log.w("LoginFragment", "user update timed out");
-                    }
-                } catch (InterruptedException e) {
-                    Log.w("LoginFragment", "user update interrupted");
-                }
-
-                if (status.get()) {
-                    Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .remove(this)
-                            .commit();
-                } else {
-                    // show network error
-                    Toast.makeText(view.getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
-                }
+                    });
+                }, e->{
+                    requireActivity().runOnUiThread(() -> {
+                        v.setEnabled(true);
+                        Toast.makeText(getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
+                    });
+                });
             }
         });
     }
