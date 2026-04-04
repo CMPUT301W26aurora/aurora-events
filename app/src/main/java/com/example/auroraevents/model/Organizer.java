@@ -1,20 +1,34 @@
 package com.example.auroraevents.model;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
+    private String deviceID;
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String role;
+    private boolean isAdmin;
 
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
-        myEvents = new ArrayList<Event>();
+        myEvents = new ArrayList<>();
+    }
+
+    public Organizer(String deviceID, String name, String email, String phoneNumber, String role, boolean isAdmin) {
+        super(deviceID, name, email, phoneNumber, role, isAdmin);
+        setRole(User.ROLE_ORGANIZER);
+        myEvents = new ArrayList<>();
     }
 
     public ArrayList<Event> getMyEvents() {
@@ -26,17 +40,34 @@ public class Organizer extends User {
     }
 
     /**
-     * @param organizerDeviceId  The organizer's device ID
-     * @param title              The title of the event
-     * @param description        The event description
-     * @param date               The date of the event, format: yyyy-MM-dd HH:mm:ss
-     * @param startTime          The start of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param endTime            The end of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param location           The event location
-     * @param capacity           The event capacity
+     * @param organizerDeviceId   The organizer's device ID
+     * @param title               The title of the event
+     * @param description         The event description
+     * @param price               The event's price
+     * @param date                The date of the event, format: yyyy-MM-dd HH:mm:ss
+     * @param startTime           The start of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param endTime             The end of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param location            The event location
+     * @param geolocationRequired Whether entrants need to be in the location to sign up
+     * @param waitingCapacity     The total number of entrants that could attend the event
+     * @param attendingCapacity   The total number of entrants that can join the waiting list
+     * @param poster              A pretty picture for the event info screen
      */
     public void CreateEvent(String organizerDeviceId, String title, String description, String date,
                             String startTime, String endTime, String location, int capacity, String imageUrl) {
+    public void CreateEvent(
+            String organizerDeviceId,
+            String title,
+            String description,
+            String price,
+            String date,
+            String startTime,
+            String endTime,
+            String location,
+            boolean geolocationRequired,
+            int waitingCapacity,
+            int attendingCapacity,
+            Bitmap poster) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -45,11 +76,20 @@ public class Organizer extends User {
         LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
 
         // Create event from parameters
-        Event event = new Event(organizerDeviceId, title, description,
+        Event event = new Event(
+                organizerDeviceId,
+                title,
+                description,
+                price,
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
                 location, capacity, imageUrl);
+                location,
+                geolocationRequired,
+                waitingCapacity,
+                attendingCapacity);
+        event.setGeolocationRequired(geolocationRequired);
 
         EventDb.addEvent(event,
                 eventId -> {
@@ -58,33 +98,5 @@ public class Organizer extends User {
                 },
                 e -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );
-    }
-
-    /**
-     * Randomly samples users in the waiting list of the specified event
-     * @param event
-     * Event that the organizer wants to sample in
-     */
-    public void sampleWaitList(Event event) {
-        if (!(myEvents.contains(event))) {
-            throw new IllegalArgumentException("Event not found");
-        } else {
-            event.randomSampling();
-        }
-    }
-
-    /**
-     * Gets the list of users that are in the waiting list of the specified event
-     * @param event
-     * The event the organizer wants to get the waiting list of
-     * @return
-     * Return the waiting list of users in the specified event
-     */
-    public ArrayList<User> getEventWaitList(Event event) {
-        if (myEvents.contains(event)) {
-            return event.getWaitingListOfUsers();
-        } else {
-            throw new IllegalArgumentException("Event not found");
-        }
     }
 }

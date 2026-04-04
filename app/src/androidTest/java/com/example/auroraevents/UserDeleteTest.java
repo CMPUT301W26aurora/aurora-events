@@ -1,12 +1,12 @@
 package com.example.auroraevents;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpWaitingList;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.setUpUser;
 import static com.example.auroraevents.TestsSupport.signIn;
@@ -30,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 
 public class UserDeleteTest {
+    //Testing with Live database is a big no-no. Refactor with Mockito...
+    /**
     User user;
     User user2;
     Event waitingEvent;
@@ -52,7 +54,8 @@ public class UserDeleteTest {
                 "User for the user delete tests",
                 "user@delete.test",
                 "5559998888",
-                User.ROLE_ENTRANT
+                User.ROLE_ENTRANT,
+                false
         );
         setUpUser(user);
 
@@ -61,7 +64,8 @@ public class UserDeleteTest {
                 "Second user for the user delete test",
                 "user2@delete.test",
                 "1234567890",
-                User.ROLE_ENTRANT
+                User.ROLE_ENTRANT,
+                false
         );
         setUpUser(user2);
 
@@ -69,56 +73,62 @@ public class UserDeleteTest {
                 "test organizer",
                 "waiting",
                 "event for user on the waiting list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                0, false);
         selectedEvent = new Event(
                 "test organizer",
                 "selected",
                 "event for user on the selected list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                0, false);
         attendingEvent = new Event(
                 "test organizer",
                 "attending",
                 "event for user on the attending list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                0, false);
         declinedEvent = new Event(
                 "test organizer",
                 "declined",
                 "event for user on the declined list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                0, false);
         cancelledEvent = new Event(
                 "test organizer",
                 "cancelled",
                 "event for user on the cancelled list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                0, false);
         removedEvent = new Event(
                 "test organizer",
                 "removed",
                 "event for user on the removed list for profile delete test",
+                "free",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                0);
+                0, false);
 
         setUpEvent(waitingEvent);
         setUpWaitingList(waitingEvent.registrationList, user.getDeviceId());
@@ -288,4 +298,6 @@ public class UserDeleteTest {
         checkSingle(cancelledEvent.registrationList, user2.getDeviceId());
         checkSingle(removedEvent.registrationList, user2.getDeviceId());
     }
+    **/
+
 }

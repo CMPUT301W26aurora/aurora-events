@@ -1,16 +1,16 @@
-package com.example.auroraevents;
+package com.example.auroraevents.registration_tests;
 
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAllLists;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAllLists;
 import static com.example.auroraevents.TestsSupport.setUpEvent;
 import static com.example.auroraevents.TestsSupport.signIn;
 import static com.example.auroraevents.TestsSupport.takeDownEvent;
-import static com.example.auroraevents.RegistrationListTestsSupport.checkSingle;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpAttendingList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpCancelledList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpDeclinedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpRemovedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpSelectedList;
-import static com.example.auroraevents.RegistrationListTestsSupport.setUpWaitingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.checkSingle;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpAttendingList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpCancelledList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpDeclinedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpRemovedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpSelectedList;
+import static com.example.auroraevents.registration_tests.RegistrationListTestsSupport.setUpWaitingList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,11 +50,12 @@ public class RegistrationWaitingListTest {
                 "test device",
                 "registration test",
                 "event for registration waiting list test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                0);
+                0, false);
         setUpEvent(event);
         list = event.registrationList;
         entrantID = "aurora";

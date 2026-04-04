@@ -1,11 +1,14 @@
 package com.example.auroraevents.server;
 
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import com.example.auroraevents.model.Event;
+import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -13,8 +16,13 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 /**
@@ -64,6 +72,56 @@ public class EventDb {
     }
 
     // ── CREATE ─────────────────────────────────────────────────────────────
+
+    //https://firebase.google.com/docs/storage/android/upload-files
+    public void saveUrlToFirestore(String eventId, String url, String field){
+        db.collection(COLLECTION_NAME)
+                .document(eventId)
+                .update(field, url)
+                .addOnSuccessListener(unused->{
+                    Log.d(TAG, "added image " + field);
+                })
+                .addOnFailureListener(e->{
+                   Log.e(TAG, "Failed upload to " + field + " " +e );
+                });
+    }
+
+    public void uploadPoster(Uri uri, String eventId) {
+        if (uri == null || eventId == null) return;
+
+        StorageReference fileRef = FirebaseStorage.getInstance().getReference()
+                        .child(eventId + "/" +"poster.jpg");
+
+        fileRef.putFile(uri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    fileRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                        saveUrlToFirestore(eventId, downloadUri.toString(), "posterUrl");
+                    });
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Upload failed for poster", e));
+    }
+
+    public void uploadQr(Bitmap qr, String eventId){
+        if (qr == null || eventId == null) return;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        qr.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+
+        StorageReference fileRef = FirebaseStorage.getInstance().getReference()
+                .child(eventId + "/" +"qr.png");
+
+        fileRef.putBytes(data)
+                .addOnSuccessListener(taskSnapshot->{
+                    fileRef.getDownloadUrl().addOnSuccessListener(downloadUri->{
+                        saveUrlToFirestore(eventId, downloadUri.toString(), "qrCodeUrl");
+                    });
+                })
+                .addOnFailureListener(e->Log.e(TAG, "Upload failed for url"));
+    }
+
+
 
     /**
      * Adds a new event document to Firestore with an auto-generated ID.
@@ -264,6 +322,32 @@ public class EventDb {
     }
 
     /**
+     * Removes a user by device id from all of a given events lists
+     *
+     * @param eventId   The event to remove from.
+     * @param userID    The user who is being removed.
+     * @param onSuccess Called on Success
+     * @param onFailure Called with exception on failure
+     */
+    public void removeUserFromAllLists(String eventId, String userID, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+
+        eventRef.update(
+                        LIST_WAITING, FieldValue.arrayRemove(userID),
+                        LIST_SELECTED, FieldValue.arrayRemove(userID),
+                        LIST_ATTENDING, FieldValue.arrayRemove(userID),
+                        LIST_DECLINED, FieldValue.arrayRemove(userID),
+                        LIST_CANCELLED, FieldValue.arrayRemove(userID),
+                        LIST_REMOVED, FieldValue.arrayRemove(userID)
+                )
+                .addOnSuccessListener(unused -> onSuccess.onSuccess())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove user from all lists");
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
      * Moves a user from one participant list to another atomically using a Firestore batch write.
      *
      * @param eventId       The event document ID.
@@ -288,7 +372,60 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
+    /**
+     * Moves a user from the Selected list to the Attending list.
+     */
+    public void userAcceptSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_SELECTED, LIST_ATTENDING, userId, onSuccess, onFailure);
+    }
 
+    /**
+     * Moves a user from the Selected list to the Declined list.
+     */
+    public void userDeclineSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_SELECTED, LIST_DECLINED, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Adds a user to the waiting list.
+     */
+    public void joinWaitlist(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        addUserToList(eventId, LIST_WAITING, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Moves a user from the Waiting list to the canceled list (User clicked 'Leave Pool').
+     */
+    public void leaveWaitlist(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_WAITING, LIST_CANCELLED, userId, onSuccess, onFailure);
+    }
+
+    //https://www.geeksforgeeks.org/firebase/how-to-update-an-array-of-objects-with-firestore/
+    /**
+     * Batch move users from one list to another
+     *
+     * @param eventId       The event document ID
+     * @param fromFieldName The list moving from
+     * @param toFieldName   the list moving to
+     * @param ids           the users to batch move
+     * @param onSuccess     Called on success
+     * @param onFailure     called on failure
+     */
+    public void moveGroupUsers(String eventId, String fromFieldName, String toFieldName, List<String> ids,
+                               OnSuccessCallback onSuccess, OnFailureCallback onFailure){
+        WriteBatch batch = db.batch();
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+
+        batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
+        batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+
+        batch.commit()
+                .addOnSuccessListener(unused -> onSuccess.onSuccess())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to group move users between lists. Event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
     /**
      * Stores the QR code data string on the event document.
      *
@@ -312,22 +449,56 @@ public class EventDb {
     // ── DELETE ─────────────────────────────────────────────────────────────
 
     /**
-     * Deletes an event document from Firestore.
+     * Deletes an event document from Firestore
      *
      * @param eventId   The document ID of the event to delete.
      * @param onSuccess Called when the deletion succeeds.
      * @param onFailure Called with the exception if the deletion fails.
      */
     public void deleteEvent(String eventId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        db.collection(COLLECTION_NAME)
-                .document(eventId)
+        db.collection(COLLECTION_NAME).document(eventId)
                 .delete()
-                .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "Event deleted: " + eventId);
+                .addOnSuccessListener(querySnapshot -> {
+                    Log.d(TAG, "Event Deleted" + eventId);
                     onSuccess.onSuccess();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to delete event: " + eventId, e);
+                    Log.e(TAG, "Failed to delete Event", e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    public void deletePoster(String eventId, OnSuccessCallback onSuccess, OnFailureCallback onFailure){
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        db.collection(COLLECTION_NAME).document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot->{
+                    String posterUrl = documentSnapshot.getString("posterUrl");
+                    if(posterUrl != null && !posterUrl.isEmpty() ){
+                        StorageReference photoRef = storage.getReferenceFromUrl(posterUrl);
+
+                        photoRef.delete().addOnSuccessListener(aVoid -> {
+                            //on succesfull photo delete
+                            Log.d(TAG, "Deleted event poster");
+                            db.collection(COLLECTION_NAME).document(eventId)
+                                    .update("posterUrl", null)
+                                    .addOnSuccessListener(v -> {
+                                        //on url field clear
+                                        Log.d(TAG, "Deleted poster and cleared URL");
+                                        onSuccess.onSuccess();
+                                    })
+                                    .addOnFailureListener(e->{
+                                        //failure to clear url
+                                        Log.e(TAG, "failed to delete URL", e);
+                                        onFailure.onFailure(e);
+                                    });
+                        });
+                    }else{
+                        //nothing to delete, we good
+                        onSuccess.onSuccess();
+                    }
+                }).addOnFailureListener(e->{
+                    Log.e(TAG, "failed to grab event info");
                     onFailure.onFailure(e);
                 });
     }
@@ -357,4 +528,5 @@ public class EventDb {
         });
 
     }
+
 }

@@ -1,28 +1,22 @@
 package com.example.auroraevents.model;
 
 
-import android.os.Build;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import android.graphics.Bitmap;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import android.graphics.Bitmap;
-
-import com.example.auroraevents.server.UserDb;
 import com.google.firebase.firestore.Exclude;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents an event in the application.
@@ -32,10 +26,11 @@ public class Event {
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private String  eventId;          // Firestore document ID (set after creation)
-    private String  organizerDeviceId;
-    private String  name;
-    private String  description;
+    private String eventId;          // Firestore document ID (set after creation)
+    private String organizerDeviceId;
+    private String name;
+    private String description;
+    private String price;
     private String dateTime;              // stored as "yyyy-MM-dd"
     private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
     private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
@@ -44,37 +39,76 @@ public class Event {
     private String  imageUrl;
     private String  qrCodeData;       // String payload encoded in the QR code
     private Bitmap qR;
+    private String location;
+    private String qrUrl;
+    private String posterUrl;
+
+    private boolean geolocationRequired;
+    private boolean isPrivate;
+    private List<String> reports;
+    private double latitude;
+    private double longitude;
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
 
-    private List<String> waitingList;     // signed up, awaiting lottery
-    private List<String> selectedList;    // drawn / invited but not yet confirmed
-    private List<String> attendingList;   // confirmed attendees
-    private List<String> declinedList;    // invited then self declined
-    private List<String> cancelledList;   // self cancelled
-    private List<String> removedList;     // force removed
-
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
         registrationList = new RegistrationList();
+        reports = new ArrayList<>();
     }
 
     public Event(String organizerDeviceId, String name, String description,
                  LocalDateTime dateTime, LocalDateTime registrationStart,
                  LocalDateTime registrationEnd, String location, int capacity, String imageUrl) {
+    public Event(
+            String organizerDeviceId,
+            String name,
+            String description,
+            String price,
+            LocalDateTime dateTime,
+            LocalDateTime registrationStart,
+            LocalDateTime registrationEnd,
+            String location,
+            boolean geolocationRequired,
+            int waitingCapacity,
+            int attendingCapacity) {
         this();
-        this.organizerDeviceId = organizerDeviceId;
-        this.name              = name;
-        this.description       = description;
-        this.dateTime = dateTime.format(FORMATTER); // "yyyy-MM-dd"
+        this.organizerDeviceId     = organizerDeviceId;
+        this.name                  = name;
+        this.description           = description;
+        this.price                 = price;
+        this.dateTime              = dateTime.format(FORMATTER); // "yyyy-MM-dd"
         this.registrationTimeStart = registrationStart.format(FORMATTER);
         this.registrationTimeEnd   = registrationEnd.format(FORMATTER);
         this.location          = location;
         this.capacity          = capacity;
         this.imageUrl          = imageUrl;
+        this.location              = location;
+        this.geolocationRequired   = geolocationRequired;
+        this.registrationList.setWaitingCapacity(waitingCapacity);
+        this.registrationList.setAttendingCapacity(attendingCapacity);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Event event = (Event) o;
+        return
+                Objects.equals(getEventId(), event.getEventId()) &&
+                Objects.equals(getOrganizerDeviceId(), event.getOrganizerDeviceId()) &&
+                Objects.equals(getName(), event.getName()) &&
+                Objects.equals(getDescription(), event.getDescription()) &&
+                Objects.equals(getPrice(), event.getPrice()) &&
+                Objects.equals(getDateTime(), event.getDateTime()) &&
+                Objects.equals(getRegistrationTimeStart(), event.getRegistrationTimeStart()) &&
+                Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
+                Objects.equals(getLocation(), event.getLocation()) &&
+                getGeolocationRequired() == event.getGeolocationRequired() &&
+                getNumReports() == event.getNumReports() &&
+                Objects.equals(registrationList, event.registrationList)
+                ;
+    }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
 
@@ -85,35 +119,63 @@ public class Event {
     }
 
 
-    public String getOrganizerDeviceId()                               { return organizerDeviceId; }
-    public void   setOrganizerDeviceId(String organizerDeviceId)       { this.organizerDeviceId = organizerDeviceId; }
+    public String getOrganizerDeviceId()                         { return organizerDeviceId; }
+    public void   setOrganizerDeviceId(String organizerDeviceId) { this.organizerDeviceId = organizerDeviceId; }
 
-    public String getName()                            { return name; }
-    public void   setName(String name)                 { this.name = name; }
+    public String getName()            { return name; }
+    public void   setName(String name) { this.name = name; }
 
-    public String getDescription()                     { return description; }
-    public void   setDescription(String description)   { this.description = description; }
+    public String getDescription()                   { return description; }
+    public void   setDescription(String description) { this.description = description; }
 
-    public String getDateTime()                      { return dateTime; }
-    public void   setDateTime(String dateTime)       { this.dateTime = dateTime; }
+    public String getPrice()             { return price; }
+    public void   setPrice(String price) { this.price = price; }
 
-    public String getRegistrationTimeStart()                         { return registrationTimeStart; }
+    public String getDateTime()                { return dateTime; }
+    public void   setDateTime(String dateTime) { this.dateTime = dateTime; }
+
+    public String getRegistrationTimeStart()                             { return registrationTimeStart; }
     public void   setRegistrationTimeStart(String registrationTimeStart) { this.registrationTimeStart = registrationTimeStart; }
 
     public String getRegistrationTimeEnd()                           { return registrationTimeEnd; }
     public void   setRegistrationTimeEnd(String registrationTimeEnd) { this.registrationTimeEnd = registrationTimeEnd; }
 
-    public String getLocation()                      { return location; }
-    public void   setLocation(String location)       { this.location = location; }
+    public String getLocation()                { return location; }
+    public void   setLocation(String location) { this.location = location; }
 
-    public int    getCapacity()                      { return capacity; }
-    public void   setCapacity(int capacity)          { this.capacity = capacity; }
+    public boolean getGeolocationRequired()                            { return geolocationRequired; }
+    public void    setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
+  
+    public boolean isPrivate()                   { return isPrivate; }
+    public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
 
     public String getImageUrl()                      { return imageUrl; }
     public void setImageUrl(String imageUrl)         { this.imageUrl = imageUrl; }
 
     public String getQrCodeData()                    { return qrCodeData; }
     public void   setQrCodeData(String qrCodeData)   { this.qrCodeData = qrCodeData; }
+    public int  getNumReports() { return reports.size(); }
+
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude()  { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    /**
+     * Adds a report
+     * @param userId The device ID of the user reporting the event
+     * @return
+     *     {@code 0}  when success
+     *     {@code -1} when the user has already reported the event
+     */
+    public int addReport(String userId) {
+        if (!reports.contains(userId)) {
+            reports.add(userId);
+            return 0;
+        } else
+            return -1;
+    }
 
     // Converters
     @Exclude
@@ -131,17 +193,27 @@ public class Event {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
 
-    public Bitmap       getQrCode()                                    { return this.qR; }
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getQrUrl() {
+        return qrUrl;
+    }
+
+    public void setQrUrl(String qrUrl) {
+        this.qrUrl = qrUrl;
+    }
 
     // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
-    /**
-     * takes a string of data and converts to a bitmap QR code
-     * The string data is defined in the constructor and using this produces a bitmap
-     * that returns the value specified inside the variable
-     * @author Sean Ross
-     */
+
+
     @Exclude
-    public void generateQrCode(){
+    public Bitmap generateQrCode(){
         MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
         try{
             // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
@@ -154,143 +226,12 @@ public class Event {
 
             //convert matrix to bitmap, can be used in image view
             BarcodeEncoder encoder = new BarcodeEncoder();
-            qR = encoder.createBitmap(matrix);
+            return encoder.createBitmap(matrix);
         }
         catch (WriterException e){
             Log.e("EVENT","Error encoding QR code", e);
+            return null;
         }
-    }
 
-    /**
-     * Returns the amount of empty slots that is available in the event
-     * @return
-     * Amount of empty slots available
-     */
-    @Exclude
-    public int getEmptySlotAmount() {
-        return capacity - registrationList.getAttendingList().size() - registrationList.getSelectedList().size();
     }
-
-    /**
-     * Connects and fetches user objects from database using their device IDs and returns an array list of them
-     * @param listOfDeviceIDs
-     * The list of user's device IDs
-     * @return
-     * The list of user objects that were fetched with given device IDs
-     */
-    @Exclude
-    public ArrayList<User> getUsersFromDB(List<String> listOfDeviceIDs) {
-        ArrayList<User> listOfUsers = new ArrayList<User>();
-        // Fetch users from database
-        var ref = new Object() {
-            User returnedUser;
-        };
-        for (String userId : listOfDeviceIDs) {
-            CountDownLatch latch = new CountDownLatch(1);
-            UserDb.getInstance().getUser(userId,
-                    user -> {
-                        ref.returnedUser = user;
-                        latch.countDown();
-                    },
-                    e -> {
-                        Log.e("Main", "Error fetching user", e);
-                        latch.countDown();
-                    }
-            );
-            try {
-                assert latch.await(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                continue;
-            }
-            if (ref.returnedUser != null) {
-                listOfUsers.add(ref.returnedUser);
-            }
-        }
-        return listOfUsers;
-    }
-
-    /**
-     * Gets the array list of user objects that are in the waiting list
-     * @return
-     * Return the array list of user objects in the waiting list
-     */
-    @Exclude
-    public ArrayList<User> getWaitingListOfUsers() {
-        return getUsersFromDB(registrationList.getWaitingList());
-    }
-
-    /**
-     * Gets the array list of user objects that are in the selected list
-     * @return
-     * Return the array list of user objects in the selected list
-     */
-    @Exclude
-    public ArrayList<User> getSelectedListOfUsers() {
-        return getUsersFromDB(registrationList.getSelectedList());
-    }
-
-    /**
-     * Gets the array list of user objects that are in the attending list
-     * @return
-     * Return the array list of user objects in the attending list
-     */
-    @Exclude
-    public ArrayList<User> getAttendingListOfUsers() {
-        return getUsersFromDB(registrationList.getAttendingList());
-    }
-
-    /**
-     * Gets the array list of user objects that are in the declined list
-     * @return
-     * Return the array list of user objects in the declined list
-     */
-    @Exclude
-    public ArrayList<User> getDeclinedListOfUsers() {
-        return getUsersFromDB(registrationList.getDeclinedList());
-    }
-
-    /**
-     * Gets the array list of user objects that are in the cancelled list
-     * @return
-     * Return the array list of user objects in the cancelled list
-     */
-    @Exclude
-    public ArrayList<User> getCancelledListOfUsers() {
-        return getUsersFromDB(registrationList.getCancelledList());
-    }
-
-    /**
-     * Gets the array list of user objects that are in the removed list
-     * @return
-     * Return the array list of user objects in the removed list
-     */
-    @Exclude
-    public ArrayList<User> getRemovedListOfUsers() {
-        return getUsersFromDB(registrationList.getRemovedList());
-    }
-
-    /**
-     * Randomly samples users in the waiting list and adds the selected ones to the selected list
-     * then send notification to both the users who were selected and not
-     */
-    @Exclude
-    public void randomSampling() {
-        int amount = getEmptySlotAmount();
-        List<String> waitingList = registrationList.getWaitingList();
-        // There are more empty slots than there are users in waiting list: Select everyone from waiting list
-        // Also do the same if the capacity = 0 (This is when there is no limit)
-        if (capacity == 0 || amount >= waitingList.size()) {
-            registrationList.addAllToSelectedList(waitingList);
-        }
-        else { // Random sampling
-            Random random = new Random();
-            for (int i = 0; i < amount; i++) {
-                // Generate random index using the waitingList size (waiting list will shrink so this will prevent index out of bounds)
-                int randomIndex = random.nextInt(waitingList.size());
-                String selectedUserID = waitingList.get(randomIndex);
-                registrationList.addToSelectedList(selectedUserID);
-            }
-        }
-    }
-
 }

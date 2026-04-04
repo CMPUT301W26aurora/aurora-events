@@ -4,9 +4,11 @@ import android.util.Log;
 
 import com.example.auroraevents.model.User;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -141,6 +143,31 @@ public class UserDb {
                 });
     }
 
+    /**
+     * Fetches a set of users from a list of ids
+     *
+     * @param ids       A list of user ids to be fetched
+     * @param onFetched Called with matching user list
+     * @param onFailure Called with exception on failure
+     */
+    public void fetchUsersByIds(List<String> ids, OnUserListFetchedCallback onFetched, OnFailureCallback onFailure) {
+        if (ids == null || ids.isEmpty()) {
+            onFetched.onFetched(new ArrayList<>());
+            return;
+        }
+        db.collection("users")
+                .whereIn(FieldPath.documentId(), ids)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<User> users = querySnapshot.toObjects(User.class);
+                    onFetched.onFetched(users);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("UserDb", "Batch fetch failed", e);
+                    onFailure.onFailure(e);
+                });
+    }
+
     // ── UPDATE ─────────────────────────────────────────────────────────────
 
     /**
@@ -192,6 +219,13 @@ public class UserDb {
     }
 
     // ── DELETE ─────────────────────────────────────────────────────────────
+
+    //https://firebase.google.com/docs/functions/1st-gen/auth-events
+    //https://firebase.google.com/docs/firestore/manage-data/transactions
+    //https://firebase.google.com/docs/functions/firestore-events
+    //https://firebase.google.com/docs/firestore/manage-data/add-data
+    //https://cloud.google.com/functions
+    //Before you ask, I only kinda hate myself
 
     /**
      * Deletes a user document from Firestore.

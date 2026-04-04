@@ -1,8 +1,135 @@
-const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const {
+    onDocumentUpdated,
+    onDocumentDeleted
+} = require("firebase-functions/v2/firestore");
+const { onCall } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
+const bucket = admin.storage.bucket();
+
+exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
+    const deletedUserId = event.params.userId;
+    const batch = db.batch();
+
+    console.log("Triggered Cleanup for deleted user:", deletedUserId);
+    try {
+            const eventsOwnedSnapshot await db.collection("Events")
+                .where("eventOrganizerId", "==", deletedUserId)
+                .get();
+
+            eventsOwnedSnapshot.forEach(doc => {
+                batch.delete(doc.ref)
+            })
+
+            // delete from all event lists
+            const eventsSnapshot = await db.collection("Events").get();
+            eventsSnapshot.forEach(doc => {
+                batch.update(doc.ref, {
+                    "registrationList.waitingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.selectedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.attendingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.cancelledList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.declinedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.removedList": admin.firestore.FieldValue.arrayRemove(deletedUserId)
+                });
+            });
+
+            // delete users parent comments
+            const parentCommentSnapshot = await db.collection("Comments")
+                .where("userId", "==", deletedUserId)
+                .where("parentId", "==", null)
+                .get();
+
+            parentCommentSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+
+            // delete users replies, cascade will destroy the replies to self, this handles replies to others
+            const replyCommentSnapshot = await db.collection("Comments")
+                .where("userId", "==", deletedUserId)
+                .where("parentId", "!=", null)
+                .get();
+
+            replyCommentSnapshot.forEach(doc =>{
+                batch.delete(doc.ref);
+            })
+
+            // delete users notifications
+            const notificationsSnapshot = await db.collection("Notifications")
+                .where("deviceId", "==", deletedUserId)
+                .get();
+
+            notificationsSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+            console.log("Cleanup complete for user:", deletedUserId);
+
+        } catch (error) {
+            console.error("Error during user cleanup:", error);
+        }
+
+});
+
+exports.onCommentDeleted = onDocumentDeleted("Comments/{commentId}", async (event) => {
+    const deletedCommentId = event.params.commentId;
+    const batch = db.batch();
+
+    console.log("Checking for replies to deleted comment:", deletedCommentId);
+
+    try {
+        // Find all comments that are replies, delete
+        const repliesSnapshot = await db.collection("Comments")
+            .where("parentId", "==", deletedCommentId)
+            .get();
+
+        //if none exit early
+        if (repliesSnapshot.empty) {
+            return null;
+        }
+
+        repliesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log("Deleted replies for parent:",  deletedCommentId, repliesSnapshot.size);
+    } catch (error) {
+        console.error("Error cascading comment deletion:", error);
+    }
+});
+
+exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
+    const deletedEventId = event.params.eventId;
+    const batch = db.batch();
+
+    try {
+        // Find all parent comments, cascade will delete replies
+        const parentSnapshot = await db.collection("Comments")
+            .where("eventId", "==", deletedEventId)
+            .where("parentId", "==", null)
+            .get();
+
+        //https://docs.cloud.google.com/storage/docs/samples/storage-delete-file#storage_delete_file-nodejs
+        //Question asked by user Pat Myron, answered used from TheFastCat
+        //https://stackoverflow.com/questions/37749647/firebasestorage-how-to-delete-directory
+
+        await bucket.deleteFiles({
+                    prefix: `${deletedEventId}/`
+        });
+        parentSnapshot.forEach(doc=>{
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log("Deleted event and its comments", deletedEventId);
+        }catch (error) {
+            console.error("Error deleting events comments", error);
+        }
+});
 
 /**
  * Firestore-triggered Cloud Function that sends push notifications to entrants
@@ -38,6 +165,28 @@ async function notifyNewEntrants(beforeList, afterList, eventId, eventName, titl
         await sendNotification(deviceId, eventId, title, body);
     }
 }
+
+/**
+ * Callable Cloud Function that lets the organizer send a custom push
+ * notification to a specific device. Called from NotificationSender.java.
+ */
+exports.sendNotification = onCall(async (request) => {
+    const { token, title, body, eventId } = request.data;
+    if (!token || !title || !body) {
+        throw new Error("Missing required fields: token, title, body");
+    }
+    try {
+        const result = await admin.messaging().send({
+            token: token,
+            data: { eventId: eventId || "", title, body }
+        });
+        console.log("Custom notification sent:", result);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to send custom notification:", error);
+        throw new Error("Failed to send notification: " + error.message);
+    }
+});
 
 /**
  * Looks up a user's FCM token and sends them a push notification via FCM.

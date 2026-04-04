@@ -21,40 +21,38 @@ public class User {
     // Roles
     public static final String ROLE_ENTRANT   = "entrant";
     public static final String ROLE_ORGANIZER = "organizer";
-    public static final String ROLE_ADMIN     = "admin";
-
     private String deviceId;      // Firestore document ID
     private String name;
     private String email;
     private String phoneNumber;
     private String role;
-    private Integer databaseTimeout;
-    private TimeUnit timeoutUnit;
     private final String TAG = "User";
-
-
+    private Boolean isAdmin;
     // Notification history (stored as notification IDs or message strings)
     private List<String> notificationHistory;
 
     // Tags associated with this user
     private List<String> tags;
-
-
     /** Required no-arg constructor for Firestore deserialization */
     public User() {
+        this.name = "";
+        this.email = "";
+        this.phoneNumber = "";
+        this.role = ROLE_ENTRANT;
+        this.isAdmin = false;
+
         notificationHistory  = new ArrayList<>();
         tags                 = new ArrayList<>();
-        databaseTimeout = 10;
-        timeoutUnit = TimeUnit.SECONDS;
     }
 
-    public User(String deviceId, String name, String email, String phoneNumber, String role) {
+    public User(String deviceId, String name, String email, String phoneNumber, String role, Boolean isAdmin) {
         this();
         this.deviceId        = deviceId;
         this.name            = name;
         this.email           = email;
         this.phoneNumber     = phoneNumber;
         this.role            = role;
+        this.isAdmin = isAdmin;
     }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
@@ -73,95 +71,14 @@ public class User {
 
     public String getRole()                            { return role; }
     public void   setRole(String role)                 { this.role = role; }
-
+    public Boolean getIsAdmin()                          {return isAdmin;}
+    public void setIsAdmin(Boolean admin)                {isAdmin = admin;}
     public List<String> getNotificationHistory()                                   { return notificationHistory; }
     public void         setNotificationHistory(List<String> notificationHistory)   { this.notificationHistory = notificationHistory; }
-    public void         loadNotificationHistory()                                  {
-        FirebaseFirestore.getInstance()
-                .collection("Notifications")
-                .whereEqualTo("deviceId", deviceId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    notificationHistory.clear();
-                    for (QueryDocumentSnapshot doc : snapshot)
-                        notificationHistory.add(doc.getId());
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to load notifications", e));
-    }
 
     public List<String> getTags()                      { return tags; }
     public void         setTags(List<String> tags)     { this.tags = tags; }
 
-    public Integer getDatabaseTimeout() {
-        return databaseTimeout;
-    }
-    public void setDatabaseTimeout(Integer databaseTimeout) {
-        this.databaseTimeout = databaseTimeout;
-    }
 
-    public TimeUnit getTimeoutUnit() {
-        return timeoutUnit;
-    }
-    public void setTimeoutUnit(TimeUnit unit) {
-        timeoutUnit = unit;
-    }
-
-    /**
-     * Deletes the user
-     * @author Jared Strandlund
-     * @return
-     *     {@code 0} when successfully deleted
-     *     {@code 1} when code error
-     *     {@code 2} when database error
-     */
-    public int deleteUser() {
-        AtomicInteger status = new AtomicInteger(0);
-
-        // Delete from events
-        for (String listType : EventDb.ALL_LISTS)
-            EventDb.getInstance().getEventsForUser(deviceId, listType,
-                    events -> {
-                        for (Event event : events) {
-                            Log.d(TAG, "Deleting user " + deviceId);
-                            event.registrationList.setEventId(event.getEventId());
-                            event.registrationList.removeFromAllLists(deviceId);
-                        }
-                        status.set(0);
-                    },
-                    e -> status.set(1)
-            );
-
-        // Delete notifications
-        for (String notification : notificationHistory)
-            if (status.get() <= 0)
-                FirebaseFirestore.getInstance()
-                        .collection("Notifications")
-                        .document(notification)
-                        .delete()
-                        .addOnSuccessListener(unused -> {
-                            Log.d(TAG, "Notification deleted: " + notification);
-                            status.set(0);
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e(TAG, "Failed to delete notification " + notification, e);
-                            status.set(1);
-                        });
-
-        // Remove properties
-        if (status.get() <= 0) {
-            name = "";
-            email = "";
-            phoneNumber = "";
-            role = ROLE_ENTRANT;
-            databaseTimeout = 10;
-            timeoutUnit = TimeUnit.SECONDS;
-            notificationHistory = new ArrayList<>();
-            tags = new ArrayList<>();
-            status.set(0);
-        }
-
-        return status.get();
-    }
 
 }

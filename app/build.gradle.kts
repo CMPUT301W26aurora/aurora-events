@@ -9,6 +9,10 @@ android {
         version = release(36)
     }
 
+    testOptions {
+        animationsDisabled = true
+    }
+
     defaultConfig {
         applicationId = "com.example.auroraevents"
         minSdk = 24
@@ -37,6 +41,7 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        animationsDisabled = true
     }
 }
 
@@ -56,10 +61,15 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation(libs.firebase.storage)
 
+    implementation(libs.firebase.functions)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.7.0"){
+        exclude(group = "com.google.android.apps.common.testing.accessibility.framework", module = "accessibility-test-framework")
+    }
     androidTestImplementation(libs.rules)
     androidTestImplementation(libs.uiautomator)
     androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -70,4 +80,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
     implementation("com.google.firebase:firebase-appcheck-debug")
+
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("org.osmdroid:osmdroid-android:6.1.17")
 }

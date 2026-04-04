@@ -4,12 +4,14 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,11 +39,15 @@ public class EventFragment extends Fragment {
     private static final String TAG = "EventFragment";
     private FloatingActionButton addEventButton;
     private UserViewModel userViewModel;
+    private String userId;
+    private ArrayList<Event> allEventsList;
+    private TextView noEventText;
+    private EventArrayAdapter eventsAdapter;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
     /**
-     *
+     * @author Alina Iqbal
      * @param inflater The LayoutInflater object that can be used to inflate
      * any views in the fragment,
      * @param container If non-null, this is the parent view that the fragment's
@@ -49,8 +55,6 @@ public class EventFragment extends Fragment {
      * but this can be used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      * from a previous saved state as given here.
-     *
-     * @return
      */
     @Nullable
     @Override
@@ -63,39 +67,52 @@ public class EventFragment extends Fragment {
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                userId = user.getDeviceId();
+            }
+
             Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
-            if (user != null && User.ROLE_ORGANIZER.equals(user.getRole())) {
+            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()))) {
                 addEventButton.setVisibility(VISIBLE);
             } else {
                 addEventButton.setVisibility(GONE);
             }
         });
 
-        ListView listView = root.findViewById(R.id.events_list);
+        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), isAdminMode -> {
+            if(isAdminMode){
+                addEventButton.setVisibility(GONE);
+            }
+        });
 
-        // Inflate and add the header
-        View header = inflater.inflate(R.layout.header_event_fragment, listView, false);
-        listView.addHeaderView(header, null, false);
-
-        ArrayList<com.example.auroraevents.model.Event>eventList = new ArrayList<>();
         ListView eventsListView = root.findViewById(R.id.events_list);
 
-        // get user's device ID to determine user's status for the event
-        String userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        // Inflate and add the header
+        View header = inflater.inflate(R.layout.header_event_fragment, eventsListView, false);
+        eventsListView.addHeaderView(header, null, false);
+
+        allEventsList = new ArrayList<>();
+        ArrayList<Event> eventList = new ArrayList<>();
+
         // create adapter with eventList
-        com.example.auroraevents.model.EventArrayAdapter eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
+        eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
         eventsListView.setAdapter(eventsAdapter);
+
+        noEventText = root.findViewById(R.id.no_event_found_text);
 
         // resource used: https://stackoverflow.com/questions/7309259/get-list-of-attributes-of-an-object-in-an-list
         // get all events from firestore
         EventDb.getInstance().getAllEvents(events -> {
-            for (com.example.auroraevents.model.Event event : events) {
-                Log.d(TAG, "Event" +  event.getName() + " in " + event.getLocation());
-                eventList.add(event);
+            for (Event event : events) {
+                Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
+                boolean isPrivate = event.isPrivate();
+                if (!isPrivate) {
+                    allEventsList.add(event);
+                    eventList.add(event);
+                }
             }
             eventsAdapter.notifyDataSetChanged();
-        }, e -> Log.d(TAG, "Error fetching events" + e.getMessage())
-        );
+        }, e -> Log.d(TAG, "Error fetching events" + e.getMessage()));
 
         // handle event taps by user to get the event's position
         eventsListView.setOnItemClickListener((parent, v, position, id) -> {
@@ -105,30 +122,127 @@ public class EventFragment extends Fragment {
             // pass eventID to InfoUFragment using bundle
             Bundle args = new Bundle();
             args.putString("eventId", selectedEvent.getEventId());
+            args.putString("userId", userId);
 
-            InfoUEventFragment infoUEventFragment = new InfoUEventFragment();
-            infoUEventFragment.setArguments(args);
+            if (userId == null) {
+                Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
+            Fragment eventFragment;
+            if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
+                //TODO 5: open event edit
+                eventFragment = new InfoUEventFragment();
+                eventFragment.setArguments(args);
+            } else {
+                eventFragment = new InfoUEventFragment();
+                eventFragment.setArguments(args);
+            }
             // resource used: https://developer.android.com/guide/fragments/fragmentmanager
             // navigate to InfoUEventFragment
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, infoUEventFragment)
+                    .hide(this)
+                    .add(R.id.fragment_container, eventFragment)
                     .addToBackStack(null)
                     .commit();
         });
 
-        addEventButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        addEventButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container, new EventCreationFragment())
                         .addToBackStack(null)
-                        .commit();
+                        .commit());
+
+        // set SearchView query text listener
+        SearchView searchView = root.findViewById(R.id.search_event);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.trim().isEmpty()) {
+                    keywordSearchEvents("", eventList);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                keywordSearchEvents(query.trim(), eventList);
+                searchView.clearFocus();
+                return true;
             }
         });
-
         return root;
+    }
+
+    /**
+     * filter events to match searched keywords
+     * return all events when nothing is being searched
+     * private events are never included in results
+     *
+     * @param searchKeyword keyword entered by user to search for
+     * @param eventList original list of events to search through
+     * @return filtered list of events matching the keyword
+     */
+    public ArrayList<Event> filterKeywordEvents(String searchKeyword, ArrayList<com.example.auroraevents.model.Event> eventList) {
+        String searchedQuery = searchKeyword.toLowerCase();
+        ArrayList<com.example.auroraevents.model.Event> filteredEventsList = new ArrayList<>();
+
+        if (searchedQuery.isEmpty()) {
+            // display all public events when search is cleared
+            for (com.example.auroraevents.model.Event event : eventList) {
+                if (!event.isPrivate()) {
+                    filteredEventsList.add(event);
+                }
+            }
+        } else {
+            for (com.example.auroraevents.model.Event event : eventList) {
+                // don't include private events for keyword search
+                if (event.isPrivate()) continue;
+                // convert event name to lower case
+                String searchedEventName = event.getName();
+                if (searchedEventName != null) {
+                    searchedEventName = searchedEventName.toLowerCase();
+                } else {
+                    searchedEventName = "";
+                }
+                // convert event description to lower case
+                String searchedEventDescription = event.getDescription();
+                if (searchedEventDescription != null) {
+                    searchedEventDescription = searchedEventDescription.toLowerCase();
+                } else {
+                    searchedEventDescription = "";
+                }
+                // add event to filtered list if keyword matches
+                if (searchedEventName.contains(searchedQuery) || searchedEventDescription.contains(searchedQuery)) {
+                    filteredEventsList.add(event);
+                }
+            }
+        }
+        return filteredEventsList;
+    }
+
+    /**
+     * display required event list when keyword matches
+     * displays message when no keyword matches
+     *
+     * @param searchKeyword  keyword entered by user to search for
+     * @param eventArrayList filtered event list
+     */
+    public void keywordSearchEvents(String searchKeyword, ArrayList<Event> eventArrayList) {
+        ArrayList<Event> searchResults = filterKeywordEvents(searchKeyword, allEventsList);
+        eventArrayList.clear();
+        eventArrayList.addAll(searchResults);
+        eventsAdapter.notifyDataSetChanged();
+
+        // show no such event message when there are no search results
+        if (noEventText != null) {
+            if (eventArrayList.isEmpty() && !searchKeyword.trim().isEmpty()) {
+                noEventText.setVisibility(VISIBLE);
+            } else {
+                noEventText.setVisibility(GONE);
+            }
+        }
     }
 }

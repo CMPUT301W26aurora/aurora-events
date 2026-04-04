@@ -5,18 +5,31 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.auroraevents.R;
+import com.example.auroraevents.view.RemoveUserPopUpDialog;
+import com.example.auroraevents.view.UserListFragment;
 
-import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Might switch this to a recyclerView
+ */
 public class UserArrayAdapter extends ArrayAdapter<User> {
-    public UserArrayAdapter(Context context, ArrayList<User> users) {
+    private Event currentEvent;
+    private ImageButton deleteButton;
+    private UserListFragment parentFragment;
+    private UserArrayAdapter userListAdapter;
+    public UserArrayAdapter(Context context, List<User> users, Event event, UserArrayAdapter userListAdapter, UserListFragment parentFragment) {
         super(context, 0, users);
+        currentEvent = event;
+        this.parentFragment = parentFragment;
+        this.userListAdapter = userListAdapter;
     }
 
     @NonNull
@@ -30,19 +43,23 @@ public class UserArrayAdapter extends ArrayAdapter<User> {
         }
         User user = getItem(position);
         TextView userName = view.findViewById(R.id.user_name);
-        TextView userEmail = view.findViewById(R.id.user_email);
-        TextView userPhoneNumber = view.findViewById(R.id.user_phone_number);
+        TextView userStatus = view.findViewById(R.id.user_status);
 
         if (user != null) {
             userName.setText(user.getName());
-            if (user.getEmail() != null) {
-                userEmail.setText(user.getEmail());
-            }
-            if (user.getPhoneNumber() != null) {
-                userPhoneNumber.setText(user.getPhoneNumber());
-            }
         }
+
+        // Remove user button
+        deleteButton = view.findViewById(R.id.delete_user_button);
+        deleteButton.setOnClickListener(v -> {
+            RemoveUserPopUpDialog dialog = RemoveUserPopUpDialog.newInstance(
+                    currentEvent.registrationList,
+                    getItem(position).getDeviceId(),
+                    userListAdapter
+            );
+            dialog.show(parentFragment.getParentFragmentManager(), getItem(position).getDeviceId());
+        });
+
         return view;
     }
 }
-
