@@ -149,7 +149,7 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void loadEventData() {
-        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             if (u != null) {
                 this.user = u;
 

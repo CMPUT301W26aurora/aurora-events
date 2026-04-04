@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,7 +66,7 @@ public class EventFragment extends Fragment {
 
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 userId = user.getDeviceId();
             }
@@ -116,6 +117,11 @@ public class EventFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString("eventId", selectedEvent.getEventId());
             args.putString("userId", userId);
+
+            if (userId == null) {
+                Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             Fragment eventFragment;
             if (userId.equals(selectedEvent.getOrganizerDeviceId())) {

@@ -105,7 +105,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             boolean isCommentOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
             boolean isEventOrganizer = currentUserId != null && currentUserId.equals(eventOrganizerId);
 
-            if (isCommentOwner || isEventOrganizer || isAdmin && inAdmin) {
+            if (isCommentOwner || isEventOrganizer || (isAdmin && inAdmin)) {
                 comment_delete_button.setVisibility(View.VISIBLE);
                 comment_delete_button.setOnClickListener(v -> {
                     if (listener != null) {
@@ -203,5 +203,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     }
     public void setInAdmin(Boolean inAdmin){
         this.inAdmin = inAdmin;
+    }
+
+    public void setCurrentUserId(String currentUserId) {
+        this.currentUserId = currentUserId;
+    }
+
+    public void setEventOrganizerId(String eventOrganizerId) {
+        this.eventOrganizerId = eventOrganizerId;
     }
 }

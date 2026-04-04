@@ -56,26 +56,27 @@ public class AdminCommentFragment extends Fragment {
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         //https://developer.android.com/guide/fragments/lifecycle
-        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             if(u != null){
                 user = u;
                 userId = u.getDeviceId();
                 isAdmin = user.getIsAdmin();
                 adapter.setIsAdmin(isAdmin);
+                adapter.notifyDataSetChanged();
 
-                userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), modeActive -> {
-                    if(modeActive != null){
-                        adapter.setIsAdmin(isAdmin);
-                        adapter.setInAdmin(modeActive);
 
-                        adapter.notifyDataSetChanged();
-                    }
-                });
             }
 
 
         });
+        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), modeActive -> {
+            if(modeActive != null){
+                adapter.setIsAdmin(isAdmin);
+                adapter.setInAdmin(modeActive);
 
+                adapter.notifyDataSetChanged();
+            }
+        });
         commentListenerRegistrationAll = CommentDb.getInstance().commentListenerAll( comments ->{
             if (comments != null) {
                 adapter.setComments(comments);

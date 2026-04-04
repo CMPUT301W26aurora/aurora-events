@@ -77,7 +77,7 @@ public class CommentFragment extends Fragment {
         isAdmin = false;
         setUp(view);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             //grab userid
             if(u != null){
                 user = u;
@@ -85,21 +85,23 @@ public class CommentFragment extends Fragment {
 
                 userName = user.getName(); //set user details
                 isAdmin = user.getIsAdmin();
-
-                userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), modeActive -> {
-                    if( modeActive!= null){
-                        adapter.setIsAdmin(isAdmin);
-                        adapter.setInAdmin(modeActive);
-
-                        adapter.notifyDataSetChanged();
-                    }
-                });
+                adapter.setCurrentUserId(userId);
+                adapter.setEventOrganizerId(eventOrganizerId);
+                adapter.setIsAdmin(isAdmin);
+                adapter.notifyDataSetChanged();
             }
 
+        });
+        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), modeActive -> {
+            if( modeActive!= null){
+                adapter.setInAdmin(modeActive);
+                adapter.notifyDataSetChanged();
+            }
         });
 
         commentListenerRegistration = CommentDb.getInstance().commentListener(eventId, comments -> {
             if (comments != null) {
+
                 adapter.setComments(comments);
             }
         }, e -> {
