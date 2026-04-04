@@ -123,37 +123,28 @@ public class EventCreationFragment extends Fragment {
         // Get organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
-        // Fetch user
-        confirmButton.setEnabled(false);
-        confirmButton.setAlpha(0.5f);
+        // Set organizer
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
+            if (u != null) {
+                this.user = u;
+                if (u.getRole().equals(User.ROLE_ORGANIZER)) {
+                    this.organizer = new Organizer(
+                            u.getDeviceId(),
+                            u.getName(),
+                            u.getEmail(),
+                            u.getPhoneNumber(),
+                            u.getRole(),
+                            u.getIsAdmin()
+                    );
+                }
+            }
+        });
 
         // Get device ID
         String deviceId = Settings.Secure.getString(
                 getContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID
         );
-
-        // Fetch organizer to enable/disable button
-        userViewModel.fetchOrganizer(deviceId);
-        userViewModel.getOrganizer().observe(getViewLifecycleOwner(), org -> {
-            if (org != null) {
-                this.organizer = org;
-                this.user = org;
-                confirmButton.setEnabled(true);
-                confirmButton.setAlpha(1.0f);
-        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
-            if (u != null) {
-                this.user = u;
-
-                if(u.getRole().equals(User.ROLE_ORGANIZER)) {
-                    this.organizer = new Organizer(u);
-                    confirmButton.setEnabled(true);
-                    confirmButton.setAlpha(1.0f);
-                } else{
-                    Log.e(TAG, "User is not an Organizer instance");
-                }
-            }
-        });
 
         // Fetch firebase cloud storage
         storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");

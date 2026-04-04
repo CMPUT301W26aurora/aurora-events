@@ -12,6 +12,12 @@ import java.util.List;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
+    private String deviceID;
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String role;
+    private boolean isAdmin;
 
     public Organizer() {
         super();
@@ -19,9 +25,8 @@ public class Organizer extends User {
         myEvents = new ArrayList<>();
     }
 
-    public Organizer(User user){
-        super();
-        this.setDeviceId(user.getDeviceId());
+    public Organizer(String deviceID, String name, String email, String phoneNumber, String role, boolean isAdmin) {
+        super(deviceID, name, email, phoneNumber, role, isAdmin);
         setRole(User.ROLE_ORGANIZER);
         myEvents = new ArrayList<>();
     }
