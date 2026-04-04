@@ -1,11 +1,5 @@
-package com.example.auroraevents.view;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +24,6 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-/**
- * The Fragment that handles comments
- */
 public class CommentFragment extends Fragment {
     private Comment selectedParentComment = null;
     private String eventId;
@@ -43,7 +34,6 @@ public class CommentFragment extends Fragment {
     private String eventOrganizerId;
     private CommentAdapter adapter;
     private UserViewModel userViewModel;
-    private Boolean inAdmin;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistration;
     private final String TAG = "CommentFragment";
 
@@ -64,7 +54,7 @@ public class CommentFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @androidx.annotation.Nullable ViewGroup container, @androidx.annotation.Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
-        
+
         return view; //return view
     }
 
@@ -130,16 +120,7 @@ public class CommentFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(getActivity()!= null){
-            View navBar = getActivity().findViewById(R.id.nav_bar);
-            if(navBar.getVisibility()==GONE){
-                inAdmin = true;
-                getActivity().findViewById(R.id.nav_bar_admin).setVisibility(GONE);
-            }else{
-                inAdmin = false;
-                navBar.setVisibility(GONE);
-            }
-        }
+        toggleBottomBar(View.GONE);
     }
 
     /**
@@ -184,7 +165,7 @@ public class CommentFragment extends Fragment {
             public void onReplyClicked(Comment comment) {
                 selectedParentComment = comment;
                 replyText.setText("Replying to @" + comment.getUsername());
-                replyIndicator.setVisibility(VISIBLE);
+                replyIndicator.setVisibility(View.VISIBLE);
             }
             @Override
             public void onDeleteClicked(Comment comment) {
@@ -193,8 +174,8 @@ public class CommentFragment extends Fragment {
                         .setMessage("Are you sure you want to remove this comment?")
                         .setPositiveButton("Delete", (dialog, which) ->
                                 CommentDb.getInstance().deleteComment(comment.getId(),
-                                    () -> Log.d(TAG, "Deleted successfully"),
-                                    e -> Log.e(TAG, "Delete Failed")
+                                        () -> Log.d(TAG, "Deleted successfully"),
+                                        e -> Log.e(TAG, "Delete Failed")
                                 ))
                         .setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss())
                         .create()
@@ -204,7 +185,7 @@ public class CommentFragment extends Fragment {
         }, userId, isAdmin, eventOrganizerId, false, true);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
-            replyIndicator.setVisibility(GONE);
+            replyIndicator.setVisibility(View.GONE);
         });
 
         //set recyclerView
@@ -229,7 +210,7 @@ public class CommentFragment extends Fragment {
             CommentDb.getInstance().postComment(newComment, id -> {
                 editComment.setText("");
                 selectedParentComment = null;
-                view.findViewById(R.id.reply_indicator).setVisibility(GONE);
+                view.findViewById(R.id.reply_indicator).setVisibility(View.GONE);
             }, e -> Log.e(TAG, "Post failed", e));
         });
     }
