@@ -79,6 +79,12 @@ public class EventFragment extends Fragment {
             }
         });
 
+        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), isAdminMode -> {
+            if(isAdminMode){
+                addEventButton.setVisibility(GONE);
+            }
+        });
+
         ListView eventsListView = root.findViewById(R.id.events_list);
 
         // Inflate and add the header

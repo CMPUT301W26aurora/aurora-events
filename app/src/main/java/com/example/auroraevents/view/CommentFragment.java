@@ -146,8 +146,14 @@ public class CommentFragment extends Fragment {
     private void toggleBottomBar(int visibility) {
         if (getActivity() != null) {
             View navBar = getActivity().findViewById(R.id.nav_bar);
-            if (navBar != null) {
+            View adminBar = getActivity().findViewById(R.id.nav_bar_admin);
+
+            Boolean isAdminMode = userViewModel.getAdminModeActive().getValue();
+
+            if (navBar != null && Boolean.FALSE.equals(isAdminMode)) {
                 navBar.setVisibility(visibility);
+            }else if(adminBar != null && Boolean.TRUE.equals(isAdminMode)) {
+                adminBar.setVisibility(visibility);
             }
         }
     }
@@ -182,7 +188,7 @@ public class CommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, isAdmin, eventOrganizerId, false);
+        }, userId, isAdmin, eventOrganizerId, false, true);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
             replyIndicator.setVisibility(View.GONE);

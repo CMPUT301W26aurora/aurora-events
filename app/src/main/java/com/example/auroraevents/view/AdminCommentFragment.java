@@ -114,7 +114,7 @@ public class AdminCommentFragment extends Fragment {
                         .show();
 
             }
-        }, userId, isAdmin, null, true);
+        }, userId, isAdmin, null, true, false);
         //set recyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);

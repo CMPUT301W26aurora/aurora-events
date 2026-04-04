@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
         navAdminEvent.setOnClickListener(v->{
             setActiveTab(navAdminEvent);
-            loadFragment(new AdminEventFragment());
+            loadFragment(new EventFragment());
         });
 
         navAdminComment.setOnClickListener(v->{
