@@ -97,10 +97,8 @@ public class OrganizerEventCreationTest {
                 LocalDateTime.parse(START_TIME, formatter),
                 LocalDateTime.parse(END_TIME, formatter),
                 LOCATION,
-                GEOLOCATION_REQUIRED,
-                WAITING_CAPACITY,
-                ATTENDING_CAPACITY,
-                POSTER
+                CAPACITY,
+                false
         );
     }
     **/

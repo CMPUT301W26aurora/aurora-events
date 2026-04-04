@@ -78,10 +78,7 @@ public class UserDeleteTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
         selectedEvent = new Event(
                 "test organizer",
                 "selected",
@@ -91,10 +88,7 @@ public class UserDeleteTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
         attendingEvent = new Event(
                 "test organizer",
                 "attending",
@@ -104,10 +98,7 @@ public class UserDeleteTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
         declinedEvent = new Event(
                 "test organizer",
                 "declined",
@@ -117,10 +108,7 @@ public class UserDeleteTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
         cancelledEvent = new Event(
                 "test organizer",
                 "cancelled",
@@ -130,10 +118,7 @@ public class UserDeleteTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
         removedEvent = new Event(
                 "test organizer",
                 "removed",
@@ -143,10 +128,7 @@ public class UserDeleteTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
                 TAG,
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
 
         setUpEvent(waitingEvent);
         setUpWaitingList(waitingEvent.registrationList, user.getDeviceId());

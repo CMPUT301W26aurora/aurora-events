@@ -51,10 +51,7 @@ public class RegistrationSelectedListTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                false,
-                -1,
-                -1,
-                null);
+                0, false);
         setUpEvent(event);
         list = event.registrationList;
         entrantID = "aurora";

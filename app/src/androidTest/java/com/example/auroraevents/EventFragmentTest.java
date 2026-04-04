@@ -34,11 +34,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                "Rec Centre", 20, false);
         event.setEventId("test-event-1");
         eventList.add(event);
         assertEquals(1, eventList.size());
@@ -58,11 +54,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 3, 15, 17, 0),
                 LocalDateTime.of(2026, 3, 1, 9, 0),
                 LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Community Centre",
-                false,
-                -1,
-                40,
-                null);
+                "Community Centre", 40, false);
         event1.setEventId("test-event-1");
         eventList.add(event1);
 
@@ -74,11 +66,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 3, 15, 17, 0),
                 LocalDateTime.of(2026, 3, 1, 9, 0),
                 LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Arts Centre",
-                false,
-                -1,
-                50,
-                null);
+                "Arts Centre", 50, false);
         event2.setEventId("test-event-2");
         eventList.add(event2);
 
@@ -99,11 +87,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 3, 15, 17, 0),
                 LocalDateTime.of(2026, 3, 1, 9, 0),
                 LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Community Centre",
-                false,
-                -1,
-                40,
-                null);
+                "Community Centre", 40, false);
         event1.setEventId("test-event-1");
         eventList.add(event1);
 

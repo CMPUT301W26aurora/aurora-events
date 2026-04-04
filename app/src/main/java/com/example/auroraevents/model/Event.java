@@ -41,6 +41,8 @@ public class Event {
     private boolean geolocationRequired;
     private boolean isPrivate;
     private List<String> reports;
+    private double latitude;
+    private double longitude;
 
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
@@ -76,11 +78,6 @@ public class Event {
         this.geolocationRequired   = geolocationRequired;
         this.registrationList.setWaitingCapacity(waitingCapacity);
         this.registrationList.setAttendingCapacity(attendingCapacity);
-    }
-  
-    @Override
-    public String toString() {
-        return this.name;
     }
 
     @Override
@@ -143,6 +140,13 @@ public class Event {
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
 
     public int  getNumReports() { return reports.size(); }
+
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude()  { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
     /**
      * Adds a report
      * @param userId The device ID of the user reporting the event

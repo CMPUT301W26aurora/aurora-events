@@ -51,10 +51,7 @@ public class GetWaitListTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                false,
-                -1,
-                2,
-                null);
+                2, false);
         myEvent.setEventId("test event");
         setUpEvent(myEvent, 60, TimeUnit.SECONDS);
         list = myEvent.registrationList;
