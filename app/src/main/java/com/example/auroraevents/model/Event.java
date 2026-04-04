@@ -192,9 +192,9 @@ public class Event {
 
     // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
 
-    /* this is bad, will fix soon TM
+
     @Exclude
-    public void generateQrCode(){
+    public Bitmap generateQrCode(){
         MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
         try{
             // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
@@ -207,15 +207,12 @@ public class Event {
 
             //convert matrix to bitmap, can be used in image view
             BarcodeEncoder encoder = new BarcodeEncoder();
-            qR = encoder.createBitmap(matrix);
+            return encoder.createBitmap(matrix);
         }
         catch (WriterException e){
             Log.e("EVENT","Error encoding QR code", e);
+            return null;
         }
+
     }
-
-    @Exclude
-    public Bitmap getQrCode() { return this.qR; }
-
-     */
 }

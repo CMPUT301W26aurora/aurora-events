@@ -29,9 +29,8 @@ public class QRcodeTest {
                 -1,
                 null);
         event.setEventId("sample id for QR Code testing");
-        event.generateQrCode();
 
-         Bitmap test = event.getQrCode();
+         Bitmap test = event.generateQrCode();
          assertNotNull(test);
          assertEquals(400, test.getWidth());
          assertEquals(400, test.getHeight());
