@@ -26,21 +26,36 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         this.userList = user;
         this.inAdmin = inAdmin;
     }
-    public static class UserViewHolder extends RecyclerView.ViewHolder {
-        private View rootLayout;
+    public abstract static class UserViewHolder extends RecyclerView.ViewHolder {
         UserViewHolder(@NonNull View itemView){
             super(itemView);
-
-            rootLayout = itemView;
         }
-        public void bind(User user, OnUserInteractionListener listener){
-
-        }
+        public abstract void bind(User user, OnUserInteractionListener listener);
     }
     @Override
     public void onBindViewHolder(@NonNull UserAdapter.UserViewHolder holder, int position) {
         User user = userList.get(position);
         holder.bind(user, listener);
+    }
+    public static class  OrgViewHolder extends UserViewHolder{
+        OrgViewHolder(View v) {
+            super(v);
+        }
+        @Override
+        public void bind(User user, OnUserInteractionListener listener) {
+
+        }
+    }
+
+    public static class  AdminViewHolder extends UserViewHolder{
+        AdminViewHolder(View v) {
+            super(v);
+        }
+
+        @Override
+        public void bind(User user, OnUserInteractionListener listener) {
+
+        }
     }
 
     @Override
@@ -49,9 +64,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @NonNull
     @Override
     public UserAdapter.UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layout = (viewType == 1) ? R.layout.item_user_list_admin : R.layout.item_user_list_org;
-        View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-        return new UserViewHolder(view);
+        if (viewType == 1) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_list_admin, parent, false);
+            return new AdminViewHolder(v);
+        } else {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_list_org, parent, false);
+            return new OrgViewHolder(v);
+        }
     }
     @Override
     public int getItemViewType(int position) {
