@@ -152,11 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            EventFragment eventFragment = new EventFragment();
-            Bundle args = new Bundle();
-            args.putBoolean("inAdmin", false);
-            eventFragment.setArguments(args);
-            loadFragment(eventFragment);
+            loadFragment(new EventFragment());
         });
 
         navNotifications.setOnClickListener(v -> {
@@ -294,3 +290,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
