@@ -34,6 +34,7 @@ import java.util.ArrayList;
  * Allows users to view a list of all events.
  * Allows users to tap an event to view event details.
  * Implements US 01.01.03 - View list of events available for joining the waiting list.
+ * Implements US 01.01.06 - Use keyword search with filtering to narrow event search.
  */
 public class EventFragment extends Fragment {
 
@@ -167,7 +168,6 @@ public class EventFragment extends Fragment {
                     applyFilters();
                     return true;
             }
-
             @Override
             public boolean onQueryTextSubmit(String query) {
                 filterQuery = query.trim();
@@ -179,6 +179,10 @@ public class EventFragment extends Fragment {
         return root;
     }
 
+    /**
+     * keeps updating the filtered list whenever filters change to display
+     * matching events
+     */
     private void applyFilters() {
         filteredEventsList.clear();
         filteredEventsList.addAll(filteringHelper.applyAllFilters(allEventsList, filterQuery, locationFilter, startDateFilter, endDateFilter, maxCapacityFilter));
@@ -186,6 +190,9 @@ public class EventFragment extends Fragment {
         noEventsFoundText();
     }
 
+    /**
+     * Display no events found text when no matching events are found
+     */
     private void noEventsFoundText() {
         if (noEventText == null) {
             return;
@@ -203,6 +210,10 @@ public class EventFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     * @param location required location to filter events for
+     */
     public void setLocationFilter(@ Nullable String location) {
         if (location != null) {
             locationFilter = location.trim();
@@ -212,17 +223,29 @@ public class EventFragment extends Fragment {
         applyFilters();
     }
 
+    /**
+     *
+     * @param startDate earliest date to match events for
+     * @param endDate latest date to match events for
+     */
     public void setDateFilter(@Nullable LocalDate startDate, @Nullable LocalDate endDate) {
         startDateFilter = startDate;
         endDateFilter = endDate;
         applyFilters();
     }
 
+    /**
+     *
+     * @param maxCapacity max waiting list capacity to filter events for
+     */
     public void setMaxCapacityFilter(int maxCapacity) {
         maxCapacityFilter = maxCapacity;
         applyFilters();
     }
 
+    /**
+     * remove all filters when filters initially applied are removed to display all events
+     */
     public void removeAllFilters() {
         filterQuery = "";
         locationFilter = "";
@@ -232,15 +255,19 @@ public class EventFragment extends Fragment {
         applyFilters();
     }
 
+    /**
+     * filter events by keywords like event name, description, location
+     * @param searchKeyword keyword to search events for
+     * @param eventList list of all events to search through
+     * @return filtered list of public events that match the required keywords
+     */
     public ArrayList<Event> filterKeywordEvents(String searchKeyword, ArrayList<com.example.auroraevents.model.Event> eventList) {
         return filteringHelper.filterKeywordEvents(searchKeyword, eventList);
     }
 
-
     /**
      * display required event list when keyword matches
      * displays message when no keyword matches
-     *
      * @param searchKeyword  keyword entered by user to search for
      * @param eventArrayList filtered event list
      */
