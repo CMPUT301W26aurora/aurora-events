@@ -82,12 +82,12 @@ public class EventCreationFragment extends Fragment {
         confirmButton.setEnabled(false);
         confirmButton.setAlpha(0.5f);
 
-        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), u -> {
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             if (u != null) {
                 this.user = u;
 
-                if(user instanceof Organizer) {
-                    this.organizer = (Organizer) u;
+                if(u.getRole().equals(User.ROLE_ORGANIZER)) {
+                    this.organizer = new Organizer(u);
                     confirmButton.setEnabled(true);
                     confirmButton.setAlpha(1.0f);
                 } else{

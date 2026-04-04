@@ -19,6 +19,13 @@ public class Organizer extends User {
         myEvents = new ArrayList<>();
     }
 
+    public Organizer(User user){
+        super();
+        this.setDeviceId(user.getDeviceId());
+        setRole(User.ROLE_ORGANIZER);
+        myEvents = new ArrayList<>();
+    }
+
     public ArrayList<Event> getMyEvents() {
         return myEvents;
     }
