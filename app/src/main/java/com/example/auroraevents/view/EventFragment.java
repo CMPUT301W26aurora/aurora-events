@@ -1,248 +1,293 @@
-package com.example.auroraevents.view;
+package com.example.auroraevents;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.animation.ValueAnimator;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+//import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.auroraevents.R;
-import com.example.auroraevents.model.Event;
-import com.example.auroraevents.model.EventArrayAdapter;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
-import com.example.auroraevents.server.EventDb;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.auroraevents.server.UserDb;
+import com.example.auroraevents.view.AdminCommentFragment;
+import com.example.auroraevents.view.AdminEventFragment;
+import com.example.auroraevents.view.AdminImageFragment;
+import com.example.auroraevents.view.AdminOrganizerFragment;
+import com.example.auroraevents.view.AdminProfileFragment;
+import com.example.auroraevents.view.EventFragment;
+import com.example.auroraevents.view.CameraFragment;
+import com.example.auroraevents.view.LoginFragment;
+import com.example.auroraevents.view.NotificationFragment;
+import com.example.auroraevents.view.ProfileFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
-/**
- * Displays a list of all available events fetched form Firestore.
- * Allows users to view a list of all events.
- * Allows users to tap an event to view event details.
- * Implements US 01.01.03 - View list of events available for joining the waiting list.
- */
-public class EventFragment extends Fragment {
+public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "EventFragment";
-    private FloatingActionButton addEventButton;
+    private static final String TAG = "MainActivity";
+    private static final String NOTIFICATION_CHANNEL_ID = "default";
+    private static final String NOTIFICATION_CHANNEL_NAME = "Default";
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1;
+    private String deviceId;
     private UserViewModel userViewModel;
-    private String userId;
-    private ArrayList<Event> allEventsList;
-    private TextView noEventText;
-    private EventArrayAdapter eventsAdapter;
 
-    // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
+    private View navBar;
+    private View adminBar;
 
-    /**
-     * @author Alina Iqbal
-     * @param inflater The LayoutInflater object that can be used to inflate
-     * any views in the fragment,
-     * @param container If non-null, this is the parent view that the fragment's
-     * UI should be attached to.  The fragment should not add the view itself,
-     * but this can be used to generate the LayoutParams of the view.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
-     */
-    @Nullable
+    private ImageButton navScan, navBrowse, navNotifications, navAdminBrowseProfile,navAdminImage,navAdminEvent,navAdminComment,navAdminOrganizer;
+    public ImageButton navProfile,navAdminProfile;
+
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.event_fragment, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel.selectItem(new User());
+        navScan          = findViewById(R.id.nav_scan);
+        navBrowse        = findViewById(R.id.nav_browse);
+        navNotifications = findViewById(R.id.nav_notifications);
+        navProfile = findViewById(R.id.nav_profile);
+        navAdminComment = findViewById(R.id.nav_admin_comments);
+        navAdminProfile = findViewById(R.id.nav_profile_admin);
+        navAdminEvent = findViewById(R.id.nav_admin_event);
+        navAdminImage = findViewById(R.id.nav_admin_image);
+        navAdminOrganizer = findViewById(R.id.nav_admin_organizer);
+        navAdminBrowseProfile = findViewById(R.id.nav_admin_browse_profiles);
+        navBar = findViewById(R.id.nav_bar);
+        adminBar = findViewById(R.id.nav_bar_admin);
 
-        addEventButton = root.findViewById(R.id.eventAddButton);
-        addEventButton.setVisibility(GONE);
+        deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        // Show add event button only if the user is an organizer
-        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                userId = user.getDeviceId();
-            }
+        // create notification channel
+        createNotificationChannel();
 
-            Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
-            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()))) {
-                addEventButton.setVisibility(VISIBLE);
+        // request notification permission
+        requestNotificationPermission();
+
+        // sign in anonymously, then save FCM token
+        FirebaseAuth.getInstance().signInAnonymously()
+                .addOnSuccessListener(result -> {
+                    FirebaseMessaging.getInstance().getToken()
+                            .addOnSuccessListener(token -> {
+                                FirebaseFirestore.getInstance()
+                                        .collection("Users")
+                                        .document(deviceId)
+                                        .set(Collections.singletonMap("fcmToken", token), SetOptions.merge())
+                                        .addOnSuccessListener(unused -> {
+                                            Log.d(TAG, "FCM token saved for device: " + deviceId);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.e(TAG, "Failed to save FCM token", e);
+                                        });
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Anonymous sign-in failed", e);
+                });
+
+
+        //Hardcode user role for testing purposes
+        /*
+        UserDb.getInstance().getUser(deviceId,
+                user -> {
+                    user.setDeviceId(deviceId);
+                    user.setAdmin(Boolean.TRUE);
+                    userViewModel.selectItem(user);
+                },
+                e -> Log.e(TAG, "User info not available")
+        );
+        */
+
+
+        // Get user
+        UserDb.getInstance().getUser(deviceId,
+                user -> {
+                    user.setDeviceId(deviceId);
+
+                    if(user.getIsAdmin() == null){
+                        user.setIsAdmin(false);
+                    }
+
+                    if (user.getRole() == null || user.getRole().isEmpty())
+                        user.setRole(User.ROLE_ENTRANT);
+
+                    if (user.getName() == null || user.getName().isEmpty()) {
+                        //user does not exist
+                        loadFragment(new LoginFragment());
+                    } else {
+                        //user is real
+                        userViewModel.selectItem(user);
+                        setActiveTab(navBrowse);
+                        loadFragment(new EventFragment());
+                    }
+                    Log.d(TAG, "User info received!");
+                },
+                e -> Log.e(TAG, "User info not available")
+        );
+
+
+        navScan.setOnClickListener(v -> {
+            setActiveTab(navScan);
+            loadFragment(new CameraFragment());
+        });
+
+        navBrowse.setOnClickListener(v -> {
+            setActiveTab(navBrowse);
+            loadFragment(new EventFragment());
+        });
+
+        navNotifications.setOnClickListener(v -> {
+            setActiveTab(navNotifications);
+            loadFragment(new NotificationFragment());
+        });
+
+        navProfile.setOnClickListener(v -> {
+            setActiveTab(navProfile);
+            loadFragment(new ProfileFragment());
+            System.out.println(deviceId); //Debugging
+        });
+
+        navAdminBrowseProfile.setOnClickListener(v->{
+            setActiveTab(navAdminBrowseProfile);
+            loadFragment(new AdminProfileFragment());
+        });
+
+        navAdminOrganizer.setOnClickListener(v->{
+            setActiveTab(navAdminOrganizer);
+            loadFragment(new AdminOrganizerFragment());
+        });
+
+        navAdminImage.setOnClickListener(v->{
+            setActiveTab(navAdminImage);
+            loadFragment(new AdminImageFragment());
+        });
+
+        navAdminEvent.setOnClickListener(v->{
+            setActiveTab(navAdminEvent);
+            loadFragment(new EventFragment());
+        });
+
+        navAdminComment.setOnClickListener(v->{
+            setActiveTab(navAdminComment);
+            loadFragment(new AdminCommentFragment());
+        });
+
+        navAdminProfile.setOnClickListener(v->{
+            setActiveTab(navAdminProfile);
+            loadFragment(new ProfileFragment());
+        });
+
+        userViewModel.getAdminModeActive().observe(this, isAdminMode -> {
+            if (isAdminMode) {
+                navBar.setVisibility(View.GONE);
+                adminBar.setVisibility(View.VISIBLE);
+                setActiveTab(navAdminProfile);
             } else {
-                addEventButton.setVisibility(GONE);
+                navBar.setVisibility(View.VISIBLE);
+                adminBar.setVisibility(View.GONE);
+                setActiveTab(navProfile);
             }
         });
+    }
 
-        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), isAdminMode -> {
-            if(isAdminMode){
-                addEventButton.setVisibility(GONE);
-            }
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
+    }
+
+
+    public void setActiveTab(ImageButton selected) {
+        ImageButton[] tabs = { navScan,
+                navBrowse,
+                navNotifications,
+                navProfile,
+                navAdminProfile,
+                navAdminBrowseProfile,
+                navAdminImage,
+                navAdminEvent,
+                navAdminComment,
+                navAdminOrganizer};
+
+        for (ImageButton tab : tabs) {
+            int targetWidth = dpToPx(tab == selected ? 88 : 52);
+            int drawable = (tab == selected)
+                    ? R.drawable.nav_item_active
+                    : R.drawable.nav_item_inactive;
+
+            animateTabWidth(tab, targetWidth);
+            tab.setBackground(ContextCompat.getDrawable(this, drawable));
+        }
+    }
+
+    private void animateTabWidth(ImageButton tab, int targetWidth) {
+        int startWidth = tab.getLayoutParams().width;
+
+        ValueAnimator animator = ValueAnimator.ofInt(startWidth, targetWidth);
+        animator.setDuration(250); // milliseconds
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.addUpdateListener(anim -> {
+            LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) tab.getLayoutParams();
+            params.width = (int) anim.getAnimatedValue();
+            tab.setLayoutParams(params);
         });
+        animator.start();
+    }
 
-        ListView eventsListView = root.findViewById(R.id.events_list);
-
-        // Inflate and add the header
-        View header = inflater.inflate(R.layout.header_event_fragment, eventsListView, false);
-        eventsListView.addHeaderView(header, null, false);
-
-        allEventsList = new ArrayList<>();
-        ArrayList<Event> eventList = new ArrayList<>();
-
-        // create adapter with eventList
-        eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
-        eventsListView.setAdapter(eventsAdapter);
-
-        noEventText = root.findViewById(R.id.no_event_found_text);
-
-        // resource used: https://stackoverflow.com/questions/7309259/get-list-of-attributes-of-an-object-in-an-list
-        // get all events from firestore
-        EventDb.getInstance().getAllEvents(events -> {
-            for (Event event : events) {
-                Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
-                boolean isPrivate = event.isPrivate();
-                if (!isPrivate) {
-                    allEventsList.add(event);
-                    eventList.add(event);
-                }
-            }
-            eventsAdapter.notifyDataSetChanged();
-        }, e -> Log.d(TAG, "Error fetching events" + e.getMessage()));
-
-        // handle event taps by user to get the event's position
-        eventsListView.setOnItemClickListener((parent, v, position, id) -> {
-            Event selectedEvent = eventList.get(position - 1);
-
-            // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
-            // pass eventID to InfoUFragment using bundle
-            Bundle args = new Bundle();
-            args.putString("eventId", selectedEvent.getEventId());
-            args.putString("userId", userId);
-
-            if (userId == null) {
-                Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Fragment eventFragment;
-            if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
-                //TODO 5: open event edit
-                eventFragment = new InfoUEventFragment();
-                eventFragment.setArguments(args);
-            } else {
-                eventFragment = new InfoUEventFragment();
-                eventFragment.setArguments(args);
-            }
-            // resource used: https://developer.android.com/guide/fragments/fragmentmanager
-            // navigate to InfoUEventFragment
-            getParentFragmentManager()
-                    .beginTransaction()
-                    .hide(this)
-                    .add(R.id.fragment_container, eventFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
-
-        addEventButton.setOnClickListener(v ->
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, new EventCreationFragment())
-                        .addToBackStack(null)
-                        .commit());
-
-        // set SearchView query text listener
-        SearchView searchView = root.findViewById(R.id.search_event);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText.trim().isEmpty()) {
-                    keywordSearchEvents("", eventList);
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                keywordSearchEvents(query.trim(), eventList);
-                searchView.clearFocus();
-                return true;
-            }
-        });
-        return root;
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
     }
 
     /**
-     * filter events to match searched keywords
-     * return all events when nothing is being searched
-     * private events are never included in results
-     *
-     * @param searchKeyword keyword entered by user to search for
-     * @param eventList original list of events to search through
-     * @return filtered list of events matching the keyword
+     * Creates the default notification channel required for Android 8.0 (Oreo) and above.
+     * Must be called before any notifications are displayed.
      */
-    public ArrayList<Event> filterKeywordEvents(String searchKeyword, ArrayList<com.example.auroraevents.model.Event> eventList) {
-        String searchedQuery = searchKeyword.toLowerCase();
-        ArrayList<com.example.auroraevents.model.Event> filteredEventsList = new ArrayList<>();
-
-        if (searchedQuery.isEmpty()) {
-            // display all public events when search is cleared
-            for (com.example.auroraevents.model.Event event : eventList) {
-                if (!event.isPrivate()) {
-                    filteredEventsList.add(event);
-                }
-            }
-        } else {
-            for (com.example.auroraevents.model.Event event : eventList) {
-                // don't include private events for keyword search
-                if (event.isPrivate()) continue;
-                // convert event name to lower case
-                String searchedEventName = event.getName();
-                if (searchedEventName != null) {
-                    searchedEventName = searchedEventName.toLowerCase();
-                } else {
-                    searchedEventName = "";
-                }
-                // convert event description to lower case
-                String searchedEventDescription = event.getDescription();
-                if (searchedEventDescription != null) {
-                    searchedEventDescription = searchedEventDescription.toLowerCase();
-                } else {
-                    searchedEventDescription = "";
-                }
-                // add event to filtered list if keyword matches
-                if (searchedEventName.contains(searchedQuery) || searchedEventDescription.contains(searchedQuery)) {
-                    filteredEventsList.add(event);
-                }
-            }
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    NOTIFICATION_CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+            Log.d(TAG, "Notification channel created");
         }
-        return filteredEventsList;
     }
 
     /**
-     * display required event list when keyword matches
-     * displays message when no keyword matches
-     *
-     * @param searchKeyword  keyword entered by user to search for
-     * @param eventArrayList filtered event list
+     * Requests the POST_NOTIFICATIONS permission required for Android 13 (Tiramisu) and above.
+     * Presents a system permission dialog to the user if not already granted.
      */
-    public void keywordSearchEvents(String searchKeyword, ArrayList<Event> eventArrayList) {
-        ArrayList<Event> searchResults = filterKeywordEvents(searchKeyword, allEventsList);
-        eventArrayList.clear();
-        eventArrayList.addAll(searchResults);
-        eventsAdapter.notifyDataSetChanged();
-
-        // show no such event message when there are no search results
-        if (noEventText != null) {
-            if (eventArrayList.isEmpty() && !searchKeyword.trim().isEmpty()) {
-                noEventText.setVisibility(VISIBLE);
-            } else {
-                noEventText.setVisibility(GONE);
-            }
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(
+                    new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                    NOTIFICATION_PERMISSION_REQUEST_CODE
+            );
         }
     }
+
 }
