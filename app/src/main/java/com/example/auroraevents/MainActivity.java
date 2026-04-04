@@ -25,7 +25,6 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 import com.example.auroraevents.view.AdminCommentFragment;
-import com.example.auroraevents.view.AdminEventFragment;
 import com.example.auroraevents.view.AdminImageFragment;
 import com.example.auroraevents.view.AdminOrganizerFragment;
 import com.example.auroraevents.view.AdminProfileFragment;
@@ -153,7 +152,11 @@ public class MainActivity extends AppCompatActivity {
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            loadFragment(new EventFragment());
+            EventFragment eventFragment = new EventFragment();
+            Bundle args = new Bundle();
+            args.putBoolean("inAdmin", false);
+            eventFragment.setArguments(args);
+            loadFragment(eventFragment);
         });
 
         navNotifications.setOnClickListener(v -> {

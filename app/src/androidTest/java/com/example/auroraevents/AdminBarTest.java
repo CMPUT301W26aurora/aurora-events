@@ -17,11 +17,10 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import com.example.auroraevents.view.AdminCommentFragment;
-import com.example.auroraevents.view.AdminEventFragment;
 import com.example.auroraevents.view.AdminImageFragment;
 import com.example.auroraevents.view.AdminOrganizerFragment;
 import com.example.auroraevents.view.AdminProfileFragment;
-import com.example.auroraevents.view.CameraFragment;
+import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.ProfileFragment;
 
 import org.junit.Before;
@@ -99,7 +98,7 @@ public class AdminBarTest {
 
     @Test
     public void testAdminEventLoads() {
-        testNavButtonLoadsFragment(R.id.nav_admin_event, AdminEventFragment.class);
+        testNavButtonLoadsFragment(R.id.nav_admin_event, EventFragment.class);
     }
 
     @Test

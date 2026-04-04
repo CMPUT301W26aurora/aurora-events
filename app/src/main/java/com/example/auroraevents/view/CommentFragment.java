@@ -1,5 +1,8 @@
 package com.example.auroraevents.view;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -40,6 +43,7 @@ public class CommentFragment extends Fragment {
     private String eventOrganizerId;
     private CommentAdapter adapter;
     private UserViewModel userViewModel;
+    private Boolean inAdmin;
     private com.google.firebase.firestore.ListenerRegistration commentListenerRegistration;
     private final String TAG = "CommentFragment";
 
@@ -126,7 +130,16 @@ public class CommentFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        toggleBottomBar(View.GONE);
+        if(getActivity()!= null){
+            View navBar = getActivity().findViewById(R.id.nav_bar);
+            if(navBar.getVisibility()==GONE){
+                inAdmin = true;
+                getActivity().findViewById(R.id.nav_bar_admin).setVisibility(GONE);
+            }else{
+                inAdmin = false;
+                navBar.setVisibility(GONE);
+            }
+        }
     }
 
     /**
@@ -171,7 +184,7 @@ public class CommentFragment extends Fragment {
             public void onReplyClicked(Comment comment) {
                 selectedParentComment = comment;
                 replyText.setText("Replying to @" + comment.getUsername());
-                replyIndicator.setVisibility(View.VISIBLE);
+                replyIndicator.setVisibility(VISIBLE);
             }
             @Override
             public void onDeleteClicked(Comment comment) {
@@ -191,7 +204,7 @@ public class CommentFragment extends Fragment {
         }, userId, isAdmin, eventOrganizerId, false, true);
         cancelReply.setOnClickListener(v -> {
             selectedParentComment = null;
-            replyIndicator.setVisibility(View.GONE);
+            replyIndicator.setVisibility(GONE);
         });
 
         //set recyclerView
@@ -216,7 +229,7 @@ public class CommentFragment extends Fragment {
             CommentDb.getInstance().postComment(newComment, id -> {
                 editComment.setText("");
                 selectedParentComment = null;
-                view.findViewById(R.id.reply_indicator).setVisibility(View.GONE);
+                view.findViewById(R.id.reply_indicator).setVisibility(GONE);
             }, e -> Log.e(TAG, "Post failed", e));
         });
     }

@@ -71,6 +71,7 @@ public class InfoUEventFragment extends Fragment {
     private Button joinButton, leaveButton, acceptButton, declineButton;
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
+    private Boolean inAdmin;
 
     /**
      * @author Alina Iqbal & Jared Strandlund
@@ -97,6 +98,7 @@ public class InfoUEventFragment extends Fragment {
         } else {
             eventId = args.getString("eventId");
             userId = args.getString("userId");
+            inAdmin = args.getBoolean("inAdmin");
         }
 
         // get views to display event details
