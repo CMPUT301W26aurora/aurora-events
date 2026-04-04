@@ -54,4 +54,6 @@
     <string name="default_reported_num">Reported by 21 users\n(you shouldn\'t seee this)</string>
     <string name="okay_button_text">Okay</string>
     <string name="comments_button_text">Comments</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

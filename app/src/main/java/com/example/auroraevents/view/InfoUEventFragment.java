@@ -5,10 +5,14 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
-import static android.content.ContentValues.TAG;
+import static com.example.auroraevents.MainActivity.LOCATION_PERMISSION_REQUEST_CODE;
 
-import android.graphics.Color;
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,23 +26,28 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.RadiusUtil;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Displays event details for the event tapped by the entrant or admin.
@@ -72,6 +81,14 @@ public class InfoUEventFragment extends Fragment {
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
 
+    private FusedLocationProviderClient fusedLocationClient;
+    private Event pendingJoinEvent;
+
+    // Latitude and longitude for radius check
+    private static final double EDMONTON_LAT = 53.5461;
+    private static final double EDMONTON_LNG = -113.4938;
+    private static final float EDMONTON_RADIUS_METERS = 15000f;
+
     /**
      * @author Alina Iqbal & Jared Strandlund
      * @param inflater The LayoutInflater object that can be used to inflate
@@ -98,6 +115,8 @@ public class InfoUEventFragment extends Fragment {
             eventId = args.getString("eventId");
             userId = args.getString("userId");
         }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // get views to display event details
         backButton         = view.findViewById(R.id.back_button);
@@ -138,7 +157,6 @@ public class InfoUEventFragment extends Fragment {
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadEventData();
         } else {
@@ -154,39 +172,38 @@ public class InfoUEventFragment extends Fragment {
                 this.user = u;
 
                 userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), adminMode -> {
-                    if(adminMode != null) {
+                    if (adminMode != null) {
                         boolean activeAdmin = u.getIsAdmin() && adminMode;
                         startEventListener(activeAdmin);
                     }
                 });
             }
         });
-
     }
 
     private void startEventListener(boolean activeAdmin) {
         if (eventSnapshotListener != null) eventSnapshotListener.remove();
 
         eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(eventId, event -> {
-            if(event != null){
-
+            if (event != null) {
                 renderCommonUI(event);
 
                 if (activeAdmin) {
                     setupAdminUI(event);
-                } else if (userId.equals(event.getOrganizerDeviceId())) {
+                } else if (user != null && userId.equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
                     setupOrganizerUI(event);
                 } else {
                     setupEntrantUI(event);
                 }
-            }else{
+            } else {
                 Log.e(TAG, "No such event available");
             }
-        }, e->{
+        }, e -> {
             Log.e(TAG, "failed to fetch event");
         });
     }
-    private void renderCommonUI(Event event){
+
+    private void renderCommonUI(Event event) {
         if (event.getPoster() == null) {
             poster.setVisibility(View.GONE);
         } else {
@@ -194,6 +211,7 @@ public class InfoUEventFragment extends Fragment {
         }
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());
+
         // get organizer name
         String organizerText = getString(R.string.organized_by_text) + event.getOrganizerDeviceId();
         eventOrganizer.setText(organizerText);
@@ -211,13 +229,12 @@ public class InfoUEventFragment extends Fragment {
         eventDescription.setText(event.getDescription());
 
         // set info button functionality
-        infoButton.setOnClickListener( v -> {
-                    LotteryInfoFragment infoFragment = new LotteryInfoFragment();
-                    infoFragment.show(requireActivity().getSupportFragmentManager(), "Lottery Info");
-                }
-        );
+        infoButton.setOnClickListener(v -> {
+            LotteryInfoFragment infoFragment = new LotteryInfoFragment();
+            infoFragment.show(requireActivity().getSupportFragmentManager(), "Lottery Info");
+        });
 
-        commentButton.setOnClickListener(v->{
+        commentButton.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", event.getEventId());
             bundle.putString("organizerId", event.getOrganizerDeviceId());
@@ -239,7 +256,7 @@ public class InfoUEventFragment extends Fragment {
         });
     }
 
-    private void setupAdminUI(Event event){
+    private void setupAdminUI(Event event) {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
@@ -269,6 +286,7 @@ public class InfoUEventFragment extends Fragment {
             reportedNumText += " people";
         }
         reportedNum.setText(reportedNumText);
+
         // set delete button functionality
         deleteButton.setOnClickListener(v -> {
             PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
@@ -285,7 +303,7 @@ public class InfoUEventFragment extends Fragment {
         });
     }
 
-    private void setupOrganizerUI(Event event){
+    private void setupOrganizerUI(Event event) {
         Log.e(TAG, "You shouldn't be here");
         Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
 
@@ -306,6 +324,7 @@ public class InfoUEventFragment extends Fragment {
             reportedNumText += " people";
         }
         reportedNum.setText(reportedNumText);
+
         // set delete button functionality
         deleteButton.setOnClickListener(v -> {
             PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
@@ -340,7 +359,8 @@ public class InfoUEventFragment extends Fragment {
                     .commit();
         });
     }
-    private void setupEntrantUI(Event event){
+
+    private void setupEntrantUI(Event event) {
         reportButton.setVisibility(View.VISIBLE);
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
@@ -369,7 +389,6 @@ public class InfoUEventFragment extends Fragment {
 
         // set waiting count grammatically
         String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
-        // don't display the capacity if there is unlimited capacity
         if (event.registrationList.getWaitingCapacity() > -1) {
             waitingCountText += "/" + event.registrationList.getWaitingCapacity();
         }
@@ -382,7 +401,6 @@ public class InfoUEventFragment extends Fragment {
 
         // set attendees count grammatically
         String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
-        // don't display the capacity if there is unlimited capacity
         if (event.registrationList.getAttendingCapacity() > -1) {
             attendeesCountText += "/" + event.registrationList.getAttendingCapacity();
         }
@@ -412,10 +430,9 @@ public class InfoUEventFragment extends Fragment {
         } else {
             onJoin(event);
         }
-
     }
 
-    private void onAttending(Event event){
+    private void onAttending(Event event) {
         eventDeadline.setVisibility(View.GONE);
         waitingListCount.setVisibility(View.GONE);
         attendeesCount.setVisibility(View.VISIBLE);
@@ -429,8 +446,7 @@ public class InfoUEventFragment extends Fragment {
         infoButton.setVisibility(View.GONE);
     }
 
-
-    private void onSelected(Event event){
+    private void onSelected(Event event) {
         eventDeadline.setVisibility(View.VISIBLE);
         waitingListCount.setVisibility(View.VISIBLE);
         attendeesCount.setVisibility(View.VISIBLE);
@@ -444,32 +460,30 @@ public class InfoUEventFragment extends Fragment {
         infoButton.setVisibility(View.VISIBLE);
 
         // move user from selectedList to attendingList on acceptance
-        acceptButton.setOnClickListener(v  ->{
+        acceptButton.setOnClickListener(v -> {
             v.setEnabled(false);
             EventDb.getInstance().userAcceptSelection(eventId, userId,
-                    () ->{
-                        Log.d(TAG, "Accepted Invitation");
-                    },
+                    () -> Log.d(TAG, "Accepted Invitation"),
                     e -> {
                         Log.e(TAG, "Failed to accept", e);
-                        v.setEnabled(true);}
+                        v.setEnabled(true);
+                    }
             );
         });
         // move user from selectedList to declinedList on decline
-        declineButton.setOnClickListener(v ->{
+        declineButton.setOnClickListener(v -> {
             v.setEnabled(false);
             EventDb.getInstance().userDeclineSelection(eventId, userId,
-                    () ->{
-                        Log.d(TAG, "Declined Invitation");
-                    },
+                    () -> Log.d(TAG, "Declined Invitation"),
                     e -> {
                         Log.e(TAG, "Failed to Decline", e);
-                        v.setEnabled(true);}
+                        v.setEnabled(true);
+                    }
             );
         });
     }
 
-    private void onWaiting(Event event){
+    private void onWaiting(Event event) {
         eventDeadline.setVisibility(View.VISIBLE);
         waitingListCount.setVisibility(View.VISIBLE);
         attendeesCount.setVisibility(View.VISIBLE);
@@ -482,18 +496,20 @@ public class InfoUEventFragment extends Fragment {
 
         infoButton.setVisibility(View.VISIBLE);
 
-        // remove user from waitingList when Leave Pool is clicked
         leaveButton.setOnClickListener(v -> {
-            EventDb.getInstance().leaveWaitlist(eventId,userId,()->{
-                v.setEnabled(false);
-                Log.d(TAG, "Successfully Left WaitList");
-            }, e->{
-                Log.e(TAG, "Failed to leave Waitlist");
-                v.setEnabled(false);});
+            EventDb.getInstance().leaveWaitlist(eventId, userId,
+                    () -> {
+                        v.setEnabled(false);
+                        Log.d(TAG, "Successfully Left WaitList");
+                    },
+                    e -> {
+                        Log.e(TAG, "Failed to leave Waitlist");
+                        v.setEnabled(false);
+                    });
         });
     }
 
-    private void onRemoved(Event event){
+    private void onRemoved(Event event) {
         eventDeadline.setVisibility(View.GONE);
         waitingListCount.setVisibility(View.GONE);
         attendeesCount.setVisibility(View.GONE);
@@ -507,7 +523,7 @@ public class InfoUEventFragment extends Fragment {
         infoButton.setVisibility(View.GONE);
     }
 
-    private void onFull(Event event){
+    private void onFull(Event event) {
         eventDeadline.setVisibility(View.GONE);
         waitingListCount.setVisibility(View.GONE);
         attendeesCount.setVisibility(View.VISIBLE);
@@ -521,7 +537,7 @@ public class InfoUEventFragment extends Fragment {
         infoButton.setVisibility(View.VISIBLE);
     }
 
-    private void onWaitFull(Event event){
+    private void onWaitFull(Event event) {
         eventDeadline.setVisibility(View.GONE);
         waitingListCount.setVisibility(View.VISIBLE);
         attendeesCount.setVisibility(View.VISIBLE);
@@ -535,7 +551,7 @@ public class InfoUEventFragment extends Fragment {
         infoButton.setVisibility(View.VISIBLE);
     }
 
-    private void onLate(Event event){
+    private void onLate(Event event) {
         eventDeadline.setVisibility(View.VISIBLE);
         waitingListCount.setVisibility(View.GONE);
         attendeesCount.setVisibility(View.GONE);
@@ -549,8 +565,7 @@ public class InfoUEventFragment extends Fragment {
         infoButton.setVisibility(View.VISIBLE);
     }
 
-
-    private void onJoin(Event event){
+    private void onJoin(Event event) {
         eventDeadline.setVisibility(View.VISIBLE);
         waitingListCount.setVisibility(View.VISIBLE);
         attendeesCount.setVisibility(View.VISIBLE);
@@ -565,17 +580,108 @@ public class InfoUEventFragment extends Fragment {
 
         joinButton.setOnClickListener(v -> {
             v.setEnabled(false);
-            EventDb.getInstance().joinWaitlist(eventId, userId,
-                    () -> {
-                        Log.d(TAG, "Joined waitlist");
-                    },
-                    e -> {
-                        Log.d(TAG, "Failed to join Waitlist");
-                        v.setEnabled(true);
-                    }
-            );
+            attemptJoinWaitingList(event, v);
         });
     }
+
+    private void attemptJoinWaitingList(Event event, View joinBtn) {
+        if (event.getGeolocationRequired()) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Location Required")
+                    .setMessage("This event requires your location to join the waiting list. Do you want to share your location?")
+                    .setCancelable(false)
+                    .setPositiveButton("Allow", (dialog, id) -> {
+                        if (ContextCompat.checkSelfPermission(requireContext(),
+                                Manifest.permission.ACCESS_FINE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            fetchLocationAndJoin(event);
+                        } else {
+                            // Store event, prompt for permission
+                            pendingJoinEvent = event;
+                            ActivityCompat.requestPermissions(
+                                    requireActivity(),
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    LOCATION_PERMISSION_REQUEST_CODE
+                            );
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, id) -> {
+                        dialog.dismiss();
+                        if (joinBtn != null) joinBtn.setEnabled(true);
+                    })
+                    .show();
+        } else {
+            // Join directly, geolocation not required
+            joinWaitingList(event, null, null);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchLocationAndJoin(pendingJoinEvent);
+            } else {
+                Toast.makeText(requireContext(),
+                        "Location permission is required to join this event.",
+                        Toast.LENGTH_LONG).show();
+                // Do NOT join — entrant blocked until permission is granted
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void fetchLocationAndJoin(Event event) {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        // Only check radius if the event has coordinates set
+                        if (event.getLatitude() != 0 && event.getLongitude() != 0) {
+                            boolean withinRange = RadiusUtil.isWithinRadius(
+                                    EDMONTON_LAT, EDMONTON_LNG,
+                                    location.getLatitude(), location.getLongitude(),
+                                    EDMONTON_RADIUS_METERS
+                            );
+                            if (!withinRange) {
+                                Toast.makeText(requireContext(),
+                                        "You must be in Edmonton to join.",
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                        joinWaitingList(event, location.getLatitude(), location.getLongitude());
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Unable to get location. Please try again.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void joinWaitingList(Event event, Double latitude, Double longitude) {
+        EventDb.getInstance().joinWaitlist(eventId, userId,
+                () -> Log.d(TAG, "Joined waitlist"),
+                e -> Log.e(TAG, "Failed to join Waitlist")
+        );
+
+        // Store coordinates separately if geolocation is enabled
+        if (latitude != null && longitude != null) {
+            Map<String, Object> locationEntry = new HashMap<>();
+            locationEntry.put("latitude", latitude);
+            locationEntry.put("longitude", longitude);
+            FirebaseFirestore.getInstance()
+                    .collection("Events")
+                    .document(event.getEventId())
+                    .collection("entrantLocations")
+                    .document(userId)
+                    .set(locationEntry)
+                    .addOnFailureListener(e -> Log.e(TAG, "Failed to save location", e));
+        }
+    }
+
     /**
      * Remove snapshot listener
      */

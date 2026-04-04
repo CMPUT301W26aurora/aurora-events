@@ -25,12 +25,7 @@ public class EventArrayAdapterTest {
                 "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
 
         // add event to list
         ArrayList<Event> eventList = new ArrayList<>();
@@ -52,12 +47,7 @@ public class EventArrayAdapterTest {
                 "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
 
         // add device id to attendingList
         event.registrationList.getAttendingList().add("test-device-id");
@@ -79,12 +69,7 @@ public class EventArrayAdapterTest {
                 "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
         event.registrationList.getSelectedList().add("test-device-id");
         assertTrue(event.registrationList.getSelectedList().contains("test-device-id"));
     }
@@ -101,12 +86,7 @@ public class EventArrayAdapterTest {
                 "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
         event.registrationList.getWaitingList().add("test-device-id");
         assertTrue(event.registrationList.getWaitingList().contains("test-device-id"));
     }
@@ -123,12 +103,7 @@ public class EventArrayAdapterTest {
                 "free",
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Rec Centre", 20, false);
         assertFalse(event.registrationList.getAttendingList().contains("test-device-id"));
         assertFalse(event.registrationList.getSelectedList().contains("test-device-id"));
         assertFalse(event.registrationList.getWaitingList().contains("test-device-id"));
