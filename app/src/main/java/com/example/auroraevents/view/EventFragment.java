@@ -43,7 +43,6 @@ public class EventFragment extends Fragment {
     private ArrayList<Event> allEventsList;
     private TextView noEventText;
     private EventArrayAdapter eventsAdapter;
-    private Boolean inAdmin;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -64,10 +63,6 @@ public class EventFragment extends Fragment {
 
         addEventButton = root.findViewById(R.id.eventAddButton);
         addEventButton.setVisibility(GONE);
-        Bundle passed = getArguments();
-        if (passed != null) {
-            inAdmin = passed.getBoolean("inAdmin");
-        }
 
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
@@ -128,7 +123,6 @@ public class EventFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString("eventId", selectedEvent.getEventId());
             args.putString("userId", userId);
-            args.putBoolean("inAdmin", inAdmin);
 
             if (userId == null) {
                 Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
@@ -156,10 +150,10 @@ public class EventFragment extends Fragment {
 
         addEventButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new EventCreationFragment())
-                    .addToBackStack(null)
-                    .commit());
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new EventCreationFragment())
+                        .addToBackStack(null)
+                        .commit());
 
         // set SearchView query text listener
         SearchView searchView = root.findViewById(R.id.search_event);
