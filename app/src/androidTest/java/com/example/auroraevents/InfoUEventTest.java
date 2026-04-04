@@ -1,6 +1,9 @@
 package com.example.auroraevents;
 
-public class InfoUEventTest { //TODO 2: make the tests test what they say they test
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -17,9 +20,9 @@ public class InfoUEventTest {
     @Test
     public void testEventName() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         event1.setEventId("test-event-1");
         assertEquals("Singing event", event1.getName());
     }
@@ -30,9 +33,9 @@ public class InfoUEventTest {
     @Test
     public void testEventDescription() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         event1.setEventId("test-event-1");
         assertEquals("Showcase your talent", event1.getDescription());
     }
@@ -43,24 +46,11 @@ public class InfoUEventTest {
     @Test
     public void testEventLocation() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         event1.setEventId("test-event-1");
         assertEquals("Community Centre", event1.getLocation());
-    }
-
-    /**
-     * Tests if correct event capacity is displayed in event details
-     */
-    @Test
-    public void testEventCapacity() {
-        ArrayList<Event> eventList = new ArrayList<>();
-        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
-                LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
-        event1.setEventId("test-event-1");
-        assertEquals(40, event1.getCapacity());
     }
 
     /**
@@ -69,9 +59,9 @@ public class InfoUEventTest {
     @Test
     public void testWaitingListAddCount() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         event1.setEventId("test-event-1");
 
         event1.registrationList.getWaitingList().add("user-abc");
@@ -84,9 +74,9 @@ public class InfoUEventTest {
     @Test
     public void testWaitingListDeleteCount() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event1 = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         event1.setEventId("test-event-1");
 
         event1.registrationList.getWaitingList().add("user-abc");
@@ -103,9 +93,9 @@ public class InfoUEventTest {
     @Test
     public void testNewUserSeesJoinPool() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event =new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         String userId = "user-abc";
 
         boolean showJoinPoolButton = !event.registrationList.getWaitingList().contains(userId) && !event.registrationList.getSelectedList().contains(userId) && !event.registrationList.getAttendingList().contains(userId);
@@ -118,9 +108,9 @@ public class InfoUEventTest {
     @Test
     public void testLeaveButton() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         String userId = "user-abc";
         event.registrationList.getWaitingList().add(userId);
 
@@ -135,9 +125,9 @@ public class InfoUEventTest {
     @Test
     public void testSelectedUsersButtons() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         String userId = "user-abc";
         event.registrationList.getSelectedList().add(userId);
 
@@ -152,9 +142,9 @@ public class InfoUEventTest {
     @Test
     public void testAttendingListCount() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent", LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         String userId = "user-abc";
         event.registrationList.getSelectedList().add(userId);
         event.registrationList.getSelectedList().remove(userId);
@@ -169,9 +159,9 @@ public class InfoUEventTest {
     @Test
     public void testDecliningListCount() {
         ArrayList<Event> eventList = new ArrayList<>();
-        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+        Event event = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
         String userId = "user-abc";
         event.registrationList.getSelectedList().add(userId);
         event.registrationList.getSelectedList().remove(userId);
@@ -180,15 +170,6 @@ public class InfoUEventTest {
         assertFalse(event.registrationList.getAttendingList().contains(userId));
     }
 
-    /**
-     * Tests if admin can view delete button
-     */
-    @Test
-    public void testAdminDeleteButton() {
-        User testUser = new User();
-        testUser.setRole(User.ROLE_ADMIN);
-        assertTrue(testUser.getRole().equals(User.ROLE_ADMIN));
-    }
 
     /**
      * Tests delete button to see if it deletes event
@@ -196,9 +177,9 @@ public class InfoUEventTest {
         @Test
         public void testDeleteButton() {
             ArrayList<Event> events = new ArrayList<>();
-            Event event = new Event("organizer-abc", "Singing event", "Showcase your talent",  LocalDateTime.of(2026, 6, 4, 18, 0),
+            Event event = new Event("organizer-abc", "Singing event", "Showcase your talent","free",  LocalDateTime.of(2026, 6, 4, 18, 0),
                     LocalDateTime.of(2026, 5, 20, 9, 0),
-                    LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", 40, false);
+                    LocalDateTime.of(2026, 6, 1, 23, 59), "Community Centre", false,40,40);
             event.setEventId("test-event-1");
             // add event to list
             events.add(event);

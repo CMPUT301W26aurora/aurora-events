@@ -85,8 +85,7 @@ public class Organizer extends User {
                 location,
                 geolocationRequired,
                 waitingCapacity,
-                attendingCapacity,
-                poster);
+                attendingCapacity);
         event.setGeolocationRequired(geolocationRequired);
 
         // Bug 3 fix: only add to local list after Firestore confirms success

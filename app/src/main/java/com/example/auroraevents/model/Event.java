@@ -64,8 +64,7 @@ public class Event {
             String location,
             boolean geolocationRequired,
             int waitingCapacity,
-            int attendingCapacity,
-            Bitmap poster) {
+            int attendingCapacity) {
         this();
         this.organizerDeviceId     = organizerDeviceId;
         this.name                  = name;
