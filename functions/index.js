@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
+const bucket = admin.storage.bucket();
 
 exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
     const deletedUserId = event.params.userId;
@@ -112,6 +113,13 @@ exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
             .where("parentId", "==", null)
             .get();
 
+        //https://docs.cloud.google.com/storage/docs/samples/storage-delete-file#storage_delete_file-nodejs
+        //Question asked by user Pat Myron, answered used from TheFastCat
+        //https://stackoverflow.com/questions/37749647/firebasestorage-how-to-delete-directory
+
+        await bucket.deleteFiles({
+                    prefix: `${deletedEventId}/`
+        });
         parentSnapshot.forEach(doc=>{
             batch.delete(doc.ref);
         });

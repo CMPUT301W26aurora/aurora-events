@@ -1,11 +1,14 @@
 package com.example.auroraevents.server;
 
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import com.example.auroraevents.model.Event;
+import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -16,7 +19,10 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 /**
@@ -66,6 +72,56 @@ public class EventDb {
     }
 
     // ── CREATE ─────────────────────────────────────────────────────────────
+
+    //https://firebase.google.com/docs/storage/android/upload-files
+    public void saveUrlToFirestore(String eventId, String url, String field){
+        db.collection(COLLECTION_NAME)
+                .document(eventId)
+                .update(field, url)
+                .addOnSuccessListener(unused->{
+                    Log.d(TAG, "added image " + field);
+                })
+                .addOnFailureListener(e->{
+                   Log.e(TAG, "Failed upload to " + field + " " +e );
+                });
+    }
+
+    public void uploadPoster(Uri uri, String eventId) {
+        if (uri == null || eventId == null) return;
+
+        StorageReference fileRef = FirebaseStorage.getInstance().getReference()
+                        .child(eventId + "/" +"poster.jpg");
+
+        fileRef.putFile(uri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    fileRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                        saveUrlToFirestore(eventId, downloadUri.toString(), "posterUrl");
+                    });
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Upload failed for poster", e));
+    }
+
+    public void uploadQr(Bitmap qr, String eventId){
+        if (qr == null || eventId == null) return;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        qr.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+
+        StorageReference fileRef = FirebaseStorage.getInstance().getReference()
+                .child(eventId + "/" +"qr.png");
+
+        fileRef.putBytes(data)
+                .addOnSuccessListener(taskSnapshot->{
+                    fileRef.getDownloadUrl().addOnSuccessListener(downloadUri->{
+                        saveUrlToFirestore(eventId, downloadUri.toString(), "qrCodeUrl");
+                    });
+                })
+                .addOnFailureListener(e->Log.e(TAG, "Upload failed for url"));
+    }
+
+
 
     /**
      * Adds a new event document to Firestore with an auto-generated ID.
@@ -411,6 +467,41 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
+
+    public void deletePoster(String eventId, OnSuccessCallback onSuccess, OnFailureCallback onFailure){
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        db.collection(COLLECTION_NAME).document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot->{
+                    String posterUrl = documentSnapshot.getString("posterUrl");
+                    if(posterUrl != null && !posterUrl.isEmpty() ){
+                        StorageReference photoRef = storage.getReferenceFromUrl(posterUrl);
+
+                        photoRef.delete().addOnSuccessListener(aVoid -> {
+                            //on succesfull photo delete
+                            Log.d(TAG, "Deleted event poster");
+                            db.collection(COLLECTION_NAME).document(eventId)
+                                    .update("posterUrl", null)
+                                    .addOnSuccessListener(v -> {
+                                        //on url field clear
+                                        Log.d(TAG, "Deleted poster and cleared URL");
+                                        onSuccess.onSuccess();
+                                    })
+                                    .addOnFailureListener(e->{
+                                        //failure to clear url
+                                        Log.e(TAG, "failed to delete URL", e);
+                                        onFailure.onFailure(e);
+                                    });
+                        });
+                    }else{
+                        //nothing to delete, we good
+                        onSuccess.onSuccess();
+                    }
+                }).addOnFailureListener(e->{
+                    Log.e(TAG, "failed to grab event info");
+                    onFailure.onFailure(e);
+                });
+    }
     // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────────────────
 
     public interface OnEventSnapshotCallback       { void onEventSnapshot(Event event); }
@@ -437,4 +528,5 @@ public class EventDb {
         });
 
     }
+
 }
