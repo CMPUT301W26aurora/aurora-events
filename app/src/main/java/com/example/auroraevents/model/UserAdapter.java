@@ -1,20 +1,13 @@
 package com.example.auroraevents.model;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
-import com.example.auroraevents.view.RemoveUserPopUpDialog;
-import com.example.auroraevents.view.UserListFragment;
 
 import java.util.List;
 
@@ -56,7 +49,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @NonNull
     @Override
     public UserAdapter.UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_list_item, parent, false);
+        int layout = (viewType == 1) ? R.layout.item_user_list_admin : R.layout.item_user_list_org;
+        View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new UserViewHolder(view);
     }
     @Override
