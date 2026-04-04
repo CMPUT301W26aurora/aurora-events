@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,7 +43,6 @@ public class EventFragment extends Fragment {
     private ArrayList<Event> allEventsList;
     private TextView noEventText;
     private EventArrayAdapter eventsAdapter;
-    private Boolean inAdmin;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -63,10 +63,6 @@ public class EventFragment extends Fragment {
 
         addEventButton = root.findViewById(R.id.eventAddButton);
         addEventButton.setVisibility(GONE);
-        Bundle passed = getArguments();
-        if (passed != null) {
-            inAdmin = passed.getBoolean("inAdmin");
-        }
 
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
@@ -76,9 +72,15 @@ public class EventFragment extends Fragment {
             }
 
             Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
-            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()) || User.ROLE_ADMIN.equals(user.getRole()))) {
+            if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()))) {
                 addEventButton.setVisibility(VISIBLE);
             } else {
+                addEventButton.setVisibility(GONE);
+            }
+        });
+
+        userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), isAdminMode -> {
+            if(isAdminMode){
                 addEventButton.setVisibility(GONE);
             }
         });
@@ -121,7 +123,11 @@ public class EventFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString("eventId", selectedEvent.getEventId());
             args.putString("userId", userId);
-            args.putBoolean("inAdmin", inAdmin);
+
+            if (userId == null) {
+                Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             Fragment eventFragment;
             if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
@@ -144,10 +150,10 @@ public class EventFragment extends Fragment {
 
         addEventButton.setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new EventCreationFragment())
-                    .addToBackStack(null)
-                    .commit());
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new EventCreationFragment())
+                        .addToBackStack(null)
+                        .commit());
 
         // set SearchView query text listener
         SearchView searchView = root.findViewById(R.id.search_event);

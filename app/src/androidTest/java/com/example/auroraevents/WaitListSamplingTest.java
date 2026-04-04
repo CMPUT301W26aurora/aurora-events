@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class WaitListSamplingTest {
+    //Testing with Live database is a big no-no. Refactor with Mockito...
+    /**
     private Organizer organizer;
 
     Event myEvent;
@@ -191,4 +193,5 @@ public class WaitListSamplingTest {
         // Check that all users from waiting list were selected
         assertTrue(waitlistWithID.containsAll(myEvent3.registrationList.getSelectedList()));
     }
+    **/
 }
