@@ -3,6 +3,8 @@ package com.example.auroraevents.model;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,28 +23,42 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     private UserAdapter.OnUserInteractionListener listener;
     private List<User> userList;
     private Boolean inAdmin;
-    UserAdapter(OnUserInteractionListener listener, List<User> user, Boolean inAdmin){
+    private RegistrationList registrationList;
+
+    UserAdapter(OnUserInteractionListener listener, List<User> user, Boolean inAdmin, RegistrationList registrationList){
         this.listener = listener;
         this.userList = user;
         this.inAdmin = inAdmin;
+        this.registrationList = registrationList;
+
     }
     public abstract static class UserViewHolder extends RecyclerView.ViewHolder {
         UserViewHolder(@NonNull View itemView){
             super(itemView);
         }
-        public abstract void bind(User user, OnUserInteractionListener listener);
+        public abstract void bind(User user, OnUserInteractionListener listener, RegistrationList registrationList);
     }
     @Override
     public void onBindViewHolder(@NonNull UserAdapter.UserViewHolder holder, int position) {
         User user = userList.get(position);
-        holder.bind(user, listener);
+        holder.bind(user, listener, registrationList);
     }
     public static class  OrgViewHolder extends UserViewHolder{
+
+        private final View rootLayout;
+        private final ImageButton delete;
+        private final TextView userName;
+        private final TextView userStatus;
         OrgViewHolder(View v) {
             super(v);
+
+            rootLayout =v;
+            delete = rootLayout.findViewById(R.id.delete_user_button_org_item);
+            userName = rootLayout.findViewById(R.id.user_name_list_org);
+            userStatus = rootLayout.findViewById(R.id.user_status_list_org);
         }
         @Override
-        public void bind(User user, OnUserInteractionListener listener) {
+        public void bind(User user, OnUserInteractionListener listener, RegistrationList registrationList) {
 
         }
     }
@@ -53,7 +69,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
 
         @Override
-        public void bind(User user, OnUserInteractionListener listener) {
+        public void bind(User user, OnUserInteractionListener listener, RegistrationList registrationList) {
 
         }
     }
