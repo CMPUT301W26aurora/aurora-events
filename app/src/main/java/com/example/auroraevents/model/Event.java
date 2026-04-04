@@ -35,10 +35,10 @@ public class Event {
     private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
     private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String location;
+    private String qrUrl;
+    private String posterUrl;
+
     private boolean geolocationRequired;
-    private String qrCodeData;            // String payload encoded in the QR code
-    private Bitmap qR;
-    private Bitmap poster;
     private boolean isPrivate;
     private List<String> reports;
     private double latitude;
@@ -64,8 +64,7 @@ public class Event {
             String location,
             boolean geolocationRequired,
             int waitingCapacity,
-            int attendingCapacity,
-            Bitmap poster) {
+            int attendingCapacity) {
         this();
         this.organizerDeviceId     = organizerDeviceId;
         this.name                  = name;
@@ -78,7 +77,6 @@ public class Event {
         this.geolocationRequired   = geolocationRequired;
         this.registrationList.setWaitingCapacity(waitingCapacity);
         this.registrationList.setAttendingCapacity(attendingCapacity);
-        this.poster                = poster;
     }
 
     @Override
@@ -96,7 +94,6 @@ public class Event {
                 Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
                 Objects.equals(getLocation(), event.getLocation()) &&
                 getGeolocationRequired() == event.getGeolocationRequired() &&
-                Objects.equals(getPoster(), event.getPoster()) &&
                 getNumReports() == event.getNumReports() &&
                 Objects.equals(registrationList, event.registrationList)
                 ;
@@ -137,12 +134,6 @@ public class Event {
 
     public boolean getGeolocationRequired()                            { return geolocationRequired; }
     public void    setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
-
-    public String getQrCodeData()                  { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData) { this.qrCodeData = qrCodeData; }
-
-    public Bitmap getPoster()              { return poster; }
-    public void   setPoster(Bitmap poster) { this.poster = poster; }
   
     public boolean isPrivate()                   { return isPrivate; }
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
@@ -186,15 +177,27 @@ public class Event {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
 
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getQrUrl() {
+        return qrUrl;
+    }
+
+    public void setQrUrl(String qrUrl) {
+        this.qrUrl = qrUrl;
+    }
+
     // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
-    /**
-     * takes a string of data and converts to a bitmap QR code
-     * The string data is defined in the constructor and using this produces a bitmap
-     * that returns the value specified inside the variable
-     * @author Sean Ross
-     */
+
+
     @Exclude
-    public void generateQrCode(){
+    public Bitmap generateQrCode(){
         MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
         try{
             // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
@@ -207,13 +210,12 @@ public class Event {
 
             //convert matrix to bitmap, can be used in image view
             BarcodeEncoder encoder = new BarcodeEncoder();
-            qR = encoder.createBitmap(matrix);
+            return encoder.createBitmap(matrix);
         }
         catch (WriterException e){
             Log.e("EVENT","Error encoding QR code", e);
+            return null;
         }
-    }
 
-    @Exclude
-    public Bitmap getQrCode() { return this.qR; }
+    }
 }

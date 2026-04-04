@@ -204,10 +204,10 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void renderCommonUI(Event event) {
-        if (event.getPoster() == null) {
+        if (event.getPosterUrl() == null) {
             poster.setVisibility(View.GONE);
         } else {
-            poster.setImageBitmap(event.getPoster());
+            //poster.setImageBitmap(event.getPoster()); // need to use glide to pull poster from database
         }
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());
