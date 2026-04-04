@@ -14,34 +14,33 @@ import com.example.auroraevents.R;
 import java.util.List;
 
 /**
- *
+ * User adapter class for displaying users
  */
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     public interface OnUserInteractionListener{
         void Onclick(User user);
     }
     private UserAdapter.OnUserInteractionListener listener;
-    private List<User> userList;
+    private List<UserStatus> userList;
     private Boolean inAdmin;
-    private RegistrationList registrationList;
 
-    UserAdapter(OnUserInteractionListener listener, List<User> user, Boolean inAdmin, RegistrationList registrationList){
+
+    UserAdapter(OnUserInteractionListener listener, List<UserStatus> user, Boolean inAdmin, RegistrationList registrationList){
         this.listener = listener;
         this.userList = user;
         this.inAdmin = inAdmin;
-        this.registrationList = registrationList;
 
     }
     public abstract static class UserViewHolder extends RecyclerView.ViewHolder {
         UserViewHolder(@NonNull View itemView){
             super(itemView);
         }
-        public abstract void bind(User user, OnUserInteractionListener listener, RegistrationList registrationList);
+        public abstract void bind(UserStatus user, OnUserInteractionListener listener);
     }
     @Override
     public void onBindViewHolder(@NonNull UserAdapter.UserViewHolder holder, int position) {
-        User user = userList.get(position);
-        holder.bind(user, listener, registrationList);
+        UserStatus user = userList.get(position);
+        holder.bind(user, listener);
     }
     public static class  OrgViewHolder extends UserViewHolder{
 
@@ -58,8 +57,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             userStatus = rootLayout.findViewById(R.id.user_status_list_org);
         }
         @Override
-        public void bind(User user, OnUserInteractionListener listener, RegistrationList registrationList) {
-
+        public void bind(UserStatus user, OnUserInteractionListener listener) {
+            userName.setText(user.getUser().getName());
+            userStatus.setText(user.getStatus());
         }
     }
 
@@ -69,7 +69,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
 
         @Override
-        public void bind(User user, OnUserInteractionListener listener, RegistrationList registrationList) {
+        public void bind(UserStatus user, OnUserInteractionListener listener) {
 
         }
     }
@@ -93,3 +93,4 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         return inAdmin ? 1 : 0;
     }
 }
+
