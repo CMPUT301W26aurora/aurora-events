@@ -12,13 +12,13 @@ import android.widget.Button;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.RegistrationList;
-import com.example.auroraevents.model.UserArrayAdapter;
+import com.example.auroraevents.model.UserAdapter;
 
 public class RemoveUserPopUpDialog extends DialogFragment {
     private RegistrationList registrationList;
     private String selectedUserID;
-    private UserArrayAdapter userListAdapter;
-    public static RemoveUserPopUpDialog newInstance(RegistrationList registrationList, String selectedUserID, UserArrayAdapter userListAdapter) {
+    private UserAdapter userListAdapter;
+    public static RemoveUserPopUpDialog newInstance(RegistrationList registrationList, String selectedUserID, UserAdapter userListAdapter) {
         RemoveUserPopUpDialog dialog = new RemoveUserPopUpDialog();
         dialog.registrationList = registrationList;
         dialog.selectedUserID = selectedUserID;
