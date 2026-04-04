@@ -12,9 +12,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +30,8 @@ public class LoginFragment extends Fragment {
     EditText emailEdit;
     EditText phoneEdit;
 
+    UserViewModel userViewModel;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +44,8 @@ public class LoginFragment extends Fragment {
         nameEdit = view.findViewById(R.id.user_name);
         emailEdit = view.findViewById(R.id.user_email);
         phoneEdit = view.findViewById(R.id.user_phone_number);
+
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
         view.findViewById(R.id.confirm_button).setOnClickListener(v -> {
             if (nameEdit.getText().toString().isEmpty() || emailEdit.getText().toString().isEmpty()) {
@@ -61,7 +67,17 @@ public class LoginFragment extends Fragment {
                 UserDb.getInstance().addUser(user, ()->{
                     requireActivity().runOnUiThread(()->{
                         Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
-                        getParentFragmentManager().popBackStack();
+
+                        userViewModel.selectItem(user);
+
+
+                        if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                            getParentFragmentManager().popBackStack();
+                        } else {
+                            getParentFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment_container, new EventFragment())
+                                    .commit();
+                        }
 
                     });
                 }, e->{
