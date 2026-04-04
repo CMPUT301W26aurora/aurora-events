@@ -60,6 +60,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         public void bind(UserStatus user, OnUserInteractionListener listener) {
             userName.setText(user.getUser().getName());
             userStatus.setText(user.getStatus());
+            delete.setOnClickListener(v->{
+                if(listener != null){
+                    listener.Onclick(user.getUser());
+                }
+            });
         }
     }
 
