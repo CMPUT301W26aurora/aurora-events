@@ -187,11 +187,13 @@ public class InfoUEventFragment extends Fragment {
         });
     }
     private void renderCommonUI(Event event){
+        /**
         if (event.getPoster() == null) {
             poster.setVisibility(View.GONE);
         } else {
             poster.setImageBitmap(event.getPoster());
         }
+        **/ // uncomment this once you read the new print of event and pull the image, keep using glide.
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());
         // get organizer name
