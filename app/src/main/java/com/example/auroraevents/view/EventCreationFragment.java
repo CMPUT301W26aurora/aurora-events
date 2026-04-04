@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,7 @@ Maps handled by Google Maps SDK:
 public class EventCreationFragment extends Fragment {
     //TODO 4: copy into edit event fragment
     private ImageButton backButton;
+    private final String TAG = "EventCreationFragment";
     private Button addImageButton;
     private TextInputEditText eventNameInput;
     private TextInputEditText eventDescInput;
@@ -139,6 +141,17 @@ public class EventCreationFragment extends Fragment {
                 this.user = org;
                 confirmButton.setEnabled(true);
                 confirmButton.setAlpha(1.0f);
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
+            if (u != null) {
+                this.user = u;
+
+                if(u.getRole().equals(User.ROLE_ORGANIZER)) {
+                    this.organizer = new Organizer(u);
+                    confirmButton.setEnabled(true);
+                    confirmButton.setAlpha(1.0f);
+                } else{
+                    Log.e(TAG, "User is not an Organizer instance");
+                }
             }
         });
 

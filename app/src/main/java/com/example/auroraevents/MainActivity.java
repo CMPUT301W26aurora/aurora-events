@@ -3,6 +3,9 @@ package com.example.auroraevents;
 import static androidx.core.location.LocationManagerCompat.getCurrentLocation;
 
 import android.Manifest;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.NotificationChannel;
@@ -17,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -40,6 +44,7 @@ import com.example.auroraevents.view.AdminOrganizerFragment;
 import com.example.auroraevents.view.AdminProfileFragment;
 import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
+import com.example.auroraevents.view.LoginFragment;
 import com.example.auroraevents.view.NotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
 import com.google.android.gms.common.api.ApiException;
@@ -72,6 +77,9 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
     private String deviceId;
     private UserViewModel userViewModel;
 
+    private View navBar;
+    private View adminBar;
+
     private ImageButton navScan, navBrowse, navNotifications, navAdminBrowseProfile,navAdminImage,navAdminEvent,navAdminComment,navAdminOrganizer;
     public ImageButton navProfile,navAdminProfile;
 
@@ -95,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         navAdminImage = findViewById(R.id.nav_admin_image);
         navAdminOrganizer = findViewById(R.id.nav_admin_organizer);
         navAdminBrowseProfile = findViewById(R.id.nav_admin_browse_profiles);
+        navBar = findViewById(R.id.nav_bar);
+        adminBar = findViewById(R.id.nav_bar_admin);
 
         deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -159,36 +169,28 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         UserDb.getInstance().getUser(deviceId,
                 user -> {
                     user.setDeviceId(deviceId);
-                    if(user.getAdmin() == null){
-                        user.setAdmin(false); 
+
+                    if(user.getIsAdmin() == null){
+                        user.setIsAdmin(false);
                     }
+
                     if (user.getRole() == null || user.getRole().isEmpty())
                         user.setRole(User.ROLE_ENTRANT);
-                    userViewModel.selectItem(user);
+
+                    if (user.getName() == null || user.getName().isEmpty()) {
+                        //user does not exist
+                        loadFragment(new LoginFragment());
+                    } else {
+                        //user is real
+                        userViewModel.selectItem(user);
+                        setActiveTab(navBrowse);
+                        loadFragment(new EventFragment());
+                    }
                     Log.d(TAG, "User info received!");
                 },
                 e -> Log.e(TAG, "User info not available")
         );
 
-        // Set user
-        userViewModel.getSelectedItem().observe(this,u -> {
-            if (u != null && u.getName() != null) {
-                UserDb.getInstance().updateUser(u,
-                        () -> Log.d(TAG, "User info updated"),
-                        e -> Log.w(TAG, "User info not updated")
-                );
-            } else {
-                Log.d(TAG, "Sync skipped: User object is empty or not yet loaded.");
-            }
-        });
-
-        // Set default tab
-        setActiveTab(navBrowse);
-        EventFragment defaultFragment = new EventFragment();
-        Bundle defaultArgs = new Bundle();
-        defaultArgs.putBoolean("inAdmin", false); // Explicitly set default
-        defaultFragment.setArguments(defaultArgs);
-        loadFragment(defaultFragment);
 
         navScan.setOnClickListener(v -> {
             setActiveTab(navScan);
@@ -197,11 +199,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
 
         navBrowse.setOnClickListener(v -> {
             setActiveTab(navBrowse);
-            EventFragment eventFragment = new EventFragment();
-            Bundle args = new Bundle();
-            args.putBoolean("inAdmin", false);
-            eventFragment.setArguments(args);
-            loadFragment(eventFragment);
+            loadFragment(new EventFragment());
         });
 
         navNotifications.setOnClickListener(v -> {
@@ -212,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         navProfile.setOnClickListener(v -> {
             setActiveTab(navProfile);
             loadFragment(new ProfileFragment());
+            System.out.println(deviceId); //Debugging
         });
 
         navAdminBrowseProfile.setOnClickListener(v->{
@@ -231,11 +230,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
 
         navAdminEvent.setOnClickListener(v->{
             setActiveTab(navAdminEvent);
-            EventFragment eventFragment =new EventFragment();
-            Bundle args = new Bundle();
-            args.putBoolean("inAdmin", true);
-            eventFragment.setArguments(args);
-            loadFragment(eventFragment);
+            loadFragment(new EventFragment());
         });
 
         navAdminComment.setOnClickListener(v->{
@@ -247,6 +242,18 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
             setActiveTab(navAdminProfile);
             loadFragment(new ProfileFragment());
         });
+
+        userViewModel.getAdminModeActive().observe(this, isAdminMode -> {
+            if (isAdminMode) {
+                navBar.setVisibility(View.GONE);
+                adminBar.setVisibility(View.VISIBLE);
+                setActiveTab(navAdminProfile);
+            } else {
+                navBar.setVisibility(View.VISIBLE);
+                adminBar.setVisibility(View.GONE);
+                setActiveTab(navProfile);
+            }
+        });
     }
 
     private void loadFragment(Fragment fragment) {
@@ -255,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
                 .replace(R.id.fragment_container, fragment)
                 .commit();
     }
+
 
     public void setActiveTab(ImageButton selected) {
         ImageButton[] tabs = { navScan,
@@ -406,3 +414,4 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         }
     }
 }
+

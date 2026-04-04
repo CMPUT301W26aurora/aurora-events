@@ -266,6 +266,32 @@ public class EventDb {
     }
 
     /**
+     * Removes a user by device id from all of a given events lists
+     *
+     * @param eventId   The event to remove from.
+     * @param userID    The user who is being removed.
+     * @param onSuccess Called on Success
+     * @param onFailure Called with exception on failure
+     */
+    public void removeUserFromAllLists(String eventId, String userID, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+
+        eventRef.update(
+                        LIST_WAITING, FieldValue.arrayRemove(userID),
+                        LIST_SELECTED, FieldValue.arrayRemove(userID),
+                        LIST_ATTENDING, FieldValue.arrayRemove(userID),
+                        LIST_DECLINED, FieldValue.arrayRemove(userID),
+                        LIST_CANCELLED, FieldValue.arrayRemove(userID),
+                        LIST_REMOVED, FieldValue.arrayRemove(userID)
+                )
+                .addOnSuccessListener(unused -> onSuccess.onSuccess())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove user from all lists");
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
      * Moves a user from one participant list to another atomically using a Firestore batch write.
      *
      * @param eventId       The event document ID.
@@ -290,7 +316,60 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
+    /**
+     * Moves a user from the Selected list to the Attending list.
+     */
+    public void userAcceptSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_SELECTED, LIST_ATTENDING, userId, onSuccess, onFailure);
+    }
 
+    /**
+     * Moves a user from the Selected list to the Declined list.
+     */
+    public void userDeclineSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_SELECTED, LIST_DECLINED, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Adds a user to the waiting list.
+     */
+    public void joinWaitlist(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        addUserToList(eventId, LIST_WAITING, userId, onSuccess, onFailure);
+    }
+
+    /**
+     * Moves a user from the Waiting list to the canceled list (User clicked 'Leave Pool').
+     */
+    public void leaveWaitlist(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        moveUserBetweenLists(eventId, LIST_WAITING, LIST_CANCELLED, userId, onSuccess, onFailure);
+    }
+
+    //https://www.geeksforgeeks.org/firebase/how-to-update-an-array-of-objects-with-firestore/
+    /**
+     * Batch move users from one list to another
+     *
+     * @param eventId       The event document ID
+     * @param fromFieldName The list moving from
+     * @param toFieldName   the list moving to
+     * @param ids           the users to batch move
+     * @param onSuccess     Called on success
+     * @param onFailure     called on failure
+     */
+    public void moveGroupUsers(String eventId, String fromFieldName, String toFieldName, List<String> ids,
+                               OnSuccessCallback onSuccess, OnFailureCallback onFailure){
+        WriteBatch batch = db.batch();
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+
+        batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
+        batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+
+        batch.commit()
+                .addOnSuccessListener(unused -> onSuccess.onSuccess())
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to group move users between lists. Event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
     /**
      * Stores the QR code data string on the event document.
      *
@@ -314,34 +393,21 @@ public class EventDb {
     // ── DELETE ─────────────────────────────────────────────────────────────
 
     /**
-     * Deletes an event document from Firestore along with the comments
+     * Deletes an event document from Firestore
      *
      * @param eventId   The document ID of the event to delete.
      * @param onSuccess Called when the deletion succeeds.
      * @param onFailure Called with the exception if the deletion fails.
      */
     public void deleteEvent(String eventId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        db.collection("Comments")
-                .whereEqualTo("eventId", eventId)
-                .get()
+        db.collection(COLLECTION_NAME).document(eventId)
+                .delete()
                 .addOnSuccessListener(querySnapshot -> {
-                    WriteBatch batch = db.batch();
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
-                        batch.delete(doc.getReference());
-                    }
-                    batch.delete(db.collection(COLLECTION_NAME).document(eventId));
-                    batch.commit()
-                            .addOnSuccessListener(unused -> {
-                                Log.d(TAG, "Event and comments deleted: " + eventId);
-                                onSuccess.onSuccess();
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e(TAG, "Batch delete failed", e);
-                                onFailure.onFailure(e);
-                            });
+                    Log.d(TAG, "Event Deleted" + eventId);
+                    onSuccess.onSuccess();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to fetch comments for deletion", e);
+                    Log.e(TAG, "Failed to delete Event", e);
                     onFailure.onFailure(e);
                 });
     }

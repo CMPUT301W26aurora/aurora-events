@@ -30,7 +30,7 @@ public class Comment {
         if (timestamp != null) {
             return ((com.google.firebase.Timestamp) timestamp).toDate().getTime();
         }
-        return System.currentTimeMillis(); //default val, low likelyhood of being called
+        return System.currentTimeMillis(); //default val
 
     }
 

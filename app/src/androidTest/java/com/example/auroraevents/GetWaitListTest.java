@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class GetWaitListTest {
+    //Testing with Live database is a big no-no. Refactor with Mockito...
+    /**
     private Organizer organizer;
 
     Event myEvent;
@@ -102,5 +104,6 @@ public class GetWaitListTest {
         // Test that the organizer cannot access event that they did not create
         assertThrows(IllegalArgumentException.class, () -> organizer.getEventWaitList(new Event()));
     }
+    **/
 
 }
