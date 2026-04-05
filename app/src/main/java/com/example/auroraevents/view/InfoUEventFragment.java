@@ -198,8 +198,7 @@ public class InfoUEventFragment extends Fragment {
                         && user.getRole().equals(User.ROLE_ORGANIZER)) {
                     // Primary organizer: full organizer UI including co-organizer management
                     setupOrganizerUI(event, true);
-                } else if (user != null && event.isCoOrganizer(userId)
-                        && user.getRole().equals(User.ROLE_ORGANIZER)) {
+                } else if (user != null && event.isCoOrganizer(userId)) {
                     // Co-organizer: organizer UI but cannot manage co-organizers
                     setupOrganizerUI(event, false);
                 } else {
