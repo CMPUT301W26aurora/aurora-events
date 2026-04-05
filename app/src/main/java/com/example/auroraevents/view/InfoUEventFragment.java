@@ -377,7 +377,7 @@ public class InfoUEventFragment extends Fragment {
             SendNotificationDialog dialog = SendNotificationDialog.newInstance(
                     event.getEventId(),
                     event.getName(),
-                    event.registrationList
+                    event.getRegistrationList()
             );
             dialog.show(getParentFragmentManager(), "send_notification");
         });
@@ -459,11 +459,11 @@ public class InfoUEventFragment extends Fragment {
         eventDeadline.setText(deadlineText);
 
         // set waiting count grammatically
-        String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
-        if (event.registrationList.getWaitingCapacity() > -1) {
-            waitingCountText += "/" + event.registrationList.getWaitingCapacity();
+        String waitingCountText = String.valueOf(event.getRegistrationList().getWaitingList().size());
+        if (event.getRegistrationList().getWaitingCapacity() > -1) {
+            waitingCountText += "/" + event.getRegistrationList().getWaitingCapacity();
         }
-        if (waitingCountText.equals("1") && event.registrationList.getWaitingCapacity() > -1) {
+        if (waitingCountText.equals("1") && event.getRegistrationList().getWaitingCapacity() > -1) {
             waitingCountText += " person is waiting";
         } else {
             waitingCountText += " people are waiting";
@@ -471,18 +471,18 @@ public class InfoUEventFragment extends Fragment {
         waitingListCount.setText(waitingCountText);
 
         // set attendees count grammatically
-        String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
-        if (event.registrationList.getAttendingCapacity() > -1) {
-            attendeesCountText += "/" + event.registrationList.getAttendingCapacity();
+        String attendeesCountText = String.valueOf(event.getRegistrationList().getAttendingList().size());
+        if (event.getRegistrationList().getAttendingCapacity() > -1) {
+            attendeesCountText += "/" + event.getRegistrationList().getAttendingCapacity();
         }
-        if (attendeesCountText.equals("1") && event.registrationList.getAttendingCapacity() > -1) {
+        if (attendeesCountText.equals("1") && event.getRegistrationList().getAttendingCapacity() > -1) {
             attendeesCountText += " person is participating";
         } else {
             attendeesCountText += " people are participating";
         }
         attendeesCount.setText(attendeesCountText);
 
-        RegistrationList list = event.registrationList;
+        RegistrationList list = event.getRegistrationList();
 
         // A co-organizer for this event cannot join the entrant pool
         if (event.isCoOrganizer(userId)) {
