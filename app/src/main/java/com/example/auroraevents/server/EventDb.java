@@ -1,8 +1,6 @@
 package com.example.auroraevents.server;
 
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,7 +10,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.example.auroraevents.model.Event;
-import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -20,7 +17,6 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
@@ -32,7 +28,6 @@ import java.util.List;
 
 /**
  * Singleton class for all Firestore operations on the "Events" collection.
- *
  * Usage:
  *   EventDb.getInstance().addEvent(event, id -> { ... }, e -> { ... });
  */
@@ -242,7 +237,6 @@ public class EventDb {
     /**
      * Fetches all events where the given user appears in a specific participant list.
      * Use the LIST_* constants for the fieldName.
-     *
      * Example — get all events a user is waiting on:
      *   EventDb.getInstance().getEventsForUser(deviceId, EventDb.LIST_WAITING, ...);
      *
@@ -299,7 +293,6 @@ public class EventDb {
     /**
      * Adds a user (by deviceId) to one of the event's participant lists.
      * Use the LIST_* constants defined in this class for the fieldName.
-     *
      * Example:
      *   EventDb.getInstance().addUserToList(eventId, EventDb.LIST_WAITING, deviceId, ...);
      *
