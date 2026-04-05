@@ -6,6 +6,7 @@ import androidx.fragment.app.DialogFragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -17,15 +18,19 @@ import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.UserAdapter;
 import com.example.auroraevents.server.EventDb;
 
+import java.util.Collections;
+import java.util.List;
+
 public class RemoveUserPopUpDialog extends DialogFragment {
     private String selectedUserID;
+    private String currentEventID;
     private RegistrationList registrationList;
     private UserAdapter userAdapter;
-    public static RemoveUserPopUpDialog newInstance(RegistrationList registrationList, String selectedUserID, UserAdapter userListAdapter) {
+    public static RemoveUserPopUpDialog newInstance(RegistrationList registrationList, String selectedUserID, String currentEventId ) {
         RemoveUserPopUpDialog dialog = new RemoveUserPopUpDialog();
         dialog.selectedUserID = selectedUserID;
         dialog.registrationList = registrationList;
-        dialog.userAdapter = userListAdapter;
+        dialog.currentEventID = currentEventId;
 
         return dialog;
     }
@@ -41,6 +46,7 @@ public class RemoveUserPopUpDialog extends DialogFragment {
         ImageButton cancel = view.findViewById(R.id.cancel_button);
 
 
+
         AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .create();
@@ -49,38 +55,20 @@ public class RemoveUserPopUpDialog extends DialogFragment {
         cancel.setOnClickListener(v->alertDialog.dismiss());
 
         confirmButton.setOnClickListener(v -> {
-            registrationList.addToCancelledList(selectedUserID, new RegistrationList.OnDbUpdateListener() {
+            List<String> userToMove = Collections.singletonList(selectedUserID);
+            EventDb.getInstance().moveGroupUsers(
+                    currentEventID,
+                    EventDb.LIST_SELECTED,
+                    EventDb.LIST_CANCELLED,
+                    userToMove,
+                    new EventDb.OnSuccessCallback() {
                         @Override
                         public void onSuccess() {
-                            //do nothing
+                            alertDialog.dismiss();
                         }
-
-                        @Override
-                        public void onFailure() {
-                            //do Nothing
-                        }
-
-                        @Override
-                        public void onComplete(RegistrationList.RegistrationResult result) {
-                            switch (result) {
-                                case SUCCESS:
-                                    Toast.makeText(getContext(), "Removed User From Pool", Toast.LENGTH_SHORT).show();
-                                    userAdapter.notifyDataSetChanged();
-                                    alertDialog.dismiss();
-                                    break;
-                                case BLOCKED:
-                                    Toast.makeText(getContext(), "User is already removed.", Toast.LENGTH_SHORT).show();
-                                    alertDialog.dismiss();
-                                    break;
-                                case DATABASE_ERROR:
-                                    Toast.makeText(getContext(), "Connection error. Try again.", Toast.LENGTH_SHORT).show();
-                                    break;
-
-                            }
-                        }
-                    }
-
-                    , registrationList.getSelectedList(), EventDb.LIST_CANCELLED);
+                    },
+                    e -> Log.e("Dialog", "Move failed", e)
+            );
         });
 
         setDeadlineButton.setOnClickListener(v->{

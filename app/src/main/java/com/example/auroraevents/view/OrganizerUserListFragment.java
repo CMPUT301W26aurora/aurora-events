@@ -72,7 +72,12 @@ public class OrganizerUserListFragment extends DialogFragment {
         adapter = new UserAdapter(new ArrayList<>(), false, new UserAdapter.OnUserInteractionListener() {
             @Override
             public void Onclick(User user) {
-                RemoveUserPopUpDialog removeDialog = RemoveUserPopUpDialog.newInstance(registrationList, user.getDeviceId(), adapter);
+                RemoveUserPopUpDialog removeDialog = RemoveUserPopUpDialog.newInstance(
+                        registrationList,
+                        user.getDeviceId(),
+                        currentEventId
+
+                );
                 removeDialog.show(getParentFragmentManager(), "remove_picker");
             }
         });
