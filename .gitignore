@@ -35,3 +35,5 @@ google-services.json
 
 # macOS Folder Management
 .DS_Store
+
+node_modules/

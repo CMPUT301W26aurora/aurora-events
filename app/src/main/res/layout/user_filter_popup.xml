@@ -1,69 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/dialog_background">
+
+    <!-- Include: label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Include:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#A78BFA"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Toggles card with aurora gradient background and rounded corners -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="center">
-        <TextView
-            android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Include:"
-            android:textSize="20dp"
-        />
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/particpating_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Participating"/>
+            android:orientation="vertical"
+            android:background="@drawable/background_aroura_gradient"
+            android:padding="16dp">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/rejected_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Rejected"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/particpating_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Participating"
+                    android:layout_marginStart="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"/>
+            </LinearLayout>
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/invited_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Invited"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/rejected_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rejected"
+                    android:layout_marginStart="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"/>
+            </LinearLayout>
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/waiting_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Waiting"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/invited_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Invited"
+                    android:layout_marginStart="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"/>
+            </LinearLayout>
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/cancelled_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Cancelled"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/waiting_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Waiting"
+                    android:layout_marginStart="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"/>
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/confirm_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Confirm"
-        />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/cancelled_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancelled"
+                    android:layout_marginStart="12dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"/>
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/export_to_csv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Export to csv"
-            />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-    </LinearLayout>
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#A78BFA"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"/>
 
-</RelativeLayout>
+    <!-- Confirm button -->
+    <Button
+        android:id="@+id/confirm_button"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="✓  Confirm"
+        android:textAllCaps="false"
+        android:textColor="#1C1B2E"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="#A78BFA"
+        android:stateListAnimator="@null"
+        android:layout_marginBottom="10dp"
+        app:cornerRadius="26dp"
+        style="@style/Widget.MaterialComponents.Button"/>
 
-<!-- Resource used https://www.geeksforgeeks.org/android/switch-in-android/ -->
+    <!-- Export to CSV button -->
+    <Button
+        android:id="@+id/export_to_csv"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Export to CSV"
+        android:textAllCaps="false"
+        android:textColor="#A78BFA"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@android:color/transparent"
+        android:stateListAnimator="@null"
+        app:cornerRadius="26dp"
+        app:strokeColor="#A78BFA"
+        app:strokeWidth="1dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+</LinearLayout>
+
+    <!-- Resource used https://www.geeksforgeeks.org/android/switch-in-android/ -->
