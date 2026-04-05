@@ -118,23 +118,25 @@ public class EventFragment extends Fragment {
         eventsListView.setOnItemClickListener((parent, v, position, id) -> {
             Event selectedEvent = eventList.get(position - 1);
 
-            // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
-            // pass eventID to InfoUFragment using bundle
-            Bundle args = new Bundle();
-            args.putString("eventId", selectedEvent.getEventId());
-            args.putString("userId", userId);
-
-            if (userId == null) {
-                Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
             Fragment eventFragment;
             if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
-                //TODO 5: open event edit
-                eventFragment = new InfoUEventFragment();
+                Bundle args = new Bundle();
+                args.putString("eventId", selectedEvent.getEventId());
+
+                eventFragment = new EventEditFragment();
                 eventFragment.setArguments(args);
             } else {
+                // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
+                // pass eventID to InfoUFragment using bundle
+                Bundle args = new Bundle();
+                args.putString("eventId", selectedEvent.getEventId());
+                args.putString("userId", userId);
+
+                if (userId == null) {
+                    Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 eventFragment = new InfoUEventFragment();
                 eventFragment.setArguments(args);
             }

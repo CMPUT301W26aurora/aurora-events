@@ -96,4 +96,8 @@
     <string name="opt_out_button_text">Opt Out</string>
     <string name="add_an_event_content_description">Add an event</string>
     <string name="no_event_found_text">No such events exist</string>
+    <string name="get_more_participants_button_text">Get More Participants</string>
+    <string name="show_qr_code_button_text">Show QR Code</string>
+    <string name="view_entrants_button_text">View Entrants</string>
+    <string name="send_notification_button_text">Send Notification</string>
 </resources>

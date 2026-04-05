@@ -12,7 +12,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,7 +70,7 @@ public class InfoUEventFragment extends Fragment {
     private User user;
     private ImageButton backButton;
     private ImageView poster;
-    private Button sampleButton, viewEntrantsButton, notificationButton, commentButton;
+    private Button commentButton;
     private TextView eventName, eventDateTime, eventOrganizer, eventPrice, eventLocation, eventDescription;
     private TextView reportedNum;
     private Button reportButton, deleteButton;
@@ -120,10 +119,7 @@ public class InfoUEventFragment extends Fragment {
 
         // get views to display event details
         backButton         = view.findViewById(R.id.back_button);
-        sampleButton       = view.findViewById(R.id.sample_button);
-        viewEntrantsButton = view.findViewById(R.id.view_entrants_button);
         commentButton      = view.findViewById(R.id.comment_button);
-        notificationButton = view.findViewById(R.id.notification_button);
 
         poster             = view.findViewById(R.id.poster_image);
         eventName          = view.findViewById(R.id.event_name);
@@ -261,10 +257,7 @@ public class InfoUEventFragment extends Fragment {
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
 
-        sampleButton.setVisibility(View.GONE);
-        viewEntrantsButton.setVisibility(View.GONE);
         commentButton.setVisibility(View.VISIBLE);
-        notificationButton.setVisibility(View.GONE);
 
         eventDeadline.setVisibility(View.VISIBLE);
         waitingListCount.setVisibility(View.VISIBLE);
@@ -311,10 +304,7 @@ public class InfoUEventFragment extends Fragment {
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
 
-        sampleButton.setVisibility(View.VISIBLE);
-        viewEntrantsButton.setVisibility(View.VISIBLE);
         commentButton.setVisibility(View.VISIBLE);
-        notificationButton.setVisibility(View.VISIBLE);
 
         // set the number of people that reported this event grammatically
         String reportedNumText = "Reported by " + event.getNumReports();
@@ -339,25 +329,6 @@ public class InfoUEventFragment extends Fragment {
             );
             fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Delete");
         });
-        notificationButton.setOnClickListener(v -> {
-            SendNotificationDialog dialog = SendNotificationDialog.newInstance(
-                    event.getEventId(),
-                    event.getName(),
-                    event.registrationList
-            );
-            dialog.show(getParentFragmentManager(), "send_notification");
-        });
-        viewEntrantsButton.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putString("eventId", event.getEventId());
-            UserListFragment userListFragment = new UserListFragment();
-            userListFragment.setArguments(args);
-            getParentFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, userListFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
     }
 
     private void setupEntrantUI(Event event) {
@@ -365,10 +336,7 @@ public class InfoUEventFragment extends Fragment {
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
 
-        sampleButton.setVisibility(View.GONE);
-        viewEntrantsButton.setVisibility(View.GONE);
         commentButton.setVisibility(View.VISIBLE);
-        notificationButton.setVisibility(View.GONE);
 
         // set report button functionality
         reportButton.setOnClickListener(v -> {

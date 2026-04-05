@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,19 +22,25 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.Organizer;
+import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
+import com.example.auroraevents.server.EventDb;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
-Maps handled by Google Maps SDK:
  */
-public class EventCreationFragment extends Fragment {
-    private final String TAG = "EventCreationFragment";
+public class EventEditFragment extends Fragment {
+    private final String TAG = "EventEditFragment";
     private ImageButton backButton;
+    private Button sampleButton;
+    private Button qrCodeButton;
+    private Button viewEntrantsButton;
+    private Button sendNotificationButton;
     private Button addImageButton;
     private EditText eventNameInput;
     private EditText eventDescInput;
@@ -60,6 +67,7 @@ public class EventCreationFragment extends Fragment {
     private boolean isPrivate;
     private Organizer organizer;
     private User user;
+    private Event event;
     private UserViewModel userViewModel;
     private double eventLat;
     private double eventLong;
@@ -94,10 +102,14 @@ public class EventCreationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_event_creation, container, false);
+        View view = inflater.inflate(R.layout.fragment_event_edit, container, false);
 
         // Button and input setup
         backButton = view.findViewById(R.id.backButton);
+        sampleButton = view.findViewById(R.id.get_participants);
+        qrCodeButton = view.findViewById(R.id.show_qr_code);
+        viewEntrantsButton = view.findViewById(R.id.view_entrants);
+        sendNotificationButton = view.findViewById(R.id.send_notification);
         addImageButton = view.findViewById(R.id.btn_add_image);
         eventNameInput = view.findViewById(R.id.et_event_name);
         eventDescInput = view.findViewById(R.id.et_event_desc);
@@ -141,12 +153,110 @@ public class EventCreationFragment extends Fragment {
                 Settings.Secure.ANDROID_ID
         );
 
+        // Set current values
+        Bundle args = getArguments();
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        if (args == null || args.getString("eventId") == null) {
+            Log.e(TAG, "Missing eventId argument");
+            getParentFragmentManager().popBackStack();
+            return view;
+        } else {
+            String eventId = args.getString("eventId");
+            EventDb.getInstance().addSnapshotListenerForEvent(eventId, event -> {
+                this.event = event;
+                if (event != null) {
+                    //TODO: set current poster
+                    eventName = event.getName();
+                    eventNameInput.setText(eventName);
+
+                    eventDescription = event.getDescription();
+                    eventDescInput.setText(eventDescription);
+
+                    price = event.getPrice();
+                    eventPriceInput.setText(price);
+
+                    eventCap = String.valueOf(event.registrationList.getAttendingCapacity());
+                    eventCapInput.setText(eventCap);
+
+                    waitingCap = String.valueOf(event.registrationList.getWaitingCapacity());
+                    eventWaitingCapInput.setText(waitingCap);
+
+                    location = event.getLocation();
+
+                    geolocationRequired = event.getGeolocationRequired();
+                    if (geolocationRequired) {
+                        geolocationButton.setText(R.string.geolocation_unlock_text);
+                    } else {
+                        geolocationButton.setText(R.string.geolocation_lock_text);
+                    }
+
+                    registerStart = event.getRegistrationTimeStart();
+                    registerEnd = event.getRegistrationTimeEnd();
+                    date = event.getDateTime();
+
+                    isPrivate = event.isPrivate();
+                    if (isPrivate) {
+                        privateButton.setText(R.string.make_public_text);
+                    } else {
+                        privateButton.setText(R.string.make_private_text);
+                    }
+                } else {
+                    Log.e(TAG, "No such event available");
+                }
+            }, e -> {
+                Log.e(TAG, "failed to fetch event");
+            });
+        }
+
         // Fetch firebase cloud storage
         storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");
         storageRef = storage.getReference();
         imageView = view.findViewById(R.id.iv_event_image);
 
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        sampleButton.setOnClickListener(v -> event.registrationList.performLottery(event.registrationList.getEmptySlotAmount(),
+                new RegistrationList.OnDbUpdateListener() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onFailure() {
+
+                    }
+
+                    @Override
+                    public void onComplete(RegistrationList.RegistrationResult result) {
+
+                    }
+        }));
+
+        qrCodeButton.setOnClickListener(v -> {
+            //
+        });
+
+        viewEntrantsButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", event.getEventId());
+            UserListFragment userListFragment = new UserListFragment();
+            userListFragment.setArguments(bundle);
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, userListFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        sendNotificationButton.setOnClickListener(v -> {
+            SendNotificationDialog dialog = SendNotificationDialog.newInstance(
+                    event.getEventId(),
+                    event.getName(),
+                    event.registrationList
+            );
+            dialog.show(getParentFragmentManager(), "send_notification");
+        });
 
         locationButton.setOnClickListener(v -> {
             MapPickerFragment mapPicker = new MapPickerFragment();
