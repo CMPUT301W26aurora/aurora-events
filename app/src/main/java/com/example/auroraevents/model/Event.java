@@ -15,7 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -38,6 +40,7 @@ public class Event {
     private String qrUrl;
     private String posterUrl;
 
+    private Map<String, Long> userDeadlines;
     private boolean geolocationRequired;
     private boolean isPrivate;
     private List<String> reports;
@@ -55,6 +58,7 @@ public class Event {
         registrationList = new RegistrationList();
         reports = new ArrayList<>();
         coOrganizerDeviceIds = new ArrayList<>();
+        userDeadlines = new HashMap<>();
     }
 
     public Event(
@@ -151,6 +155,9 @@ public class Event {
     public void setLongitude(double longitude) { this.longitude = longitude; }
 
     public RegistrationList getRegistrationList() {return this.registrationList;}
+
+    public Map<String, Long> getUserDeadlines() { return userDeadlines; }
+    public void setUserDeadlines(Map<String, Long> deadlines) { this.userDeadlines = deadlines; }
 
     public void setRegistrationList(RegistrationList registrationList) {
         this.registrationList = registrationList;
