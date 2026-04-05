@@ -10,24 +10,23 @@ import static com.example.auroraevents.server.EventDb.LIST_WAITING;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
-import com.example.auroraevents.server.UserDb;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class RegistrationList {
     private String eventId;
-    private final List<String> waitingList;     // signed up, awaiting lottery
-    private final List<SelectedUser> selectedList;    // drawn / invited but not yet confirmed
-    private final List<String> attendingList;   // confirmed attendees
-    private final List<String> declinedList;    // invited then self declined
-    private final List<String> cancelledList;   // self cancelled
-    private final List<String> removedList;     // force removed
+    private  List<String> waitingList;     // signed up, awaiting lottery
+    private  List<SelectedUser> selectedList;    // drawn / invited but not yet confirmed
+    private  List<String> attendingList;   // confirmed attendees
+    private  List<String> declinedList;    // invited then self declined
+    private  List<String> cancelledList;   // self cancelled
+    private  List<String> removedList;     // force removed
     private int attendingCapacity;
     private int waitingCapacity;
 
@@ -63,6 +62,26 @@ public class RegistrationList {
     public List<String> getDeclinedList(){return declinedList;}
 
     public List<String> getCancelledList(){return cancelledList;}
+
+    public void setRemovedList(List<String> removedList) {this.removedList=removedList;}
+    public void setWaitingList(List<String> waitingList) {this.waitingList=waitingList;}
+    public void setDeclinedList(List<String> declinedList) {this.declinedList=declinedList;}
+    public void setCancelledList(List<String> cancelledList) {this.cancelledList=cancelledList;}
+    public void setAttendingList(List<String> attendingList) {this.attendingList=attendingList;}
+    public void setSelectedList(List<SelectedUser> selectedList) {this.selectedList=selectedList;}
+    public List<String> getAllUsers(){
+        List<String> master = new ArrayList<>();
+
+        master.addAll(selectedList.stream().map(entrant->entrant.getUserId())
+                .collect(Collectors.toList()));
+        master.addAll(removedList);
+        master.addAll(waitingList);
+        master.addAll(attendingList);
+        master.addAll(declinedList);
+        master.addAll(cancelledList);
+
+        return master;
+    }
     public enum RegistrationResult {
         SUCCESS,
         ALREADY_IN_LIST,
@@ -141,8 +160,11 @@ public class RegistrationList {
                         ((List<String>) fromList).remove(userId);
                     }
                 }
-
-                toList.add(userId);
+                if(LIST_SELECTED.equals(toName)){
+                    selectedList.add(new SelectedUser(userId, Timestamp.now()));
+                } else {
+                    toList.add(userId);
+                }
                 listener.onComplete(RegistrationResult.SUCCESS);
             }
             @Override
@@ -211,7 +233,7 @@ public class RegistrationList {
     }
 
     public void addToAttendingList(String userID, OnDbUpdateListener listener){
-        if (!getSelectedUsers().contains(userID)) {
+        if (!isUserSelected(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
         }
@@ -219,7 +241,7 @@ public class RegistrationList {
     }
 
     public void addToWaitingList(String userID, OnDbUpdateListener listener){
-        if(attendingList.contains(userID) || getSelectedUsers().contains(userID) || removedList.contains(userID) || waitingList.contains(userID)){
+        if(attendingList.contains(userID) || isUserSelected(userID) || removedList.contains(userID) || waitingList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
         }
@@ -227,7 +249,7 @@ public class RegistrationList {
     }
 
     public void addToDeclinedList(String userID, OnDbUpdateListener listener){
-        if(!getSelectedUsers().contains(userID) || removedList.contains(userID)){
+        if(!isUserSelected(userID) || removedList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
         }
@@ -271,30 +293,15 @@ public class RegistrationList {
         transitionGroup(winners, waitingList, LIST_WAITING, selectedList, LIST_SELECTED, -1, listener);
     }
 
-    public void removeFromAllLists(String userID, OnDbUpdateListener listener) {
-        EventDb.getInstance().removeUserFromAllLists(eventId, userID,
-                () -> {
-                    waitingList.remove(userID);
-                    selectedList.removeIf(user->user.getUserId().equals(userID));
-                    attendingList.remove(userID);
-                    declinedList.remove(userID);
-                    cancelledList.remove(userID);
-                    removedList.remove(userID);
-
-                    listener.onComplete(RegistrationResult.SUCCESS);
-                },
-                e -> listener.onComplete(RegistrationResult.DATABASE_ERROR)
-        );
-    }
-
     /**
      * Another Helper function to wrap a set of ids, used in the perform lottery
      * @param userIDs
      * @return
      */
+    @Exclude
     private List<SelectedUser> wrapIdList(List<String> userIDs) {
         List<SelectedUser> wrappedList = new ArrayList<>();
-        Date now = new Date(); // Single timestamp for the whole batch
+        Timestamp now = Timestamp.now(); // Single timestamp for the whole batch
 
         for (String id : userIDs) {
             wrappedList.add(new SelectedUser(id, now));
@@ -306,7 +313,8 @@ public class RegistrationList {
      * Another Helper function to unwrap a set of ids, used in contains calls
      * @return
      */
-    private List<String> getSelectedUsers(){
+    @Exclude
+    public List<String> getSelectedUserStrings(){
         List<String> sel = new ArrayList<>();
         for(SelectedUser user : selectedList){
             sel.add(user.getUserId());
@@ -321,8 +329,13 @@ public class RegistrationList {
      * @param list the selected list to be removed
      * @param idsToRemove the set of ids to remove
      */
+    @Exclude
     private void removeFromSelected(List<SelectedUser> list, List<String> idsToRemove) {
         list.removeIf(user -> idsToRemove.contains(user.getUserId()));
+    }
+    @Exclude
+    private boolean isUserSelected(String userID) {
+        return selectedList.stream().anyMatch(u -> u.getUserId().equals(userID));
     }
 
 

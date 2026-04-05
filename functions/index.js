@@ -16,10 +16,18 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
     try {
             // delete from all event lists
             const eventsSnapshot = await db.collection('Events').get();
+
             eventsSnapshot.forEach(doc => {
+                const eventData = doc.data();
+                const regList = data.registrationList || {};
+
+                if (regList.selectedList) {
+                      const updatedSelected = regList.selectedList.filter(u => u.userId !== deletedUserId);
+                      batch.update(doc.ref, { "registrationList.selectedList": updatedSelected });
+                }
+
                 batch.update(doc.ref, {
                     "registrationList.waitingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
-                    "registrationList.selectedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.attendingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.cancelledList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.declinedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),

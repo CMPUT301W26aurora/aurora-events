@@ -13,35 +13,35 @@
             android:text="Include:"
             android:textSize="20dp"
         />
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/particpating_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Participating"/>
 
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/rejected_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Rejected"/>
 
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/invited_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Invited"/>
 
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/waiting_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="Waiting"/>
 
-        <androidx.appcompat.widget.SwitchCompat
+        <Switch
             android:id="@+id/cancelled_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

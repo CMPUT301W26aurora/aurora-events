@@ -1,5 +1,7 @@
 package com.example.auroraevents.model;
 
+import com.google.firebase.Timestamp;
+
 import java.util.Date;
 
 /**
@@ -7,18 +9,18 @@ import java.util.Date;
  */
 public class SelectedUser {
     private String userId;
-    private Date selectedAt;
+    private Timestamp selectedAt;
 
     // Required for Firestore
     public SelectedUser() {}
 
-    public SelectedUser(String userId, Date selectedAt) {
+    public SelectedUser(String userId, Timestamp selectedAt) {
         this.userId = userId;
         this.selectedAt = selectedAt;
     }
 
     public String getUserId() { return userId; }
-    public Date getSelectedAt() { return selectedAt; }
+    public Timestamp getSelectedAt() { return selectedAt; }
 
 
 

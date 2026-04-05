@@ -6,6 +6,9 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.RegistrationList;
+import com.example.auroraevents.model.SelectedUser;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -17,7 +20,12 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Singleton class for all Firestore operations on the "Events" collection.
@@ -245,7 +253,7 @@ public class EventDb {
     }
 
     /**
-     * Removes a user (by deviceId) from one of the event's participant lists.
+     * Removes a user (by deviceId) from one of the event's participant lists. currently broken, fix sooner rather than later....
      *
      * @param eventId   The event document ID.
      * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED.
@@ -264,58 +272,11 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
-
-    /**
-     * Removes a user by device id from all of a given events lists
-     *
-     * @param eventId   The event to remove from.
-     * @param userID    The user who is being removed.
-     * @param onSuccess Called on Success
-     * @param onFailure Called with exception on failure
-     */
-    public void removeUserFromAllLists(String eventId, String userID, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
-
-        eventRef.update(
-                        LIST_WAITING, FieldValue.arrayRemove(userID),
-                        LIST_SELECTED, FieldValue.arrayRemove(userID),
-                        LIST_ATTENDING, FieldValue.arrayRemove(userID),
-                        LIST_DECLINED, FieldValue.arrayRemove(userID),
-                        LIST_CANCELLED, FieldValue.arrayRemove(userID),
-                        LIST_REMOVED, FieldValue.arrayRemove(userID)
-                )
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to remove user from all lists");
-                    onFailure.onFailure(e);
-                });
+    public void moveUserBetweenLists(String eventId, String from, String to, String id,
+                               OnSuccessCallback sc, OnFailureCallback fc) {
+        moveGroupUsers(eventId, from, to, Collections.singletonList(id), sc, fc);
     }
 
-    /**
-     * Moves a user from one participant list to another atomically using a Firestore batch write.
-     *
-     * @param eventId       The event document ID.
-     * @param fromFieldName The list to remove the user from.
-     * @param toFieldName   The list to add the user to.
-     * @param deviceId      The user's device ID to move.
-     * @param onSuccess     Called when the batch succeeds.
-     * @param onFailure     Called with the exception if the batch fails.
-     */
-    public void moveUserBetweenLists(String eventId, String fromFieldName, String toFieldName,
-                                     String deviceId,
-                                     OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
-
-        db.runBatch(batch -> {
-                    batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(deviceId));
-                    batch.update(eventRef, toFieldName,   FieldValue.arrayUnion(deviceId));
-                })
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to move user between lists. Event: " + eventId, e);
-                    onFailure.onFailure(e);
-                });
-    }
     /**
      * Moves a user from the Selected list to the Attending list.
      */
@@ -357,37 +318,49 @@ public class EventDb {
      */
     public void moveGroupUsers(String eventId, String fromFieldName, String toFieldName, List<String> ids,
                                OnSuccessCallback onSuccess, OnFailureCallback onFailure){
-        WriteBatch batch = db.batch();
         DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+        eventRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) return;
+            WriteBatch batch = db.batch();
 
-        batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
-        batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+            if (fromFieldName.equals(LIST_SELECTED)) {
+                List<Map<String, Object>> currentSelected = (List<Map<String, Object>>) documentSnapshot.get(fromFieldName);
+                if (currentSelected != null) {
+                    currentSelected.removeIf(map -> ids.contains(map.get("userId")));
+                    batch.update(eventRef, fromFieldName, currentSelected);
+                }
+            } else {
+                batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
+            }
 
-        batch.commit()
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to group move users between lists. Event: " + eventId, e);
-                    onFailure.onFailure(e);
-                });
-    }
-    /**
-     * Stores the QR code data string on the event document.
-     *
-     * @param eventId    The event document ID.
-     * @param qrCodeData The QR code payload string.
-     * @param onSuccess  Called when the update succeeds.
-     * @param onFailure  Called with the exception if the update fails.
-     */
-    public void setQrCode(String eventId, String qrCodeData,
-                          OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        db.collection(COLLECTION_NAME)
-                .document(eventId)
-                .update("qrCodeData", qrCodeData)
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to set QR code for event: " + eventId, e);
-                    onFailure.onFailure(e);
-                });
+            if (toFieldName.equals(LIST_SELECTED)) {
+                List<Map<String, Object>> wrappedMaps = new ArrayList<>();
+                Timestamp now = Timestamp.now();
+                for (String id : ids) {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("userId", id);
+                    userMap.put("selectedAt", now);
+                    wrappedMaps.add(userMap);
+                }
+                batch.update(eventRef, toFieldName, FieldValue.arrayUnion(wrappedMaps.toArray()));
+            } else {
+                batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+            }
+
+            batch.commit()
+                    .addOnSuccessListener(unused -> {
+                        Log.d(TAG, "Move Completed");
+                        onSuccess.onSuccess();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG,"Failed to batch commit");
+                        onFailure.onFailure(e);
+                    });
+
+        }).addOnFailureListener(e->{
+            Log.e(TAG, "Failed to pull event");
+            onFailure.onFailure(e);
+        } );
     }
 
     // ── DELETE ─────────────────────────────────────────────────────────────

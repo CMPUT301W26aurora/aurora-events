@@ -357,6 +357,42 @@ public class InfoUEventFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
+        sampleButton.setOnClickListener(v->{
+
+            event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(), new RegistrationList.OnDbUpdateListener() {
+                @Override
+                public void onSuccess() {
+                    //useless here
+                }
+
+                @Override
+                public void onFailure() {
+                    //useless here
+                }
+
+                @Override
+                public void onComplete(RegistrationList.RegistrationResult result) {
+                    switch (result) {
+                        case SUCCESS:
+                            Toast.makeText(getContext(),"Users sampled",Toast.LENGTH_SHORT ).show();
+                            break;
+                        case CAPACITY_FULL:
+                            Toast.makeText(getContext(),"can't Sample any more", Toast.LENGTH_SHORT).show();
+                            break;
+                        case DATABASE_ERROR:
+                            Toast.makeText(getContext(),"Database error, try again in a moment", Toast.LENGTH_SHORT).show();
+                            break;
+                        case BLOCKED:
+                            Toast.makeText(getContext(),"Sampled Users cannot enter Selected list", Toast.LENGTH_SHORT).show();
+                            break;
+                        case ALREADY_IN_LIST:
+                            Toast.makeText(getContext(),"Users already in list", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+            });
+        });
     }
 
     private void setupEntrantUI(Event event) {
@@ -414,7 +450,7 @@ public class InfoUEventFragment extends Fragment {
 
         if (list.getAttendingList().contains(userId)) {
             onAttending(event);
-        } else if (list.getSelectedList().contains(userId)) {
+        } else if (list.getSelectedUserStrings().contains(userId)) {
             onSelected(event);
         } else if (list.getWaitingList().contains(userId)) {
             onWaiting(event);

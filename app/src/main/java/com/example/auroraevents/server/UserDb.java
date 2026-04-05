@@ -155,7 +155,7 @@ public class UserDb {
     }
 
     /**
-     * Fetches a set of users from a list of ids
+     * Fetches a set of users from a list of ids (Max 30 doc pulls)
      *
      * @param ids       A list of user ids to be fetched
      * @param onFetched Called with matching user list
@@ -270,16 +270,14 @@ public class UserDb {
      * @param listener the callback listener
      * @return A list of Listener references
      */
-    public void listenToParticipants(List<String> allIds, OnUsersLoadedListener listener) {
+    public void fetchParticipants(List<String> allIds, OnUsersLoadedListener listener) {
 
         if (allIds == null || allIds.isEmpty()) {
             listener.onUsersUpdate(new ArrayList<>());
             return ;
         }
 
-
         List<Task<QuerySnapshot>> snaps = new ArrayList<>();
-
 
         int batch = 30;
         int totalBatches = (int) Math.ceil((double) allIds.size() / batch);
@@ -308,8 +306,5 @@ public class UserDb {
             Log.e(TAG, "Failed to batch load user", e);
             listener.onError(e);
         });
-
-
-
     }
 }
