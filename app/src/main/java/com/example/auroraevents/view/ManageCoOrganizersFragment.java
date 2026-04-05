@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RegistrationList;
+import com.example.auroraevents.model.SelectedUser;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -134,7 +135,7 @@ public class ManageCoOrganizersFragment extends Fragment {
      * Builds and displays a dialog of eligible entrants using their names instead of IDs.
      */
     private void buildPickEntrantDialog(Event event) {
-        RegistrationList reg = event.registrationList;
+        RegistrationList reg = event.getRegistrationList();
         List<String> currentCoOrgs = event.getCoOrganizerDeviceIds();
 
         List<String> eligible = new ArrayList<>();
@@ -142,8 +143,13 @@ public class ManageCoOrganizersFragment extends Fragment {
         for (String id : reg.getWaitingList()) {
             if (!currentCoOrgs.contains(id) && !eligible.contains(id)) eligible.add(id);
         }
-        for (String id : reg.getSelectedList()) {
-            if (!currentCoOrgs.contains(id) && !eligible.contains(id)) eligible.add(id);
+        for (SelectedUser selectedUser : reg.getSelectedList()) {
+            String id = selectedUser.getUserId();
+
+            // Check if they are already a Co-Org or already in the eligible list
+            if (!currentCoOrgs.contains(id) && !eligible.contains(id)) {
+                eligible.add(id);
+            }
         }
         for (String id : reg.getAttendingList()) {
             if (!currentCoOrgs.contains(id) && !eligible.contains(id)) eligible.add(id);
