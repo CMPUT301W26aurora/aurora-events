@@ -1,8 +1,6 @@
 package com.example.auroraevents.view;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserAdapter;
-import com.example.auroraevents.server.CommentDb;
 
 import java.util.ArrayList;
 
@@ -24,7 +21,7 @@ import java.util.ArrayList;
  * Displays list of all entrants with any and all status
  * Allows Organizers to filter and cancel entrants
  */
-public class OrganizerUserList extends DialogFragment {
+public class OrganizerUserListFragment extends DialogFragment {
     private UserAdapter adapter;
 
 

@@ -349,7 +349,7 @@ public class InfoUEventFragment extends Fragment {
         viewEntrantsButton.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putString("eventId", event.getEventId());
-            OrganizerUserList userListFragment = new OrganizerUserList();
+            OrganizerUserListFragment userListFragment = new OrganizerUserListFragment();
             userListFragment.setArguments(args);
             getParentFragmentManager()
                     .beginTransaction()
