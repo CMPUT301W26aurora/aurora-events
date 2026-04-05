@@ -89,17 +89,17 @@ public class Event {
         Event event = (Event) o;
         return
                 Objects.equals(getEventId(), event.getEventId()) &&
-                        Objects.equals(getOrganizerDeviceId(), event.getOrganizerDeviceId()) &&
-                        Objects.equals(getName(), event.getName()) &&
-                        Objects.equals(getDescription(), event.getDescription()) &&
-                        Objects.equals(getPrice(), event.getPrice()) &&
-                        Objects.equals(getDateTime(), event.getDateTime()) &&
-                        Objects.equals(getRegistrationTimeStart(), event.getRegistrationTimeStart()) &&
-                        Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
-                        Objects.equals(getLocation(), event.getLocation()) &&
-                        getGeolocationRequired() == event.getGeolocationRequired() &&
-                        getNumReports() == event.getNumReports() &&
-                        Objects.equals(registrationList, event.registrationList)
+                Objects.equals(getOrganizerDeviceId(), event.getOrganizerDeviceId()) &&
+                Objects.equals(getName(), event.getName()) &&
+                Objects.equals(getDescription(), event.getDescription()) &&
+                Objects.equals(getPrice(), event.getPrice()) &&
+                Objects.equals(getDateTime(), event.getDateTime()) &&
+                Objects.equals(getRegistrationTimeStart(), event.getRegistrationTimeStart()) &&
+                Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
+                Objects.equals(getLocation(), event.getLocation()) &&
+                getGeolocationRequired() == event.getGeolocationRequired() &&
+                getNumReports() == event.getNumReports() &&
+                Objects.equals(registrationList, event.registrationList)
                 ;
     }
 
@@ -172,8 +172,7 @@ public class Event {
     }
 
     /**
-     * Convenience: returns true if the device ID is either the primary organizer
-     * or a co-organizer. Useful for gating organizer-only UI.
+     * Returns true if the device ID is either the primary organizer or a co-organizer
      *
      * @param deviceId The device ID to check.
      */

@@ -454,7 +454,7 @@ public class EventDb {
     /**
      * Promotes an existing entrant to co-organizer for the given event.
      *
-     * This is done atomically in a single batch:
+     * This is done in a single batch:
      *   1. Adds the deviceId to {@code coOrganizerDeviceIds}.
      *   2. Removes the deviceId from every entrant list (waiting, selected,
      *      attending, declined, cancelled, removed) so they leave the entrant pool.
@@ -495,8 +495,7 @@ public class EventDb {
 
     /**
      * Removes a co-organizer from the event. The user is only removed from
-     * {@code coOrganizerDeviceIds} — they are NOT placed back into any entrant list,
-     * and are free to rejoin the waiting list themselves.
+     * {@code coOrganizerDeviceIds} — they are not placed back into any entrant list.
      *
      * @param eventId   The event document ID.
      * @param deviceId  The device ID of the co-organizer to demote.

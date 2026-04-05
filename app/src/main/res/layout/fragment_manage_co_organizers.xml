@@ -13,7 +13,7 @@
         android:padding="16dp"
         android:paddingBottom="24dp">
 
-        <!-- Top row: back button -->
+        <!-- back button -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,7 +32,6 @@
 
         </RelativeLayout>
 
-        <!-- Screen title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,7 +41,6 @@
             android:textColor="@color/blue"
             android:fontFamily="@font/roboto_bold"/>
 
-        <!-- Subtitle / description -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,11 +50,7 @@
             android:textColor="@color/light_text"
             android:fontFamily="@font/roboto"/>
 
-        <!--
-            Add Co-Organizer button.
-            Opens a dialog listing eligible entrants (waiting / selected / attending)
-            who are not already co-organizers.
-        -->
+        <!-- Add Co-Organizer button - opens a dialog listing eligible entrants -->
         <Button
             android:id="@+id/add_co_organizer_button"
             android:layout_width="match_parent"
@@ -71,11 +65,6 @@
             app:icon="@drawable/rounded_group_24"
             app:iconTint="@color/dark_text"/>
 
-        <!--
-            Current co-organizers section.
-            The list is populated dynamically by ManageCoOrganizersFragment via a
-            real-time Firestore snapshot listener, so it always reflects the live state.
-        -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,10 +74,6 @@
             android:textColor="@color/blue"
             android:fontFamily="@font/roboto"/>
 
-        <!--
-            Empty-state label shown when no co-organizers have been assigned yet.
-            Toggled by ManageCoOrganizersFragment based on list size.
-        -->
         <TextView
             android:id="@+id/empty_co_organizer_text"
             android:layout_width="match_parent"
@@ -104,12 +89,6 @@
             android:backgroundTint="@color/light_glass"
             android:visibility="gone"/>
 
-        <!--
-            Co-organizer list.
-            android:nestedScrollingEnabled="false" lets the outer ScrollView handle
-            scrolling so the entire page moves together rather than the list trapping
-            scroll events inside its own viewport.
-        -->
         <ListView
             android:id="@+id/co_organizer_list"
             android:layout_width="match_parent"
