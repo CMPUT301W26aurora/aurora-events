@@ -111,7 +111,7 @@ public class EventDb {
         fileRef.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     fileRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                        saveUrlToFirestore(eventId, downloadUri.toString(), "posterUri");
+                        saveUrlToFirestore(eventId, downloadUri.toString(), "posterUrl");
                     });
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "Upload failed", e));

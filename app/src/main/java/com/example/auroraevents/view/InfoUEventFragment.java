@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RadiusUtil;
@@ -204,10 +205,16 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void renderCommonUI(Event event) {
+        Log.d(TAG, "posterUrl: " + event.getPosterUrl());
         if (event.getPosterUrl() == null) {
             poster.setVisibility(View.GONE);
         } else {
-            //poster.setImageBitmap(event.getPoster()); // need to use glide to pull poster from database
+            if (event.getPosterUrl() != null) {
+                poster.setVisibility(View.VISIBLE);
+                Glide.with(requireContext())
+                        .load(event.getPosterUrl())
+                        .into(poster);
+            }
         }
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());
@@ -304,9 +311,6 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void setupOrganizerUI(Event event) {
-        Log.e(TAG, "You shouldn't be here");
-        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
-
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
