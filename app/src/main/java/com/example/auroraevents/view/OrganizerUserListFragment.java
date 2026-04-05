@@ -12,6 +12,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserAdapter;
 
@@ -23,6 +24,7 @@ import java.util.ArrayList;
  */
 public class OrganizerUserListFragment extends DialogFragment {
     private UserAdapter adapter;
+    private RegistrationList registrationList;
 
 
 
@@ -42,10 +44,12 @@ public class OrganizerUserListFragment extends DialogFragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.entrants_list_org);
         ImageButton deleteButton = view.findViewById(R.id.delete_user_button_org_item);
+
         adapter = new UserAdapter(new ArrayList<>(), false, new UserAdapter.OnUserInteractionListener() {
             @Override
             public void Onclick(User user) {
-
+                RemoveUserPopUpDialog removeDialog = RemoveUserPopUpDialog.newInstance(registrationList, user.getDeviceId(), adapter);
+                removeDialog.show(getParentFragmentManager(), "remove_picker");
             }
         });
     }

@@ -15,6 +15,7 @@ import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -22,7 +23,7 @@ import java.util.Random;
 public class RegistrationList {
     private String eventId;
     private final List<String> waitingList;     // signed up, awaiting lottery
-    private final List<String> selectedList;    // drawn / invited but not yet confirmed
+    private final List<SelectedUser> selectedList;    // drawn / invited but not yet confirmed
     private final List<String> attendingList;   // confirmed attendees
     private final List<String> declinedList;    // invited then self declined
     private final List<String> cancelledList;   // self cancelled
@@ -51,7 +52,7 @@ public class RegistrationList {
     public int getWaitingCapacity() {return waitingCapacity;}
     public void setWaitingCapacity(int waitingCapacity) {this.waitingCapacity = waitingCapacity;}
 
-    public List<String> getSelectedList(){return selectedList;}
+    public List<SelectedUser> getSelectedList(){return selectedList;}
 
     public List<String> getRemovedList(){return removedList;}
 
@@ -99,26 +100,48 @@ public class RegistrationList {
             );
         }
     }
+
+    /**
+     * A function that acts a base template to move users over to another list, in practice we never group
+     * move a single person from waiting to selected without calling group transition, so toList is always a
+     * List of strings, so we can ignore the case of it being a group transition of selected users.
+     *
+     * @param userId
+     * @param toList
+     * @param toName
+     * @param fromList
+     * @param fromName
+     * @param capacity
+     * @param listener
+     */
     private void transitionUser(String userId,
                                 List<String> toList,
                                 String toName,
-                                List<String> fromList,
+                                Object fromList,
                                 String fromName,
                                 int capacity,
                                 OnDbUpdateListener listener){
-        if (capacity > -1 && toList.size() >= capacity){
+        int currentSize = (toList instanceof List) ? ((List<?>) toList).size() : 0;
+        if (capacity > -1 && currentSize >= capacity){
             listener.onComplete(RegistrationResult.CAPACITY_FULL);
             return;
         }
 
-        if(toList.contains(userId)){
+        if(toName.equals(fromName)){
             listener.onComplete(RegistrationResult.ALREADY_IN_LIST);
             return;
         }
         changeDb(fromName, toName, userId, new OnDbUpdateListener() {
             @Override
             public void onSuccess() {
-                if (fromList != null) fromList.remove(userId);
+                if (fromList instanceof List) {
+                    if (fromName.equals(LIST_SELECTED)) {
+                        selectedList.removeIf(u -> u.getUserId().equals(userId));
+                    } else {
+                        ((List<String>) fromList).remove(userId);
+                    }
+                }
+
                 toList.add(userId);
                 listener.onComplete(RegistrationResult.SUCCESS);
             }
@@ -132,34 +155,44 @@ public class RegistrationList {
 
     }
     private void transitionGroup(List<String> userIDs,
-                                 List<String> fromList,
+                                 Object fromList,
                                  String fromName,
-                                 List<String> toList,
+                                 Object toList,
                                  String toName,
                                  int capacity,
                                  OnDbUpdateListener listener) {
-
-        if (capacity > -1 && (toList.size() + userIDs.size()) > capacity) {
+        int currentSize = (toList instanceof List) ? ((List<?>) toList).size() : 0;
+        if (capacity > -1 && (currentSize + userIDs.size()) > capacity) {
             listener.onComplete(RegistrationResult.CAPACITY_FULL);
             return;
         }
         EventDb.getInstance().moveGroupUsers(eventId, fromName, toName, userIDs,
                 () -> {
-                    fromList.removeAll(userIDs);
-                    toList.addAll(userIDs);
+                    if (fromList instanceof List) {
+                        List<?> list = (List<?>) fromList;
+                        if (!list.isEmpty() && list.get(0) instanceof SelectedUser) {
+                            removeFromSelected((List<SelectedUser>) fromList, userIDs);
+                        } else {
+                            ((List<String>) fromList).removeAll(userIDs);
+                        }
+                    }
+                    if(toList instanceof List) {
+                        if(toName.equals(LIST_SELECTED)){
+                            List<SelectedUser> wrappedIds = wrapIdList(userIDs);
+
+                            ((List<SelectedUser>) toList).addAll(wrappedIds);
+
+                        }else{
+                            ((List<String>) toList).addAll(userIDs);
+                        }
+                    }
+
                     listener.onComplete(RegistrationResult.SUCCESS);
                 },
                 e -> listener.onComplete(RegistrationResult.DATABASE_ERROR)
         );
     }
 
-    public void addToSelectedList(String userID, OnDbUpdateListener listener) {
-        if (attendingList.contains(userID) || removedList.contains(userID)) {
-            listener.onComplete(RegistrationResult.BLOCKED);
-            return;
-        }
-        transitionUser(userID, selectedList, LIST_SELECTED, waitingList, LIST_WAITING, -1, listener);
-    }
 
     public void addToRemovedList(String userID, OnDbUpdateListener listener, List<String> fromList, String fromName) {
         if (removedList.contains(userID)) {
@@ -178,7 +211,7 @@ public class RegistrationList {
     }
 
     public void addToAttendingList(String userID, OnDbUpdateListener listener){
-        if (!selectedList.contains(userID)) {
+        if (!getSelectedUsers().contains(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
         }
@@ -186,7 +219,7 @@ public class RegistrationList {
     }
 
     public void addToWaitingList(String userID, OnDbUpdateListener listener){
-        if(attendingList.contains(userID) || selectedList.contains(userID) || removedList.contains(userID) || waitingList.contains(userID)){
+        if(attendingList.contains(userID) || getSelectedUsers().contains(userID) || removedList.contains(userID) || waitingList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
         }
@@ -194,7 +227,7 @@ public class RegistrationList {
     }
 
     public void addToDeclinedList(String userID, OnDbUpdateListener listener){
-        if(!selectedList.contains(userID) || removedList.contains(userID)){
+        if(!getSelectedUsers().contains(userID) || removedList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
         }
@@ -242,7 +275,7 @@ public class RegistrationList {
         EventDb.getInstance().removeUserFromAllLists(eventId, userID,
                 () -> {
                     waitingList.remove(userID);
-                    selectedList.remove(userID);
+                    selectedList.removeIf(user->user.getUserId().equals(userID));
                     attendingList.remove(userID);
                     declinedList.remove(userID);
                     cancelledList.remove(userID);
@@ -253,4 +286,44 @@ public class RegistrationList {
                 e -> listener.onComplete(RegistrationResult.DATABASE_ERROR)
         );
     }
+
+    /**
+     * Another Helper function to wrap a set of ids, used in the perform lottery
+     * @param userIDs
+     * @return
+     */
+    private List<SelectedUser> wrapIdList(List<String> userIDs) {
+        List<SelectedUser> wrappedList = new ArrayList<>();
+        Date now = new Date(); // Single timestamp for the whole batch
+
+        for (String id : userIDs) {
+            wrappedList.add(new SelectedUser(id, now));
+        }
+        return wrappedList;
+    }
+
+    /**
+     * Another Helper function to unwrap a set of ids, used in contains calls
+     * @return
+     */
+    private List<String> getSelectedUsers(){
+        List<String> sel = new ArrayList<>();
+        for(SelectedUser user : selectedList){
+            sel.add(user.getUserId());
+        }
+        return sel;
+    }
+
+    //https://www.geeksforgeeks.org/java/arraylist-removeif-method-in-java/
+    /**
+     * A filter method that removes elements from a list based on a conditional
+     *
+     * @param list the selected list to be removed
+     * @param idsToRemove the set of ids to remove
+     */
+    private void removeFromSelected(List<SelectedUser> list, List<String> idsToRemove) {
+        list.removeIf(user -> idsToRemove.contains(user.getUserId()));
+    }
+
+
 }
