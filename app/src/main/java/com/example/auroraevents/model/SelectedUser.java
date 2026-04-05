@@ -1,7 +1,6 @@
 package com.example.auroraevents.model;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * wrapper for selected users

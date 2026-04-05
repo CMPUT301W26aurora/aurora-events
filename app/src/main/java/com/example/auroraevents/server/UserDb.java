@@ -6,10 +6,13 @@ import com.example.auroraevents.model.User;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Singleton class for all Firestore operations on the "Users" collection.
@@ -43,6 +46,11 @@ public class UserDb {
             instance = new UserDb();
         }
         return instance;
+    }
+
+    public interface OnUsersLoadedListener {
+        void onUsersUpdate(List<User> participants);
+        void onError(Exception e);
     }
 
     // ── CREATE ─────────────────────────────────────────────────────────────
@@ -246,5 +254,64 @@ public class UserDb {
                     Log.e(TAG, "Failed to delete user: " + deviceId, e);
                     onFailure.onFailure(e);
                 });
+    }
+
+    //-- Listener -------------------------------------------------------------------------------------
+
+    /**
+     * A batch user listener for grabbing users from a specific event
+     * WhereIn caps doc grabs at 30, so a thread safe loop is needed
+     * to keep the event capacity from being low.
+     *
+     * @param allIds the list of ids to listen to
+     * @param listener the callback listener
+     * @return A list of Listener references
+     */
+    public List<ListenerRegistration> listenToParticipants(List<String> allIds, OnUsersLoadedListener listener) {
+        List<ListenerRegistration> registrations = new ArrayList<>();
+        if (allIds == null || allIds.isEmpty()) {
+            listener.onUsersUpdate(new ArrayList<>());
+            return registrations;
+        }
+        List<User> masterList = Collections.synchronizedList(new ArrayList<>());
+        int batch = 30;
+        int totalBatches = (int) Math.ceil((double) allIds.size() / batch);
+        AtomicInteger count = new AtomicInteger(0);
+        //https://firebase.google.com/docs/firestore/query-data/queries
+        //https://oneuptime.com/blog/post/2026-02-17-how-to-set-up-real-time-listeners-for-live-data-updates-in-firestore/view
+
+        for(int i = 0; i < allIds.size(); i= i + batch ){
+            int end = Math.min(i+batch, allIds.size());
+            List<String> sub = allIds.subList(i, end);
+            ListenerRegistration reg = db.collection(COLLECTION_NAME)
+                    .whereIn(FieldPath.documentId(), sub)
+                    .addSnapshotListener((snapshots, e) -> {
+
+                        if(e!= null){
+                            listener.onError(e);
+                            return;
+                        }
+
+                        if(snapshots != null){
+                            for (DocumentSnapshot doc : snapshots) {
+                                User user = (doc.toObject(User.class));
+                                if(user!=null)
+                                    masterList.add(user);
+
+                            }
+
+                        }
+                        if(count.incrementAndGet() >= totalBatches){
+                            listener.onUsersUpdate(new ArrayList<>(masterList));
+                            count.set(0);
+                            masterList.clear();
+                        }
+
+                    });
+
+            registrations.add(reg);
+        }
+
+        return registrations;
     }
 }

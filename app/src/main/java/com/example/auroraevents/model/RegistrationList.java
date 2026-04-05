@@ -194,7 +194,7 @@ public class RegistrationList {
     }
 
 
-    public void addToRemovedList(String userID, OnDbUpdateListener listener, List<String> fromList, String fromName) {
+    public void addToRemovedList(String userID, OnDbUpdateListener listener, List<?> fromList, String fromName) {
         if (removedList.contains(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
@@ -202,7 +202,7 @@ public class RegistrationList {
         transitionUser(userID,removedList, LIST_REMOVED,  fromList,fromName , -1, listener);
     }
 
-    public void addToCancelledList(String userID, OnDbUpdateListener listener, List<String> fromList, String fromName) {
+    public void addToCancelledList(String userID, OnDbUpdateListener listener, List<?> fromList, String fromName) {
         if (removedList.contains(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
             return;

@@ -155,6 +155,8 @@ public class Event {
     public double getLongitude()  { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
 
+    public RegistrationList getRegistrationList() {return this.registrationList;}
+
     /**
      * Adds a report
      * @param userId The device ID of the user reporting the event

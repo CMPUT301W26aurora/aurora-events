@@ -1,5 +1,6 @@
 package com.example.auroraevents.model;
 
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +33,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         this.inAdmin = inAdmin;
 
     }
+
+    public void setUserList(List<UserAdapterWrapper> list){ this.userList=list;}
     public abstract static class UserViewHolder extends RecyclerView.ViewHolder {
         UserViewHolder(@NonNull View itemView){
             super(itemView);
@@ -46,8 +50,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         private final View rootLayout;
         private final ImageButton delete;
-        private final TextView userName;
-        private final TextView userStatus;
+        private final TextView userName, userStatus, userEmail, userPhone, userTime;
+
         OrgViewHolder(View v) {
             super(v);
 
@@ -55,14 +59,43 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             delete = rootLayout.findViewById(R.id.delete_user_button_org_item);
             userName = rootLayout.findViewById(R.id.user_name_list_org);
             userStatus = rootLayout.findViewById(R.id.user_status_list_org);
+            userEmail = rootLayout.findViewById(R.id.user_email_list_org);
+            userPhone = rootLayout.findViewById(R.id.user_phone_list_org);
+            userTime = rootLayout.findViewById(R.id.invite_duration_list_org);
+
+
         }
         @Override
         public void bind(UserAdapterWrapper user, OnUserInteractionListener listener) {
-            userName.setText(user.getUser().getName());
-            userStatus.setText(user.getStatus());
-            if(!user.getStatus().equals("selected")){
+            String name =user.getUser().getName();
+            String email = user.getUser().getEmail();
+            String phone = user.getUser().getPhoneNumber();
+
+
+            userName.setText(name);
+            userEmail.setText(email);
+
+            if(phone != null && !phone.isEmpty()){
+                userPhone.setText(phone);
+            }else{
+                userPhone.setVisibility(View.GONE);
+            }
+
+            if (user.getStatus().equals("Selected")) {
+                Date selectedDate = user.getDate();
+                if(selectedDate != null){
+                    String timeAgo = DateUtils.getRelativeTimeSpanString(selectedDate.getTime(),
+                            System.currentTimeMillis(),
+                            DateUtils.MINUTE_IN_MILLIS).toString();
+                    userTime.setText("Invited " + timeAgo);
+                    delete.setVisibility(View.VISIBLE);
+                }
+
+            }else{
+                userTime.setVisibility(View.GONE);
                 delete.setVisibility(View.GONE);
             }
+            userStatus.setText(user.getStatus());
             delete.setOnClickListener(v->{
                 if(listener != null){
                     listener.Onclick(user.getUser());
@@ -100,5 +133,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public int getItemViewType(int position) {
         return inAdmin ? 1 : 0;
     }
+
+
 }
 

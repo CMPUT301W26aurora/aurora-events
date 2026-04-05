@@ -13,7 +13,11 @@ import android.widget.ListView;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.RegistrationList;
+import com.example.auroraevents.model.SelectedUser;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserAdapter;
+import com.example.auroraevents.model.UserAdapterWrapper;
 import com.example.auroraevents.server.EventDb;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
@@ -24,13 +28,12 @@ public class FilterUserPopUpDialog extends DialogFragment {
 
     private Event currentEvent;
     private List<User> userList;
-
-    private ListView userListView;
-    public static FilterUserPopUpDialog newInstance(Event currentEvent, List<User> userList, ListView userListView) {
+    private UserAdapter userAdapter;
+    public static FilterUserPopUpDialog newInstance(Event currentEvent, List<User> userList, UserAdapter userAdapter) {
         FilterUserPopUpDialog dialog = new FilterUserPopUpDialog();
         dialog.currentEvent = currentEvent;
         dialog.userList = userList;
-        dialog.userListView = userListView;
+        dialog.userAdapter = userAdapter;
         return dialog;
     }
 
@@ -54,11 +57,37 @@ public class FilterUserPopUpDialog extends DialogFragment {
 
         // After pressing Confirm, Update userlist with the filter
         confirmButton.setOnClickListener(v -> {
-            ArrayList<User> filteredUsers = new ArrayList<>();
-            userList.addAll(filteredUsers);
-            userListView.deferNotifyDataSetChanged();
+            List<UserAdapterWrapper> filteredWrappers = new ArrayList<>();
+            RegistrationList reg = currentEvent.getRegistrationList();
+
+
+            if (switchWaiting.isChecked()) {
+                for (String id : reg.getWaitingList()) {
+                    filteredWrappers.add(new UserAdapterWrapper(findUserFromPool(id), "Waiting", null));
+                }
+            }
+
+
+            if (switchInvited.isChecked()) {
+                for (SelectedUser su : reg.getSelectedList()) {
+                    filteredWrappers.add(new UserAdapterWrapper(findUserFromPool(su.getUserId()), "Selected", su.getSelectedAt()));
+                }
+            }
+
+
+            if (switchParticipating.isChecked()) {
+                for (String id : reg.getAttendingList()) {
+                    filteredWrappers.add(new UserAdapterWrapper(findUserFromPool(id), "Attending", null));
+                }
+            }
+
+
+            userAdapter.setUserList(filteredWrappers);
+            userAdapter.notifyDataSetChanged();
+
             alertDialog.dismiss();
         });
+
 
         alertDialog.setOnShowListener(d -> {
             assert alertDialog.getWindow() != null;
@@ -66,5 +95,20 @@ public class FilterUserPopUpDialog extends DialogFragment {
         });
 
         return alertDialog;
+    }
+
+    /**
+     * Helper Function that finds a user from the passed user pool by id
+     * @param id the id to be queried
+     * @return the user in question
+     */
+    private User findUserFromPool(String id){
+        for (User u : userList){
+            if(id.equals(u.getName())){
+                return u;
+            }
+
+        }
+        return null;
     }
 }
