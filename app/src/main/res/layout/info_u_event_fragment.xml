@@ -43,7 +43,7 @@
                 android:fontFamily="@font/roboto"/>
 
         </RelativeLayout>
-      
+
         <!--Send Notification Button-->
         <Button
             android:id="@+id/notification_button"
@@ -59,7 +59,8 @@
             android:text="Send Notification"
             android:textColor="@android:color/white"
             android:fontFamily="@font/roboto"/>
-        
+
+        <!--View Entrants Button-->
         <Button
             android:id="@+id/view_entrants_button"
             android:layout_width="match_parent"
@@ -71,6 +72,27 @@
             android:gravity="center"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"/>
+
+        <!--
+            Manage Co-Organizers Button.
+            Visible only to the primary organizer; hidden for co-organizers,
+            admins, and entrants. Visibility is controlled in InfoUEventFragment.
+        -->
+        <Button
+            android:id="@+id/manage_co_organizers_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14sp"
+            android:backgroundTint="@color/light_glass"
+            android:gravity="center"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="Manage Co-Organizers"
+            android:textColor="@color/light_text"
+            android:fontFamily="@font/roboto"
+            android:visibility="gone"
+            app:icon="@drawable/rounded_group_24"
+            app:iconTint="@color/light_text"/>
 
         <!--Optional poster image-->
         <ImageView

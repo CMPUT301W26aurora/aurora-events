@@ -7,8 +7,10 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.auroraevents.model.Comment;
 import com.example.auroraevents.model.Event;
-import com.google.firebase.Firebase;
+import com.google.firebase.Timestamp;
+
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -16,14 +18,19 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.io.ByteArrayOutputStream;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * Singleton class for all Firestore operations on the "Events" collection.
@@ -37,14 +44,17 @@ public class EventDb {
     private static final String COLLECTION_NAME = "Events";
 
     // Participant list field names — use these constants everywhere
-    public static final String LIST_REGISTRATION = "registrationList";
-    public static final String LIST_ATTENDING    = LIST_REGISTRATION + '.' + "attendingList";
-    public static final String LIST_SELECTED     = LIST_REGISTRATION + '.' + "selectedList";
-    public static final String LIST_WAITING      = LIST_REGISTRATION + '.' + "waitingList";
-    public static final String LIST_CANCELLED    = LIST_REGISTRATION + '.' + "cancelledList";
-    public static final String LIST_DECLINED     = LIST_REGISTRATION + '.' + "declinedList";
-    public static final String LIST_REMOVED      = LIST_REGISTRATION + '.' + "removedList";
-    public static final String[] ALL_LISTS       = {LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED};
+    public static final String LIST_REGISTRATION  = "registrationList";
+    public static final String LIST_ATTENDING     = LIST_REGISTRATION + '.' + "attendingList";
+    public static final String LIST_SELECTED      = LIST_REGISTRATION + '.' + "selectedList";
+    public static final String LIST_WAITING       = LIST_REGISTRATION + '.' + "waitingList";
+    public static final String LIST_CANCELLED     = LIST_REGISTRATION + '.' + "cancelledList";
+    public static final String LIST_DECLINED      = LIST_REGISTRATION + '.' + "declinedList";
+    public static final String LIST_REMOVED       = LIST_REGISTRATION + '.' + "removedList";
+    public static final String[] ALL_LISTS        = {LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED};
+
+    // Co-organizer field name
+    public static final String LIST_CO_ORGANIZERS = "coOrganizerDeviceIds";
 
 
     private static EventDb instance;
@@ -52,17 +62,15 @@ public class EventDb {
 
     // ── Callbacks ──────────────────────────────────────────────────────────
 
-    public interface OnSuccessCallback       { void onSuccess(); }
-    public interface OnFailureCallback       { void onFailure(Exception e); }
-    public interface OnEventCreatedCallback  { void onCreated(String eventId); }
-    public interface OnEventFetchedCallback  { void onFetched(Event event); }
+    public interface OnSuccessCallback          { void onSuccess(); }
+    public interface OnFailureCallback          { void onFailure(Exception e); }
+    public interface OnEventCreatedCallback     { void onCreated(String eventId); }
+    public interface OnEventFetchedCallback     { void onFetched(Event event); }
     public interface OnEventListFetchedCallback { void onFetched(List<Event> events); }
 
     // ── Singleton ──────────────────────────────────────────────────────────
 
-    private EventDb() {
-
-    }
+    private EventDb() {}
 
     public static synchronized EventDb getInstance() {
         if (instance == null) {
@@ -82,7 +90,7 @@ public class EventDb {
                     Log.d(TAG, "added image " + field);
                 })
                 .addOnFailureListener(e->{
-                   Log.e(TAG, "Failed upload to " + field + " " +e );
+                    Log.e(TAG, "Failed upload to " + field + " " +e );
                 });
     }
 
@@ -90,7 +98,7 @@ public class EventDb {
         if (uri == null || eventId == null) return;
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference()
-                        .child(eventId + "/" +"poster.jpg");
+                .child(eventId + "/" +"poster.jpg");
 
         fileRef.putFile(uri)
                 .addOnSuccessListener(taskSnapshot -> {
@@ -301,7 +309,7 @@ public class EventDb {
     }
 
     /**
-     * Removes a user (by deviceId) from one of the event's participant lists.
+     * Removes a user (by deviceId) from one of the event's participant lists. currently broken, fix sooner rather than later....
      *
      * @param eventId   The event document ID.
      * @param fieldName One of LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED.
@@ -320,59 +328,13 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
-
-    /**
-     * Removes a user by device id from all of a given events lists
-     *
-     * @param eventId   The event to remove from.
-     * @param userID    The user who is being removed.
-     * @param onSuccess Called on Success
-     * @param onFailure Called with exception on failure
-     */
-    public void removeUserFromAllLists(String eventId, String userID, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
-
-        eventRef.update(
-                        LIST_WAITING, FieldValue.arrayRemove(userID),
-                        LIST_SELECTED, FieldValue.arrayRemove(userID),
-                        LIST_ATTENDING, FieldValue.arrayRemove(userID),
-                        LIST_DECLINED, FieldValue.arrayRemove(userID),
-                        LIST_CANCELLED, FieldValue.arrayRemove(userID),
-                        LIST_REMOVED, FieldValue.arrayRemove(userID)
-                )
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to remove user from all lists");
-                    onFailure.onFailure(e);
-                });
+    public void moveUserBetweenLists(String eventId, String from, String to, String id,
+                               OnSuccessCallback sc, OnFailureCallback fc) {
+        moveGroupUsers(eventId, from, to, Collections.singletonList(id), sc, fc);
     }
 
     /**
-     * Moves a user from one participant list to another atomically using a Firestore batch write.
-     *
-     * @param eventId       The event document ID.
-     * @param fromFieldName The list to remove the user from.
-     * @param toFieldName   The list to add the user to.
-     * @param deviceId      The user's device ID to move.
-     * @param onSuccess     Called when the batch succeeds.
-     * @param onFailure     Called with the exception if the batch fails.
-     */
-    public void moveUserBetweenLists(String eventId, String fromFieldName, String toFieldName,
-                                     String deviceId,
-                                     OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
-        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
 
-        db.runBatch(batch -> {
-                    batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(deviceId));
-                    batch.update(eventRef, toFieldName,   FieldValue.arrayUnion(deviceId));
-                })
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to move user between lists. Event: " + eventId, e);
-                    onFailure.onFailure(e);
-                });
-    }
-    /**
      * Moves a user from the Selected list to the Attending list.
      */
     public void userAcceptSelection(String eventId, String userId, OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
@@ -413,19 +375,52 @@ public class EventDb {
      */
     public void moveGroupUsers(String eventId, String fromFieldName, String toFieldName, List<String> ids,
                                OnSuccessCallback onSuccess, OnFailureCallback onFailure){
-        WriteBatch batch = db.batch();
         DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+        eventRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) return;
+            WriteBatch batch = db.batch();
 
-        batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
-        batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+            if (fromFieldName.equals(LIST_SELECTED)) {
+                List<Map<String, Object>> currentSelected = (List<Map<String, Object>>) documentSnapshot.get(fromFieldName);
+                if (currentSelected != null) {
+                    currentSelected.removeIf(map -> ids.contains(map.get("userId")));
+                    batch.update(eventRef, fromFieldName, currentSelected);
+                }
+            } else {
+                batch.update(eventRef, fromFieldName, FieldValue.arrayRemove(ids.toArray()));
+            }
 
-        batch.commit()
-                .addOnSuccessListener(unused -> onSuccess.onSuccess())
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to group move users between lists. Event: " + eventId, e);
-                    onFailure.onFailure(e);
-                });
+            if (toFieldName.equals(LIST_SELECTED)) {
+                List<Map<String, Object>> wrappedMaps = new ArrayList<>();
+                Timestamp now = Timestamp.now();
+                for (String id : ids) {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("userId", id);
+                    userMap.put("selectedAt", now);
+                    wrappedMaps.add(userMap);
+                }
+                batch.update(eventRef, toFieldName, FieldValue.arrayUnion(wrappedMaps.toArray()));
+            } else {
+                batch.update(eventRef, toFieldName, FieldValue.arrayUnion(ids.toArray()));
+            }
+
+            batch.commit()
+                    .addOnSuccessListener(unused -> {
+                        Log.d(TAG, "Move Completed");
+                        onSuccess.onSuccess();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG,"Failed to batch commit");
+                        onFailure.onFailure(e);
+                    });
+
+        }).addOnFailureListener(e->{
+            Log.e(TAG, "Failed to pull event");
+            onFailure.onFailure(e);
+        });
+
     }
+
     /**
      * Stores the QR code data string on the event document.
      *
@@ -442,6 +437,74 @@ public class EventDb {
                 .addOnSuccessListener(unused -> onSuccess.onSuccess())
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to set QR code for event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    // ── CO-ORGANIZER ───────────────────────────────────────────────────────
+
+    /**
+     * Promotes an existing entrant to co-organizer for the given event.
+     *
+     * This is done in a single batch:
+     *   1. Adds the deviceId to {@code coOrganizerDeviceIds}.
+     *   2. Removes the deviceId from every entrant list (waiting, selected,
+     *      attending, declined, cancelled, removed) so they leave the entrant pool.
+     *
+     * @param eventId   The event document ID.
+     * @param deviceId  The device ID of the entrant to promote.
+     * @param onSuccess Called when the batch write succeeds.
+     * @param onFailure Called with the exception if the batch fails.
+     */
+    public void addCoOrganizer(String eventId, String deviceId,
+                               OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+        WriteBatch batch = db.batch();
+
+        // Add to co-organizer list
+        batch.update(eventRef, LIST_CO_ORGANIZERS, FieldValue.arrayUnion(deviceId));
+
+        // Remove from every entrant list atomically
+        batch.update(eventRef,
+                LIST_WAITING,   FieldValue.arrayRemove(deviceId),
+                LIST_SELECTED,  FieldValue.arrayRemove(deviceId),
+                LIST_ATTENDING, FieldValue.arrayRemove(deviceId),
+                LIST_DECLINED,  FieldValue.arrayRemove(deviceId),
+                LIST_CANCELLED, FieldValue.arrayRemove(deviceId),
+                LIST_REMOVED,   FieldValue.arrayRemove(deviceId)
+        );
+
+        batch.commit()
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "Co-organizer added: " + deviceId + " for event: " + eventId);
+                    onSuccess.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to add co-organizer: " + deviceId + " for event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
+     * Removes a co-organizer from the event. The user is only removed from
+     * {@code coOrganizerDeviceIds} — they are not placed back into any entrant list.
+     *
+     * @param eventId   The event document ID.
+     * @param deviceId  The device ID of the co-organizer to demote.
+     * @param onSuccess Called when the update succeeds.
+     * @param onFailure Called with the exception if the update fails.
+     */
+    public void removeCoOrganizer(String eventId, String deviceId,
+                                  OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        db.collection(COLLECTION_NAME)
+                .document(eventId)
+                .update(LIST_CO_ORGANIZERS, FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "Co-organizer removed: " + deviceId + " for event: " + eventId);
+                    onSuccess.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove co-organizer: " + deviceId + " for event: " + eventId, e);
                     onFailure.onFailure(e);
                 });
     }
@@ -502,9 +565,11 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
-    // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────────────────
 
-    public interface OnEventSnapshotCallback       { void onEventSnapshot(Event event); }
+    // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────
+
+    public interface OnEventSnapshotCallback { void onEventSnapshot(Event event); }
+
     public ListenerRegistration addSnapshotListenerForEvent(String eventId, OnEventSnapshotCallback onEventSnapshot, OnFailureCallback onFailure) {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(eventId);
         return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -526,7 +591,20 @@ public class EventDb {
                 }
             }
         });
-
     }
 
+    public ListenerRegistration eventListenerAll( OnEventListFetchedCallback onFetched, OnFailureCallback onFailure) {
+        return db.collection(COLLECTION_NAME)
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        onFailure.onFailure(e);
+                        return;
+                    }
+                    if (value != null) {
+                        List<Event> events = value.toObjects(Event.class);
+                        onFetched.onFetched(events);
+                    }
+                });
+    }
 }

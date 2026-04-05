@@ -3,13 +3,19 @@ package com.example.auroraevents.server;
 import android.util.Log;
 
 import com.example.auroraevents.model.User;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Singleton class for all Firestore operations on the "Users" collection.
@@ -43,6 +49,11 @@ public class UserDb {
             instance = new UserDb();
         }
         return instance;
+    }
+
+    public interface OnUsersLoadedListener {
+        void onUsersUpdate(List<User> participants);
+        void onError(Exception e);
     }
 
     // ── CREATE ─────────────────────────────────────────────────────────────
@@ -144,7 +155,7 @@ public class UserDb {
     }
 
     /**
-     * Fetches a set of users from a list of ids
+     * Fetches a set of users from a list of ids (Max 30 doc pulls)
      *
      * @param ids       A list of user ids to be fetched
      * @param onFetched Called with matching user list
@@ -246,5 +257,54 @@ public class UserDb {
                     Log.e(TAG, "Failed to delete user: " + deviceId, e);
                     onFailure.onFailure(e);
                 });
+    }
+
+    //-- Listener -------------------------------------------------------------------------------------
+
+    /**
+     * A batch user listener for grabbing users from a specific event
+     * WhereIn caps doc grabs at 30, so a thread safe loop is needed
+     * to keep the event capacity from being low.
+     *
+     * @param allIds the list of ids to listen to
+     * @param listener the callback listener
+     * @return A list of Listener references
+     */
+    public void fetchParticipants(List<String> allIds, OnUsersLoadedListener listener) {
+
+        if (allIds == null || allIds.isEmpty()) {
+            listener.onUsersUpdate(new ArrayList<>());
+            return ;
+        }
+
+        List<Task<QuerySnapshot>> snaps = new ArrayList<>();
+
+        int batch = 30;
+        int totalBatches = (int) Math.ceil((double) allIds.size() / batch);
+        //https://firebase.google.com/docs/firestore/query-data/queries
+        //https://oneuptime.com/blog/post/2026-02-17-how-to-set-up-real-time-listeners-for-live-data-updates-in-firestore/view
+
+        for(int i = 0; i < allIds.size(); i= i + batch ){
+            int end = Math.min(i+batch, allIds.size());
+            List<String> sub = allIds.subList(i, end);
+            snaps.add(db.collection(COLLECTION_NAME)
+                    .whereIn(FieldPath.documentId(), sub)
+                    .get());
+        }
+
+        Tasks.whenAllSuccess(snaps).addOnSuccessListener(results->{
+            List<User> list = new ArrayList<>();
+            for (Object result: results){
+                QuerySnapshot querySnapshot = (QuerySnapshot) result;
+                for (DocumentSnapshot doc : querySnapshot){
+                    list.add(doc.toObject(User.class));
+                }
+            }
+            listener.onUsersUpdate(list);
+
+        }).addOnFailureListener(e->{
+            Log.e(TAG, "Failed to batch load user", e);
+            listener.onError(e);
+        });
     }
 }

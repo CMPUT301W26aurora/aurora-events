@@ -80,6 +80,9 @@ public class InfoUEventFragment extends Fragment {
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
 
+    // Co-organizer management button (visible to the primary organizer only)
+    private Button manageCoOrganizersButton;
+
     private FusedLocationProviderClient fusedLocationClient;
     private Event pendingJoinEvent;
 
@@ -148,7 +151,8 @@ public class InfoUEventFragment extends Fragment {
         attendingLabel     = view.findViewById(R.id.attending_label);
         cannotAttendLabel  = view.findViewById(R.id.cannot_attend_label);
 
-        infoButton         = view.findViewById(R.id.lottery_info_button);
+        infoButton                = view.findViewById(R.id.lottery_info_button);
+        manageCoOrganizersButton  = view.findViewById(R.id.manage_co_organizers_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -186,8 +190,13 @@ public class InfoUEventFragment extends Fragment {
 
                 if (activeAdmin) {
                     setupAdminUI(event);
-                } else if (user != null && userId.equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
-                    setupOrganizerUI(event);
+                } else if (user != null && userId.equals(event.getOrganizerDeviceId())
+                        && user.getRole().equals(User.ROLE_ORGANIZER)) {
+                    // Primary organizer: full organizer UI including co-organizer management
+                    setupOrganizerUI(event, true);
+                } else if (user != null && event.isCoOrganizer(userId)) {
+                    // Co-organizer: organizer UI but cannot manage co-organizers
+                    setupOrganizerUI(event, false);
                 } else {
                     setupEntrantUI(event);
                 }
@@ -256,6 +265,7 @@ public class InfoUEventFragment extends Fragment {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
+        manageCoOrganizersButton.setVisibility(View.GONE);
 
         commentButton.setVisibility(View.VISIBLE);
 
@@ -296,15 +306,40 @@ public class InfoUEventFragment extends Fragment {
         });
     }
 
-    private void setupOrganizerUI(Event event) {
-        Log.e(TAG, "You shouldn't be here");
-        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
-
+    /**
+     * Sets up the organizer UI.
+     *
+     * @param event            The current event.
+     * @param isPrimaryOrganizer True if the current user is the primary organizer (not a co-organizer).
+     *                           Only the primary organizer can open the co-organizer management screen.
+     */
+    private void setupOrganizerUI(Event event, boolean isPrimaryOrganizer) {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
 
         commentButton.setVisibility(View.VISIBLE);
+
+        // Only the primary organizer can manage co-organizers
+        if (isPrimaryOrganizer) {
+            manageCoOrganizersButton.setVisibility(View.VISIBLE);
+            manageCoOrganizersButton.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString("eventId", event.getEventId());
+                args.putString("organizerDeviceId", event.getOrganizerDeviceId());
+
+                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
+                fragment.setArguments(args);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        } else {
+            manageCoOrganizersButton.setVisibility(View.GONE);
+        }
 
         // set the number of people that reported this event grammatically
         String reportedNumText = "Reported by " + event.getNumReports();
@@ -321,7 +356,7 @@ public class InfoUEventFragment extends Fragment {
                     EventDb.getInstance().deleteEvent(
                             event.getEventId(),
                             () -> {
-                                Log.d(TAG, "Event deleted by admin");
+                                Log.d(TAG, "Event deleted by organizer");
                                 getParentFragmentManager().popBackStack();
                             },
                             e -> Log.e(TAG, "Error deleting event: " + e)
@@ -335,6 +370,7 @@ public class InfoUEventFragment extends Fragment {
         reportButton.setVisibility(View.VISIBLE);
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
+        manageCoOrganizersButton.setVisibility(View.GONE);
 
         commentButton.setVisibility(View.VISIBLE);
 
@@ -356,11 +392,11 @@ public class InfoUEventFragment extends Fragment {
         eventDeadline.setText(deadlineText);
 
         // set waiting count grammatically
-        String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
-        if (event.registrationList.getWaitingCapacity() > -1) {
-            waitingCountText += "/" + event.registrationList.getWaitingCapacity();
+        String waitingCountText = String.valueOf(event.getRegistrationList().getWaitingList().size());
+        if (event.getRegistrationList().getWaitingCapacity() > -1) {
+            waitingCountText += "/" + event.getRegistrationList().getWaitingCapacity();
         }
-        if (waitingCountText.equals("1") && event.registrationList.getWaitingCapacity() > -1) {
+        if (waitingCountText.equals("1") && event.getRegistrationList().getWaitingCapacity() > -1) {
             waitingCountText += " person is waiting";
         } else {
             waitingCountText += " people are waiting";
@@ -368,22 +404,33 @@ public class InfoUEventFragment extends Fragment {
         waitingListCount.setText(waitingCountText);
 
         // set attendees count grammatically
-        String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
-        if (event.registrationList.getAttendingCapacity() > -1) {
-            attendeesCountText += "/" + event.registrationList.getAttendingCapacity();
+        String attendeesCountText = String.valueOf(event.getRegistrationList().getAttendingList().size());
+        if (event.getRegistrationList().getAttendingCapacity() > -1) {
+            attendeesCountText += "/" + event.getRegistrationList().getAttendingCapacity();
         }
-        if (attendeesCountText.equals("1") && event.registrationList.getAttendingCapacity() > -1) {
+        if (attendeesCountText.equals("1") && event.getRegistrationList().getAttendingCapacity() > -1) {
             attendeesCountText += " person is participating";
         } else {
             attendeesCountText += " people are participating";
         }
         attendeesCount.setText(attendeesCountText);
 
-        RegistrationList list = event.registrationList;
+        RegistrationList list = event.getRegistrationList();
+
+        // A co-organizer for this event cannot join the entrant pool
+        if (event.isCoOrganizer(userId)) {
+            joinButton.setVisibility(View.GONE);
+            leaveButton.setVisibility(View.GONE);
+            selectButtonSet.setVisibility(View.GONE);
+            attendingLabel.setVisibility(View.GONE);
+            cannotAttendLabel.setVisibility(View.VISIBLE);
+            cannotAttendLabel.setText(R.string.co_organizer_cannot_join);
+            return;
+        }
 
         if (list.getAttendingList().contains(userId)) {
             onAttending(event);
-        } else if (list.getSelectedList().contains(userId)) {
+        } else if (list.getSelectedUserStrings().contains(userId)) {
             onSelected(event);
         } else if (list.getWaitingList().contains(userId)) {
             onWaiting(event);
