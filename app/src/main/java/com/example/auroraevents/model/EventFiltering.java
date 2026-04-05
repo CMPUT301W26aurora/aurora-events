@@ -80,29 +80,29 @@ public class EventFiltering {
         if (keywordSearchQuery.isEmpty()) {
             return true;
         }
-            String eventName = event.getName();
-            if (eventName != null) {
-                eventName = eventName.toLowerCase();
-            } else {
-                eventName = "";
-            }
-
-            String eventDescription = event.getDescription();
-            if (eventDescription != null) {
-                eventDescription = eventDescription.toLowerCase();
-            } else {
-                eventDescription = "";
-            }
-
-            String eventLocation = event.getLocation();
-            if (eventLocation != null) {
-                eventLocation = eventLocation.toLowerCase();
-            } else {
-                eventLocation = "";
-            }
-            // return true if any keyword matches
-            return (eventName.contains(keywordSearchQuery) || eventDescription.contains(keywordSearchQuery) || eventLocation.contains(keywordSearchQuery));
+        String eventName = event.getName();
+        if (eventName != null) {
+            eventName = eventName.toLowerCase();
+        } else {
+            eventName = "";
         }
+
+        String eventDescription = event.getDescription();
+        if (eventDescription != null) {
+            eventDescription = eventDescription.toLowerCase();
+        } else {
+            eventDescription = "";
+        }
+
+        String eventLocation = event.getLocation();
+        if (eventLocation != null) {
+            eventLocation = eventLocation.toLowerCase();
+        } else {
+            eventLocation = "";
+        }
+        // return true if any keyword matches
+        return (eventName.contains(keywordSearchQuery) || eventDescription.contains(keywordSearchQuery) || eventLocation.contains(keywordSearchQuery));
+    }
 
     /**
      * Checks if an event's location matches the required location query.
@@ -110,7 +110,7 @@ public class EventFiltering {
      * @param locationQuery the location filter that needs to be checked for
      * @return true if matching location is found or if no location filter is applied
      */
-        private boolean checkMatchingLocation(Event event, String locationQuery) {
+    private boolean checkMatchingLocation(Event event, String locationQuery) {
         if (locationQuery.isEmpty()) {
             return true;
         }
@@ -121,7 +121,7 @@ public class EventFiltering {
             eventLocation = "";
         }
         return eventLocation.contains(locationQuery);
-        }
+    }
 
     /**
      * Checks if an event's date matches the required date range query.
@@ -130,7 +130,7 @@ public class EventFiltering {
      * @param highestEventDate latest date to check for
      * @return true if event date matches date range or if no date filter is applied
      */
-        private boolean checkMatchingDates(Event event, LocalDate lowestEventDate, LocalDate highestEventDate) {
+    private boolean checkMatchingDates(Event event, LocalDate lowestEventDate, LocalDate highestEventDate) {
         if (lowestEventDate == null && highestEventDate == null) {
             return true;
         } else {
@@ -144,7 +144,7 @@ public class EventFiltering {
             }
         }
         return true;
-        }
+    }
 
     /**
      * Check if an event's waiting list capacity matched the required capacity query.
@@ -152,7 +152,7 @@ public class EventFiltering {
      * @param maxEventCapacity maximum waiting list capacity to check for
      * @return true is capacity is within limit or if event has unlimited capacity or if capacity filter is not applied
      */
-        private boolean checkMatchingCapacity(Event event, int maxEventCapacity) {
+    private boolean checkMatchingCapacity(Event event, int maxEventCapacity) {
         if (maxEventCapacity == 0) {
             return true;
         }
@@ -164,7 +164,7 @@ public class EventFiltering {
             return true;
         }
         return false;
-        }
+    }
 
     /**
      * Checks entire event list against all filters.
@@ -178,7 +178,7 @@ public class EventFiltering {
      * @return list of all public events that match against any of the filters
      * or all public events when no filters are applied
      */
-        public ArrayList<Event> applyAllFilters(ArrayList<com.example.auroraevents.model.Event> eventList, String searchKeyword, String locationFilter, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate, int maxEventCapacity) {
+    public ArrayList<Event> applyAllFilters(ArrayList<com.example.auroraevents.model.Event> eventList, String searchKeyword, String locationFilter, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate, int maxEventCapacity) {
         String keywordSearchQuery;
         if (searchKeyword != null) {
             keywordSearchQuery = searchKeyword.trim().toLowerCase();

@@ -261,4 +261,4 @@ public class EventFilteringTest {
         ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "music", "calgary", null, null, 0);
         assertTrue(result.isEmpty());
     }
-    }
+}
