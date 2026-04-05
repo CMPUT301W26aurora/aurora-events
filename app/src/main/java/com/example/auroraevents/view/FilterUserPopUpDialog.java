@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import com.example.auroraevents.R;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,15 +31,18 @@ public class FilterUserPopUpDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View view = getLayoutInflater().inflate(R.layout.user_filter_popup, null);
-        Switch switchParticipating = view.findViewById(R.id.particpating_switch);
-        Switch switchRejected      = view.findViewById(R.id.rejected_switch);
-        Switch switchInvited       = view.findViewById(R.id.invited_switch);
-        Switch switchWaiting       = view.findViewById(R.id.waiting_switch);
-        Switch switchCancelled     = view.findViewById(R.id.cancelled_switch);
+        SwitchMaterial switchParticipating = view.findViewById(R.id.particpating_switch);
+        SwitchMaterial switchRejected      = view.findViewById(R.id.rejected_switch);
+        SwitchMaterial switchInvited       = view.findViewById(R.id.invited_switch);
+        SwitchMaterial switchWaiting       = view.findViewById(R.id.waiting_switch);
+        SwitchMaterial switchCancelled     = view.findViewById(R.id.cancelled_switch);
         Button confirmButton = view.findViewById(R.id.confirm_button);
         AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .create();
+        alertDialog.setOnShowListener(d ->
+                alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent)
+        );
         List<String> status = new ArrayList<>();
         confirmButton.setOnClickListener(v -> {
             if (switchWaiting.isChecked())       status.add("Waiting");
