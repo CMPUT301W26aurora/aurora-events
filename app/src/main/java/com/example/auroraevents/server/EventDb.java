@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.auroraevents.model.Comment;
 import com.example.auroraevents.model.Event;
 import com.google.firebase.Timestamp;
 
@@ -17,6 +18,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
@@ -589,5 +591,20 @@ public class EventDb {
                 }
             }
         });
+    }
+
+    public ListenerRegistration eventListenerAll( OnEventListFetchedCallback onFetched, OnFailureCallback onFailure) {
+        return db.collection(COLLECTION_NAME)
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        onFailure.onFailure(e);
+                        return;
+                    }
+                    if (value != null) {
+                        List<Event> events = value.toObjects(Event.class);
+                        onFetched.onFetched(events);
+                    }
+                });
     }
 }
