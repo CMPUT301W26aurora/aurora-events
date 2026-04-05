@@ -141,17 +141,18 @@ public class EventFilteringTest {
      */
     @Test
     public void testApplyLocationFilterMatchesLocation() {
-        ArrayList<Event> result = eventFiltering.applyLocationFilter(eventList, "Edmonton");
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "Edmonton", null, null, 0);
         assertEquals(1, result.size());
         assertEquals("event-1", result.get(0).getEventId());
     }
+
     /**
-     * Tests that empty location filter returns all events
+     * Tests that empty location filter returns all public events
      */
     @Test
     public void testApplyLocationFilterReturnsAllEvents() {
-        ArrayList<Event> result = eventFiltering.applyLocationFilter(eventList, "");
-        assertEquals(3, result.size());
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", null, null, 0);
+        assertEquals(2, result.size());
     }
 
     /**
@@ -159,19 +160,19 @@ public class EventFilteringTest {
      */
     @Test
     public void testApplyLocationFilterNoMatchedEvents() {
-        ArrayList<Event> result = eventFiltering.applyLocationFilter(eventList, "Toronto");
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "Toronto", null, null, 0);
         assertTrue(result.isEmpty());
     }
 
     /**
-     * Tests that date filter returns events for the required range
+     * Tests that date filter returns events within the required range
      */
     @Test
     public void testApplyDateFilter() {
         LocalDate startDate = LocalDate.of(2026, 6, 1);
         LocalDate endDate = LocalDate.of(2026, 7, 1);
 
-        ArrayList<Event> result = eventFiltering.applyDateFilter(eventList, startDate, endDate);
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", startDate, endDate, 0);
         assertEquals(1, result.size());
         assertEquals("event-1", result.get(0).getEventId());
     }
@@ -183,23 +184,25 @@ public class EventFilteringTest {
     public void testApplyDateFilterNoStartDate() {
         LocalDate endDate = LocalDate.of(2026, 7, 1);
 
-        // display all public events before and including  July 1 2026
-        ArrayList<Event> result = eventFiltering.applyDateFilter(eventList, null, endDate);
+        // display all public events on or before July 1 2026
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", null, endDate, 0);
         assertEquals(1, result.size());
         assertEquals("event-1", result.get(0).getEventId());
     }
+
     /**
      * Tests that no end date doesn't apply a filter for upper bound event dates
      */
     @Test
     public void testApplyDateFilterNoEndDate() {
-        LocalDate start = LocalDate.of(2026, 7, 1);
+        LocalDate startDate = LocalDate.of(2026, 7, 1);
 
-        // display all public events including and after July 1 2026
-        ArrayList<Event> result = eventFiltering.applyDateFilter(eventList, start, null);
+        // display all public events on or after July 1 2026
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", startDate, null, 0);
         assertEquals(1, result.size());
         assertEquals("event-2", result.get(0).getEventId());
     }
+
     /**
      * Tests that events outside the date range are not displayed
      */
@@ -208,7 +211,7 @@ public class EventFilteringTest {
         LocalDate startDate = LocalDate.of(2026, 9, 1);
         LocalDate endDate = LocalDate.of(2026, 12, 31);
 
-        ArrayList<Event> result = eventFiltering.applyDateFilter(eventList, startDate, endDate);
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", startDate, endDate, 0);
         assertTrue(result.isEmpty());
     }
 
@@ -217,7 +220,7 @@ public class EventFilteringTest {
      */
     @Test
     public void testApplyCapacityFilter() {
-        ArrayList<Event> result = eventFiltering.applyCapacityFilter(eventList, 25);
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", null, null, 25);
         assertEquals(1, result.size());
         assertEquals("event-2", result.get(0).getEventId());
     }
@@ -227,8 +230,8 @@ public class EventFilteringTest {
      */
     @Test
     public void testApplyCapacityFilterNoCapacity() {
-        ArrayList<Event> result = eventFiltering.applyCapacityFilter(eventList, 0);
-        assertEquals(3, result.size());
+        ArrayList<Event> result = eventFiltering.applyAllFilters(eventList, "", "", null, null, 0);
+        assertEquals(2, result.size());
     }
 
     /**

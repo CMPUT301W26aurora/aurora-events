@@ -5,13 +5,15 @@
 
 package com.example.auroraevents.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Helper class to implement event filtering and keyword search logic
- * Filters events based on:
- * keyword search that includes event name, description, location
- * location, date, and capacity filters
+ * Filters public events based on:
+ * Keyword search that includes matching against event name, description, and location
+ * Applies filters for location, date range, and waiting list capacity
  * Only displays public events when filters are applied
  */
 public class EventFiltering {
@@ -67,108 +69,139 @@ public class EventFiltering {
     }
 
     /**
-     * Filter events to display all public events that match the required location
-     * @param eventList list of all events to filter through
-     * @param locationFilter location keyword required to match against location of all events
-     * @return filtered list containing matching location events
+     * Checks if an event matches the searched query against event name, description, and location
+     * If keyword search is empty, all events are returned
+     * @param event the event to check for matching keyword
+     * @param keywordSearchQuery the keyword that needs to be searched
+     * @return true if keyword found or if the keyword search is empty
      */
-    public ArrayList<Event> applyLocationFilter(ArrayList<com.example.auroraevents.model.Event> eventList, String locationFilter) {
-        if (locationFilter == null || locationFilter.trim().isEmpty()) {
-            ArrayList<Event> allEventsList = new ArrayList<>(eventList);
-            return allEventsList;
+    private boolean compareKeywordToMatch(Event event, String keywordSearchQuery) {
+        // all events to be included when keyword search is empty
+        if (keywordSearchQuery.isEmpty()) {
+            return true;
         }
-        String locationQuery = locationFilter.trim().toLowerCase();
-        ArrayList<Event> locationFilterResults = new ArrayList<>();
+            String eventName = event.getName();
+            if (eventName != null) {
+                eventName = eventName.toLowerCase();
+            } else {
+                eventName = "";
+            }
 
-        for (Event event : eventList) {
-            if (event.isPrivate()) continue;
+            String eventDescription = event.getDescription();
+            if (eventDescription != null) {
+                eventDescription = eventDescription.toLowerCase();
+            } else {
+                eventDescription = "";
+            }
 
-            String eventLocation;
-            if (event.getLocation() != null) {
-                eventLocation = event.getLocation().toLowerCase();
+            String eventLocation = event.getLocation();
+            if (eventLocation != null) {
+                eventLocation = eventLocation.toLowerCase();
             } else {
                 eventLocation = "";
             }
-
-            if (eventLocation.contains(locationQuery)) {
-                locationFilterResults.add(event);
-            }
+            // return true if any keyword matches
+            return (eventName.contains(keywordSearchQuery) || eventDescription.contains(keywordSearchQuery) || eventLocation.contains(keywordSearchQuery));
         }
-        return locationFilterResults;
-    }
 
     /**
-     * Filters events to display all public events that match the given date range
-     * @param eventList list of all events to filter through
-     * @param eventStartDate earliest event date
-     * @param eventEndDate latest event date
-     * @return filtered list containing events within the required date range
+     * Checks if an event's location matches the required location query.
+     * @param event the event to check for matching location
+     * @param locationQuery the location filter that needs to be checked for
+     * @return true if matching location is found or if no location filter is applied
      */
-    public ArrayList<Event> applyDateFilter(ArrayList<com.example.auroraevents.model.Event> eventList, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate) {
-        if (eventStartDate == null && eventEndDate == null) {
-            ArrayList<Event> allEventsList = new ArrayList<>(eventList);
-            return allEventsList;
+        private boolean checkMatchingLocation(Event event, String locationQuery) {
+        if (locationQuery.isEmpty()) {
+            return true;
         }
-        ArrayList<Event> dateFilterResults = new ArrayList<>();
-
-        for (Event event : eventList) {
-            if (event.isPrivate()) continue;
-
-            java.time.LocalDate eventDate = event.getDateTimeAsLocalDate();
-
-            if (eventStartDate != null && eventDate.isBefore(eventStartDate)) {
-                continue;
-            }
-
-            if (eventEndDate != null && eventDate.isAfter(eventEndDate)) {
-                continue;
-            }
-            dateFilterResults.add(event);
+        String eventLocation = event.getLocation();
+        if (eventLocation != null) {
+            eventLocation = eventLocation.toLowerCase();
+        } else {
+            eventLocation = "";
         }
-        return dateFilterResults;
-    }
+        return eventLocation.contains(locationQuery);
+        }
 
     /**
-     * Filter events to display all public events whose waiting list capacity matches the given maximum capacity
-     * Returns all events when max capacity is 0 i.e. no filter applied
-     * @param eventList list of all events to filter through
-     * @param maxEventCapacity maximum waiting list capacity to display
-     * @return filtered list of events within the maximum waiting capacity
+     * Checks if an event's date matches the required date range query.
+     * @param event event to check for matching dates
+     * @param lowestEventDate earliest date to check for
+     * @param highestEventDate latest date to check for
+     * @return true if event date matches date range or if no date filter is applied
      */
-    public ArrayList<Event> applyCapacityFilter(ArrayList<com.example.auroraevents.model.Event> eventList, int maxEventCapacity) {
+        private boolean checkMatchingDates(Event event, LocalDate lowestEventDate, LocalDate highestEventDate) {
+        if (lowestEventDate == null && highestEventDate == null) {
+            return true;
+        } else {
+            LocalDate eventDate = event.getDateTimeAsLocalDate();
+
+            if (lowestEventDate != null && eventDate.isBefore(lowestEventDate)) {
+                return false;
+            }
+            if (highestEventDate != null && eventDate.isAfter(highestEventDate)) {
+                return false;
+            }
+        }
+        return true;
+        }
+
+    /**
+     * Check if an event's waiting list capacity matched the required capacity query.
+     * @param event event to check capacity for
+     * @param maxEventCapacity maximum waiting list capacity to check for
+     * @return true is capacity is within limit or if event has unlimited capacity or if capacity filter is not applied
+     */
+        private boolean checkMatchingCapacity(Event event, int maxEventCapacity) {
         if (maxEventCapacity == 0) {
-            ArrayList<Event> allEventsList = new ArrayList<>(eventList);
-            return allEventsList;
+            return true;
         }
-        ArrayList<Event> capacityFilterResults = new ArrayList<>();
+        int maxWaitingListCapacity = event.registrationList.getWaitingCapacity();
+        if (maxWaitingListCapacity == 0) {
+            return true;
+        }
+        if (maxWaitingListCapacity <= maxEventCapacity) {
+            return true;
+        }
+        return false;
+        }
+
+    /**
+     * Checks entire event list against all filters.
+     * Only displays public events after filtering.
+     * @param eventList list containing all events
+     * @param searchKeyword keyword to search for
+     * @param locationFilter location to filter for
+     * @param eventStartDate earliest date to filter for
+     * @param eventEndDate latest date to filter for
+     * @param maxEventCapacity maximum waititng list capacity to check for
+     * @return list of all public events that match against any of the filters
+     * or all public events when no filters are applied
+     */
+        public ArrayList<Event> applyAllFilters(ArrayList<com.example.auroraevents.model.Event> eventList, String searchKeyword, String locationFilter, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate, int maxEventCapacity) {
+        String keywordSearchQuery;
+        if (searchKeyword != null) {
+            keywordSearchQuery = searchKeyword.trim().toLowerCase();
+        } else {
+            keywordSearchQuery = "";
+        }
+        String locationQuery;
+        if (locationFilter != null) {
+            locationQuery = locationFilter.trim().toLowerCase();
+        } else {
+            locationQuery = "";
+        }
+
+        ArrayList<Event> allFilteredEvents = new ArrayList<>();
 
         for (Event event : eventList) {
             if (event.isPrivate()) {
                 continue;
             }
-            int eventWaitingListCapacity = event.registrationList.getWaitingCapacity();
-            if (eventWaitingListCapacity == 0 || eventWaitingListCapacity <= maxEventCapacity) {
-                capacityFilterResults.add(event);
+            if (compareKeywordToMatch(event, keywordSearchQuery) && checkMatchingLocation(event, locationQuery) && checkMatchingDates(event, eventStartDate, eventEndDate) && checkMatchingCapacity(event, maxEventCapacity)) {
+                allFilteredEvents.add(event);
             }
         }
-        return capacityFilterResults;
-    }
-
-    /**
-     * Filters events to display public events that match when all the filters are applied at once
-     * @param eventList list of all events to filter through
-     * @param searchKeyword keyword to search matching events
-     * @param locationFilter required location to match events
-     * @param eventStartDate required earliest date to match events
-     * @param eventEndDate required latest date to match events
-     * @param maxEventCapacity required max waiting list capacity to match events
-     * @return all public events that match all the applied filters
-     */
-    public ArrayList<Event> applyAllFilters(ArrayList<com.example.auroraevents.model.Event> eventList, String searchKeyword, String locationFilter, java.time.LocalDate eventStartDate, java.time.LocalDate eventEndDate, int maxEventCapacity) {
-        ArrayList<Event> allFilteredEvents = filterKeywordEvents(searchKeyword, eventList);
-        allFilteredEvents = applyLocationFilter(allFilteredEvents, locationFilter);
-        allFilteredEvents = applyDateFilter(allFilteredEvents, eventStartDate, eventEndDate);
-        allFilteredEvents = applyCapacityFilter(allFilteredEvents, maxEventCapacity);
         return allFilteredEvents;
     }
 }
