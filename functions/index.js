@@ -24,11 +24,19 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
             });
 
             // delete from all event lists
+
             const eventsSnapshot = await db.collection("Events").get();
             eventsSnapshot.forEach(doc => {
+                const data = doc.data();
+                const regList = data.registrationList || {};
+
+                if (regList.selectedList) {
+                      const updatedSelected = regList.selectedList.filter(u => u.userId !== deletedUserId);
+                      batch.update(doc.ref, { "registrationList.selectedList": updatedSelected });
+                }
+
                 batch.update(doc.ref, {
                     "registrationList.waitingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
-                    "registrationList.selectedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.attendingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.cancelledList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.declinedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
@@ -146,15 +154,18 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     const eventName  = event.data.after.data().name || "an event";
     const eventId    = event.params.eventId;
 
-    console.log("Function triggered for event:", eventId);
-    console.log("Before selectedList:", JSON.stringify(before.selectedList));
-    console.log("After selectedList:", JSON.stringify(after.selectedList));
+    const beforeSelected = (before.selectedList || []).map(u => u.userId);
+    const afterSelected  = (after.selectedList  || []).map(u => u.userId);
 
-    await notifyNewEntrants(before.selectedList,  after.selectedList,  eventId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
-    await notifyNewEntrants(before.attendingList, after.attendingList, eventId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
-    await notifyNewEntrants(before.declinedList,  after.declinedList,  eventId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`);
-    await notifyNewEntrants(before.cancelledList, after.cancelledList, eventId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
-    await notifyNewEntrants(before.removedList,   after.removedList,   eventId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
+    console.log("Function triggered for event:", eventId);
+    console.log("Before selectedList:", JSON.stringify(beforeSelected));
+    console.log("After selectedList:", JSON.stringify(afterSelected));
+
+    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
+    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
+    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`);
+    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
+    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
 
     // Handle co-organizer additions/removals
     const addedCoOrgs   = afterCo.filter(id => !beforeCo.includes(id));

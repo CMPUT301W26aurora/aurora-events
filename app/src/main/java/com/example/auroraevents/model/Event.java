@@ -48,7 +48,7 @@ public class Event {
     private List<String> coOrganizerDeviceIds;
 
     // Participant lists — each list holds device IDs (User.deviceId)
-    public RegistrationList registrationList; // for manipulating the lists
+    private RegistrationList registrationList; // for manipulating the lists
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
@@ -149,6 +149,12 @@ public class Event {
 
     public double getLongitude()  { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public RegistrationList getRegistrationList() {return this.registrationList;}
+
+    public void setRegistrationList(RegistrationList registrationList) {
+        this.registrationList = registrationList;
+    }
 
     // ── Co-organizer helpers ───────────────────────────────────────────────
 

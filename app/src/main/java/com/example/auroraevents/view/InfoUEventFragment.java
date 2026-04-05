@@ -12,7 +12,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -378,20 +377,56 @@ public class InfoUEventFragment extends Fragment {
             SendNotificationDialog dialog = SendNotificationDialog.newInstance(
                     event.getEventId(),
                     event.getName(),
-                    event.registrationList
+                    event.getRegistrationList()
             );
             dialog.show(getParentFragmentManager(), "send_notification");
         });
         viewEntrantsButton.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putString("eventId", event.getEventId());
-            UserListFragment userListFragment = new UserListFragment();
+            OrganizerUserListFragment userListFragment = new OrganizerUserListFragment();
             userListFragment.setArguments(args);
             getParentFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, userListFragment)
                     .addToBackStack(null)
                     .commit();
+        });
+
+        sampleButton.setOnClickListener(v->{
+
+            event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(), new RegistrationList.OnDbUpdateListener() {
+                @Override
+                public void onSuccess() {
+                    //useless here
+                }
+
+                @Override
+                public void onFailure() {
+                    //useless here
+                }
+
+                @Override
+                public void onComplete(RegistrationList.RegistrationResult result) {
+                    switch (result) {
+                        case SUCCESS:
+                            Toast.makeText(getContext(),"Users sampled",Toast.LENGTH_SHORT ).show();
+                            break;
+                        case CAPACITY_FULL:
+                            Toast.makeText(getContext(),"can't Sample any more", Toast.LENGTH_SHORT).show();
+                            break;
+                        case DATABASE_ERROR:
+                            Toast.makeText(getContext(),"Database error, try again in a moment", Toast.LENGTH_SHORT).show();
+                            break;
+                        case BLOCKED:
+                            Toast.makeText(getContext(),"Sampled Users cannot enter Selected list", Toast.LENGTH_SHORT).show();
+                            break;
+                        case ALREADY_IN_LIST:
+                            Toast.makeText(getContext(),"Users already in list", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+            });
         });
     }
 
@@ -424,11 +459,11 @@ public class InfoUEventFragment extends Fragment {
         eventDeadline.setText(deadlineText);
 
         // set waiting count grammatically
-        String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
-        if (event.registrationList.getWaitingCapacity() > -1) {
-            waitingCountText += "/" + event.registrationList.getWaitingCapacity();
+        String waitingCountText = String.valueOf(event.getRegistrationList().getWaitingList().size());
+        if (event.getRegistrationList().getWaitingCapacity() > -1) {
+            waitingCountText += "/" + event.getRegistrationList().getWaitingCapacity();
         }
-        if (waitingCountText.equals("1") && event.registrationList.getWaitingCapacity() > -1) {
+        if (waitingCountText.equals("1") && event.getRegistrationList().getWaitingCapacity() > -1) {
             waitingCountText += " person is waiting";
         } else {
             waitingCountText += " people are waiting";
@@ -436,18 +471,18 @@ public class InfoUEventFragment extends Fragment {
         waitingListCount.setText(waitingCountText);
 
         // set attendees count grammatically
-        String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
-        if (event.registrationList.getAttendingCapacity() > -1) {
-            attendeesCountText += "/" + event.registrationList.getAttendingCapacity();
+        String attendeesCountText = String.valueOf(event.getRegistrationList().getAttendingList().size());
+        if (event.getRegistrationList().getAttendingCapacity() > -1) {
+            attendeesCountText += "/" + event.getRegistrationList().getAttendingCapacity();
         }
-        if (attendeesCountText.equals("1") && event.registrationList.getAttendingCapacity() > -1) {
+        if (attendeesCountText.equals("1") && event.getRegistrationList().getAttendingCapacity() > -1) {
             attendeesCountText += " person is participating";
         } else {
             attendeesCountText += " people are participating";
         }
         attendeesCount.setText(attendeesCountText);
 
-        RegistrationList list = event.registrationList;
+        RegistrationList list = event.getRegistrationList();
 
         // A co-organizer for this event cannot join the entrant pool
         if (event.isCoOrganizer(userId)) {
@@ -462,7 +497,7 @@ public class InfoUEventFragment extends Fragment {
 
         if (list.getAttendingList().contains(userId)) {
             onAttending(event);
-        } else if (list.getSelectedList().contains(userId)) {
+        } else if (list.getSelectedUserStrings().contains(userId)) {
             onSelected(event);
         } else if (list.getWaitingList().contains(userId)) {
             onWaiting(event);
