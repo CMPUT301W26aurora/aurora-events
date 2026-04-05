@@ -23,6 +23,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
                 batch.delete(doc.ref);
             });
 
+            // delete from all event lists
             const eventsSnapshot = await db.collection("Events").get();
             eventsSnapshot.forEach(doc => {
                 batch.update(doc.ref, {
@@ -35,6 +36,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
                 });
             });
 
+            // delete users parent comments
             const parentCommentSnapshot = await db.collection("Comments")
                 .where("userId", "==", deletedUserId)
                 .where("parentId", "==", null)
@@ -44,6 +46,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
                 batch.delete(doc.ref);
             });
 
+            // delete users replies, cascade will destroy the replies to self, this handles replies to others
             const replyCommentSnapshot = await db.collection("Comments")
                 .where("userId", "==", deletedUserId)
                 .where("parentId", "!=", null)
@@ -53,6 +56,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
                 batch.delete(doc.ref);
             });
 
+            // delete users notifications
             const notificationsSnapshot = await db.collection("Notifications")
                 .where("deviceId", "==", deletedUserId)
                 .get();
@@ -67,6 +71,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
         } catch (error) {
             console.error("Error during user cleanup:", error);
         }
+
 });
 
 exports.onCommentDeleted = onDocumentDeleted("Comments/{commentId}", async (event) => {
@@ -76,18 +81,22 @@ exports.onCommentDeleted = onDocumentDeleted("Comments/{commentId}", async (even
     console.log("Checking for replies to deleted comment:", deletedCommentId);
 
     try {
+        // Find all comments that are replies, delete
         const repliesSnapshot = await db.collection("Comments")
             .where("parentId", "==", deletedCommentId)
             .get();
 
-        if (repliesSnapshot.empty) return null;
+        //if none exit early
+        if (repliesSnapshot.empty) {
+            return null;
+        }
 
         repliesSnapshot.forEach(doc => {
             batch.delete(doc.ref);
         });
 
         await batch.commit();
-        console.log("Deleted replies for parent:", deletedCommentId, repliesSnapshot.size);
+        console.log("Deleted replies for parent:",  deletedCommentId, repliesSnapshot.size);
     } catch (error) {
         console.error("Error cascading comment deletion:", error);
     }
@@ -98,10 +107,15 @@ exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
     const batch = db.batch();
 
     try {
+        // Find all parent comments, cascade will delete replies
         const parentSnapshot = await db.collection("Comments")
             .where("eventId", "==", deletedEventId)
             .where("parentId", "==", null)
             .get();
+
+        //https://docs.cloud.google.com/storage/docs/samples/storage-delete-file#storage_delete_file-nodejs
+        //Question asked by user Pat Myron, answered used from TheFastCat
+        //https://stackoverflow.com/questions/37749647/firebasestorage-how-to-delete-directory
 
         await bucket.deleteFiles({
             prefix: `${deletedEventId}/`
@@ -120,7 +134,8 @@ exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
 });
 
 /**
- * Sends notifications when event lists OR co-organizers change
+ * Firestore-triggered Cloud Function that sends push notifications to entrants
+ * when they are moved between registration lists on an Event document.
  */
 exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) => {
     const before     = event.data.before.data().registrationList || {};
@@ -132,6 +147,8 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     const eventId    = event.params.eventId;
 
     console.log("Function triggered for event:", eventId);
+    console.log("Before selectedList:", JSON.stringify(before.selectedList));
+    console.log("After selectedList:", JSON.stringify(after.selectedList));
 
     await notifyNewEntrants(before.selectedList,  after.selectedList,  eventId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
     await notifyNewEntrants(before.attendingList, after.attendingList, eventId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
@@ -139,7 +156,7 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     await notifyNewEntrants(before.cancelledList, after.cancelledList, eventId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
     await notifyNewEntrants(before.removedList,   after.removedList,   eventId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
 
-    // --- Co-organizer changes ---
+    // Handle co-organizer additions/removals
     const addedCoOrgs   = afterCo.filter(id => !beforeCo.includes(id));
     const removedCoOrgs = beforeCo.filter(id => !afterCo.includes(id));
 
@@ -164,7 +181,7 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
 });
 
 /**
- * Finds entrants newly added to a list and sends notifications
+ * Finds entrants newly added to a list and sends each a push notification.
  */
 async function notifyNewEntrants(beforeList, afterList, eventId, eventName, title, body) {
     const before = beforeList || [];
@@ -179,6 +196,10 @@ async function notifyNewEntrants(beforeList, afterList, eventId, eventName, titl
     );
 }
 
+/**
+ * Callable Cloud Function that lets the organizer send a custom push
+ * notification to a specific device. Called from NotificationSender.java.
+ */
 exports.sendNotification = onCall(async (request) => {
     const { token, title, body, eventId } = request.data;
     if (!token || !title || !body) {
@@ -197,18 +218,31 @@ exports.sendNotification = onCall(async (request) => {
     }
 });
 
+/**
+ * Looks up a user's FCM token and sends them a push notification via FCM.
+ */
 async function sendNotification(deviceId, eventId, title, body) {
+    console.log("sendNotification called for deviceId:", deviceId);
+
     const userDoc = await db.collection("Users").doc(deviceId).get();
-    if (!userDoc.exists) return;
+    if (!userDoc.exists) {
+        console.log("No user document found for deviceId:", deviceId);
+        return;
+    }
 
     const token = userDoc.data().fcmToken;
-    if (!token) return;
+    if (!token) {
+        console.log("No FCM token found for deviceId:", deviceId);
+        return;
+    }
 
+    console.log("Sending notification to token:", token);
     try {
-        await admin.messaging().send({
+        const result = await admin.messaging().send({
             token: token,
             data: { eventId, title, body }
         });
+        console.log("Notification sent successfully:", result);
     } catch (error) {
         console.error("Failed to send notification:", error);
     }
