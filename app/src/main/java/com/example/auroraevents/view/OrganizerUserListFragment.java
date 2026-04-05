@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
-import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.SelectedUser;
 import com.example.auroraevents.model.User;
@@ -29,7 +28,6 @@ import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -52,11 +50,22 @@ public class OrganizerUserListFragment extends DialogFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_organizer_user_list, container, false);
 
+
+        View nav = requireActivity().findViewById(R.id.nav_bar);
+        if(nav != null){
+            nav.setVisibility(View.GONE);
+        }
+
         return view;
     }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        View nav = requireActivity().findViewById(R.id.nav_bar);
+        if(nav != null){
+            nav.setVisibility(View.GONE);
+        }
 
         RecyclerView recyclerView = view.findViewById(R.id.entrants_list_org);
         ImageButton deleteButton = view.findViewById(R.id.delete_user_button_org_item);
@@ -186,7 +195,7 @@ public class OrganizerUserListFragment extends DialogFragment {
     @Override
     public void onStart(){
         super.onStart();
-        View nav = getActivity().findViewById(R.id.nav_bar);
+        View nav = requireActivity().findViewById(R.id.nav_bar);
         if(nav != null){
             nav.setVisibility(View.GONE);
         }

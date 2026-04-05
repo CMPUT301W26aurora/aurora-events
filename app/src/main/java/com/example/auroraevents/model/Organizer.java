@@ -8,7 +8,6 @@ import com.example.auroraevents.server.EventDb;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
@@ -87,7 +86,6 @@ public class Organizer extends User {
                 geolocationRequired,
                 waitingCapacity,
                 attendingCapacity);
-        event.setGeolocationRequired(geolocationRequired);
         event.setPrivate(isPrivate);
 
         // Bug 3 fix: only add to local list after Firestore confirms success

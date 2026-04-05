@@ -54,6 +54,7 @@ public class EventEditFragment extends Fragment {
     private Button dateButton;
     private Button privateButton;
     private Button confirmButton;
+    private Button manageCoOrganizersButton;
     private String eventName;
     private String eventDescription;
     private String price;
@@ -106,10 +107,13 @@ public class EventEditFragment extends Fragment {
 
         // Button and input setup
         backButton = view.findViewById(R.id.backButton);
+
         sampleButton = view.findViewById(R.id.get_participants);
         qrCodeButton = view.findViewById(R.id.show_qr_code);
         viewEntrantsButton = view.findViewById(R.id.view_entrants);
         sendNotificationButton = view.findViewById(R.id.send_notification);
+        manageCoOrganizersButton = view.findViewById(R.id.manage_co_organizers_button);
+
         addImageButton = view.findViewById(R.id.btn_add_image);
         eventNameInput = view.findViewById(R.id.et_event_name);
         eventDescInput = view.findViewById(R.id.et_event_desc);
@@ -123,9 +127,6 @@ public class EventEditFragment extends Fragment {
         dateButton = view.findViewById(R.id.btn_signup_deadline);
         privateButton = view.findViewById(R.id.btn_is_private);
         confirmButton = view.findViewById(R.id.btn_confirm);
-
-        // Hide nav bar
-        requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
 
         // Get organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
@@ -155,7 +156,6 @@ public class EventEditFragment extends Fragment {
 
         // Set current values
         Bundle args = getArguments();
-        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         if (args == null || args.getString("eventId") == null) {
             Log.e(TAG, "Missing eventId argument");
             getParentFragmentManager().popBackStack();
@@ -175,10 +175,10 @@ public class EventEditFragment extends Fragment {
                     price = event.getPrice();
                     eventPriceInput.setText(price);
 
-                    eventCap = String.valueOf(event.registrationList.getAttendingCapacity());
+                    eventCap = String.valueOf(event.getRegistrationList().getAttendingCapacity());
                     eventCapInput.setText(eventCap);
 
-                    waitingCap = String.valueOf(event.registrationList.getWaitingCapacity());
+                    waitingCap = String.valueOf(event.getRegistrationList().getWaitingCapacity());
                     eventWaitingCapInput.setText(waitingCap);
 
                     location = event.getLocation();
@@ -208,6 +208,26 @@ public class EventEditFragment extends Fragment {
             });
         }
 
+        if (user != null && user.getDeviceId().equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
+            manageCoOrganizersButton.setVisibility(View.VISIBLE);
+            manageCoOrganizersButton.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("eventId", event.getEventId());
+                bundle.putString("organizerDeviceId", event.getOrganizerDeviceId());
+
+                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
+                fragment.setArguments(bundle);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        } else {
+            manageCoOrganizersButton.setVisibility(View.GONE);
+        }
+
         // Fetch firebase cloud storage
         storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");
         storageRef = storage.getReference();
@@ -215,7 +235,7 @@ public class EventEditFragment extends Fragment {
 
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        sampleButton.setOnClickListener(v -> event.registrationList.performLottery(event.registrationList.getEmptySlotAmount(),
+        sampleButton.setOnClickListener(v -> event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(),
                 new RegistrationList.OnDbUpdateListener() {
                     @Override
                     public void onSuccess() {
@@ -240,7 +260,7 @@ public class EventEditFragment extends Fragment {
         viewEntrantsButton.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", event.getEventId());
-            UserListFragment userListFragment = new UserListFragment();
+            OrganizerUserListFragment userListFragment = new OrganizerUserListFragment();
             userListFragment.setArguments(bundle);
             getParentFragmentManager()
                     .beginTransaction()
@@ -253,7 +273,7 @@ public class EventEditFragment extends Fragment {
             SendNotificationDialog dialog = SendNotificationDialog.newInstance(
                     event.getEventId(),
                     event.getName(),
-                    event.registrationList
+                    event.getRegistrationList()
             );
             dialog.show(getParentFragmentManager(), "send_notification");
         });
@@ -265,7 +285,6 @@ public class EventEditFragment extends Fragment {
                 eventLat = lat;     // Store latitude and longitude
                 eventLong = lng;
                 locationButton.setText(address);
-                requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
             });
             getParentFragmentManager()
                     .beginTransaction()
@@ -386,11 +405,15 @@ public class EventEditFragment extends Fragment {
                 return;
             }
 
-            try {
-                Integer.parseInt(waitingCap);
-            } catch (NumberFormatException e) {
-                eventWaitingCapInput.setError("Please enter a valid number");
-                return;
+            int waitingCapacity = -1;
+            if (!waitingCap.isEmpty()) {
+                try {
+                    Integer.parseInt(waitingCap);
+                } catch (NumberFormatException e) {
+                    eventWaitingCapInput.setError("Please enter a valid number");
+                    return;
+                }
+                waitingCapacity = Integer.parseInt(waitingCap);
             }
 
             //
@@ -398,27 +421,40 @@ public class EventEditFragment extends Fragment {
                 return;
             }
 
-            // Create and add event
+            // update event
             if (organizer != null) {
-                organizer.CreateEvent(
-                        organizer.getDeviceId(),
-                        eventName,
-                        eventDescription,
-                        price,
-                        date,
-                        registerStart,
-                        registerEnd,
-                        location,
-                        geolocationRequired,
-                        Integer.parseInt(eventCap),
-                        Integer.parseInt(eventCap),
-                        isPrivate,
-                        uploadedImageUrl
+                event.setName(eventName);
+                event.setDescription(eventDescription);
+                event.setPrice(price);
+                event.setDateTime(date);
+                event.setRegistrationTimeStart(registerStart);
+                event.setRegistrationTimeEnd(registerEnd);
+                event.setLocation(location);
+                event.setGeolocationRequired(geolocationRequired);
+                event.getRegistrationList().setAttendingCapacity(Integer.parseInt(eventCap));
+                event.getRegistrationList().setWaitingCapacity(waitingCapacity);
+                event.setPrivate(isPrivate);
+                //TODO: update image
+
+                EventDb.getInstance().updateEvent(event,
+                        () -> {
+                            Log.d(TAG, "Event updated!");
+                            Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
+                        },
+                        e -> Log.e(TAG, "Event not updated")
                 );
-                getParentFragmentManager().popBackStack();
             }
         });
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.GONE);
+        }
     }
 
     @Override

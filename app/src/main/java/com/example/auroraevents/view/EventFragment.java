@@ -27,6 +27,7 @@ import com.example.auroraevents.server.EventDb;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Displays a list of all available events fetched form Firestore.
@@ -107,6 +108,9 @@ public class EventFragment extends Fragment {
                 Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
                 boolean isPrivate = event.isPrivate();
                 if (!isPrivate) {
+                    allEventsList.add(event);
+                    eventList.add(event);
+                } else if (Objects.equals(event.getOrganizerDeviceId(), userId) || event.getCoOrganizerDeviceIds().contains(userId)) {
                     allEventsList.add(event);
                     eventList.add(event);
                 }

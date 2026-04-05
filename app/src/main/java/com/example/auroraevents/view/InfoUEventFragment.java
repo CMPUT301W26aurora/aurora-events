@@ -79,10 +79,6 @@ public class InfoUEventFragment extends Fragment {
     private Button joinButton, leaveButton, acceptButton, declineButton;
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
-
-    // Co-organizer management button (visible to the primary organizer only)
-    private Button manageCoOrganizersButton;
-
     private FusedLocationProviderClient fusedLocationClient;
     private Event pendingJoinEvent;
 
@@ -152,7 +148,6 @@ public class InfoUEventFragment extends Fragment {
         cannotAttendLabel  = view.findViewById(R.id.cannot_attend_label);
 
         infoButton                = view.findViewById(R.id.lottery_info_button);
-        manageCoOrganizersButton  = view.findViewById(R.id.manage_co_organizers_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -265,7 +260,6 @@ public class InfoUEventFragment extends Fragment {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
-        manageCoOrganizersButton.setVisibility(View.GONE);
 
         commentButton.setVisibility(View.VISIBLE);
 
@@ -314,63 +308,14 @@ public class InfoUEventFragment extends Fragment {
      *                           Only the primary organizer can open the co-organizer management screen.
      */
     private void setupOrganizerUI(Event event, boolean isPrimaryOrganizer) {
-        bottomBar.setVisibility(View.GONE);
-        reportButton.setVisibility(View.GONE);
-        adminInfo.setVisibility(View.VISIBLE);
-
-        commentButton.setVisibility(View.VISIBLE);
-
-        // Only the primary organizer can manage co-organizers
-        if (isPrimaryOrganizer) {
-            manageCoOrganizersButton.setVisibility(View.VISIBLE);
-            manageCoOrganizersButton.setOnClickListener(v -> {
-                Bundle args = new Bundle();
-                args.putString("eventId", event.getEventId());
-                args.putString("organizerDeviceId", event.getOrganizerDeviceId());
-
-                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
-                fragment.setArguments(args);
-
-                getParentFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
-                        .addToBackStack(null)
-                        .commit();
-            });
-        } else {
-            manageCoOrganizersButton.setVisibility(View.GONE);
-        }
-
-        // set the number of people that reported this event grammatically
-        String reportedNumText = "Reported by " + event.getNumReports();
-        if (event.getNumReports() == 1) {
-            reportedNumText += " person";
-        } else {
-            reportedNumText += " people";
-        }
-        reportedNum.setText(reportedNumText);
-
-        // set delete button functionality
-        deleteButton.setOnClickListener(v -> {
-            PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
-                    EventDb.getInstance().deleteEvent(
-                            event.getEventId(),
-                            () -> {
-                                Log.d(TAG, "Event deleted by organizer");
-                                getParentFragmentManager().popBackStack();
-                            },
-                            e -> Log.e(TAG, "Error deleting event: " + e)
-                    )
-            );
-            fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Delete");
-        });
+        Log.e(TAG, "When organizer of this event, it should open `EventEditFragment`");
+        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
     }
 
     private void setupEntrantUI(Event event) {
         reportButton.setVisibility(View.VISIBLE);
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
-        manageCoOrganizersButton.setVisibility(View.GONE);
 
         commentButton.setVisibility(View.VISIBLE);
 

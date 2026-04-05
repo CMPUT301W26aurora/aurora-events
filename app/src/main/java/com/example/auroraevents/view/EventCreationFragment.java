@@ -276,11 +276,15 @@ public class EventCreationFragment extends Fragment {
                 return;
             }
 
-            try {
-                Integer.parseInt(waitingCap);
-            } catch (NumberFormatException e) {
-                eventWaitingCapInput.setError("Please enter a valid number");
-                return;
+            int waitingCapacity = -1;
+            if (!waitingCap.isEmpty()) {
+                try {
+                    Integer.parseInt(waitingCap);
+                } catch (NumberFormatException e) {
+                    eventWaitingCapInput.setError("Please enter a valid number");
+                    return;
+                }
+                waitingCapacity = Integer.parseInt(waitingCap);
             }
 
             //
@@ -301,7 +305,7 @@ public class EventCreationFragment extends Fragment {
                         location,
                         geolocationRequired,
                         Integer.parseInt(eventCap),
-                        Integer.parseInt(eventCap),
+                        waitingCapacity,
                         isPrivate,
                         uploadedImageUrl
                 );
