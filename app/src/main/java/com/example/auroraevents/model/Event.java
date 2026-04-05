@@ -35,22 +35,26 @@ public class Event {
     private String registrationTimeStart; // stored as "yyyy-MM-dd HH:mm:ss"
     private String registrationTimeEnd;   // stored as "yyyy-MM-dd HH:mm:ss"
     private String location;
+    private String qrUrl;
+    private String posterUrl;
+
     private boolean geolocationRequired;
-    private String qrCodeData;            // String payload encoded in the QR code
-    private Bitmap qR;
-    private Bitmap poster;
     private boolean isPrivate;
     private List<String> reports;
     private double latitude;
     private double longitude;
 
+    // Co-organizers for this event (stored as device IDs, per-event only)
+    private List<String> coOrganizerDeviceIds;
+
     // Participant lists — each list holds device IDs (User.deviceId)
-    public RegistrationList registrationList; // for manipulating the lists
+    private RegistrationList registrationList; // for manipulating the lists
 
     /** Required no-arg constructor for Firestore deserialization */
     public Event() {
         registrationList = new RegistrationList();
         reports = new ArrayList<>();
+        coOrganizerDeviceIds = new ArrayList<>();
     }
 
     public Event(
@@ -64,8 +68,7 @@ public class Event {
             String location,
             boolean geolocationRequired,
             int waitingCapacity,
-            int attendingCapacity,
-            Bitmap poster) {
+            int attendingCapacity) {
         this();
         this.organizerDeviceId     = organizerDeviceId;
         this.name                  = name;
@@ -78,7 +81,6 @@ public class Event {
         this.geolocationRequired   = geolocationRequired;
         this.registrationList.setWaitingCapacity(waitingCapacity);
         this.registrationList.setAttendingCapacity(attendingCapacity);
-        this.poster                = poster;
     }
 
     @Override
@@ -96,7 +98,6 @@ public class Event {
                 Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
                 Objects.equals(getLocation(), event.getLocation()) &&
                 getGeolocationRequired() == event.getGeolocationRequired() &&
-                Objects.equals(getPoster(), event.getPoster()) &&
                 getNumReports() == event.getNumReports() &&
                 Objects.equals(registrationList, event.registrationList)
                 ;
@@ -138,12 +139,6 @@ public class Event {
     public boolean getGeolocationRequired()                            { return geolocationRequired; }
     public void    setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
 
-    public String getQrCodeData()                  { return qrCodeData; }
-    public void   setQrCodeData(String qrCodeData) { this.qrCodeData = qrCodeData; }
-
-    public Bitmap getPoster()              { return poster; }
-    public void   setPoster(Bitmap poster) { this.poster = poster; }
-  
     public boolean isPrivate()                   { return isPrivate; }
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
 
@@ -154,6 +149,46 @@ public class Event {
 
     public double getLongitude()  { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public RegistrationList getRegistrationList() {return this.registrationList;}
+
+    public void setRegistrationList(RegistrationList registrationList) {
+        this.registrationList = registrationList;
+    }
+
+    // ── Co-organizer helpers ───────────────────────────────────────────────
+
+    public List<String> getCoOrganizerDeviceIds() {
+        if (coOrganizerDeviceIds == null) coOrganizerDeviceIds = new ArrayList<>();
+        return coOrganizerDeviceIds;
+    }
+
+    public void setCoOrganizerDeviceIds(List<String> coOrganizerDeviceIds) {
+        this.coOrganizerDeviceIds = coOrganizerDeviceIds;
+    }
+
+    /**
+     * Returns true if the given device ID belongs to a co-organizer of this event.
+     *
+     * @param deviceId The device ID to check.
+     */
+    @Exclude
+    public boolean isCoOrganizer(String deviceId) {
+        return coOrganizerDeviceIds != null && coOrganizerDeviceIds.contains(deviceId);
+    }
+
+    /**
+     * Returns true if the device ID is either the primary organizer or a co-organizer
+     *
+     * @param deviceId The device ID to check.
+     */
+    @Exclude
+    public boolean isOrganizerOrCoOrganizer(String deviceId) {
+        return deviceId != null &&
+                (deviceId.equals(organizerDeviceId) || isCoOrganizer(deviceId));
+    }
+
+    // ── Reports ────────────────────────────────────────────────────────────
 
     /**
      * Adds a report
@@ -186,34 +221,42 @@ public class Event {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
 
-    // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
-    /**
-     * takes a string of data and converts to a bitmap QR code
-     * The string data is defined in the constructor and using this produces a bitmap
-     * that returns the value specified inside the variable
-     * @author Sean Ross
-     */
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getQrUrl() {
+        return qrUrl;
+    }
+
+    public void setQrUrl(String qrUrl) {
+        this.qrUrl = qrUrl;
+    }
+
+    // ── QR code generation ─────────────────────────────────────────────────
+
     @Exclude
-    public void generateQrCode(){
-        MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
+    public Bitmap generateQrCode(){
+        MultiFormatWriter writer = new MultiFormatWriter();
         try{
             // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
 
-            int width = 400; //these values change the width and height of the qr code
+            int width = 400;
             int height = 400;
 
-            //convert data to bit matrix
             BitMatrix matrix = writer.encode(this.eventId, BarcodeFormat.QR_CODE, width, height);
 
-            //convert matrix to bitmap, can be used in image view
             BarcodeEncoder encoder = new BarcodeEncoder();
-            qR = encoder.createBitmap(matrix);
+            return encoder.createBitmap(matrix);
         }
         catch (WriterException e){
             Log.e("EVENT","Error encoding QR code", e);
+            return null;
         }
-    }
 
-    @Exclude
-    public Bitmap getQrCode() { return this.qR; }
+    }
 }

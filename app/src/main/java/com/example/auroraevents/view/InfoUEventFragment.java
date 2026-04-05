@@ -81,6 +81,9 @@ public class InfoUEventFragment extends Fragment {
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
 
+    // Co-organizer management button (visible to the primary organizer only)
+    private Button manageCoOrganizersButton;
+
     private FusedLocationProviderClient fusedLocationClient;
     private Event pendingJoinEvent;
 
@@ -152,7 +155,8 @@ public class InfoUEventFragment extends Fragment {
         attendingLabel     = view.findViewById(R.id.attending_label);
         cannotAttendLabel  = view.findViewById(R.id.cannot_attend_label);
 
-        infoButton         = view.findViewById(R.id.lottery_info_button);
+        infoButton                = view.findViewById(R.id.lottery_info_button);
+        manageCoOrganizersButton  = view.findViewById(R.id.manage_co_organizers_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -190,8 +194,13 @@ public class InfoUEventFragment extends Fragment {
 
                 if (activeAdmin) {
                     setupAdminUI(event);
-                } else if (user != null && userId.equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
-                    setupOrganizerUI(event);
+                } else if (user != null && userId.equals(event.getOrganizerDeviceId())
+                        && user.getRole().equals(User.ROLE_ORGANIZER)) {
+                    // Primary organizer: full organizer UI including co-organizer management
+                    setupOrganizerUI(event, true);
+                } else if (user != null && event.isCoOrganizer(userId)) {
+                    // Co-organizer: organizer UI but cannot manage co-organizers
+                    setupOrganizerUI(event, false);
                 } else {
                     setupEntrantUI(event);
                 }
@@ -204,10 +213,10 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void renderCommonUI(Event event) {
-        if (event.getPoster() == null) {
+        if (event.getPosterUrl() == null) {
             poster.setVisibility(View.GONE);
         } else {
-            poster.setImageBitmap(event.getPoster());
+            //poster.setImageBitmap(event.getPoster()); // need to use glide to pull poster from database
         }
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());
@@ -260,6 +269,7 @@ public class InfoUEventFragment extends Fragment {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
+        manageCoOrganizersButton.setVisibility(View.GONE);
 
         sampleButton.setVisibility(View.GONE);
         viewEntrantsButton.setVisibility(View.GONE);
@@ -303,10 +313,14 @@ public class InfoUEventFragment extends Fragment {
         });
     }
 
-    private void setupOrganizerUI(Event event) {
-        Log.e(TAG, "You shouldn't be here");
-        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
-
+    /**
+     * Sets up the organizer UI.
+     *
+     * @param event            The current event.
+     * @param isPrimaryOrganizer True if the current user is the primary organizer (not a co-organizer).
+     *                           Only the primary organizer can open the co-organizer management screen.
+     */
+    private void setupOrganizerUI(Event event, boolean isPrimaryOrganizer) {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
@@ -315,6 +329,27 @@ public class InfoUEventFragment extends Fragment {
         viewEntrantsButton.setVisibility(View.VISIBLE);
         commentButton.setVisibility(View.VISIBLE);
         notificationButton.setVisibility(View.VISIBLE);
+
+        // Only the primary organizer can manage co-organizers
+        if (isPrimaryOrganizer) {
+            manageCoOrganizersButton.setVisibility(View.VISIBLE);
+            manageCoOrganizersButton.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString("eventId", event.getEventId());
+                args.putString("organizerDeviceId", event.getOrganizerDeviceId());
+
+                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
+                fragment.setArguments(args);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        } else {
+            manageCoOrganizersButton.setVisibility(View.GONE);
+        }
 
         // set the number of people that reported this event grammatically
         String reportedNumText = "Reported by " + event.getNumReports();
@@ -331,7 +366,7 @@ public class InfoUEventFragment extends Fragment {
                     EventDb.getInstance().deleteEvent(
                             event.getEventId(),
                             () -> {
-                                Log.d(TAG, "Event deleted by admin");
+                                Log.d(TAG, "Event deleted by organizer");
                                 getParentFragmentManager().popBackStack();
                             },
                             e -> Log.e(TAG, "Error deleting event: " + e)
@@ -343,14 +378,14 @@ public class InfoUEventFragment extends Fragment {
             SendNotificationDialog dialog = SendNotificationDialog.newInstance(
                     event.getEventId(),
                     event.getName(),
-                    event.registrationList
+                    event.getRegistrationList()
             );
             dialog.show(getParentFragmentManager(), "send_notification");
         });
         viewEntrantsButton.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putString("eventId", event.getEventId());
-            UserListFragment userListFragment = new UserListFragment();
+            OrganizerUserListFragment userListFragment = new OrganizerUserListFragment();
             userListFragment.setArguments(args);
             getParentFragmentManager()
                     .beginTransaction()
@@ -358,12 +393,49 @@ public class InfoUEventFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
+        sampleButton.setOnClickListener(v->{
+
+            event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(), new RegistrationList.OnDbUpdateListener() {
+                @Override
+                public void onSuccess() {
+                    //useless here
+                }
+
+                @Override
+                public void onFailure() {
+                    //useless here
+                }
+
+                @Override
+                public void onComplete(RegistrationList.RegistrationResult result) {
+                    switch (result) {
+                        case SUCCESS:
+                            Toast.makeText(getContext(),"Users sampled",Toast.LENGTH_SHORT ).show();
+                            break;
+                        case CAPACITY_FULL:
+                            Toast.makeText(getContext(),"can't Sample any more", Toast.LENGTH_SHORT).show();
+                            break;
+                        case DATABASE_ERROR:
+                            Toast.makeText(getContext(),"Database error, try again in a moment", Toast.LENGTH_SHORT).show();
+                            break;
+                        case BLOCKED:
+                            Toast.makeText(getContext(),"Sampled Users cannot enter Selected list", Toast.LENGTH_SHORT).show();
+                            break;
+                        case ALREADY_IN_LIST:
+                            Toast.makeText(getContext(),"Users already in list", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+            });
+        });
     }
 
     private void setupEntrantUI(Event event) {
         reportButton.setVisibility(View.VISIBLE);
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
+        manageCoOrganizersButton.setVisibility(View.GONE);
 
         sampleButton.setVisibility(View.GONE);
         viewEntrantsButton.setVisibility(View.GONE);
@@ -388,11 +460,11 @@ public class InfoUEventFragment extends Fragment {
         eventDeadline.setText(deadlineText);
 
         // set waiting count grammatically
-        String waitingCountText = String.valueOf(event.registrationList.getWaitingList().size());
-        if (event.registrationList.getWaitingCapacity() > -1) {
-            waitingCountText += "/" + event.registrationList.getWaitingCapacity();
+        String waitingCountText = String.valueOf(event.getRegistrationList().getWaitingList().size());
+        if (event.getRegistrationList().getWaitingCapacity() > -1) {
+            waitingCountText += "/" + event.getRegistrationList().getWaitingCapacity();
         }
-        if (waitingCountText.equals("1") && event.registrationList.getWaitingCapacity() > -1) {
+        if (waitingCountText.equals("1") && event.getRegistrationList().getWaitingCapacity() > -1) {
             waitingCountText += " person is waiting";
         } else {
             waitingCountText += " people are waiting";
@@ -400,22 +472,33 @@ public class InfoUEventFragment extends Fragment {
         waitingListCount.setText(waitingCountText);
 
         // set attendees count grammatically
-        String attendeesCountText = String.valueOf(event.registrationList.getAttendingList().size());
-        if (event.registrationList.getAttendingCapacity() > -1) {
-            attendeesCountText += "/" + event.registrationList.getAttendingCapacity();
+        String attendeesCountText = String.valueOf(event.getRegistrationList().getAttendingList().size());
+        if (event.getRegistrationList().getAttendingCapacity() > -1) {
+            attendeesCountText += "/" + event.getRegistrationList().getAttendingCapacity();
         }
-        if (attendeesCountText.equals("1") && event.registrationList.getAttendingCapacity() > -1) {
+        if (attendeesCountText.equals("1") && event.getRegistrationList().getAttendingCapacity() > -1) {
             attendeesCountText += " person is participating";
         } else {
             attendeesCountText += " people are participating";
         }
         attendeesCount.setText(attendeesCountText);
 
-        RegistrationList list = event.registrationList;
+        RegistrationList list = event.getRegistrationList();
+
+        // A co-organizer for this event cannot join the entrant pool
+        if (event.isCoOrganizer(userId)) {
+            joinButton.setVisibility(View.GONE);
+            leaveButton.setVisibility(View.GONE);
+            selectButtonSet.setVisibility(View.GONE);
+            attendingLabel.setVisibility(View.GONE);
+            cannotAttendLabel.setVisibility(View.VISIBLE);
+            cannotAttendLabel.setText(R.string.co_organizer_cannot_join);
+            return;
+        }
 
         if (list.getAttendingList().contains(userId)) {
             onAttending(event);
-        } else if (list.getSelectedList().contains(userId)) {
+        } else if (list.getSelectedUserStrings().contains(userId)) {
             onSelected(event);
         } else if (list.getWaitingList().contains(userId)) {
             onWaiting(event);

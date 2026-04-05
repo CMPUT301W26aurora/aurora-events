@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
+const bucket = admin.storage().bucket();
 
 exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
     const deletedUserId = event.params.userId;
@@ -14,12 +15,28 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
 
     console.log("Triggered Cleanup for deleted user:", deletedUserId);
     try {
+            const eventsOwnedSnapshot = await db.collection("Events")
+                .where("eventOrganizerId", "==", deletedUserId)
+                .get();
+
+            eventsOwnedSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
             // delete from all event lists
-            const eventsSnapshot = await db.collection('Events').get();
+
+            const eventsSnapshot = await db.collection("Events").get();
             eventsSnapshot.forEach(doc => {
+                const data = doc.data();
+                const regList = data.registrationList || {};
+
+                if (regList.selectedList) {
+                      const updatedSelected = regList.selectedList.filter(u => u.userId !== deletedUserId);
+                      batch.update(doc.ref, { "registrationList.selectedList": updatedSelected });
+                }
+
                 batch.update(doc.ref, {
                     "registrationList.waitingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
-                    "registrationList.selectedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.attendingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.cancelledList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
                     "registrationList.declinedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
@@ -45,7 +62,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
 
             replyCommentSnapshot.forEach(doc =>{
                 batch.delete(doc.ref);
-            })
+            });
 
             // delete users notifications
             const notificationsSnapshot = await db.collection("Notifications")
@@ -55,6 +72,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
             notificationsSnapshot.forEach(doc => {
                 batch.delete(doc.ref);
             });
+
             await batch.commit();
             console.log("Cleanup complete for user:", deletedUserId);
 
@@ -103,15 +121,24 @@ exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
             .where("parentId", "==", null)
             .get();
 
+        //https://docs.cloud.google.com/storage/docs/samples/storage-delete-file#storage_delete_file-nodejs
+        //Question asked by user Pat Myron, answered used from TheFastCat
+        //https://stackoverflow.com/questions/37749647/firebasestorage-how-to-delete-directory
+
+        await bucket.deleteFiles({
+            prefix: `${deletedEventId}/`
+        });
+
         parentSnapshot.forEach(doc=>{
             batch.delete(doc.ref);
         });
 
         await batch.commit();
         console.log("Deleted event and its comments", deletedEventId);
-        }catch (error) {
-            console.error("Error deleting events comments", error);
-        }
+
+    } catch (error) {
+        console.error("Error deleting events comments", error);
+    }
 });
 
 /**
@@ -121,18 +148,47 @@ exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
 exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) => {
     const before     = event.data.before.data().registrationList || {};
     const after      = event.data.after.data().registrationList || {};
+    const beforeCo   = event.data.before.data().coOrganizerDeviceIds || [];
+    const afterCo    = event.data.after.data().coOrganizerDeviceIds || [];
+
     const eventName  = event.data.after.data().name || "an event";
     const eventId    = event.params.eventId;
 
-    console.log("Function triggered for event:", eventId);
-    console.log("Before selectedList:", JSON.stringify(before.selectedList));
-    console.log("After selectedList:", JSON.stringify(after.selectedList));
+    const beforeSelected = (before.selectedList || []).map(u => u.userId);
+    const afterSelected  = (after.selectedList  || []).map(u => u.userId);
 
-    await notifyNewEntrants(before.selectedList,  after.selectedList,  eventId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
-    await notifyNewEntrants(before.attendingList, after.attendingList, eventId, eventName, "You're confirmed!",          `You're confirmed for ${eventName}.`);
-    await notifyNewEntrants(before.declinedList,  after.declinedList,  eventId, eventName, "Invitation declined",        `Your invitation to ${eventName} has been declined.`);
-    await notifyNewEntrants(before.cancelledList, after.cancelledList, eventId, eventName, "Registration cancelled",     `Your registration for ${eventName} has been cancelled.`);
-    await notifyNewEntrants(before.removedList,   after.removedList,   eventId, eventName, "Removed from event",         `You have been removed from ${eventName}.`);
+    console.log("Function triggered for event:", eventId);
+    console.log("Before selectedList:", JSON.stringify(beforeSelected));
+    console.log("After selectedList:", JSON.stringify(afterSelected));
+
+    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
+    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
+    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`);
+    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
+    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
+
+    // Handle co-organizer additions/removals
+    const addedCoOrgs   = afterCo.filter(id => !beforeCo.includes(id));
+    const removedCoOrgs = beforeCo.filter(id => !afterCo.includes(id));
+
+    await Promise.all([
+        ...addedCoOrgs.map(deviceId =>
+            sendNotification(
+                deviceId,
+                eventId,
+                "You've been made a co-organizer!",
+                `You are now a co-organizer for ${eventName}.`
+            )
+        ),
+        ...removedCoOrgs.map(deviceId =>
+            sendNotification(
+                deviceId,
+                eventId,
+                "Co-organizer access removed",
+                `You are no longer a co-organizer for ${eventName}.`
+            )
+        )
+    ]);
 });
 
 /**
@@ -144,9 +200,11 @@ async function notifyNewEntrants(beforeList, afterList, eventId, eventName, titl
 
     const newEntrants = after.filter(id => !before.includes(id));
 
-    for (const deviceId of newEntrants) {
-        await sendNotification(deviceId, eventId, title, body);
-    }
+    await Promise.all(
+        newEntrants.map(deviceId =>
+            sendNotification(deviceId, eventId, title, body)
+        )
+    );
 }
 
 /**
