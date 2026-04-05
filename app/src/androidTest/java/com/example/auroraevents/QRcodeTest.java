@@ -24,14 +24,10 @@ public class QRcodeTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                false,
-                -1,
-                -1,
-                null);
+                false,0,0);
         event.setEventId("sample id for QR Code testing");
-        event.generateQrCode();
 
-         Bitmap test = event.getQrCode();
+         Bitmap test = event.generateQrCode();
          assertNotNull(test);
          assertEquals(400, test.getWidth());
          assertEquals(400, test.getHeight());

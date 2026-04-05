@@ -55,10 +55,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                false,
-                -1,
-                3,
-                null);
+                3, false);
         myEvent.setEventId("test event");
         setUpEvent(myEvent, 10, TimeUnit.SECONDS);
 
@@ -71,10 +68,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                false,
-                -1,
-                3,
-                null);
+                3, false);
         myEvent2.setEventId("test event");
         setUpEvent(myEvent2, 10, TimeUnit.SECONDS);
 
@@ -87,10 +81,7 @@ public class WaitListSamplingTest {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                false,
-                -1,
-                10,
-                null);
+                10, false); //0); for events with unlimited amount
         myEvent3.setEventId("test event");
         setUpEvent(myEvent3, 10, TimeUnit.SECONDS);
 

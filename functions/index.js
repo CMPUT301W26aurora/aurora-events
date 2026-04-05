@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
+const bucket = admin.storage.bucket();
 
 exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
     const deletedUserId = event.params.userId;
@@ -14,8 +15,16 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
 
     console.log("Triggered Cleanup for deleted user:", deletedUserId);
     try {
+            const eventsOwnedSnapshot await db.collection("Events")
+                .where("eventOrganizerId", "==", deletedUserId)
+                .get();
+
+            eventsOwnedSnapshot.forEach(doc => {
+                batch.delete(doc.ref)
+            })
+
             // delete from all event lists
-            const eventsSnapshot = await db.collection('Events').get();
+            const eventsSnapshot = await db.collection("Events").get();
             eventsSnapshot.forEach(doc => {
                 batch.update(doc.ref, {
                     "registrationList.waitingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
@@ -36,6 +45,7 @@ exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
             parentCommentSnapshot.forEach(doc => {
                 batch.delete(doc.ref);
             });
+
 
             // delete users replies, cascade will destroy the replies to self, this handles replies to others
             const replyCommentSnapshot = await db.collection("Comments")
@@ -103,6 +113,13 @@ exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
             .where("parentId", "==", null)
             .get();
 
+        //https://docs.cloud.google.com/storage/docs/samples/storage-delete-file#storage_delete_file-nodejs
+        //Question asked by user Pat Myron, answered used from TheFastCat
+        //https://stackoverflow.com/questions/37749647/firebasestorage-how-to-delete-directory
+
+        await bucket.deleteFiles({
+                    prefix: `${deletedEventId}/`
+        });
         parentSnapshot.forEach(doc=>{
             batch.delete(doc.ref);
         });

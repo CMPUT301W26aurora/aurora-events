@@ -42,11 +42,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                "Rec Centre", false,0,0);
         assertEquals("organizer-xyz", event.getOrganizerDeviceId());
     }
 
@@ -64,11 +60,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                "Rec Centre", false,0,0);
         assertEquals("Sports Event", event.getName());
     }
 
@@ -86,11 +78,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                "Rec Centre", false,0,0);
         assertEquals("Explore your favourite sport", event.getDescription());
     }
 
@@ -107,12 +95,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null
-        );
+                "Rec Centre", false,0,0);
 
         assertEquals(LocalDate.of(2026, 6, 4), event.getDateTimeAsLocalDate());
     }
@@ -130,12 +113,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null
-        );
+                "Rec Centre", false,0,0);
 
         assertEquals(LocalDateTime.of(2026, 5, 20, 9, 0),
                 event.getRegistrationTimeStartAsDateTime());
@@ -154,12 +132,7 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null
-        );
+                "Rec Centre", false,0,0);
 
         assertEquals(LocalDateTime.of(2026, 6, 1, 23, 59),
                 event.getRegistrationTimeEndAsDateTime());
@@ -179,33 +152,8 @@ public class EventTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                "Rec Centre", false,0,0);
         assertEquals("Rec Centre", event.getLocation());
-    }
-    /**
-     * Tests if the constructor sets the event capacity correctly
-     */
-    @Test
-    public void testEventCapacity() {
-        // create an event
-        Event event = new Event(
-                "organizer-xyz",
-                "Sports Event",
-                "Explore your favourite sport",
-                "free",
-                LocalDateTime.of(2026, 6, 4, 18, 0),
-                LocalDateTime.of(2026, 5, 20, 9, 0),
-                LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
-        assertEquals(20, event.registrationList.getAttendingCapacity());
     }
 
     /**
