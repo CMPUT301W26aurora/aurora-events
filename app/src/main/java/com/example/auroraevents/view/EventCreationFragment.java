@@ -118,7 +118,6 @@ public class EventCreationFragment extends Fragment {
                     }
 
                     if (image != null) {
-
                         // Update image upload dialog
                         if (dialogImageView != null) {
                             dialogImageView.setVisibility(View.VISIBLE);
@@ -134,6 +133,9 @@ public class EventCreationFragment extends Fragment {
             }
     );
 
+    /**
+     * Take photo via intent
+     */
     private void dispatchTakePictureIntent() {
         // Create temp image URI
         java.io.File photoFile = new java.io.File(
@@ -385,6 +387,9 @@ public class EventCreationFragment extends Fragment {
         }
     }
 
+    /**
+     * Display input dialog for image selection
+     */
     private void showInputDialogImage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
@@ -473,6 +478,9 @@ public class EventCreationFragment extends Fragment {
                 calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
     }
 
+    /**
+     * For testing purposes, adds an image to the gallery
+     */
     private void addMockImageToGallery() {
         // Copy drawable to external storage
         android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeResource(
