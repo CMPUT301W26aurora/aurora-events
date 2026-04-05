@@ -3,10 +3,10 @@ package com.example.auroraevents.model;
 /**
  * wrapper class for User Adapter
  */
-public class UserStatus {
+public class UserAdapterWrapper {
     private User user;
     private String status;
-    public UserStatus(User user, String status) {
+    public UserAdapterWrapper(User user, String status) {
         this.user = user;
         this.status = status;
     }

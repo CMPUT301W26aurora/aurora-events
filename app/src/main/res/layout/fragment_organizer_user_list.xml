@@ -6,12 +6,15 @@
     android:layout_height="match_parent"
     android:background="@drawable/background_aroura_gradient">
 
-    <ListView
-        android:id="@+id/entrants_list"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/entrants_list_org"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent">
-    </ListView>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/done_and_map_layout"
+        app:layout_constraintEnd_toEndOf="parent">
+    </androidx.recyclerview.widget.RecyclerView>
 
     <LinearLayout
         android:id="@+id/filter_and_sort"

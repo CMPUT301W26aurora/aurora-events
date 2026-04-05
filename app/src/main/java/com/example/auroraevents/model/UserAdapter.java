@@ -21,11 +21,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         void Onclick(User user);
     }
     private UserAdapter.OnUserInteractionListener listener;
-    private List<UserStatus> userList;
+    private List<UserAdapterWrapper> userList;
     private Boolean inAdmin;
 
 
-    UserAdapter(OnUserInteractionListener listener, List<UserStatus> user, Boolean inAdmin, RegistrationList registrationList){
+    public UserAdapter(List<UserAdapterWrapper> user, Boolean inAdmin, OnUserInteractionListener listener){
         this.listener = listener;
         this.userList = user;
         this.inAdmin = inAdmin;
@@ -35,11 +35,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         UserViewHolder(@NonNull View itemView){
             super(itemView);
         }
-        public abstract void bind(UserStatus user, OnUserInteractionListener listener);
+        public abstract void bind(UserAdapterWrapper user, OnUserInteractionListener listener);
     }
     @Override
     public void onBindViewHolder(@NonNull UserAdapter.UserViewHolder holder, int position) {
-        UserStatus user = userList.get(position);
+        UserAdapterWrapper user = userList.get(position);
         holder.bind(user, listener);
     }
     public static class  OrgViewHolder extends UserViewHolder{
@@ -57,9 +57,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             userStatus = rootLayout.findViewById(R.id.user_status_list_org);
         }
         @Override
-        public void bind(UserStatus user, OnUserInteractionListener listener) {
+        public void bind(UserAdapterWrapper user, OnUserInteractionListener listener) {
             userName.setText(user.getUser().getName());
             userStatus.setText(user.getStatus());
+            if(!user.getStatus().equals("selected")){
+                delete.setVisibility(View.GONE);
+            }
             delete.setOnClickListener(v->{
                 if(listener != null){
                     listener.Onclick(user.getUser());
@@ -74,7 +77,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
 
         @Override
-        public void bind(UserStatus user, OnUserInteractionListener listener) {
+        public void bind(UserAdapterWrapper user, OnUserInteractionListener listener) {
 
         }
     }

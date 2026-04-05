@@ -12,7 +12,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -350,7 +349,7 @@ public class InfoUEventFragment extends Fragment {
         viewEntrantsButton.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putString("eventId", event.getEventId());
-            UserListFragment userListFragment = new UserListFragment();
+            OrganizerUserList userListFragment = new OrganizerUserList();
             userListFragment.setArguments(args);
             getParentFragmentManager()
                     .beginTransaction()
