@@ -45,6 +45,8 @@ import java.time.LocalDateTime;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CommentFragmentTest {
+    //Testing with Live database is a big no-no. Refactor with Mockito...
+    /**
     Event event;
     //rules so it works
     @Rule
@@ -93,9 +95,7 @@ public class CommentFragmentTest {
     }
 
 
-    /**
-     * tests if you can post a comment
-     */
+
     @Test
     public void test02_testPostComment() {
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -113,9 +113,7 @@ public class CommentFragmentTest {
 
     }
 
-    /**
-     * tests bar visibility
-     */
+
     @Test
     public void test01_barVisibility(){
         onView(withId(R.id.recycler_view_comments)).check(matches(isDisplayed()));
@@ -123,9 +121,7 @@ public class CommentFragmentTest {
     }
 
 
-    /**
-     * tests replying
-     */
+
     @Test
     public void test03_testPostComment2() {
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -158,9 +154,7 @@ public class CommentFragmentTest {
 
     }
 
-    /**
-     * tests canceling replies
-     */
+
     @Test
     public void test04_cancelReply(){
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -186,9 +180,7 @@ public class CommentFragmentTest {
 
     }
 
-    /**
-     * tests post deletion
-     */
+
     @Test
     public void test05_deletePost(){
         String testComment = "This is a test comment " + System.currentTimeMillis();
@@ -213,4 +205,6 @@ public class CommentFragmentTest {
         onView(withText(testComment)).check(doesNotExist());
     }
 
+
+**/
 }

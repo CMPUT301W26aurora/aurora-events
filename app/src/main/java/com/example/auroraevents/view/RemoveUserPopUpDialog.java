@@ -30,19 +30,15 @@ public class RemoveUserPopUpDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        View view = LayoutInflater.from(requireContext())
-                .inflate(R.layout.delete_user_confirm_popup, null);
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.delete_user_confirm_popup, null);
 
         Button confirmButton = view.findViewById(R.id.confirm_button);
 
         AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .create();
-
         // When Organizer presses confirm, the selected user is cancelled from the event
         confirmButton.setOnClickListener(v -> {
-            registrationList.addToCancelledList(selectedUserID);
-            userListAdapter.notifyDataSetChanged();
             alertDialog.dismiss();
         });
 

@@ -30,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 
 public class UserDeleteTest {
+    //Testing with Live database is a big no-no. Refactor with Mockito...
+    /**
     User user;
     User user2;
     Event waitingEvent;
@@ -314,4 +316,6 @@ public class UserDeleteTest {
         checkSingle(cancelledEvent.registrationList, user2.getDeviceId());
         checkSingle(removedEvent.registrationList, user2.getDeviceId());
     }
+    **/
+
 }

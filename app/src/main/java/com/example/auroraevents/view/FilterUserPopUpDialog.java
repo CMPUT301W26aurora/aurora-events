@@ -55,15 +55,10 @@ public class FilterUserPopUpDialog extends DialogFragment {
         // After pressing Confirm, Update userlist with the filter
         confirmButton.setOnClickListener(v -> {
             ArrayList<User> filteredUsers = new ArrayList<>();
-            if (switchParticipating.isChecked()) filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_ATTENDING));
-            if (switchRejected.isChecked())      filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_DECLINED));
-            if (switchInvited.isChecked())       filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_SELECTED));
-            if (switchWaiting.isChecked())       filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_WAITING));
-            if (switchCancelled.isChecked())     filteredUsers.addAll(currentEvent.registrationList.getUsersFromDB(EventDb.LIST_CANCELLED));
             userList.addAll(filteredUsers);
             userListView.deferNotifyDataSetChanged();
             alertDialog.dismiss();
-                });
+        });
 
         alertDialog.setOnShowListener(d -> {
             assert alertDialog.getWindow() != null;
