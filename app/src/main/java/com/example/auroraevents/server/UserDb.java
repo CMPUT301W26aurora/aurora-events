@@ -3,10 +3,13 @@ package com.example.auroraevents.server;
 import android.util.Log;
 
 import com.example.auroraevents.model.User;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
@@ -267,51 +270,46 @@ public class UserDb {
      * @param listener the callback listener
      * @return A list of Listener references
      */
-    public List<ListenerRegistration> listenToParticipants(List<String> allIds, OnUsersLoadedListener listener) {
-        List<ListenerRegistration> registrations = new ArrayList<>();
+    public void listenToParticipants(List<String> allIds, OnUsersLoadedListener listener) {
+
         if (allIds == null || allIds.isEmpty()) {
             listener.onUsersUpdate(new ArrayList<>());
-            return registrations;
+            return ;
         }
-        List<User> masterList = Collections.synchronizedList(new ArrayList<>());
+
+
+        List<Task<QuerySnapshot>> snaps = new ArrayList<>();
+
+
         int batch = 30;
         int totalBatches = (int) Math.ceil((double) allIds.size() / batch);
-        AtomicInteger count = new AtomicInteger(0);
         //https://firebase.google.com/docs/firestore/query-data/queries
         //https://oneuptime.com/blog/post/2026-02-17-how-to-set-up-real-time-listeners-for-live-data-updates-in-firestore/view
 
         for(int i = 0; i < allIds.size(); i= i + batch ){
             int end = Math.min(i+batch, allIds.size());
             List<String> sub = allIds.subList(i, end);
-            ListenerRegistration reg = db.collection(COLLECTION_NAME)
+            snaps.add(db.collection(COLLECTION_NAME)
                     .whereIn(FieldPath.documentId(), sub)
-                    .addSnapshotListener((snapshots, e) -> {
-
-                        if(e!= null){
-                            listener.onError(e);
-                            return;
-                        }
-
-                        if(snapshots != null){
-                            for (DocumentSnapshot doc : snapshots) {
-                                User user = (doc.toObject(User.class));
-                                if(user!=null)
-                                    masterList.add(user);
-
-                            }
-
-                        }
-                        if(count.incrementAndGet() >= totalBatches){
-                            listener.onUsersUpdate(new ArrayList<>(masterList));
-                            count.set(0);
-                            masterList.clear();
-                        }
-
-                    });
-
-            registrations.add(reg);
+                    .get());
         }
 
-        return registrations;
+        Tasks.whenAllSuccess(snaps).addOnSuccessListener(results->{
+            List<User> list = new ArrayList<>();
+            for (Object result: results){
+                QuerySnapshot querySnapshot = (QuerySnapshot) result;
+                for (DocumentSnapshot doc : querySnapshot){
+                    list.add(doc.toObject(User.class));
+                }
+            }
+            listener.onUsersUpdate(list);
+
+        }).addOnFailureListener(e->{
+            Log.e(TAG, "Failed to batch load user", e);
+            listener.onError(e);
+        });
+
+
+
     }
 }
