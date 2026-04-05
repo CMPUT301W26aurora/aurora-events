@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1B2E"
+    android:background="@color/background"
     android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -85,134 +84,200 @@
             </FrameLayout>
         </FrameLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <!-- Event Name Input -->
+        <LinearLayout
             android:id="@+id/eventName_input"
-            style="@style/PurpleTextInputLayout"
-            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="*Event Name"
-            app:hintEnabled="true"
-            app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addImage">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/required_event_name_hint"
+                android:textColor="@color/purple"
+                android:paddingHorizontal="5dp"/>
+
+            <EditText
                 android:id="@+id/et_event_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints="name"
+                android:backgroundTint="@color/blue"
+                android:hint="@string/required_event_name_hint"
                 android:inputType="text"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                android:textColorHint="@color/light_glass"
+                android:textColor="@color/green"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mandatory_label"
+                android:textColor="@color/light_glass"
+                android:paddingHorizontal="5dp"/>
+        </LinearLayout>
 
         <!-- Event Description Input -->
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:id="@+id/eventDesc_input"
-            style="@style/PurpleTextInputLayout"
-            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="*Description"
-            app:hintEnabled="true"
-            app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/eventName_input">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/required_description_hint"
+                android:textColor="@color/purple"
+                android:paddingHorizontal="5dp"/>
+
+            <EditText
                 android:id="@+id/et_event_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints="name"
+                android:backgroundTint="@color/blue"
+                android:hint="@string/required_description_hint"
                 android:inputType="text"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                android:textColorHint="@color/light_glass"
+                android:textColor="@color/green"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mandatory_label"
+                android:textColor="@color/light_glass"
+                android:paddingHorizontal="5dp"/>
+        </LinearLayout>
 
         <!-- Event Price Input -->
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:id="@+id/eventPrice_input"
-            style="@style/PurpleTextInputLayout"
-            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="*Price"
-            app:hintEnabled="true"
-            app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/eventDesc_input">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/required_price_hint"
+                android:textColor="@color/purple"
+                android:paddingHorizontal="5dp"/>
+
+            <EditText
                 android:id="@+id/et_event_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autofillHints="name"
+                android:backgroundTint="@color/blue"
+                android:hint="@string/required_price_hint"
                 android:inputType="text"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                android:textColorHint="@color/light_glass"
+                android:textColor="@color/green"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mandatory_label"
+                android:textColor="@color/light_glass"
+                android:paddingHorizontal="5dp"/>
+        </LinearLayout>
 
         <!-- Event Capacity Input -->
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:id="@+id/eventCapacity_input"
-            style="@style/PurpleTextInputLayout"
-            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="*Maximum Participants"
-            app:hintEnabled="true"
-            app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/eventPrice_input">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/required_maximum_participants_hint"
+                android:textColor="@color/purple"
+                android:paddingHorizontal="5dp"/>
+
+            <EditText
                 android:id="@+id/et_event_capacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                android:autofillHints="name"
+                android:backgroundTint="@color/blue"
+                android:hint="@string/required_maximum_participants_hint"
+                android:inputType="text"
+                android:textColorHint="@color/light_glass"
+                android:textColor="@color/green"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mandatory_label"
+                android:textColor="@color/light_glass"
+                android:paddingHorizontal="5dp"/>
+        </LinearLayout>
 
         <!-- Event Capacity Input -->
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:id="@+id/waitingCapacity_input"
-            style="@style/PurpleTextInputLayout"
-            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:hint="Maximum Waiting List Spots"
-            app:hintEnabled="true"
-            app:hintTextColor="@color/purple_accent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/eventCapacity_input">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/maximum_waiting_list_spots_hint"
+                android:textColor="@color/purple"
+                android:paddingHorizontal="5dp"/>
+
+            <EditText
                 android:id="@+id/et_event_waiting_capacity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:textColor="@color/green"
-                android:textSize="16sp" />
+                android:autofillHints="name"
+                android:backgroundTint="@color/blue"
+                android:hint="@string/maximum_waiting_list_spots_hint"
+                android:inputType="text"
+                android:textColorHint="@color/light_glass"
+                android:textColor="@color/green"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/optional_label"
+                android:textColor="@color/light_glass"
+                android:paddingHorizontal="5dp"/>
+        </LinearLayout>
 
         <!-- Row 1: Select Location + Geolocation Lock -->
         <Button
@@ -225,7 +290,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Location"
+            android:text="@string/required_location_hint"
             android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
@@ -270,7 +335,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Sign-Up Start"
+            android:text="@string/required_sign_up_start_hint"
             android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
@@ -292,7 +357,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Sign-Up End"
+            android:text="@string/required_sign_up_end_hint"
             android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"
@@ -313,7 +378,7 @@
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:text="*Event Date"
+            android:text="@string/required_event_date_hint"
             android:textColor="@color/light_text"
             android:textSize="13sp"
             app:backgroundTint="@null"

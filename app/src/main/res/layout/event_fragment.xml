@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/background_aroura_gradient">
+    android:background="@color/background">
 
     <SearchView
         android:id="@+id/search_event"
@@ -38,20 +38,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="No such events exist"
+            android:text="@string/no_event_found_text"
             android:textSize="16sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/light_text"
             android:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/eventAddButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginBottom="80dp"
+        android:contentDescription="@string/add_an_event_content_description"
+        android:backgroundTint="@color/blue"
         android:src="@android:drawable/ic_input_add"
+        android:tint="@color/dark_text"
         app:elevation="6dp" />
     </FrameLayout>
 </LinearLayout>

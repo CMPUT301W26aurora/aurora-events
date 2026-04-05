@@ -317,13 +317,16 @@
                         android:fontFamily="@font/roboto_bold"
                         app:icon="@drawable/rounded_add_circle_24"
                         app:iconTint="@color/dark_text"
-                        android:backgroundTint="@color/green"/>
+                        app:iconGravity="textStart"
+                        app:backgroundTint="@null"
+                        android:background="@drawable/gradient_confirm_button"/>
 
                     <!-- Leave Button-->
                     <Button
                         android:id="@+id/leave_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:paddingVertical="13dp"
                         android:text="@string/leave_pool_button_text"
                         android:textSize="7pt"
                         android:textColor="@color/light_text"
@@ -344,13 +347,15 @@
                             android:id="@+id/accept_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:backgroundTint="@color/green"
                             android:fontFamily="@font/roboto_bold"
                             android:text="@string/accept_button_text"
                             android:textSize="7pt"
                             android:textColor="@color/dark_text"
                             app:icon="@drawable/rounded_check_24"
-                            app:iconTint="@color/dark_text"/>
+                            app:iconTint="@color/dark_text"
+                            app:iconGravity="textStart"
+                            app:backgroundTint="@null"
+                            android:background="@drawable/gradient_confirm_button"/>
 
                         <Space
                             android:layout_width="10dp"
@@ -361,6 +366,7 @@
                             android:id="@+id/decline_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:paddingVertical="13dp"
                             android:backgroundTint="@color/dark_red"
                             android:fontFamily="@font/roboto_bold"
                             android:text="@string/decline_button_text"
@@ -376,7 +382,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="10dp"
+                        android:paddingVertical="13dp"
                         android:text="@string/attending_label_text"
                         android:textSize="7pt"
                         android:textColor="@color/dark_text"
@@ -393,7 +399,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="10dp"
+                        android:paddingVertical="13dp"
                         android:text="@string/cannot_attend_label_text"
                         android:textSize="7pt"
                         android:textColor="@color/light_text"

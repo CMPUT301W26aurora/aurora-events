@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
@@ -37,11 +38,11 @@ public class EventCreationFragment extends Fragment {
     private final String TAG = "EventCreationFragment";
     private ImageButton backButton;
     private Button addImageButton;
-    private TextInputEditText eventNameInput;
-    private TextInputEditText eventDescInput;
-    private TextInputEditText eventPriceInput;
-    private TextInputEditText eventCapInput;
-    private TextInputEditText eventWaitingCapInput;
+    private EditText eventNameInput;
+    private EditText eventDescInput;
+    private EditText eventPriceInput;
+    private EditText eventCapInput;
+    private EditText eventWaitingCapInput;
     private Button locationButton;
     private Button geolocationButton;
     private Button startDateButton;
