@@ -80,6 +80,9 @@ public class InfoUEventFragment extends Fragment {
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
 
+    // Co-organizer management button (visible to the primary organizer only)
+    private Button manageCoOrganizersButton;
+
     private FusedLocationProviderClient fusedLocationClient;
     private Event pendingJoinEvent;
 
@@ -151,7 +154,8 @@ public class InfoUEventFragment extends Fragment {
         attendingLabel     = view.findViewById(R.id.attending_label);
         cannotAttendLabel  = view.findViewById(R.id.cannot_attend_label);
 
-        infoButton         = view.findViewById(R.id.lottery_info_button);
+        infoButton                = view.findViewById(R.id.lottery_info_button);
+        manageCoOrganizersButton  = view.findViewById(R.id.manage_co_organizers_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -189,8 +193,13 @@ public class InfoUEventFragment extends Fragment {
 
                 if (activeAdmin) {
                     setupAdminUI(event);
-                } else if (user != null && userId.equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
-                    setupOrganizerUI(event);
+                } else if (user != null && userId.equals(event.getOrganizerDeviceId())
+                        && user.getRole().equals(User.ROLE_ORGANIZER)) {
+                    // Primary organizer: full organizer UI including co-organizer management
+                    setupOrganizerUI(event, true);
+                } else if (user != null && event.isCoOrganizer(userId)) {
+                    // Co-organizer: organizer UI but cannot manage co-organizers
+                    setupOrganizerUI(event, false);
                 } else {
                     setupEntrantUI(event);
                 }
@@ -203,10 +212,10 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void renderCommonUI(Event event) {
-        if (event.getPoster() == null) {
+        if (event.getPosterUrl() == null) {
             poster.setVisibility(View.GONE);
         } else {
-            poster.setImageBitmap(event.getPoster());
+            //poster.setImageBitmap(event.getPoster()); // need to use glide to pull poster from database
         }
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());
@@ -259,6 +268,7 @@ public class InfoUEventFragment extends Fragment {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
+        manageCoOrganizersButton.setVisibility(View.GONE);
 
         sampleButton.setVisibility(View.GONE);
         viewEntrantsButton.setVisibility(View.GONE);
@@ -302,10 +312,14 @@ public class InfoUEventFragment extends Fragment {
         });
     }
 
-    private void setupOrganizerUI(Event event) {
-        Log.e(TAG, "You shouldn't be here");
-        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
-
+    /**
+     * Sets up the organizer UI.
+     *
+     * @param event            The current event.
+     * @param isPrimaryOrganizer True if the current user is the primary organizer (not a co-organizer).
+     *                           Only the primary organizer can open the co-organizer management screen.
+     */
+    private void setupOrganizerUI(Event event, boolean isPrimaryOrganizer) {
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
@@ -314,6 +328,27 @@ public class InfoUEventFragment extends Fragment {
         viewEntrantsButton.setVisibility(View.VISIBLE);
         commentButton.setVisibility(View.VISIBLE);
         notificationButton.setVisibility(View.VISIBLE);
+
+        // Only the primary organizer can manage co-organizers
+        if (isPrimaryOrganizer) {
+            manageCoOrganizersButton.setVisibility(View.VISIBLE);
+            manageCoOrganizersButton.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString("eventId", event.getEventId());
+                args.putString("organizerDeviceId", event.getOrganizerDeviceId());
+
+                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
+                fragment.setArguments(args);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        } else {
+            manageCoOrganizersButton.setVisibility(View.GONE);
+        }
 
         // set the number of people that reported this event grammatically
         String reportedNumText = "Reported by " + event.getNumReports();
@@ -330,7 +365,7 @@ public class InfoUEventFragment extends Fragment {
                     EventDb.getInstance().deleteEvent(
                             event.getEventId(),
                             () -> {
-                                Log.d(TAG, "Event deleted by admin");
+                                Log.d(TAG, "Event deleted by organizer");
                                 getParentFragmentManager().popBackStack();
                             },
                             e -> Log.e(TAG, "Error deleting event: " + e)
@@ -399,6 +434,7 @@ public class InfoUEventFragment extends Fragment {
         reportButton.setVisibility(View.VISIBLE);
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
+        manageCoOrganizersButton.setVisibility(View.GONE);
 
         sampleButton.setVisibility(View.GONE);
         viewEntrantsButton.setVisibility(View.GONE);
@@ -447,6 +483,17 @@ public class InfoUEventFragment extends Fragment {
         attendeesCount.setText(attendeesCountText);
 
         RegistrationList list = event.registrationList;
+
+        // A co-organizer for this event cannot join the entrant pool
+        if (event.isCoOrganizer(userId)) {
+            joinButton.setVisibility(View.GONE);
+            leaveButton.setVisibility(View.GONE);
+            selectButtonSet.setVisibility(View.GONE);
+            attendingLabel.setVisibility(View.GONE);
+            cannotAttendLabel.setVisibility(View.VISIBLE);
+            cannotAttendLabel.setText(R.string.co_organizer_cannot_join);
+            return;
+        }
 
         if (list.getAttendingList().contains(userId)) {
             onAttending(event);

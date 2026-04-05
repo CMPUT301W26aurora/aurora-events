@@ -34,7 +34,7 @@ public class EventFragmentTest {
                 LocalDateTime.of(2026, 6, 4, 18, 0),
                 LocalDateTime.of(2026, 5, 20, 9, 0),
                 LocalDateTime.of(2026, 6, 1, 23, 59),
-                "Rec Centre", 20, false);
+                "Rec Centre", false,0,0);
         event.setEventId("test-event-1");
         eventList.add(event);
         assertEquals(1, eventList.size());
@@ -47,26 +47,26 @@ public class EventFragmentTest {
     public void testAddMoreEventsToList() {
         ArrayList<Event> eventList = new ArrayList<>();
         Event event1 = new Event(
-                "organizer-abc",
-                "Singing event",
-                "Showcase your talent",
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
         eventList.add(event1);
 
         Event event2 = new Event(
-                "organizer-def",
-                "Art Event",
-                "Display your work",
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Arts Centre", 50, false);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event2.setEventId("test-event-2");
         eventList.add(event2);
 
@@ -80,14 +80,14 @@ public class EventFragmentTest {
     public void testEventPosition() {
         ArrayList<Event> eventList = new ArrayList<>();
         Event event1 = new Event(
-                "organizer-abc",
-                "Singing event",
-                "Showcase your talent",
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Community Centre", 40, false);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
         eventList.add(event1);
 
@@ -105,18 +105,14 @@ public class EventFragmentTest {
         ArrayList<Event> allEventsList = new ArrayList<>();
 
         Event event1 = new Event(
-                "organizer-abc",
-                "Singing event",
-                "Showcase your talent",
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Community Centre",
-                false,
-                -1,
-                40,
-                null);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
         allEventsList.add(event1);
 
@@ -134,18 +130,14 @@ public class EventFragmentTest {
         ArrayList<Event> allEventsList = new ArrayList<>();
 
         Event event1 = new Event(
-                "organizer-abc",
-                "Singing event",
-                "Showcase your talent",
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Community Centre",
-                false,
-                -1,
-                40,
-                null);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
         allEventsList.add(event1);
 
@@ -164,17 +156,13 @@ public class EventFragmentTest {
 
         Event event1 = new Event(
                 "organizer-xyz",
-                "Sports event",
+                "Sports Event",
                 "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
         allEventsList.add(event1);
 
@@ -192,17 +180,13 @@ public class EventFragmentTest {
 
         Event event1 = new Event(
                 "organizer-xyz",
-                "Sports event",
+                "Sports Event",
                 "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
         allEventsList.add(event1);
 
@@ -220,32 +204,24 @@ public class EventFragmentTest {
 
         Event event1 = new Event(
                 "organizer-xyz",
-                "Sports event",
+                "Sports Event",
                 "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Rec Centre",
-                false,
-                -1,
-                20,
-                null);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event1.setEventId("test-event-1");
 
-        Event event2 = new Event(
-                "organizer-def",
-                "Art Event",
-                "Display your work",
+        Event event2 =new Event(
+                "organizer-xyz",
+                "Sports Event",
+                "Explore your favourite sport",
                 "free",
-                LocalDateTime.of(2026, 3, 15, 17, 0),
-                LocalDateTime.of(2026, 3, 1, 9, 0),
-                LocalDateTime.of(2026, 3, 10, 23, 59),
-                "Arts Centre",
-                false,
-                -1,
-                50,
-                null);
+                LocalDateTime.of(2026, 6, 4, 18, 0),
+                LocalDateTime.of(2026, 5, 20, 9, 0),
+                LocalDateTime.of(2026, 6, 1, 23, 59),
+                "Rec Centre", false,0,0);
         event2.setEventId("test-event-2");
 
         allEventsList.add(event1);
@@ -270,33 +246,25 @@ public class EventFragmentTest {
 
      Event publicEvent = new Event(
              "organizer-xyz",
-             "Sports event",
+             "Sports Event",
              "Explore your favourite sport",
              "free",
-             LocalDateTime.of(2026, 3, 15, 17, 0),
-             LocalDateTime.of(2026, 3, 1, 9, 0),
-             LocalDateTime.of(2026, 3, 10, 23, 59),
-             "Rec Centre",
-             false,
-             -1,
-             20,
-             null);
+             LocalDateTime.of(2026, 6, 4, 18, 0),
+             LocalDateTime.of(2026, 5, 20, 9, 0),
+             LocalDateTime.of(2026, 6, 1, 23, 59),
+             "Rec Centre", false,0,0);
      publicEvent.setEventId("test-event-1");
      publicEvent.setPrivate(false);
 
-     Event privateEvent = new Event(
-             "organizer-def",
-             "Art event",
-             "Display your work",
+     Event privateEvent =new Event(
+             "organizer-xyz",
+             "Sports Event",
+             "Explore your favourite sport",
              "free",
-             LocalDateTime.of(2026, 3, 15, 17, 0),
-             LocalDateTime.of(2026, 3, 1, 9, 0),
-             LocalDateTime.of(2026, 3, 10, 23, 59),
-             "Arts Centre",
-             false,
-             -1,
-             50,
-             null);
+             LocalDateTime.of(2026, 6, 4, 18, 0),
+             LocalDateTime.of(2026, 5, 20, 9, 0),
+             LocalDateTime.of(2026, 6, 1, 23, 59),
+             "Rec Centre", false,0,0);
      privateEvent.setEventId("test-event-2");
      privateEvent.setPrivate(true);
 
