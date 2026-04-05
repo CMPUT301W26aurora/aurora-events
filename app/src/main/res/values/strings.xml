@@ -54,6 +54,14 @@
     <string name="default_reported_num">Reported by 21 users\n(you shouldn\'t seee this)</string>
     <string name="okay_button_text">Okay</string>
     <string name="comments_button_text">Comments</string>
+    <string name="manage_co_organizers_title">Co-Organizers</string>
+    <string name="manage_co_organizers_subtitle">Co-organizers have full organizer access to this event. They are removed from the entrant pool while assigned.</string>
+    <string name="add_co_organizer_button_text">Add Co-Organizer</string>
+    <string name="current_co_organizers_label">Current Co-Organizers</string>
+    <string name="no_co_organizers_text">No co-organizers yet.\nTap \'Add Co-Organizer\' to assign one.</string>
+    <string name="remove_co_organizer_button_text">Remove</string>
+    <string name="co_organizer_cannot_join">You are a co-organizer for this event and cannot join the entrant pool.</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
