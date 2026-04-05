@@ -37,14 +37,17 @@ public class EventDb {
     private static final String COLLECTION_NAME = "Events";
 
     // Participant list field names — use these constants everywhere
-    public static final String LIST_REGISTRATION = "registrationList";
-    public static final String LIST_ATTENDING    = LIST_REGISTRATION + '.' + "attendingList";
-    public static final String LIST_SELECTED     = LIST_REGISTRATION + '.' + "selectedList";
-    public static final String LIST_WAITING      = LIST_REGISTRATION + '.' + "waitingList";
-    public static final String LIST_CANCELLED    = LIST_REGISTRATION + '.' + "cancelledList";
-    public static final String LIST_DECLINED     = LIST_REGISTRATION + '.' + "declinedList";
-    public static final String LIST_REMOVED      = LIST_REGISTRATION + '.' + "removedList";
-    public static final String[] ALL_LISTS       = {LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED};
+    public static final String LIST_REGISTRATION  = "registrationList";
+    public static final String LIST_ATTENDING     = LIST_REGISTRATION + '.' + "attendingList";
+    public static final String LIST_SELECTED      = LIST_REGISTRATION + '.' + "selectedList";
+    public static final String LIST_WAITING       = LIST_REGISTRATION + '.' + "waitingList";
+    public static final String LIST_CANCELLED     = LIST_REGISTRATION + '.' + "cancelledList";
+    public static final String LIST_DECLINED      = LIST_REGISTRATION + '.' + "declinedList";
+    public static final String LIST_REMOVED       = LIST_REGISTRATION + '.' + "removedList";
+    public static final String[] ALL_LISTS        = {LIST_ATTENDING, LIST_SELECTED, LIST_WAITING, LIST_CANCELLED, LIST_DECLINED, LIST_REMOVED};
+
+    // Co-organizer field name
+    public static final String LIST_CO_ORGANIZERS = "coOrganizerDeviceIds";
 
 
     private static EventDb instance;
@@ -52,17 +55,15 @@ public class EventDb {
 
     // ── Callbacks ──────────────────────────────────────────────────────────
 
-    public interface OnSuccessCallback       { void onSuccess(); }
-    public interface OnFailureCallback       { void onFailure(Exception e); }
-    public interface OnEventCreatedCallback  { void onCreated(String eventId); }
-    public interface OnEventFetchedCallback  { void onFetched(Event event); }
+    public interface OnSuccessCallback          { void onSuccess(); }
+    public interface OnFailureCallback          { void onFailure(Exception e); }
+    public interface OnEventCreatedCallback     { void onCreated(String eventId); }
+    public interface OnEventFetchedCallback     { void onFetched(Event event); }
     public interface OnEventListFetchedCallback { void onFetched(List<Event> events); }
 
     // ── Singleton ──────────────────────────────────────────────────────────
 
-    private EventDb() {
-
-    }
+    private EventDb() {}
 
     public static synchronized EventDb getInstance() {
         if (instance == null) {
@@ -82,7 +83,7 @@ public class EventDb {
                     Log.d(TAG, "added image " + field);
                 })
                 .addOnFailureListener(e->{
-                   Log.e(TAG, "Failed upload to " + field + " " +e );
+                    Log.e(TAG, "Failed upload to " + field + " " +e );
                 });
     }
 
@@ -90,7 +91,7 @@ public class EventDb {
         if (uri == null || eventId == null) return;
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference()
-                        .child(eventId + "/" +"poster.jpg");
+                .child(eventId + "/" +"poster.jpg");
 
         fileRef.putFile(uri)
                 .addOnSuccessListener(taskSnapshot -> {
@@ -372,6 +373,7 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
+
     /**
      * Moves a user from the Selected list to the Attending list.
      */
@@ -426,6 +428,7 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
+
     /**
      * Stores the QR code data string on the event document.
      *
@@ -442,6 +445,75 @@ public class EventDb {
                 .addOnSuccessListener(unused -> onSuccess.onSuccess())
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to set QR code for event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    // ── CO-ORGANIZER ───────────────────────────────────────────────────────
+
+    /**
+     * Promotes an existing entrant to co-organizer for the given event.
+     *
+     * This is done atomically in a single batch:
+     *   1. Adds the deviceId to {@code coOrganizerDeviceIds}.
+     *   2. Removes the deviceId from every entrant list (waiting, selected,
+     *      attending, declined, cancelled, removed) so they leave the entrant pool.
+     *
+     * @param eventId   The event document ID.
+     * @param deviceId  The device ID of the entrant to promote.
+     * @param onSuccess Called when the batch write succeeds.
+     * @param onFailure Called with the exception if the batch fails.
+     */
+    public void addCoOrganizer(String eventId, String deviceId,
+                               OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        DocumentReference eventRef = db.collection(COLLECTION_NAME).document(eventId);
+        WriteBatch batch = db.batch();
+
+        // Add to co-organizer list
+        batch.update(eventRef, LIST_CO_ORGANIZERS, FieldValue.arrayUnion(deviceId));
+
+        // Remove from every entrant list atomically
+        batch.update(eventRef,
+                LIST_WAITING,   FieldValue.arrayRemove(deviceId),
+                LIST_SELECTED,  FieldValue.arrayRemove(deviceId),
+                LIST_ATTENDING, FieldValue.arrayRemove(deviceId),
+                LIST_DECLINED,  FieldValue.arrayRemove(deviceId),
+                LIST_CANCELLED, FieldValue.arrayRemove(deviceId),
+                LIST_REMOVED,   FieldValue.arrayRemove(deviceId)
+        );
+
+        batch.commit()
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "Co-organizer added: " + deviceId + " for event: " + eventId);
+                    onSuccess.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to add co-organizer: " + deviceId + " for event: " + eventId, e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
+     * Removes a co-organizer from the event. The user is only removed from
+     * {@code coOrganizerDeviceIds} — they are NOT placed back into any entrant list,
+     * and are free to rejoin the waiting list themselves.
+     *
+     * @param eventId   The event document ID.
+     * @param deviceId  The device ID of the co-organizer to demote.
+     * @param onSuccess Called when the update succeeds.
+     * @param onFailure Called with the exception if the update fails.
+     */
+    public void removeCoOrganizer(String eventId, String deviceId,
+                                  OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        db.collection(COLLECTION_NAME)
+                .document(eventId)
+                .update(LIST_CO_ORGANIZERS, FieldValue.arrayRemove(deviceId))
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "Co-organizer removed: " + deviceId + " for event: " + eventId);
+                    onSuccess.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to remove co-organizer: " + deviceId + " for event: " + eventId, e);
                     onFailure.onFailure(e);
                 });
     }
@@ -502,9 +574,11 @@ public class EventDb {
                     onFailure.onFailure(e);
                 });
     }
-    // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────────────────
 
-    public interface OnEventSnapshotCallback       { void onEventSnapshot(Event event); }
+    // ── SNAPSHOT LISTENER ─────────────────────────────────────────────────
+
+    public interface OnEventSnapshotCallback { void onEventSnapshot(Event event); }
+
     public ListenerRegistration addSnapshotListenerForEvent(String eventId, OnEventSnapshotCallback onEventSnapshot, OnFailureCallback onFailure) {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(eventId);
         return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -526,7 +600,5 @@ public class EventDb {
                 }
             }
         });
-
     }
-
 }

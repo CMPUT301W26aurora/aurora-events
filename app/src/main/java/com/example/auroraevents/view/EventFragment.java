@@ -129,15 +129,11 @@ public class EventFragment extends Fragment {
                 return;
             }
 
-            Fragment eventFragment;
-            if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
-                //TODO 5: open event edit
-                eventFragment = new InfoUEventFragment();
-                eventFragment.setArguments(args);
-            } else {
-                eventFragment = new InfoUEventFragment();
-                eventFragment.setArguments(args);
-            }
+            // Route to organizer view if the user is the primary organizer or a co-organizer.
+            // InfoUEventFragment handles the distinction between the two internally.
+            Fragment eventFragment = new InfoUEventFragment();
+            eventFragment.setArguments(args);
+
             // resource used: https://developer.android.com/guide/fragments/fragmentmanager
             // navigate to InfoUEventFragment
             getParentFragmentManager()

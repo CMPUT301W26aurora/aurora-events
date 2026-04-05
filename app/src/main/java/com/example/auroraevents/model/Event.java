@@ -44,6 +44,9 @@ public class Event {
     private double latitude;
     private double longitude;
 
+    // Co-organizers for this event (stored as device IDs, per-event only)
+    private List<String> coOrganizerDeviceIds;
+
     // Participant lists — each list holds device IDs (User.deviceId)
     public RegistrationList registrationList; // for manipulating the lists
 
@@ -51,6 +54,7 @@ public class Event {
     public Event() {
         registrationList = new RegistrationList();
         reports = new ArrayList<>();
+        coOrganizerDeviceIds = new ArrayList<>();
     }
 
     public Event(
@@ -85,17 +89,17 @@ public class Event {
         Event event = (Event) o;
         return
                 Objects.equals(getEventId(), event.getEventId()) &&
-                Objects.equals(getOrganizerDeviceId(), event.getOrganizerDeviceId()) &&
-                Objects.equals(getName(), event.getName()) &&
-                Objects.equals(getDescription(), event.getDescription()) &&
-                Objects.equals(getPrice(), event.getPrice()) &&
-                Objects.equals(getDateTime(), event.getDateTime()) &&
-                Objects.equals(getRegistrationTimeStart(), event.getRegistrationTimeStart()) &&
-                Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
-                Objects.equals(getLocation(), event.getLocation()) &&
-                getGeolocationRequired() == event.getGeolocationRequired() &&
-                getNumReports() == event.getNumReports() &&
-                Objects.equals(registrationList, event.registrationList)
+                        Objects.equals(getOrganizerDeviceId(), event.getOrganizerDeviceId()) &&
+                        Objects.equals(getName(), event.getName()) &&
+                        Objects.equals(getDescription(), event.getDescription()) &&
+                        Objects.equals(getPrice(), event.getPrice()) &&
+                        Objects.equals(getDateTime(), event.getDateTime()) &&
+                        Objects.equals(getRegistrationTimeStart(), event.getRegistrationTimeStart()) &&
+                        Objects.equals(getRegistrationTimeEnd(), event.getRegistrationTimeEnd()) &&
+                        Objects.equals(getLocation(), event.getLocation()) &&
+                        getGeolocationRequired() == event.getGeolocationRequired() &&
+                        getNumReports() == event.getNumReports() &&
+                        Objects.equals(registrationList, event.registrationList)
                 ;
     }
 
@@ -134,7 +138,7 @@ public class Event {
 
     public boolean getGeolocationRequired()                            { return geolocationRequired; }
     public void    setGeolocationRequired(boolean geolocationRequired) { this.geolocationRequired = geolocationRequired; }
-  
+
     public boolean isPrivate()                   { return isPrivate; }
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
 
@@ -145,6 +149,41 @@ public class Event {
 
     public double getLongitude()  { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    // ── Co-organizer helpers ───────────────────────────────────────────────
+
+    public List<String> getCoOrganizerDeviceIds() {
+        if (coOrganizerDeviceIds == null) coOrganizerDeviceIds = new ArrayList<>();
+        return coOrganizerDeviceIds;
+    }
+
+    public void setCoOrganizerDeviceIds(List<String> coOrganizerDeviceIds) {
+        this.coOrganizerDeviceIds = coOrganizerDeviceIds;
+    }
+
+    /**
+     * Returns true if the given device ID belongs to a co-organizer of this event.
+     *
+     * @param deviceId The device ID to check.
+     */
+    @Exclude
+    public boolean isCoOrganizer(String deviceId) {
+        return coOrganizerDeviceIds != null && coOrganizerDeviceIds.contains(deviceId);
+    }
+
+    /**
+     * Convenience: returns true if the device ID is either the primary organizer
+     * or a co-organizer. Useful for gating organizer-only UI.
+     *
+     * @param deviceId The device ID to check.
+     */
+    @Exclude
+    public boolean isOrganizerOrCoOrganizer(String deviceId) {
+        return deviceId != null &&
+                (deviceId.equals(organizerDeviceId) || isCoOrganizer(deviceId));
+    }
+
+    // ── Reports ────────────────────────────────────────────────────────────
 
     /**
      * Adds a report
@@ -193,22 +232,19 @@ public class Event {
         this.qrUrl = qrUrl;
     }
 
-    // ──QR code generation ──────────────────────────────────────────────────────────────────────────────────────────
-
+    // ── QR code generation ─────────────────────────────────────────────────
 
     @Exclude
     public Bitmap generateQrCode(){
-        MultiFormatWriter writer = new MultiFormatWriter(); //bitmap writer
+        MultiFormatWriter writer = new MultiFormatWriter();
         try{
             // ideas taken from Hilal Ahmed in medium at https://ihilalahmadd.medium.com/how-to-generate-qr-code-in-android-5a2a7edf11c
 
-            int width = 400; //these values change the width and height of the qr code
+            int width = 400;
             int height = 400;
 
-            //convert data to bit matrix
             BitMatrix matrix = writer.encode(this.eventId, BarcodeFormat.QR_CODE, width, height);
 
-            //convert matrix to bitmap, can be used in image view
             BarcodeEncoder encoder = new BarcodeEncoder();
             return encoder.createBitmap(matrix);
         }
