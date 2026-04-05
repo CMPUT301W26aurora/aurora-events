@@ -221,7 +221,6 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void renderCommonUI(Event event) {
-        Log.d(TAG, "posterUrl: " + event.getPosterUrl());
         if (event.getPosterUrl() == null) {
             poster.setVisibility(View.GONE);
         } else {

@@ -215,7 +215,7 @@ public class EventCreationFragment extends Fragment {
         imageView = view.findViewById(R.id.iv_event_image);
 
         // Testing purposes
-        addMockImageToGallery();
+        //addMockImageToGallery();
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -102,6 +102,7 @@
 
             <Button
                 android:id="@+id/edit_poster_button"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -112,7 +113,6 @@
                 android:textColor="@color/light_text"
                 android:textSize="6pt"
                 app:iconTint="@color/light_text" />
-
         </FrameLayout>
 
         <!--Event Name-->
