@@ -178,6 +178,8 @@ public class InfoUEventFragment extends Fragment {
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
+        requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadEventData();
         } else {
@@ -423,6 +425,42 @@ public class InfoUEventFragment extends Fragment {
             public void onClick(View v) {
                 showInputDialogImage();
             }
+        });
+
+        sampleButton.setOnClickListener(v->{
+
+            event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(), new RegistrationList.OnDbUpdateListener() {
+                @Override
+                public void onSuccess() {
+                    //useless here
+                }
+
+                @Override
+                public void onFailure() {
+                    //useless here
+                }
+
+                @Override
+                public void onComplete(RegistrationList.RegistrationResult result) {
+                    switch (result) {
+                        case SUCCESS:
+                            Toast.makeText(getContext(),"Users sampled",Toast.LENGTH_SHORT ).show();
+                            break;
+                        case CAPACITY_FULL:
+                            Toast.makeText(getContext(),"can't Sample any more", Toast.LENGTH_SHORT).show();
+                            break;
+                        case DATABASE_ERROR:
+                            Toast.makeText(getContext(),"Database error, try again in a moment", Toast.LENGTH_SHORT).show();
+                            break;
+                        case BLOCKED:
+                            Toast.makeText(getContext(),"Sampled Users cannot enter Selected list", Toast.LENGTH_SHORT).show();
+                            break;
+                        case ALREADY_IN_LIST:
+                            Toast.makeText(getContext(),"Users already in list", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                }
+            });
         });
     }
 
@@ -770,6 +808,10 @@ public class InfoUEventFragment extends Fragment {
         if (eventSnapshotListener != null) {
             eventSnapshotListener.remove();
             Log.d(TAG, "Event snapshot listener detached");
+        }
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
         }
     }
 
