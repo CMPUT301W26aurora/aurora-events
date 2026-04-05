@@ -46,6 +46,13 @@
             android:layout_gravity="bottom|center_horizontal"
             app:tint="@drawable/gradient_confirm_button"
             />
+        <Button
+            android:id="@+id/set_deadline_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="set deadline"
+            android:layout_gravity="center"/>
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -81,7 +81,7 @@ public class SendNotificationDialog extends DialogFragment {
             List<String> recipients = new ArrayList<>();
             if (switchParticipating.isChecked()) recipients.addAll(registrationList.getAttendingList());
             if (switchRejected.isChecked())      recipients.addAll(registrationList.getDeclinedList());
-            if (switchInvited.isChecked())       recipients.addAll(registrationList.getSelectedList());
+            if (switchInvited.isChecked())       recipients.addAll(registrationList.getSelectedUserStrings());
             if (switchWaiting.isChecked())       recipients.addAll(registrationList.getWaitingList());
             if (switchCancelled.isChecked())     recipients.addAll(registrationList.getCancelledList());
 
