@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
@@ -48,7 +49,7 @@ public class AdminProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView recyclerView = view.findViewById(R.id.entrants_list_admin);
         ImageButton deleteButton  = view.findViewById(R.id.delete_user_button_admin_item);
-        CheckBox filterButton       = view.findViewById(R.id.filter_button);
+        CheckBox filterButton       = view.findViewById(R.id.filter_organizers_checkbox);
         filterButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             applyFilter(isChecked);
         });
@@ -64,6 +65,9 @@ public class AdminProfileFragment extends Fragment {
                 //Insert Notification list code here
             }
         });
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
 
         listenerRegistration = UserDb.getInstance().userSnapshotListener(users -> {
             masterUserList = users;
