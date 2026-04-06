@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:paddingBottom="64dp">
 
         <ImageButton
             android:id="@+id/backButton"
@@ -25,17 +25,143 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/blue" />
 
+        <Button
+            android:id="@+id/comment_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/light_glass"
+            android:text="@string/comments_button_text"
+            android:textColor="@color/light_text"
+            android:fontFamily="@font/roboto"/>
+
+        <LinearLayout
+            android:id="@+id/top_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/backButton">
+
+            <Button
+                android:id="@+id/get_participants"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/get_more_participants_button_text"
+                android:textColor="@color/dark_text"
+                app:icon="@drawable/rounded_add_circle_24"
+                app:iconTint="@color/dark_text"
+                app:iconGravity="textStart"
+                app:backgroundTint="@null"
+                android:background="@drawable/gradient_confirm_button"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingVertical="10dp">
+
+                <Button
+                    android:id="@+id/show_qr_code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_qr_code_button_text"
+                    android:textColor="@color/purple"
+                    app:icon="@drawable/outline_barcode_scanner_24"
+                    app:iconTint="@color/purple"
+                    app:iconGravity="textStart"
+                    app:backgroundTint="@null"
+                    android:background="@drawable/glass_pill_bg"/>
+
+                <Space
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"/>
+
+                <Button
+                    android:id="@+id/view_entrants"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_entrants_button_text"
+                    android:textColor="@color/purple"
+                    app:icon="@drawable/rounded_eye_tracking_24"
+                    app:iconTint="@color/purple"
+                    app:iconGravity="textStart"
+                    app:backgroundTint="@null"
+                    android:background="@drawable/glass_pill_bg"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/send_notification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/send_notification_button_text"
+                    android:textColor="@color/purple"
+                    app:icon="@drawable/rounded_send_24"
+                    app:iconTint="@color/purple"
+                    app:iconGravity="textStart"
+                    app:backgroundTint="@null"
+                    android:background="@drawable/glass_pill_bg"/>
+
+                <Space
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"/>
+
+                <Button
+                    android:id="@+id/invite_entrants"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/invite_entrants_button_text"
+                    android:textColor="@color/purple"
+                    app:icon="@drawable/rounded_add_circle_24"
+                    app:iconTint="@color/purple"
+                    app:iconGravity="textStart"
+                    app:backgroundTint="@null"
+                    android:background="@drawable/glass_pill_bg"/>
+            </LinearLayout>
+
+            <!--
+                Manage Co-Organizers Button.
+                Visible only to the primary organizer; hidden for co-organizers,
+                admins, and entrants. Visibility is controlled in InfoUEventFragment.
+            -->
+            <Button
+                android:id="@+id/manage_co_organizers_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginVertical="10dp"
+                android:text="@string/manage_co_organizers_button_text"
+                android:textColor="@color/purple"
+                android:fontFamily="@font/roboto"
+                app:icon="@drawable/rounded_group_24"
+                app:iconTint="@color/purple"
+                app:backgroundTint="@null"
+                android:background="@drawable/glass_pill_bg"/>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/warning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
             android:text="@string/required_field_warning_text"
             android:textColor="@color/dark_red"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/top_buttons" />
 
         <FrameLayout
             android:id="@+id/addImage"
@@ -83,7 +209,6 @@
                     app:iconTint="@color/purple" />
             </FrameLayout>
         </FrameLayout>
-
 
         <!-- Event Name Input -->
         <LinearLayout
@@ -229,7 +354,7 @@
                 android:autofillHints="name"
                 android:backgroundTint="@color/blue"
                 android:hint="@string/required_maximum_participants_hint"
-                android:inputType="text"
+                android:inputType="number"
                 android:textColorHint="@color/light_glass"
                 android:textColor="@color/green"/>
 
@@ -268,7 +393,7 @@
                 android:autofillHints="name"
                 android:backgroundTint="@color/blue"
                 android:hint="@string/maximum_waiting_list_spots_hint"
-                android:inputType="text"
+                android:inputType="number"
                 android:textColorHint="@color/light_glass"
                 android:textColor="@color/green"/>
 
@@ -288,13 +413,13 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="8dp"
+            app:backgroundTint="@null"
             android:background="@drawable/glass_pill_bg"
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:text="@string/required_location_hint"
             android:textColor="@color/light_text"
             android:textSize="13sp"
-            app:backgroundTint="@null"
             app:ensureMinTouchTargetSize="false"
             app:icon="@android:drawable/ic_menu_mylocation"
             app:iconGravity="start"

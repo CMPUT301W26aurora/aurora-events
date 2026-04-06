@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <ListView
+        android:id="@+id/entrants_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent">
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/filter_and_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom|start">
+
+        <Button
+            android:id="@+id/filter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_button_text"
+            android:textColor="@color/dark_text"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="10dp"
+            app:icon="@drawable/rounded_settings_heart_24"
+            app:iconTint="@color/dark_text"
+            app:iconGravity="textStart"
+            android:backgroundTint="@color/blue"
+            />
+
+        <Button
+            android:id="@+id/sort_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_button_text"
+            android:textColor="@color/dark_text"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            app:icon="@drawable/rounded_sort_24"
+            app:iconTint="@color/dark_text"
+            app:iconGravity="textStart"
+            android:backgroundTint="@color/blue"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/done_and_map_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|end">
+        <Button
+            android:id="@+id/map_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/view_map_button_text"
+            android:textColor="@color/dark_text"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            app:icon="@drawable/rounded_map_24"
+            app:iconTint="@color/dark_text"
+            app:iconGravity="textStart"
+            app:backgroundTint="@null"
+            android:background="@drawable/gradient_confirm_button"
+            />
+        <Button
+            android:id="@+id/done_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/done_button_text"
+            android:textColor="@color/dark_text"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            app:icon="@drawable/rounded_check_24"
+            app:iconTint="@color/dark_text"
+            app:iconGravity="textStart"
+            app:backgroundTint="@null"
+            android:background="@drawable/gradient_confirm_button"
+        />
+    </LinearLayout>
+
+</FrameLayout>

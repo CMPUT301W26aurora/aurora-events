@@ -20,16 +20,21 @@
             android:layout_width="177dp"
             android:layout_height="143dp"
             android:adjustViewBounds="true"
-            android:contentDescription="A barcode inside of a scanner"
+            android:contentDescription="@string/barscanner_icon_content_description"
             android:scaleType="fitCenter"
             android:src="@drawable/outline_barcode_scanner_24" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/blue"
             android:id="@+id/scan"
-            android:text="scan"/>
+            android:text="@string/scan_qr_code_button_text"
+            android:textColor="@color/dark_text"
+            app:icon="@drawable/rounded_photo_camera_24"
+            app:iconTint="@color/dark_text"
+            app:iconGravity="textStart"
+            app:backgroundTint="@null"
+            android:background="@drawable/gradient_confirm_button"/>
 
     </LinearLayout>
 

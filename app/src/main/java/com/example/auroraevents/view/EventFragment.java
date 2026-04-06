@@ -38,6 +38,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.List;
 
 /**
@@ -141,7 +142,13 @@ public class EventFragment extends Fragment {
             for (Event event : events) {
                 Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
                 boolean isPrivate = event.isPrivate();
-                if (!isPrivate) {
+                if (
+                        !isPrivate ||
+                        Objects.equals(event.getOrganizerDeviceId(), userId) ||
+                        event.getCoOrganizerDeviceIds().contains(userId) ||
+                        event.getRegistrationList().getAttendingList().contains(userId) ||
+                        event.getRegistrationList().getSelectedUserStrings().contains(userId)
+                ) {
                     allEventsList.add(event);
                     eventList.add(event);
                 }
@@ -153,22 +160,29 @@ public class EventFragment extends Fragment {
         eventsListView.setOnItemClickListener((parent, v, position, id) -> {
             Event selectedEvent = eventList.get(position - 1);
 
-            // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
-            // pass eventID to InfoUFragment using bundle
-            Bundle args = new Bundle();
-            args.putString("eventId", selectedEvent.getEventId());
-            args.putString("userId", userId);
+            Fragment eventFragment;
+            Boolean adminMode = userViewModel.getAdminModeActive().getValue();
+            if (userId != null && userId.equals(selectedEvent.getOrganizerDeviceId()) && adminMode != null && !adminMode) {
+                Bundle args = new Bundle();
+                args.putString("eventId", selectedEvent.getEventId());
 
-            if (userId == null) {
-                Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
-                return;
+                eventFragment = new EventEditFragment();
+                eventFragment.setArguments(args);
+            } else {
+                // resource used: https://www.geeksforgeeks.org/android/bundle-in-android-with-example/
+                // pass eventID to InfoUFragment using bundle
+                Bundle args = new Bundle();
+                args.putString("eventId", selectedEvent.getEventId());
+                args.putString("userId", userId);
+
+                if (userId == null) {
+                    Toast.makeText(getContext(), "Loading user data, please wait...", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                eventFragment = new InfoUEventFragment();
+                eventFragment.setArguments(args);
             }
-
-            // Route to organizer view if the user is the primary organizer or a co-organizer.
-            // InfoUEventFragment handles the distinction between the two internally.
-            Fragment eventFragment = new InfoUEventFragment();
-            eventFragment.setArguments(args);
-
             // resource used: https://developer.android.com/guide/fragments/fragmentmanager
             // navigate to InfoUEventFragment
             getParentFragmentManager()

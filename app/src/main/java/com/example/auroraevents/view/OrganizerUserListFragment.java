@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.CsvExportManager;
-import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.SelectedUser;
 import com.example.auroraevents.model.User;
@@ -205,22 +204,6 @@ public class OrganizerUserListFragment extends DialogFragment {
         if (listenerRegistration != null) {
             listenerRegistration.remove();
             listenerRegistration = null;
-        }
-    }
-    @Override
-    public void onStop() {
-        super.onStop();
-        View navBar = getActivity().findViewById(R.id.nav_bar);
-        if (navBar != null) {
-            navBar.setVisibility(View.VISIBLE);
-        }
-    }
-    @Override
-    public void onStart() {
-        super.onStart();
-        View nav = getActivity().findViewById(R.id.nav_bar);
-        if (nav != null) {
-            nav.setVisibility(View.GONE);
         }
     }
 }

@@ -14,7 +14,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -69,6 +69,7 @@ public class RegistrationList {
     public void setCancelledList(List<String> cancelledList) {this.cancelledList=cancelledList;}
     public void setAttendingList(List<String> attendingList) {this.attendingList=attendingList;}
     public void setSelectedList(List<SelectedUser> selectedList) {this.selectedList=selectedList;}
+    @Exclude
     public List<String> getAllUsers(){
         List<String> master = new ArrayList<>();
 
@@ -243,9 +244,25 @@ public class RegistrationList {
     public void addToWaitingList(String userID, OnDbUpdateListener listener){
         if(attendingList.contains(userID) || isUserSelected(userID) || removedList.contains(userID) || waitingList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
-            return;
+        } else if (cancelledList.contains(userID)) {
+            transitionUser(userID, waitingList, LIST_WAITING, cancelledList, LIST_CANCELLED, getWaitingCapacity(), listener);
+        } else {
+            transitionUser(userID, waitingList, LIST_WAITING, null, null, getWaitingCapacity(), listener);
         }
-        transitionUser(userID, waitingList, LIST_WAITING, null, null, getWaitingCapacity(), listener);
+    }
+
+    public void addToSelectedList(String userID, OnDbUpdateListener listener){
+        if (getWaitingList().contains(userID)) {
+            transitionGroup(new ArrayList<>(Collections.singleton(userID)), waitingList, LIST_WAITING, selectedList, LIST_SELECTED, -1, listener);
+        } else if (getSelectedUserStrings().contains(userID) || getAttendingList().contains(userID) || getDeclinedList().contains(userID)) {
+            listener.onComplete(RegistrationResult.ALREADY_IN_LIST);
+        } else if (getCancelledList().contains(userID)) {
+            transitionGroup(new ArrayList<>(Collections.singleton(userID)), cancelledList, LIST_CANCELLED, selectedList, LIST_SELECTED, -1, listener);
+        } else if (getRemovedList().contains(userID)) {
+            transitionGroup(new ArrayList<>(Collections.singleton(userID)), removedList, LIST_REMOVED, selectedList, LIST_SELECTED, -1, listener);
+        } else {
+            transitionGroup(new ArrayList<>(Collections.singleton(userID)), null, null, selectedList, LIST_SELECTED, -1, listener);
+        }
     }
 
     public void addToDeclinedList(String userID, OnDbUpdateListener listener){

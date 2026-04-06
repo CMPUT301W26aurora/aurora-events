@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@android:color/transparent">
+    android:background="@color/dark_glass">
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"

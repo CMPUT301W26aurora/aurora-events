@@ -38,6 +38,7 @@ public class MapPickerFragment extends Fragment {
     private Marker selectedMarker;
     private Button confirmButton;
     private GeoPoint selectedPoint;
+    private int navBarStatus;
 
     public interface OnLocationPickedListener {
         void onLocationPicked(String address, double lat, double lng);
@@ -54,6 +55,8 @@ public class MapPickerFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map_picker, container, false);
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        navBarStatus = navBar.getVisibility();
 
         confirmButton = view.findViewById(R.id.btn_confirm_location);
         confirmButton.setEnabled(false);
@@ -148,7 +151,9 @@ public class MapPickerFragment extends Fragment {
         super.onResume();
         mapView.onResume();
         // Hide nav bar when in fragment
-        requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        navBarStatus = navBar.getVisibility();
+        navBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -163,7 +168,7 @@ public class MapPickerFragment extends Fragment {
         // Show nav bar when leaving fragment
         View navBar = requireActivity().findViewById(R.id.nav_bar);
         if (navBar != null) {
-            navBar.setVisibility(View.VISIBLE);
+            navBar.setVisibility(navBarStatus);
         }
     }
 
