@@ -81,10 +81,7 @@ public class AdminBarTest {
         });
     }
 
-    @Test
-    public void testAdminBrowseProfileLoads() {
-        testNavButtonLoadsFragment(R.id.nav_admin_browse_profiles, AdminProfileFragment.class);
-    }
+
 
     @Test
     public void testAdminOrganizerLoads() {

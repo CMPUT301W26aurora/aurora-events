@@ -71,7 +71,6 @@ public class OrganizerUserListFragment extends DialogFragment {
         }
 
         csvExportManager = new CsvExportManager(requireContext());
-
         adapter = new UserAdapter(new ArrayList<>(), false, new UserAdapter.OnUserInteractionListener() {
             @Override
             public void Onclick(User user) {
@@ -81,6 +80,10 @@ public class OrganizerUserListFragment extends DialogFragment {
                         currentEventId
                 );
                 removeDialog.show(getParentFragmentManager(), "remove_picker");
+            }
+            @Override
+            public void OnNotify(User user){
+                //do nothing here
             }
         });
 
@@ -187,13 +190,18 @@ public class OrganizerUserListFragment extends DialogFragment {
 
     @Override
     public void onDestroyView() {
+
         super.onDestroyView();
+        if (listenerRegistration != null) {
+            listenerRegistration.remove();
+            listenerRegistration = null;
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        View navBar = getActivity().findViewById(R.id.nav_bar);
         if (navBar != null) {
             navBar.setVisibility(View.VISIBLE);
         }
