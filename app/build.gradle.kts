@@ -77,4 +77,5 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("org.osmdroid:osmdroid-android:6.1.17")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
