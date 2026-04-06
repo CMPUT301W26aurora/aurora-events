@@ -56,8 +56,8 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Im
         public ImageViewHolder(@NonNull View itemView) {
             super(itemView);
             thumbnail     = itemView.findViewById(R.id.image_thumbnail);
-            eventName     = itemView.findViewById(R.id.name_of_event);
-            imageUploader = itemView.findViewById(R.id.image_uploader);
+            eventName     = itemView.findViewById(R.id.event_name_text);
+            imageUploader = itemView.findViewById(R.id.image_uploader_text);
         }
 
         /**

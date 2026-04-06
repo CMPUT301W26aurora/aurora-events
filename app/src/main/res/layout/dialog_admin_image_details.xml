@@ -1,41 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@drawable/aurora_gradient"
+    android:padding="20dp">
 
-    <!-- enlarged image preview -->
-    <ImageView
-        android:id="@+id/image_enlarge_preview"
+    <FrameLayout
+        android:layout_width="44dp"
+        android:layout_height="44dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/rounded_box" />
+
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/rounded_arrow_back_24"
+            android:contentDescription="Back" />
+    </FrameLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:scaleType="centerInside" />
+        android:layout_height="0dp"
+        android:layout_weight="0.2" />
 
-    <!-- event name -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/admin_image_preview_background"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/image_enlarge_preview"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:contentDescription="Enlarged image preview" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/event_name_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="18dp"
+        android:text="Event Name"
+        android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- image uploader -->
     <TextView
         android:id="@+id/image_uploader_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="14sp"
-        android:textColor="@android:color/black" />
+        android:layout_marginTop="6dp"
+        android:text="Image Uploaded by:"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
 
-    <!-- delete button -->
     <Button
         android:id="@+id/delete_image_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Delete Image" />
+        android:layout_marginTop="20dp"
+        android:text="Delete Image"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/dark_red" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

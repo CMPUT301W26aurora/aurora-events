@@ -1,43 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp">
+    android:layout_margin="6dp">
 
-    <!-- image -->
     <ImageView
         android:id="@+id/image_thumbnail"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerCrop"
-        android:contentDescription="Event poster thumbnail" />
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/admin_image_preview_background"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/ic_menu_gallery" />
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingStart="12dp"
-        android:gravity="center_vertical">
-
-        <!-- event name -->
-        <TextView
-            android:id="@+id/name_of_event"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- which user uploaded this image -->
-        <TextView
-            android:id="@+id/image_uploader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="13sp"
-            android:textColor="@android:color/black" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>
