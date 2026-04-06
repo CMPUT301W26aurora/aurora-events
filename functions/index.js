@@ -159,6 +159,20 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     const afterSelected  = (after.selectedList  || []).map(u => u.userId);
 
 
+    //Manually check wait list joins
+    const beforeJoin = (before.waitingList).map(u=>u.userId);
+    const afterJoin = (after.waitingList).map(u=>u.userId);
+    const newJoin = afterJoin.filter(id => !beforeJoin.includes(id));
+    for (const uid of newJoin) {
+        const userRef = db.collection("Users").doc(uid);
+        await userRef.set({
+            eventsSigned: {
+                [eventId]: "Waiting"
+            }
+        }, { merge: true });
+        console.log(`User ${uid} status synced to: Waiting`);
+    }
+
     console.log("Function triggered for event:", eventId);
     console.log("Before selectedList:", JSON.stringify(beforeSelected));
     console.log("After selectedList:", JSON.stringify(afterSelected));
@@ -206,7 +220,7 @@ async function notifyNewEntrants(beforeList, afterList, eventId, sentFromId, eve
 
     await Promise.all(
         newEntrants.map(deviceId =>{
-            const userRef = db.collection("Users").doc(deviceId);
+            const userRef = db.collection("Users").doc(deviceId); //updates user map for admin adapters
             const dbUpdate = userRef.set({
                   eventsSigned: {
                        [eventId]: statusLabel

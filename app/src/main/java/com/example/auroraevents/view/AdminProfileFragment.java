@@ -133,10 +133,11 @@ public class AdminProfileFragment extends Fragment {
      */
     private void applyFilter(boolean onlyOrganizers) {
         if (masterUserList == null) return;
-
         List<User> filteredUsers = new ArrayList<>();
         for (User u : masterUserList) {
-            if (!onlyOrganizers || u.getRole().equals(User.ROLE_ORGANIZER)) {
+            boolean hasName = (u != null && u.getName() != null);
+            boolean matchesRole = (!onlyOrganizers || u.getRole().equals(User.ROLE_ORGANIZER));
+            if ( hasName && matchesRole ) {
                 filteredUsers.add(u);
             }
         }

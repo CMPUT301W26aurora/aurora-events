@@ -1,5 +1,6 @@
 package com.example.auroraevents.model;
 
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
@@ -94,10 +95,9 @@ public class User {
     @Exclude
     public String getFormattedAccountAge() {
         if (accountAge == null) return "Unknown";
-        long diffInMs = System.currentTimeMillis() - accountAge.toDate().getTime();
-        long days = TimeUnit.MILLISECONDS.toDays(diffInMs);
-
-        if (days < 1) return "Joined Today";
-        return days + " days ago";
+        String timeAgo = DateUtils.getRelativeTimeSpanString(accountAge.toDate().getTime(),
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS).toString();
+        return "Joined " +timeAgo;
     }
 }

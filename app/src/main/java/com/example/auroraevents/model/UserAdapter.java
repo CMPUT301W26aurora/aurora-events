@@ -16,6 +16,7 @@ import com.example.auroraevents.R;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User adapter class for displaying users
@@ -96,7 +97,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public static class  AdminViewHolder extends UserViewHolder{
         private final View rootLayout;
         private final ImageButton delete, notify;
-        private final TextView userName, userEmail, userPhone;
+        private final TextView userName, userEmail, userPhone, userJoined, userHosted, acctime;
         AdminViewHolder(View v) {
             super(v);
             rootLayout =v;
@@ -105,15 +106,25 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             userName = rootLayout.findViewById(R.id.user_name_list_admin);
             userEmail = rootLayout.findViewById(R.id.user_email_list_admin);
             userPhone = rootLayout.findViewById(R.id.user_phone_list_admin);
+            userJoined = rootLayout.findViewById(R.id.user_event_list_in_admin);
+            userHosted = rootLayout.findViewById(R.id.user_event_list_own_admin);
+            acctime = rootLayout.findViewById(R.id.user_account);
         }
         @Override
         public void bind(UserAdapterWrapper user, OnUserInteractionListener listener) {
             String name =user.getUser().getName();
             String email = user.getUser().getEmail();
             String phone = user.getUser().getPhoneNumber();
+            String accAge = user.getUser().getFormattedAccountAge();
+            String joined = formatJoined(user.getEventDataList(), user.getLookup());
+            String owned = formatOwned(user.getUser(),user.getLookup());
+
             notify.setVisibility(View.GONE);
             userName.setText(name);
             userEmail.setText(email);
+            userHosted.setText(owned);
+            userJoined.setText(joined);
+            acctime.setText(accAge);
             if(phone != null && !phone.isEmpty()){
                 userPhone.setText(phone);
             }else{
@@ -145,5 +156,28 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public int getItemViewType(int position) {
         return inAdmin ? 1 : 0;
+    }
+    //https://www.geeksforgeeks.org/java/stringbuilder-class-in-java-with-examples/
+    private static String formatJoined(Map<String, String> statuses, Map<String, String> lookup) {
+        if (statuses == null || statuses.isEmpty()) return "No events joined.";
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : statuses.entrySet()) {
+            String eventId = entry.getKey();
+            String status  = entry.getValue();
+            String title   = lookup.getOrDefault(eventId, "Unknown Event");
+            sb.append(title).append(": ").append(status).append("\n");
+        }
+        return sb.toString().trim();
+    }
+    private static String formatOwned(User user, Map<String, String> lookup) {
+        if (!(user instanceof Organizer)) return "";
+        Organizer org = (Organizer) user;
+        if (org.getMyEvents() == null || org.getMyEvents().isEmpty()) return "No events hosted.";
+        StringBuilder sb = new StringBuilder("Hosting:\n");
+        for (Event e : org.getMyEvents()) {
+            String title = lookup.getOrDefault(e.getEventId(), e.getName());
+            sb.append(title).append("\n");
+        }
+        return sb.toString().trim();
     }
 }
