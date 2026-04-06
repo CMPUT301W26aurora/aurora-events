@@ -38,7 +38,6 @@ import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 
 /*TODO:
- * comment button
  * invite entrants to private event
  * show QR code
  * prompt for camera access
@@ -50,7 +49,7 @@ Location conversion to coordinates handled by Geocoder: https://developer.androi
 public class EventEditFragment extends Fragment {
     private final String TAG = "EventEditFragment";
     private ImageButton backButton;
-    private Button sampleButton, qrCodeButton, viewEntrantsButton, sendNotificationButton, addImageButton;
+    private Button commentButton, sampleButton, qrCodeButton, viewEntrantsButton, sendNotificationButton, addImageButton;
     private EditText eventNameInput, eventDescInput, eventPriceInput, eventCapInput, eventWaitingCapInput;
     private Button locationButton, geolocationButton, startDateButton, endDateButton, dateButton, privateButton, confirmButton, manageCoOrganizersButton;
     private String eventName, eventDescription, price, eventCap, waitingCap, location, registerStart, registerEnd, date;
@@ -94,6 +93,7 @@ public class EventEditFragment extends Fragment {
 
         // Button and input setup
         backButton = view.findViewById(R.id.backButton);
+        commentButton = view.findViewById(R.id.comment_button);
 
         sampleButton = view.findViewById(R.id.get_participants);
         qrCodeButton = view.findViewById(R.id.show_qr_code);
@@ -223,11 +223,30 @@ public class EventEditFragment extends Fragment {
         }
 
         // Fetch firebase cloud storage
-        storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");
-        storageRef = storage.getReference();
         imageView = view.findViewById(R.id.iv_event_image);
 
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        commentButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", event.getEventId());
+            bundle.putString("organizerId", event.getOrganizerDeviceId());
+
+            CommentFragment commentFragment = new CommentFragment();
+            commentFragment.setArguments(bundle);
+
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(
+                            android.R.anim.slide_in_left,
+                            android.R.anim.fade_out,
+                            android.R.anim.fade_in,
+                            android.R.anim.slide_out_right
+                    )
+                    .replace(R.id.fragment_container, commentFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
 
         addImageButton.setOnClickListener(v -> showInputDialogImage());
         imageView.setOnClickListener(v -> showInputDialogImage());

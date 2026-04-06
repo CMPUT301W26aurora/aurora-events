@@ -14,7 +14,8 @@
         android:padding="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="@color/blue" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_comments"

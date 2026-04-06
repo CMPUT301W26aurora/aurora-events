@@ -25,6 +25,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/blue" />
 
+        <Button
+            android:id="@+id/comment_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/light_glass"
+            android:text="@string/comments_button_text"
+            android:textColor="@color/light_text"
+            android:fontFamily="@font/roboto"/>
+
         <LinearLayout
             android:id="@+id/top_buttons"
             android:layout_width="match_parent"
