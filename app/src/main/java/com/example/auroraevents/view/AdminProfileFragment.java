@@ -20,6 +20,7 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserAdapter;
 import com.example.auroraevents.model.UserAdapterWrapper;
 import com.example.auroraevents.server.UserDb;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class AdminProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView recyclerView = view.findViewById(R.id.entrants_list_admin);
         ImageButton deleteButton  = view.findViewById(R.id.delete_user_button_admin_item);
-        CheckBox filterButton       = view.findViewById(R.id.filter_organizers_checkbox);
+        CheckBox filterButton = view.findViewById(R.id.filter_organizers_checkbox);
         filterButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             applyFilter(isChecked);
         });
@@ -58,7 +59,41 @@ public class AdminProfileFragment extends Fragment {
 
             @Override
             public void Onclick(User user) {
-                //womp
+                if(user.getRole().equals(User.ROLE_ENTRANT)){
+                    new MaterialAlertDialogBuilder(getContext())
+                            .setTitle("Delete User?")
+                            .setMessage("Are you sure you want to permanently delete " + user.getName() + "? This action cannot be undone.")
+                            .setNegativeButton("Cancel", (dialog, which) -> {
+                                dialog.dismiss();
+                            })
+                            .setPositiveButton("Delete", (dialog, which) -> {
+                                UserDb.getInstance().deleteUser(user.getDeviceId(), ()->{
+                                    Log.d(TAG, "Succesfully Deleted User");
+                                    Toast.makeText(getContext(),"User is deleted", Toast.LENGTH_SHORT).show();
+                                },e->{
+                                    Log.e(TAG, "Firebase error",e);
+                                    Toast.makeText(getContext(),"Error deleting user, try again", Toast.LENGTH_SHORT).show();;
+                                });
+                            })
+                            .show();
+                }else{
+                    new MaterialAlertDialogBuilder(getContext())
+                            .setTitle("Delete Organizer?")
+                            .setMessage("Are you sure you want to permanently delete " + user.getName() + "? This action cannot be undone and will delete all their events")
+                            .setNegativeButton("Cancel", (dialog, which) -> {
+                                dialog.dismiss();
+                            })
+                            .setPositiveButton("Delete", (dialog, which) -> {
+                                UserDb.getInstance().deleteUser(user.getDeviceId(), ()->{
+                                    Log.d(TAG, "Succesfully Deleted User");
+                                    Toast.makeText(getContext(),"User is deleted", Toast.LENGTH_SHORT).show();
+                                },e->{
+                                    Log.e(TAG, "Firebase error",e);
+                                    Toast.makeText(getContext(),"Error deleting user, try again", Toast.LENGTH_SHORT).show();;
+                                });
+                            })
+                            .show();
+                }
             }
             @Override
             public void OnNotify(User user) {
