@@ -62,6 +62,8 @@ public class Organizer extends User {
             String startTime,
             String endTime,
             String location,
+            double latitude,
+            double longitude,
             boolean geolocationRequired,
             int waitingCapacity,
             int attendingCapacity,
@@ -87,7 +89,10 @@ public class Organizer extends User {
                 geolocationRequired,
                 waitingCapacity,
                 attendingCapacity);
+
         event.setGeolocationRequired(geolocationRequired);
+        event.setLatitude(latitude);
+        event.setLongitude(longitude);
 
         EventDb.addEvent(event,
                 eventId -> {
