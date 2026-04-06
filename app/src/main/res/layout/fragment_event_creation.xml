@@ -84,6 +84,7 @@
             </FrameLayout>
         </FrameLayout>
 
+
         <!-- Event Name Input -->
         <LinearLayout
             android:id="@+id/eventName_input"

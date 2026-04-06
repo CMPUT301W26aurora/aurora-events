@@ -4,6 +4,11 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -40,12 +45,27 @@ import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 
 import java.io.File;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+
+import android.widget.Toast;
+
+import java.io.IOException;
+import java.util.List;
+
+/*
+Image loading handled by resource Glide:
+https://github.com/bumptech/glide
+ */
+
 
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
 Maps handled by Google Maps SDK:
  */
 public class EventCreationFragment extends Fragment {
+    private ImageButton backButton;
     private final String TAG = "EventCreationFragment";
     private ImageButton backButton;
     private EditText eventNameInput, eventDescInput, eventPriceInput, eventCapInput, eventWaitingCapInput;
@@ -106,19 +126,13 @@ public class EventCreationFragment extends Fragment {
      */
     private void dispatchTakePictureIntent() {
         // Create temp image URI
-        File photoFile = new File(
-                requireActivity().getApplicationContext().getCacheDir(),
+        java.io.File photoFile = new java.io.File(
+                requireContext().getCacheDir(),
                 "camera_photo_" + System.currentTimeMillis() + ".jpg"
         );
-
-        /*
-        Source - https://stackoverflow.com/a/58908053
-        Posted by Pradeep Kumar, modified by community. See post 'Timeline' for change history
-        Retrieved 2026-04-05, License - CC BY-SA 4.0
-        */
-        cameraImageUri = FileProvider.getUriForFile(
-                requireActivity().getApplicationContext(),
-                requireContext().getPackageName() + ".provider",
+        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
                 photoFile
         );
 
@@ -363,6 +377,7 @@ public class EventCreationFragment extends Fragment {
                 );
             }
         });
+
         return view;
     }
 
@@ -480,9 +495,8 @@ public class EventCreationFragment extends Fragment {
                 .insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         try {
-            assert uri != null;
-            java.io.OutputStream outputStream = requireContext().getContentResolver().openOutputStream(uri);
-            assert outputStream != null;
+            java.io.OutputStream outputStream = requireContext().getContentResolver()
+                    .openOutputStream(uri);
             bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, outputStream);
             outputStream.close();
             Toast.makeText(requireContext(), "Mock image added to gallery", Toast.LENGTH_SHORT).show();

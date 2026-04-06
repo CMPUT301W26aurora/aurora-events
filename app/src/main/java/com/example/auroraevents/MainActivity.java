@@ -22,6 +22,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -46,7 +47,11 @@ import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.LoginFragment;
 import com.example.auroraevents.view.NotificationFragment;
+import com.example.auroraevents.view.OrganizerNotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.appcheck.FirebaseAppCheck;
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -150,6 +155,15 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
                     Log.e(TAG, "Anonymous sign-in failed", e);
                 });
 
+        // Initialize AppCheckProvider
+        FirebaseApp.initializeApp(this);
+        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+        );
+
+        /*
+        Hardcode user role for testing purposes
+         */
 
         //Hardcode user role for testing purposes
         /*

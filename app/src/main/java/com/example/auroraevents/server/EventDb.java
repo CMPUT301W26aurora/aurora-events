@@ -28,12 +28,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * Singleton class for all Firestore operations on the "Events" collection.
- *
  * Usage:
  *   EventDb.getInstance().addEvent(event, id -> { ... }, e -> { ... });
  */
@@ -244,7 +246,6 @@ public class EventDb {
     /**
      * Fetches all events where the given user appears in a specific participant list.
      * Use the LIST_* constants for the fieldName.
-     *
      * Example — get all events a user is waiting on:
      *   EventDb.getInstance().getEventsForUser(deviceId, EventDb.LIST_WAITING, ...);
      *
@@ -301,7 +302,6 @@ public class EventDb {
     /**
      * Adds a user (by deviceId) to one of the event's participant lists.
      * Use the LIST_* constants defined in this class for the fieldName.
-     *
      * Example:
      *   EventDb.getInstance().addUserToList(eventId, EventDb.LIST_WAITING, deviceId, ...);
      *

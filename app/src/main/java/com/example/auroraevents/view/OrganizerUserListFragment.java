@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.CsvExportManager;
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.SelectedUser;
 import com.example.auroraevents.model.User;
@@ -32,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Displays list of all entrants with any and all status
- * Allows Organizers to filter and cancel entrants
+ * Displays list of all entrants with any and all status.
+ * Allows Organizers to filter and cancel entrants.
  */
 public class OrganizerUserListFragment extends DialogFragment {
     private UserAdapter adapter;
@@ -43,6 +45,7 @@ public class OrganizerUserListFragment extends DialogFragment {
     private ListenerRegistration listenerRegistration;
     private List<UserAdapterWrapper> masterUiList;
     private List<String> statuses;
+    private CsvExportManager csvExportManager;
 
     @Nullable
     @Override
@@ -58,6 +61,7 @@ public class OrganizerUserListFragment extends DialogFragment {
 
         return view;
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -68,16 +72,18 @@ public class OrganizerUserListFragment extends DialogFragment {
         }
 
         RecyclerView recyclerView = view.findViewById(R.id.entrants_list_org);
-        ImageButton deleteButton = view.findViewById(R.id.delete_user_button_org_item);
-        Button filterButton = view.findViewById(R.id.filter_button);
-        Button doneButton = view.findViewById(R.id.done_button);
+        ImageButton deleteButton  = view.findViewById(R.id.delete_user_button_org_item);
+        Button filterButton       = view.findViewById(R.id.filter_button);
+        Button doneButton         = view.findViewById(R.id.done_button);
 
         Bundle args = getArguments();
         statuses = new ArrayList<>();
 
-        if(args != null){
+        if (args != null) {
             currentEventId = args.getString("eventId");
         }
+
+        csvExportManager = new CsvExportManager(requireContext());
         adapter = new UserAdapter(new ArrayList<>(), false, new UserAdapter.OnUserInteractionListener() {
             @Override
             public void Onclick(User user) {
@@ -85,36 +91,42 @@ public class OrganizerUserListFragment extends DialogFragment {
                         registrationList,
                         user.getDeviceId(),
                         currentEventId
-
                 );
                 removeDialog.show(getParentFragmentManager(), "remove_picker");
             }
+            @Override
+            public void OnNotify(User user){
+                //do nothing here
+            }
         });
 
-        doneButton.setOnClickListener(v->{
-            getParentFragmentManager().popBackStack();
-        });
+        doneButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        filterButton.setOnClickListener(v->{
+        filterButton.setOnClickListener(v -> {
             FilterUserPopUpDialog dialog = FilterUserPopUpDialog.newInstance();
             dialog.setOnFilterAppliedListener(selectedStatuses -> {
                 statuses = selectedStatuses;
                 orgUserApplyFilter(selectedStatuses);
             });
+            dialog.setOnExportRequestedListener(
+                    selectedStatuses -> csvExportManager.export(masterUiList, selectedStatuses)
+            );
             dialog.show(getChildFragmentManager(), "filter_dialog");
-
         });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        listenerRegistration = EventDb.getInstance().addSnapshotListenerForEvent(currentEventId,event -> {
-            registrationList = event.getRegistrationList();
-            loadParticipantData();
-        },e->{
-            Log.e(TAG, "failed to fetch event", e);
-        });
+        listenerRegistration = EventDb.getInstance().addSnapshotListenerForEvent(
+                currentEventId,
+                event -> {
+                    registrationList = event.getRegistrationList();
+                    loadParticipantData();
+                },
+                e -> Log.e(TAG, "failed to fetch event", e)
+        );
     }
+
     private void loadParticipantData() {
         if (registrationList == null) return;
         List<String> allIds = registrationList.getAllUsers();
@@ -124,11 +136,12 @@ public class OrganizerUserListFragment extends DialogFragment {
             public void onUsersUpdate(List<User> participants) {
                 Log.d(TAG, "Fetched " + participants.size() + " users from DB");
                 Log.d(TAG, "RegistrationList has " + registrationList.getAllUsers().size() + " IDs");
-                 List<UserAdapterWrapper> uiList = createDisplayList(participants, registrationList);
-                 masterUiList = uiList;
+                List<UserAdapterWrapper> uiList = createDisplayList(participants, registrationList);
+                masterUiList = uiList;
                 Log.d(TAG, "UI List size: " + uiList.size());
-                 orgUserApplyFilter(statuses);
+                orgUserApplyFilter(statuses);
             }
+
             @Override
             public void onError(Exception e) {
                 Toast.makeText(getContext(), "Failed to refresh list", Toast.LENGTH_SHORT).show();
@@ -136,13 +149,15 @@ public class OrganizerUserListFragment extends DialogFragment {
         });
     }
 
-    private List<UserAdapterWrapper> createDisplayList(List<User> fetchedUsers, RegistrationList registration) {
+    private List<UserAdapterWrapper> createDisplayList(List<User> fetchedUsers,
+                                                       RegistrationList registration) {
         List<UserAdapterWrapper> displayList = new ArrayList<>();
 
         Map<String, Date> map = new HashMap<>();
         for (SelectedUser se : registration.getSelectedList()) {
             map.put(se.getUserId(), se.getSelectedAt().toDate());
         }
+
         for (User user : fetchedUsers) {
             String userId = user.getDeviceId();
             String status = "Waiting";
@@ -155,27 +170,29 @@ public class OrganizerUserListFragment extends DialogFragment {
                 status = "Cancelled";
             } else if (registration.getDeclinedList().contains(userId)) {
                 status = "Declined";
-            } else if(registration.getAttendingList().contains(userId)) {
+            } else if (registration.getAttendingList().contains(userId)) {
                 status = "Accepted";
             } else if (registrationList.getRemovedList().contains(userId)) {
                 status = "Removed";
             }
+
             displayList.add(new UserAdapterWrapper(user, status, time));
         }
 
         return displayList;
     }
-    private void orgUserApplyFilter(List<String> statuses){
-        if(masterUiList == null) return;
-        if(statuses.isEmpty() ){
+
+    private void orgUserApplyFilter(List<String> statuses) {
+        if (masterUiList == null) return;
+        if (statuses.isEmpty()) {
             adapter.setUserList(masterUiList);
             adapter.notifyDataSetChanged();
             return;
         }
 
         List<UserAdapterWrapper> filtered = new ArrayList<>();
-        for(UserAdapterWrapper user : masterUiList){
-            if(statuses.contains(user.getStatus())){
+        for (UserAdapterWrapper user : masterUiList) {
+            if (statuses.contains(user.getStatus())) {
                 filtered.add(user);
             }
         }
@@ -186,19 +203,29 @@ public class OrganizerUserListFragment extends DialogFragment {
 
     @Override
     public void onDestroyView() {
+
         super.onDestroyView();
         if (listenerRegistration != null) {
             listenerRegistration.remove();
+            listenerRegistration = null;
         }
     }
 
     @Override
-    public void onStart(){
+    public void onStop() {
+        super.onStop();
+        View navBar = getActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onStart() {
         super.onStart();
         View nav = requireActivity().findViewById(R.id.nav_bar);
         if(nav != null){
             nav.setVisibility(View.GONE);
         }
     }
-
 }

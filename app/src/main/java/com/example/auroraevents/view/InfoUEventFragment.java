@@ -5,24 +5,33 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
+import static android.app.Activity.RESULT_OK;
 import static com.example.auroraevents.MainActivity.LOCATION_PERMISSION_REQUEST_CODE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -88,15 +97,22 @@ public class InfoUEventFragment extends Fragment {
     private static final double EDMONTON_LNG = -113.4938;
     private static final float EDMONTON_RADIUS_METERS = 15000f;
 
+    // Edit poster
+    private android.net.Uri image;
+    private android.widget.ImageView dialogImageView;
+    private android.net.Uri cameraImageUri;
+    private Uri selectedImageUri = null;
+    private View dialogView;
+
     /**
-     * @author Alina Iqbal & Jared Strandlund
-     * @param inflater The LayoutInflater object that can be used to inflate
-     * any views in the fragment,
-     * @param container If non-null, this is the parent view that the fragment's
-     * UI should be attached to.  The fragment should not add the view itself,
-     * but this can be used to generate the LayoutParams of the view.
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment,
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to.  The fragment should not add the view itself,
+     *                           but this can be used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
+     *                           from a previous saved state as given here.
+     * @author Alina Iqbal & Jared Strandlund
      */
     @Nullable
     @Override
@@ -152,6 +168,8 @@ public class InfoUEventFragment extends Fragment {
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadEventData();
@@ -228,7 +246,8 @@ public class InfoUEventFragment extends Fragment {
                         eventOrganizer.setText(organizerName);
                     }
                 },
-                e -> {}
+                e -> {
+                }
         );
         eventPrice.setText(event.getPrice());
         eventLocation.setText(event.getLocation());
@@ -658,5 +677,126 @@ public class InfoUEventFragment extends Fragment {
             eventSnapshotListener.remove();
             Log.d(TAG, "Event snapshot listener detached");
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Input dialog for image selection
+     */
+    private void showInputDialogImage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
+        builder.setView((dialogView));
+
+        dialogImageView = dialogView.findViewById(R.id.image_preview);
+
+        AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.gravity = Gravity.CENTER;
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        Button btnCamera = dialogView.findViewById(R.id.btn_take_photo);
+        Button btnGallery = dialogView.findViewById(R.id.btn_choose_gallery);
+        Button btnCancel = dialogView.findViewById(R.id.btn_image_cancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
+        FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
+        TextView header = dialogView.findViewById(R.id.dialog_title);
+
+        header.setText("Edit Event Poster");
+
+        btnGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                activityResultLauncher.launch(intent);
+            }
+        });
+
+        btnConfirm.setOnClickListener(v -> {
+            if (image == null) {
+                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Update and upload poster
+            selectedImageUri = image;
+            Glide.with(requireContext()).load(selectedImageUri).into(poster);
+            EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, eventId);
+            dialog.dismiss();
+        });
+
+        btnCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    /**
+     * Upload image from camera or photo gallery
+     */
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null && result.getData().getData() != null) {
+                        image = result.getData().getData();
+                    } else if (cameraImageUri != null) {
+                        image = cameraImageUri;
+                    }
+
+                    if (image != null) {
+
+                        // Update image upload dialog
+                        if (dialogImageView != null) {
+                            dialogImageView.setVisibility(View.VISIBLE);
+                            dialogView.findViewById(R.id.image_placeholder).setVisibility(View.GONE);
+                            dialogImageView.post(() ->
+                                    Glide.with(requireContext()).load(image).into(dialogImageView)
+                            );
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No image selected", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
+
+    /**
+     * Take photo via intent
+     */
+    private void dispatchTakePictureIntent() {
+        // Create temp image URI
+        java.io.File photoFile = new java.io.File(
+                requireContext().getCacheDir(),
+                "camera_photo_" + System.currentTimeMillis() + ".jpg"
+        );
+        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                photoFile
+        );
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+        activityResultLauncher.launch(takePictureIntent);
     }
 }

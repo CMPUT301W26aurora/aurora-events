@@ -2,6 +2,7 @@ package com.example.auroraevents.server;
 
 import android.util.Log;
 
+import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.User;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -306,5 +307,25 @@ public class UserDb {
             Log.e(TAG, "Failed to batch load user", e);
             listener.onError(e);
         });
+    }
+    /**
+     * listens to all users
+     * @param onFetched the success callback
+     * @param onFailure the failure call back that returns an error
+     * @return on success return a list of users.
+     */
+    public ListenerRegistration userSnapshotListener(OnUserListFetchedCallback onFetched, EventDb.OnFailureCallback onFailure){
+        return db.collection(COLLECTION_NAME)
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        onFailure.onFailure(e);
+                        return;
+                    }
+                    if (value != null) {
+                        List<User> users = value.toObjects(User.class);
+                        onFetched.onFetched(users);
+                    }
+                });
     }
 }

@@ -41,15 +41,16 @@ public class FirebaseNotificationHandler extends FirebaseMessagingService {
         Map<String, String> data = message.getData();
         if (data.isEmpty()) return;
 
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        String eventId  = data.get("eventId");
-        String title    = data.get("title");
-        String body     = data.get("body");
+        String deviceId   = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        String sentFromId = data.get("sentFromId"); // organizer's deviceId
+        String eventId    = data.get("eventId");
+        String title      = data.get("title");
+        String body       = data.get("body");
 
         Log.d(TAG, "onMessageReceived: " + title + " — " + body);
 
-        // Save to Firestore
-        Notification notification = new Notification(deviceId, eventId, title, body);
+        // Save to Firestore — sentFromId is stored so admins can look up notifications by organizer
+        Notification notification = new Notification(deviceId, sentFromId, eventId, title, body);
         FirebaseFirestore.getInstance()
                 .collection("Notifications")
                 .add(notification)

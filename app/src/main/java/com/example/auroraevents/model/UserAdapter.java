@@ -1,5 +1,7 @@
 package com.example.auroraevents.model;
 
+import static android.view.View.VISIBLE;
+
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +23,10 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     public interface OnUserInteractionListener{
         void Onclick(User user);
+        void OnNotify(User user);
     }
+
+
     private UserAdapter.OnUserInteractionListener listener;
     private List<UserAdapterWrapper> userList;
     private Boolean inAdmin;
@@ -88,7 +93,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                             System.currentTimeMillis(),
                             DateUtils.MINUTE_IN_MILLIS).toString();
                     userTime.setText("Invited " + timeAgo);
-                    delete.setVisibility(View.VISIBLE);
+                    delete.setVisibility(VISIBLE);
                 }
 
             }else{
@@ -105,13 +110,45 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     public static class  AdminViewHolder extends UserViewHolder{
+        private final View rootLayout;
+        private final ImageButton delete, notify;
+        private final TextView userName, userEmail, userPhone;
         AdminViewHolder(View v) {
-            super(v);
-        }
 
+            super(v);
+
+            rootLayout =v;
+            delete = rootLayout.findViewById(R.id.delete_user_button_admin_item);
+            notify = rootLayout.findViewById(R.id.show_notif_button_admin_item);
+            userName = rootLayout.findViewById(R.id.user_name_list_admin);
+            userEmail = rootLayout.findViewById(R.id.user_email_list_admin);
+            userPhone = rootLayout.findViewById(R.id.user_phone_list_admin);
+
+        }
         @Override
         public void bind(UserAdapterWrapper user, OnUserInteractionListener listener) {
+            String name  = user.getUser().getName();
+            String email = user.getUser().getEmail();
+            String phone = user.getUser().getPhoneNumber();
 
+            notify.setVisibility(View.GONE);
+            userName.setText(name);
+            userEmail.setText(email);
+
+            if (phone != null && !phone.isEmpty()) {
+                userPhone.setText(phone);
+            } else {
+                userPhone.setVisibility(View.GONE);
+            }
+
+            if (user.getUser().getRole().equals(User.ROLE_ORGANIZER)) {
+                notify.setVisibility(VISIBLE);
+                notify.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.OnNotify(user.getUser());
+                    }
+                });
+            }
         }
     }
 
@@ -136,4 +173,3 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
 
 }
-
