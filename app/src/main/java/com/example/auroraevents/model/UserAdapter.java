@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
 import java.util.List;
@@ -35,6 +37,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         this.inAdmin = inAdmin;
 
     }
+
     public void setUserList(List<UserAdapterWrapper> list){ this.userList=list;}
     public abstract static class UserViewHolder extends RecyclerView.ViewHolder {
         UserViewHolder(@NonNull View itemView){
@@ -117,12 +120,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             String phone = user.getUser().getPhoneNumber();
             String accAge = user.getUser().getFormattedAccountAge();
             String joined = formatJoined(user.getEventDataList(), user.getLookup());
-            String owned = formatOwned(user.getUser(),user.getLookup());
+
+
+            userHosted.setText("Loading");
 
             notify.setVisibility(View.GONE);
             userName.setText(name);
             userEmail.setText(email);
-            userHosted.setText(owned);
+
             userJoined.setText(joined);
             acctime.setText(accAge);
             if(phone != null && !phone.isEmpty()){
@@ -132,12 +137,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             }
             if(user.getUser().getRole().equals(User.ROLE_ORGANIZER)){
                 notify.setVisibility(VISIBLE);
+                grabEventsFormat(user.getUser().getDeviceId(), userHosted);
                 notify.setOnClickListener(v -> {
                     if (listener != null) {
                         listener.OnNotify(user.getUser());
                     }
                 });
             }
+
+            delete.setOnClickListener(v->{
+                if(listener!=null){
+                    listener.Onclick(user.getUser());
+                }
+            });
         }
     }
     @Override
@@ -157,10 +169,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public int getItemViewType(int position) {
         return inAdmin ? 1 : 0;
     }
+
     //https://www.geeksforgeeks.org/java/stringbuilder-class-in-java-with-examples/
     private static String formatJoined(Map<String, String> statuses, Map<String, String> lookup) {
         if (statuses == null || statuses.isEmpty()) return "No events joined.";
         StringBuilder sb = new StringBuilder();
+        sb.append("Joined:").append("\n");
         for (Map.Entry<String, String> entry : statuses.entrySet()) {
             String eventId = entry.getKey();
             String status  = entry.getValue();
@@ -169,15 +183,28 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
         return sb.toString().trim();
     }
-    private static String formatOwned(User user, Map<String, String> lookup) {
-        if (!(user instanceof Organizer)) return "";
-        Organizer org = (Organizer) user;
-        if (org.getMyEvents() == null || org.getMyEvents().isEmpty()) return "No events hosted.";
-        StringBuilder sb = new StringBuilder("Hosting:\n");
-        for (Event e : org.getMyEvents()) {
-            String title = lookup.getOrDefault(e.getEventId(), e.getName());
-            sb.append(title).append("\n");
-        }
-        return sb.toString().trim();
+    private static void grabEventsFormat(String userId, TextView targetTextView) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Events")
+                .whereEqualTo("organizerDeviceId", userId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        targetTextView.setText("No events hosted.");
+                        return;
+                    }
+                    StringBuilder sb = new StringBuilder("Hosting:\n");
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        if(doc==null)continue;
+                        String eventName = doc.getString("name");
+                        if(eventName==null)continue;
+                        sb.append(eventName).append("\n");
+                    }
+                    targetTextView.setText(sb.toString().trim());
+                })
+                .addOnFailureListener(e -> {
+                    targetTextView.setText("Error loading hosted events.");
+                });
     }
+
 }

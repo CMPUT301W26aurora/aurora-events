@@ -196,14 +196,6 @@ public class AdminProfileFragment extends Fragment {
     public List<String> getAllEventIds(User user) {
         Map<String, String> signedMap = user.getEventsSigned();
         List<String> ids = new ArrayList<>(signedMap.keySet());
-        if (user instanceof Organizer) {
-            Organizer org = (Organizer) user;
-            if (org.getMyEvents() != null) {
-                for (Event e : org.getMyEvents()) {
-                    ids.add(e.getEventId());
-                }
-            }
-        }
         return ids;
     }
 }
