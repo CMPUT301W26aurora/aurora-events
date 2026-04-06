@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,47 +37,28 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 
+/*TODO:
+ * comment button
+ * invite entrants to private event
+ * show QR code
+ * prompt for camera access
+ */
+
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
  */
 public class EventEditFragment extends Fragment {
     private final String TAG = "EventEditFragment";
     private ImageButton backButton;
-    private Button sampleButton;
-    private Button qrCodeButton;
-    private Button viewEntrantsButton;
-    private Button sendNotificationButton;
-    private Button addImageButton;
-    private EditText eventNameInput;
-    private EditText eventDescInput;
-    private EditText eventPriceInput;
-    private EditText eventCapInput;
-    private EditText eventWaitingCapInput;
-    private Button locationButton;
-    private Button geolocationButton;
-    private Button startDateButton;
-    private Button endDateButton;
-    private Button dateButton;
-    private Button privateButton;
-    private Button confirmButton;
-    private Button manageCoOrganizersButton;
-    private String eventName;
-    private String eventDescription;
-    private String price;
-    private String eventCap;
-    private String waitingCap;
-    private String location;
-    private boolean geolocationRequired;
-    private String registerStart;
-    private String registerEnd;
-    private String date;
-    private boolean isPrivate;
+    private Button sampleButton, qrCodeButton, viewEntrantsButton, sendNotificationButton, addImageButton;
+    private EditText eventNameInput, eventDescInput, eventPriceInput, eventCapInput, eventWaitingCapInput;
+    private Button locationButton, geolocationButton, startDateButton, endDateButton, dateButton, privateButton, confirmButton, manageCoOrganizersButton;
+    private String eventName, eventDescription, price, eventCap, waitingCap, location, registerStart, registerEnd, date;
+    private boolean geolocationRequired, isPrivate;
     private Organizer organizer;
     private User user;
     private Event event;
     private UserViewModel userViewModel;
-    private double eventLat;
-    private double eventLong;
 
     private android.net.Uri image;
     private android.widget.ImageView imageView;
@@ -97,7 +77,7 @@ public class EventEditFragment extends Fragment {
         if (context instanceof LocationToggleListener) {
             locationToggleListener = (LocationToggleListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement LocationToggleListener");
+            throw new RuntimeException(context + " must implement LocationToggleListener");
         }
     }
 
@@ -142,13 +122,11 @@ public class EventEditFragment extends Fragment {
 
         // Get organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-
-        // Set organizer
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
             if (u != null) {
-                this.user = u;
+                user = u;
                 if (u.getRole().equals(User.ROLE_ORGANIZER)) {
-                    this.organizer = new Organizer(
+                    organizer = new Organizer(
                             u.getDeviceId(),
                             u.getName(),
                             u.getEmail(),
@@ -159,12 +137,6 @@ public class EventEditFragment extends Fragment {
                 }
             }
         });
-
-        // Get device ID
-        String deviceId = Settings.Secure.getString(
-                getContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
 
         // Set current values
         Bundle args = getArguments();
@@ -222,32 +194,32 @@ public class EventEditFragment extends Fragment {
                                     .into(imageView);
                         }
                     }
+
+                    if (user != null && user.getDeviceId().equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
+                        manageCoOrganizersButton.setVisibility(View.VISIBLE);
+                        manageCoOrganizersButton.setOnClickListener(v -> {
+                            Bundle bundle = new Bundle();
+                            bundle.putString("eventId", event.getEventId());
+                            bundle.putString("organizerDeviceId", event.getOrganizerDeviceId());
+
+                            ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
+                            fragment.setArguments(bundle);
+
+                            getParentFragmentManager()
+                                    .beginTransaction()
+                                    .add(R.id.fragment_container, fragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        });
+                    } else {
+                        manageCoOrganizersButton.setVisibility(View.GONE);
+                    }
                 } else {
                     Log.e(TAG, "No such event available");
                 }
             }, e -> {
                 Log.e(TAG, "failed to fetch event");
             });
-        }
-
-        if (user != null && user.getDeviceId().equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
-            manageCoOrganizersButton.setVisibility(View.VISIBLE);
-            manageCoOrganizersButton.setOnClickListener(v -> {
-                Bundle bundle = new Bundle();
-                bundle.putString("eventId", event.getEventId());
-                bundle.putString("organizerDeviceId", event.getOrganizerDeviceId());
-
-                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
-                fragment.setArguments(bundle);
-
-                getParentFragmentManager()
-                        .beginTransaction()
-                        .add(R.id.fragment_container, fragment)
-                        .addToBackStack(null)
-                        .commit();
-            });
-        } else {
-            manageCoOrganizersButton.setVisibility(View.GONE);
         }
 
         // Fetch firebase cloud storage
@@ -307,8 +279,6 @@ public class EventEditFragment extends Fragment {
             MapPickerFragment mapPicker = new MapPickerFragment();
             mapPicker.setOnLocationPickedListener((address, lat, lng) -> {
                 location = address;
-                eventLat = lat;     // Store latitude and longitude
-                eventLong = lng;
                 locationButton.setText(address);
             });
             getParentFragmentManager()
@@ -521,15 +491,12 @@ public class EventEditFragment extends Fragment {
         FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
         TextView header = dialogView.findViewById(R.id.dialog_title);
 
-        header.setText("Edit Event Poster");
+        header.setText(R.string.edit_event_poster_title);
 
-        btnGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                activityResultLauncher.launch(intent);
-            }
+        btnGallery.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
         });
 
         btnConfirm.setOnClickListener(v -> {
@@ -544,12 +511,7 @@ public class EventEditFragment extends Fragment {
             dialog.dismiss();
         });
 
-        btnCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent();
-            }
-        });
+        btnCamera.setOnClickListener(v -> dispatchTakePictureIntent());
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 

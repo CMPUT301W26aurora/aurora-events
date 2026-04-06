@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -35,8 +34,8 @@ import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
+
+//TODO: prompt for camera access
 
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
@@ -45,35 +44,13 @@ Maps handled by Google Maps SDK:
 public class EventCreationFragment extends Fragment {
     private final String TAG = "EventCreationFragment";
     private ImageButton backButton;
-    private Button addImageButton;
-    private EditText eventNameInput;
-    private EditText eventDescInput;
-    private EditText eventPriceInput;
-    private EditText eventCapInput;
-    private EditText eventWaitingCapInput;
-    private Button locationButton;
-    private Button geolocationButton;
-    private Button startDateButton;
-    private Button endDateButton;
-    private Button dateButton;
-    private Button privateButton;
-    private Button confirmButton;
-    private String eventName;
-    private String eventDescription;
-    private String price;
-    private String eventCap;
-    private String waitingCap;
-    private String location;
-    private boolean geolocationRequired;
-    private String registerStart;
-    private String registerEnd;
-    private String date;
-    private boolean isPrivate;
+    private EditText eventNameInput, eventDescInput, eventPriceInput, eventCapInput, eventWaitingCapInput;
+    private Button addImageButton, locationButton, geolocationButton, startDateButton, endDateButton, dateButton, privateButton, confirmButton;
+    private String eventName, eventDescription, price, eventCap, waitingCap, location, registerStart, registerEnd, date;
+    private boolean geolocationRequired, isPrivate;
     private Organizer organizer;
     private User user;
     private UserViewModel userViewModel;
-    private double eventLat;
-    private double eventLong;
 
     private android.net.Uri image;
     private android.widget.ImageView imageView;
@@ -81,8 +58,6 @@ public class EventCreationFragment extends Fragment {
     private android.net.Uri cameraImageUri;
     private Uri selectedImageUri = null;
     private View dialogView;
-    private com.google.firebase.storage.FirebaseStorage storage;
-    private com.google.firebase.storage.StorageReference storageRef;
 
     private LocationToggleListener locationToggleListener;
 
@@ -92,7 +67,7 @@ public class EventCreationFragment extends Fragment {
         if (context instanceof LocationToggleListener) {
             locationToggleListener = (LocationToggleListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement LocationToggleListener");
+            throw new RuntimeException(context + " must implement LocationToggleListener");
         }
     }
 
@@ -197,12 +172,6 @@ public class EventCreationFragment extends Fragment {
             }
         });
 
-        // Get device ID
-        String deviceId = Settings.Secure.getString(
-                getContext().getContentResolver(),
-                Settings.Secure.ANDROID_ID
-        );
-
         // Fetch firebase cloud storage
         imageView = view.findViewById(R.id.iv_event_image);
 
@@ -214,8 +183,6 @@ public class EventCreationFragment extends Fragment {
             MapPickerFragment mapPicker = new MapPickerFragment();
             mapPicker.setOnLocationPickedListener((address, lat, lng) -> {
                 location = address;
-                eventLat = lat;     // Store latitude and longitude
-                eventLong = lng;
                 requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
             });
             getParentFragmentManager()
@@ -384,7 +351,6 @@ public class EventCreationFragment extends Fragment {
                             }
                         }
                 );
-                getParentFragmentManager().popBackStack();
             }
         });
         return view;
@@ -426,13 +392,10 @@ public class EventCreationFragment extends Fragment {
         Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
         FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
 
-        btnGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                activityResultLauncher.launch(intent);
-            }
+        btnGallery.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            activityResultLauncher.launch(intent);
         });
 
         btnConfirm.setOnClickListener(v -> {

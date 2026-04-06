@@ -109,4 +109,5 @@
     <string name="view_entrants_button_text">View Entrants</string>
     <string name="send_notification_button_text">Send Notification</string>
     <string name="manage_co_organizers_button_text">Manage Co-Organizers</string>
+    <string name="edit_event_poster_title">Edit Event Poster</string>
 </resources>

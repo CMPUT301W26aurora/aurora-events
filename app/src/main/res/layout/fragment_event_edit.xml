@@ -325,7 +325,7 @@
                 android:autofillHints="name"
                 android:backgroundTint="@color/blue"
                 android:hint="@string/required_maximum_participants_hint"
-                android:inputType="text"
+                android:inputType="number"
                 android:textColorHint="@color/light_glass"
                 android:textColor="@color/green"/>
 
@@ -364,7 +364,7 @@
                 android:autofillHints="name"
                 android:backgroundTint="@color/blue"
                 android:hint="@string/maximum_waiting_list_spots_hint"
-                android:inputType="text"
+                android:inputType="number"
                 android:textColorHint="@color/light_glass"
                 android:textColor="@color/green"/>
 
