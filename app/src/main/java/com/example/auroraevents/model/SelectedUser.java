@@ -16,4 +16,6 @@ public class SelectedUser {
     }
     public String getUserId() { return userId; }
     public Timestamp getSelectedAt() { return selectedAt; }
+    public void setUserId(String userId) { this.userId = userId; }
+    public void setSelectedAt(Timestamp selectedAt) { this.selectedAt = selectedAt; }
 }
