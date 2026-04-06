@@ -17,6 +17,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,11 +42,13 @@ import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -392,42 +396,27 @@ public class InfoUEventFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+        sampleButton.setOnClickListener(v -> {
+            View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_sample_event, null);
+            CheckBox deadlineToggle = dialogView.findViewById(R.id.deadline_checkbox);
+            DatePicker datePicker = dialogView.findViewById(R.id.date_picker);
+            deadlineToggle.setOnCheckedChangeListener((buttonView, isChecked) ->
+                    datePicker.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+            datePicker.setMinDate(System.currentTimeMillis());
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogView)
+                    .setPositiveButton("Confirm", (dialog, which) -> {
+                        long deadline = -1;
+                        if (deadlineToggle.isChecked()) {
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth(), 23, 59, 59);
+                            deadline = calendar.getTimeInMillis();
+                        }
 
-        sampleButton.setOnClickListener(v->{
-
-            event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(), new RegistrationList.OnDbUpdateListener() {
-                @Override
-                public void onSuccess() {
-                    //useless here
-                }
-
-                @Override
-                public void onFailure() {
-                    //useless here
-                }
-
-                @Override
-                public void onComplete(RegistrationList.RegistrationResult result) {
-                    switch (result) {
-                        case SUCCESS:
-                            Toast.makeText(getContext(),"Users sampled",Toast.LENGTH_SHORT ).show();
-                            break;
-                        case CAPACITY_FULL:
-                            Toast.makeText(getContext(),"can't Sample any more", Toast.LENGTH_SHORT).show();
-                            break;
-                        case DATABASE_ERROR:
-                            Toast.makeText(getContext(),"Database error, try again in a moment", Toast.LENGTH_SHORT).show();
-                            break;
-                        case BLOCKED:
-                            Toast.makeText(getContext(),"Sampled Users cannot enter Selected list", Toast.LENGTH_SHORT).show();
-                            break;
-                        case ALREADY_IN_LIST:
-                            Toast.makeText(getContext(),"Users already in list", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
             });
-        });
     }
 
     private void setupEntrantUI(Event event) {
