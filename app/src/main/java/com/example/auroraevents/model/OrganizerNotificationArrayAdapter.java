@@ -51,7 +51,7 @@ public class OrganizerNotificationArrayAdapter extends ArrayAdapter<Notification
 
         holder.title.setText(n.getTitle() != null ? n.getTitle() : "");
         holder.body.setText(n.getBody()   != null ? n.getBody()  : "");
-        holder.recipient.setText("To: " + (n.getRecipientName() != null ? n.getRecipientName() : "Unknown"));
+        holder.recipient.setText("Sent to: " + (n.getRecipientName() != null ? n.getRecipientName() : "Unknown"));
         holder.timestamp.setText(n.getTimestamp() != null ? DATE_FMT.format(n.getTimestamp()) : "");
 
         return convertView;

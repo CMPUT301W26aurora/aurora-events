@@ -62,7 +62,17 @@ public class AdminProfileFragment extends Fragment {
             }
             @Override
             public void OnNotify(User user) {
-                //Insert Notification list code here
+                Bundle args = new Bundle();
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_ID, user.getDeviceId());
+
+                OrganizerNotificationFragment fragment = new OrganizerNotificationFragment();
+                fragment.setArguments(args);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 

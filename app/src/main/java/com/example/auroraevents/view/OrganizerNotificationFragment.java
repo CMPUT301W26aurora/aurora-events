@@ -69,6 +69,9 @@ public class OrganizerNotificationFragment extends Fragment {
         listView.addHeaderView(header, null, false);
         listView.setAdapter(adapter);
 
+        view.findViewById(R.id.back_button_organizer_notif).setOnClickListener(v ->
+                getParentFragmentManager().popBackStack());
+
         String organizerId = requireArguments().getString(ARG_ORGANIZER_ID);
         if (organizerId != null) {
             loadNotificationsForOrganizer(organizerId);

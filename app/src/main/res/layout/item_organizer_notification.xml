@@ -10,7 +10,6 @@
     android:layout_marginBottom="8dp"
     android:background="@drawable/event_list_card">
 
-    <!-- Notification title -->
     <TextView
         android:id="@+id/organizer_notif_title"
         android:layout_width="match_parent"
@@ -20,7 +19,6 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- Notification body -->
     <TextView
         android:id="@+id/organizer_notif_body"
         android:layout_width="match_parent"
@@ -30,22 +28,34 @@
         android:textColor="@android:color/black"
         android:textSize="16sp" />
 
-    <!-- Recipient name -->
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="8dp"
+        android:background="#22000000" />
+
     <TextView
         android:id="@+id/organizer_notif_recipient"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="To: Recipient Name"
-        android:textColor="@android:color/black"
-        android:textSize="14sp" />
+        android:text="Sent to: Recipient Name"
+        android:textColor="#1A6B3C"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/roboto"
+        android:background="@drawable/chip_background"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
 
-    <!-- Timestamp -->
     <TextView
         android:id="@+id/organizer_notif_timestamp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:text="Jan 1, 2026, 12:00 PM"
         android:textColor="@android:color/black"
         android:textSize="13sp" />

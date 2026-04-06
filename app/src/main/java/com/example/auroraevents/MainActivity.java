@@ -219,13 +219,6 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         navNotifications.setOnClickListener(v -> {
             setActiveTab(navNotifications);
             loadFragment(new NotificationFragment());
-//            Bundle args = new Bundle();
-//            args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_ID, "fac32b561e952d4b");
-//
-//            OrganizerNotificationFragment fragment = new OrganizerNotificationFragment();
-//            fragment.setArguments(args);
-//
-//            loadFragment(fragment);
         });
 
         navProfile.setOnClickListener(v -> {

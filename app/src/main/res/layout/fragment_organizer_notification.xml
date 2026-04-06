@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.OrganizerNotificationFragment">
+    android:fitsSystemWindows="true"
+    android:background="@drawable/background_aroura_gradient">
 
     <ListView
         android:id="@+id/organizer_notifications_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:paddingBottom="96dp"
+        android:dividerHeight="8dp"
+        android:divider="@android:color/transparent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"/>
+
+    <!-- Back button -->
+    <ImageButton
+        android:id="@+id/back_button_organizer_notif"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:contentDescription="@string/back_button_content_description"
+        android:padding="10dp"
+        android:src="@drawable/rounded_arrow_back_24"
+        app:tint="@color/blue"
+        android:background="@drawable/rounded_box"
+        android:backgroundTint="@color/light_glass"/>
 
 </FrameLayout>
