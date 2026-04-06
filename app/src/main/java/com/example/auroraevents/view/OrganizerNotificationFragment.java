@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,20 +28,13 @@ import java.util.Set;
 
 /**
  * Displays every notification sent by a specific organizer.
- *
- * Usage — pass the organizer's deviceId as a fragment argument:
- *
- *   Bundle args = new Bundle();
- *   args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_ID, organizer.getDeviceId());
- *   OrganizerNotificationFragment f = new OrganizerNotificationFragment();
- *   f.setArguments(args);
- *
- * Requires the Notifications collection to have a `sentFromId` field
- * (the organizer's deviceId) on each document.
  */
 public class OrganizerNotificationFragment extends Fragment {
 
-    public static final String ARG_ORGANIZER_ID = "organizerId";
+    public static final String ARG_ORGANIZER_ID    = "organizerId";
+    public static final String ARG_ORGANIZER_NAME  = "organizerName";
+    public static final String ARG_ORGANIZER_EMAIL = "organizerEmail";
+
     private static final String TAG = "OrganizerNotifList";
 
     private OrganizerNotificationArrayAdapter adapter;
@@ -60,20 +54,24 @@ public class OrganizerNotificationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Back button
+        view.findViewById(R.id.back_button_organizer_notif)
+                .setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        // Organizer info line: "Name | email | deviceId"
+        String organizerId    = requireArguments().getString(ARG_ORGANIZER_ID, "");
+        String organizerName  = requireArguments().getString(ARG_ORGANIZER_NAME, "");
+        String organizerEmail = requireArguments().getString(ARG_ORGANIZER_EMAIL, "");
+
+        TextView infoText = view.findViewById(R.id.organizer_info_text);
+        infoText.setText(organizerName + "  |  " + organizerEmail + "  |  " + organizerId);
+
+        // List
         adapter = new OrganizerNotificationArrayAdapter(requireContext(), notifications);
-
         ListView listView = view.findViewById(R.id.organizer_notifications_list);
-
-        View header = LayoutInflater.from(requireContext())
-                .inflate(R.layout.header_organizer_notification_list, listView, false);
-        listView.addHeaderView(header, null, false);
         listView.setAdapter(adapter);
 
-        view.findViewById(R.id.back_button_organizer_notif).setOnClickListener(v ->
-                getParentFragmentManager().popBackStack());
-
-        String organizerId = requireArguments().getString(ARG_ORGANIZER_ID);
-        if (organizerId != null) {
+        if (!organizerId.isEmpty()) {
             loadNotificationsForOrganizer(organizerId);
         } else {
             Log.e(TAG, "No organizerId argument provided");
@@ -82,12 +80,6 @@ public class OrganizerNotificationFragment extends Fragment {
 
     // ── Data loading ──────────────────────────────────────────────────────────
 
-    /**
-     * Step 1: fetch all notifications where sentFromId == organizerId.
-     * Step 2: collect unique recipient deviceIds.
-     * Step 3: resolve those deviceIds to names from the Users collection.
-     * Step 4: set recipientName on each Notification and refresh the list.
-     */
     private void loadNotificationsForOrganizer(String organizerId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -123,9 +115,6 @@ public class OrganizerNotificationFragment extends Fragment {
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to load notifications", e));
     }
 
-    /**
-     * Looks up Users by deviceId in chunks of 30 (Firestore whereIn limit).
-     */
     private void fetchUserNames(FirebaseFirestore db,
                                 List<String> deviceIds,
                                 NameMapCallback callback) {
