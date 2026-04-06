@@ -217,7 +217,7 @@ public class EventEditFragment extends Fragment {
                         });
                     }
 
-                    if (event.getPosterUrl() == null) {
+                    if (event.getPosterUrl() == null && getContext() != null) {
                         imageView.setVisibility(View.GONE);
                     } else {
                         imageView.setVisibility(View.VISIBLE);
