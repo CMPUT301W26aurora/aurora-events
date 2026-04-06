@@ -145,7 +145,6 @@ public class Event {
 
     public boolean isPrivate()                   { return isPrivate; }
     public void    setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
-
     public int  getNumReports() { return reports.size(); }
 
     public double getLatitude() { return latitude; }
@@ -228,21 +227,11 @@ public class Event {
         return LocalDateTime.parse(registrationTimeEnd, FORMATTER);
     }
 
-    public String getPosterUrl() {
-        return posterUrl;
-    }
+    public String getPosterUrl() { return posterUrl; }
+    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
 
-    public void setPosterUrl(String posterUrl) {
-        this.posterUrl = posterUrl;
-    }
-
-    public String getQrUrl() {
-        return qrUrl;
-    }
-
-    public void setQrUrl(String qrUrl) {
-        this.qrUrl = qrUrl;
-    }
+    public String getQrUrl() { return qrUrl; }
+    public void setQrUrl(String qrUrl) { this.qrUrl = qrUrl; }
 
     // ── QR code generation ─────────────────────────────────────────────────
 
