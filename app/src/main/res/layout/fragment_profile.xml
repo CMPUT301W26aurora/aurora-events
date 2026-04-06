@@ -91,8 +91,7 @@
                 android:textColor="@color/dark_text"
                 android:textSize="6pt"
                 app:icon="@drawable/rounded_delete_forever_24"
-                app:iconTint="@color/dark_text"
-                android:visibility="gone"/>
+                app:iconTint="@color/dark_text"/>
 
         </LinearLayout>
 
@@ -127,15 +126,16 @@
             android:id="@+id/confirm_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/green"
             android:fontFamily="@font/roboto"
-            android:paddingHorizontal="145dp"
             android:paddingVertical="15dp"
             android:text="@string/login_confirm_text"
             android:textColor="@color/dark_text"
             android:textSize="8pt"
-            app:icon="@drawable/round_check_24"
-            app:iconTint="@color/dark_text" />
+            app:icon="@drawable/rounded_check_24"
+            app:iconTint="@color/dark_text"
+            app:iconGravity="textStart"
+            app:backgroundTint="@null"
+            android:background="@drawable/gradient_confirm_button"/>
 
         <Space
             android:layout_width="match_parent"

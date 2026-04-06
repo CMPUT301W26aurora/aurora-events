@@ -9,6 +9,10 @@ android {
         version = release(36)
     }
 
+    testOptions {
+        animationsDisabled = true
+    }
+
     defaultConfig {
         applicationId = "com.example.auroraevents"
         minSdk = 24
@@ -37,6 +41,7 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        animationsDisabled = true
     }
 }
 
@@ -46,24 +51,37 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.media3.common)
-    implementation("androidx.core:core:1.12.0")
+    implementation(libs.core)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
-
+    implementation("com.google.firebase:firebase-storage")
+    implementation(libs.firebase.functions)
+    implementation(libs.firebase.storage)
+    implementation(libs.swiperefreshlayout)
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.7.0"){
+        exclude(group = "com.google.android.apps.common.testing.accessibility.framework", module = "accessibility-test-framework")
+    }
     androidTestImplementation(libs.rules)
     androidTestImplementation(libs.uiautomator)
     androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    implementation("org.osmdroid:osmdroid-android:6.1.17")
 }

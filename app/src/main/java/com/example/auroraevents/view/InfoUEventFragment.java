@@ -5,26 +5,59 @@
 // https://www.c-sharpcorner.com/UploadFile/8836be/set-visibility-on-buttons-in-android/
 package com.example.auroraevents.view;
 
+import static android.app.Activity.RESULT_OK;
+import static com.example.auroraevents.MainActivity.LOCATION_PERMISSION_REQUEST_CODE;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.RadiusUtil;
+import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Displays event details for the event tapped by the entrant or admin.
@@ -36,70 +69,114 @@ import com.google.firebase.firestore.ListenerRegistration;
  * Implements US 01.06.01 - View waiting list count.
  * Implements US 01.06.02 - Sign up for an event from event details.
  * Implements US 02.02.01 - Admin can view and delete events.
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
  */
-public class InfoUEventFragment extends Fragment {
+public class InfoUEventFragment extends Fragment implements LocationToggleListener {
 
     private static final String TAG = "InfoUEventFragment";
 
     private String eventId;
     private String userId;
     private ListenerRegistration eventSnapshotListener;
-
-    private TextView eventName, eventDescription, eventLocation, eventDateTime;
-    private TextView eventOrganizer, eventDeadline, waitingListCount, attendeesCount, attendingLabel;
+    private UserViewModel userViewModel;
+    private User user;
+    private ImageButton backButton;
     private ImageView poster;
-    private Button backButton, joinButton, acceptButton, declineButton, deleteButton;
+    private Button commentButton;
+    private TextView eventName, eventDateTime, eventOrganizer, eventPrice, eventLocation, eventDescription;
+    private TextView reportedNum;
+    private Button reportButton, deleteButton;
+    private LinearLayout bottomBar, selectButtonSet, adminInfo;
+    private TextView eventDeadline, waitingListCount, attendeesCount;
+    private Button joinButton, leaveButton, acceptButton, declineButton;
+    private TextView attendingLabel, cannotAttendLabel;
+    private ImageButton infoButton;
+    private FusedLocationProviderClient fusedLocationClient;
+    private Event pendingJoinEvent;
+
+    // Latitude and longitude for radius check
+    private static final double EDMONTON_LAT = 53.5461;
+    private static final double EDMONTON_LNG = -113.4938;
+    private static final float EDMONTON_RADIUS_METERS = 15000f;
+
+    // Edit poster
+    private android.net.Uri image;
+    private android.widget.ImageView dialogImageView;
+    private android.net.Uri cameraImageUri;
+    private Uri selectedImageUri = null;
+    private View dialogView;
 
     /**
-     *
-     * @param inflater The LayoutInflater object that can be used to inflate
-     * any views in the fragment,
-     * @param container If non-null, this is the parent view that the fragment's
-     * UI should be attached to.  The fragment should not add the view itself,
-     * but this can be used to generate the LayoutParams of the view.
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment,
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to.  The fragment should not add the view itself,
+     *                           but this can be used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
-     *
-     * @return
+     *                           from a previous saved state as given here.
+     * @author Alina Iqbal & Jared Strandlund
      */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.info_u_event_fragment, container, false);
 
-        // get event Id from bundle
+        // get event ID and user ID from bundle
         Bundle args = getArguments();
-        if (args == null || args.getString("eventId") == null) {
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        if (args == null || args.getString("eventId") == null || args.getString("userId") == null) {
             Log.e(TAG, "Missing eventId argument");
             getParentFragmentManager().popBackStack();
             return view;
+        } else {
+            eventId = args.getString("eventId");
+            userId = args.getString("userId");
         }
 
-        eventId = args.getString("eventId");
-
-        // get device Id to identify user
-        userId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // get views to display event details
-        eventName        = view.findViewById(R.id.event_name);
-        eventDescription = view.findViewById(R.id.event_description);
-        eventLocation    = view.findViewById(R.id.event_location);
-        eventDateTime    = view.findViewById(R.id.event_date_time);
-        eventOrganizer   = view.findViewById(R.id.event_organizer);
-        eventDeadline    = view.findViewById(R.id.event_deadline);
-        waitingListCount = view.findViewById(R.id.waiting_list_count);
-        attendeesCount   = view.findViewById(R.id.attendees_count);
-        attendingLabel   = view.findViewById(R.id.attending_label);
-        poster           = view.findViewById(R.id.poster_image);
-        backButton    = view.findViewById(R.id.back_button);
-        joinButton    = view.findViewById(R.id.join_button);
-        acceptButton  = view.findViewById(R.id.accept_button);
-        declineButton = view.findViewById(R.id.decline_button);
-        deleteButton  = view.findViewById(R.id.delete_button);
+        backButton         = view.findViewById(R.id.back_button);
+        commentButton      = view.findViewById(R.id.comment_button);
+
+        poster             = view.findViewById(R.id.poster_image);
+        eventName          = view.findViewById(R.id.event_name);
+        eventDateTime      = view.findViewById(R.id.event_date_time);
+        eventOrganizer     = view.findViewById(R.id.event_organizer);
+        eventPrice         = view.findViewById(R.id.event_price);
+        eventLocation      = view.findViewById(R.id.event_location);
+        eventDescription   = view.findViewById(R.id.event_description);
+
+        reportButton       = view.findViewById(R.id.report_button);
+        adminInfo          = view.findViewById(R.id.admin_info);
+        reportedNum        = view.findViewById(R.id.reported_num);
+        deleteButton       = view.findViewById(R.id.delete_button);
+
+        bottomBar          = view.findViewById(R.id.bottom_bar);
+
+        eventDeadline      = view.findViewById(R.id.event_deadline);
+        waitingListCount   = view.findViewById(R.id.waiting_list_count);
+        attendeesCount     = view.findViewById(R.id.attendees_count);
+
+        joinButton         = view.findViewById(R.id.join_button);
+        leaveButton        = view.findViewById(R.id.leave_button);
+        selectButtonSet    = view.findViewById(R.id.select_button_set);
+        acceptButton       = view.findViewById(R.id.accept_button);
+        declineButton      = view.findViewById(R.id.decline_button);
+        attendingLabel     = view.findViewById(R.id.attending_label);
+        cannotAttendLabel  = view.findViewById(R.id.cannot_attend_label);
+
+        infoButton                = view.findViewById(R.id.lottery_info_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
+        requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadEventData();
@@ -111,137 +188,492 @@ public class InfoUEventFragment extends Fragment {
     }
 
     private void loadEventData() {
-        UserDb.getInstance().getUser(
-                userId,
-                user -> {
-                    // check if user role is admin
-                    final boolean userIsAdmin = user != null && User.ROLE_ADMIN.equals(user.getRole());
+        userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), u -> {
+            if (u != null) {
+                this.user = u;
 
-                    // attach snapshot listener to get event details
-                    eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(
-                                    eventId,
-                                    event -> { if (event != null) {
-                                            // display event details for all user roles
-                                            eventName.setText(event.getName());
-                                            eventDescription.setText(event.getDescription());
-                                            eventLocation.setText(event.getLocation());
-                                            eventDateTime.setText(event.getDateTime());
-                                            eventOrganizer.setText("Organizer: " + event.getOrganizerDeviceId());
-                                            poster.setVisibility(View.GONE);
+                userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), adminMode -> {
+                    if (adminMode != null) {
+                        boolean activeAdmin = u.getIsAdmin() && adminMode;
+                        startEventListener(activeAdmin);
+                    }
+                });
+            }
+        });
+    }
 
-                                            if (userIsAdmin) {
-                                                // display event details for admin view
-                                                joinButton.setVisibility(View.GONE);
-                                                acceptButton.setVisibility(View.GONE);
-                                                declineButton.setVisibility(View.GONE);
-                                                attendingLabel.setVisibility(View.GONE);
-                                                waitingListCount.setVisibility(View.GONE);
-                                                attendeesCount.setVisibility(View.GONE);
-                                                deleteButton.setVisibility(View.VISIBLE);
+    private void startEventListener(boolean activeAdmin) {
+        if (eventSnapshotListener != null) eventSnapshotListener.remove();
 
-                                                // allow admin to delete event by clicking delete button
-                                                deleteButton.setOnClickListener(v -> {
-                                                    EventDb.getInstance().deleteEvent(
-                                                            event.getEventId(),
-                                                            () -> {
-                                                                Log.d(TAG, "Event deleted by admin");
-                                                                getParentFragmentManager().popBackStack();
-                                                            },
-                                                            e -> Log.d(TAG, "Error deleting event: " + e)
-                                                    );
-                                                });
-                                            } else {
-                                                // show waiting list and attendees count for entrant
-                                                waitingListCount.setVisibility(View.VISIBLE);
-                                                attendeesCount.setVisibility(View.VISIBLE);
-                                                waitingListCount.setText(event.registrationList.getWaitingList().size() + " people are waiting ");
-                                                attendeesCount.setText(event.registrationList.getAttendingList().size() + " people are participating ");
-                                                deleteButton.setVisibility(View.GONE);
+        eventSnapshotListener = EventDb.getInstance().addSnapshotListenerForEvent(eventId, event -> {
+            if (event != null) {
+                renderCommonUI(event);
 
-                                                // check which list user is in and display corresponding buttons
-                                                if (event.registrationList.getAttendingList().contains(userId)) {
-                                                    joinButton.setVisibility(View.GONE);
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    attendingLabel.setVisibility(View.VISIBLE);
-                                                    attendingLabel.setText("You are attending");
-                                                }
-                                                else if (event.registrationList.getSelectedList().contains(userId)) {
-                                                    // user has been selected and needs to accept or decline
-                                                    joinButton.setVisibility(View.GONE);
-                                                    acceptButton.setVisibility(View.VISIBLE);
-                                                    declineButton.setVisibility(View.VISIBLE);
-                                                    attendingLabel.setVisibility(View.GONE);
+                if (activeAdmin) {
+                    setupAdminUI(event);
+                } else if (user != null && userId.equals(event.getOrganizerDeviceId())
+                        && user.getRole().equals(User.ROLE_ORGANIZER)) {
+                    // Primary organizer: full organizer UI including co-organizer management
+                    setupOrganizerUI(event, true);
+                } else if (user != null && event.isCoOrganizer(userId)) {
+                    // Co-organizer: organizer UI but cannot manage co-organizers
+                    setupOrganizerUI(event, false);
+                } else {
+                    setupEntrantUI(event);
+                }
+            } else {
+                Log.e(TAG, "No such event available");
+            }
+        }, e -> {
+            Log.e(TAG, "failed to fetch event");
+        });
+    }
 
-                                                    // move user from selectedList to attendingList on acceptance
-                                                    acceptButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().moveUserBetweenLists(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_SELECTED,
-                                                                EventDb.LIST_ATTENDING,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User accepted invitation"),
-                                                                e -> Log.d(TAG, "Error accepting invitation: " + e)
-                                                        );
-                                                    });
-                                                    // move user from selectedList to declinedList on decline
-                                                    declineButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().moveUserBetweenLists(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_SELECTED,
-                                                                EventDb.LIST_DECLINED,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User declined invitation"),
-                                                                e -> Log.d(TAG, "Error declining invitation: " + e)
-                                                        );
-                                                    });
-                                                }
-                                                else if (event.registrationList.getWaitingList().contains(userId)) {
-                                                    // user is on waiting list
-                                                    joinButton.setVisibility(View.VISIBLE);
-                                                    joinButton.setText("Leave Pool");
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    attendingLabel.setVisibility(View.GONE);
-                                                    // remove user from waitingList when Leave Pool is clicked
-                                                    joinButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().removeUserFromList(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_WAITING,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User left waiting list"),
-                                                                e -> Log.d(TAG, "Error leaving waiting list: " + e)
-                                                        );
-                                                    });
-                                                }
-                                                else {
-                                                    // user is not on any list so show Join Pool button
-                                                    joinButton.setVisibility(View.VISIBLE);
-                                                    joinButton.setText("Join Pool");
-                                                    acceptButton.setVisibility(View.GONE);
-                                                    declineButton.setVisibility(View.GONE);
-                                                    attendingLabel.setVisibility(View.GONE);
-                                                    // add user to waitingList when Join Pool is clicked
-                                                    joinButton.setOnClickListener(v -> {
-                                                        EventDb.getInstance().addUserToList(
-                                                                event.getEventId(),
-                                                                EventDb.LIST_WAITING,
-                                                                userId,
-                                                                () -> Log.d(TAG, "User joined waiting list"),
-                                                                e -> Log.d(TAG, "Error joining waiting list: " + e)
-                                                        );
-                                                    });
-                                                }
-                                            }
-                                        } else {
-                                            Log.d(TAG, "No such event available");
-                                        }
-                                    },
-                                    e -> Log.d(TAG, "Error fetching event: " + e)
-                            );
+    private void renderCommonUI(Event event) {
+        if (event.getPosterUrl() == null) {
+            poster.setVisibility(View.GONE);
+        } else {
+            if (event.getPosterUrl() != null) {
+                poster.setVisibility(View.VISIBLE);
+                Glide.with(requireContext())
+                        .load(event.getPosterUrl())
+                        .into(poster);
+            }
+        }
+        eventName.setText(event.getName());
+        eventDateTime.setText(event.getDateTime());
+
+        // get organizer name
+        String organizerText = getString(R.string.organized_by_text) + event.getOrganizerDeviceId();
+        eventOrganizer.setText(organizerText);
+        UserDb.getInstance().getUser(event.getOrganizerDeviceId(),
+                u -> {
+                    if (u != null) {
+                        String organizerName = getString(R.string.organized_by_text) + u.getName() + " (" + event.getOrganizerDeviceId() + ")";
+                        eventOrganizer.setText(organizerName);
+                    }
                 },
-                e -> Log.d(TAG, "Error fetching user" + e)
+                e -> {
+                }
         );
+        eventPrice.setText(event.getPrice());
+        eventLocation.setText(event.getLocation());
+        eventDescription.setText(event.getDescription());
+
+        // set info button functionality
+        infoButton.setOnClickListener(v -> {
+            LotteryInfoFragment infoFragment = new LotteryInfoFragment();
+            infoFragment.show(requireActivity().getSupportFragmentManager(), "Lottery Info");
+        });
+
+        commentButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", event.getEventId());
+            bundle.putString("organizerId", event.getOrganizerDeviceId());
+
+            CommentFragment commentFragment = new CommentFragment();
+            commentFragment.setArguments(bundle);
+
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(
+                            android.R.anim.slide_in_left,
+                            android.R.anim.fade_out,
+                            android.R.anim.fade_in,
+                            android.R.anim.slide_out_right
+                    )
+                    .replace(R.id.fragment_container, commentFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+    }
+
+    private void setupAdminUI(Event event) {
+        bottomBar.setVisibility(View.GONE);
+        reportButton.setVisibility(View.GONE);
+        adminInfo.setVisibility(View.VISIBLE);
+
+        commentButton.setVisibility(View.VISIBLE);
+
+        eventDeadline.setVisibility(View.VISIBLE);
+        waitingListCount.setVisibility(View.VISIBLE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.GONE);
+
+        infoButton.setVisibility(View.VISIBLE);
+
+        // set the number of people that reported this event grammatically
+        String reportedNumText = "Reported by " + event.getNumReports();
+        if (event.getNumReports() == 1) {
+            reportedNumText += " person";
+        } else {
+            reportedNumText += " people";
+        }
+        reportedNum.setText(reportedNumText);
+
+        // set delete button functionality
+        deleteButton.setOnClickListener(v -> {
+            PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
+                    EventDb.getInstance().deleteEvent(
+                            event.getEventId(),
+                            () -> {
+                                Log.d(TAG, "Event deleted by admin");
+                                getParentFragmentManager().popBackStack();
+                            },
+                            e -> Log.e(TAG, "Error deleting event: " + e)
+                    )
+            );
+            fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Delete");
+        });
+    }
+
+    /**
+     * Sets up the organizer UI.
+     *
+     * @param event            The current event.
+     * @param isPrimaryOrganizer True if the current user is the primary organizer (not a co-organizer).
+     *                           Only the primary organizer can open the co-organizer management screen.
+     */
+    private void setupOrganizerUI(Event event, boolean isPrimaryOrganizer) {
+        Log.e(TAG, "When organizer of this event, it should open `EventEditFragment`");
+        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
+    }
+
+    private void setupEntrantUI(Event event) {
+        reportButton.setVisibility(View.VISIBLE);
+        adminInfo.setVisibility(View.GONE);
+        bottomBar.setVisibility(View.VISIBLE);
+
+        commentButton.setVisibility(View.VISIBLE);
+
+        // set report button functionality
+        reportButton.setOnClickListener(v -> {
+            ReportFragment fragment = ReportFragment.newInstance(() -> {
+                event.addReport(userId);
+                EventDb.getInstance().updateEvent(event,
+                        () -> {
+                            Log.d(TAG, "Event updated with new report");
+                            Toast.makeText(getContext(), "Event reported.", Toast.LENGTH_SHORT).show();
+                        },
+                        e -> Toast.makeText(getContext(), "Database connection failed. Please try again.", Toast.LENGTH_SHORT).show());
+            });
+            fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Report");
+        });
+
+        String deadlineText = "Sign up before " + event.getRegistrationTimeEnd();
+        eventDeadline.setText(deadlineText);
+
+        // set waiting count grammatically
+        String waitingCountText = String.valueOf(event.getRegistrationList().getWaitingList().size());
+        if (event.getRegistrationList().getWaitingCapacity() > -1) {
+            waitingCountText += "/" + event.getRegistrationList().getWaitingCapacity();
+        }
+        if (waitingCountText.equals("1") && event.getRegistrationList().getWaitingCapacity() > -1) {
+            waitingCountText += " person is waiting";
+        } else {
+            waitingCountText += " people are waiting";
+        }
+        waitingListCount.setText(waitingCountText);
+
+        // set attendees count grammatically
+        String attendeesCountText = String.valueOf(event.getRegistrationList().getAttendingList().size());
+        if (event.getRegistrationList().getAttendingCapacity() > -1) {
+            attendeesCountText += "/" + event.getRegistrationList().getAttendingCapacity();
+        }
+        if (attendeesCountText.equals("1") && event.getRegistrationList().getAttendingCapacity() > -1) {
+            attendeesCountText += " person is participating";
+        } else {
+            attendeesCountText += " people are participating";
+        }
+        attendeesCount.setText(attendeesCountText);
+
+        RegistrationList list = event.getRegistrationList();
+
+        // A co-organizer for this event cannot join the entrant pool
+        if (event.isCoOrganizer(userId)) {
+            joinButton.setVisibility(View.GONE);
+            leaveButton.setVisibility(View.GONE);
+            selectButtonSet.setVisibility(View.GONE);
+            attendingLabel.setVisibility(View.GONE);
+            cannotAttendLabel.setVisibility(View.VISIBLE);
+            cannotAttendLabel.setText(R.string.co_organizer_cannot_join);
+            return;
+        }
+
+        if (list.getAttendingList().contains(userId)) {
+            onAttending(event);
+        } else if (list.getSelectedUserStrings().contains(userId)) {
+            onSelected(event);
+        } else if (list.getWaitingList().contains(userId)) {
+            onWaiting(event);
+        } else if (list.getRemovedList().contains(userId)) {
+            onRemoved(event);
+        } else if (list.getEmptySlotAmount() == 0) {
+            onFull(event);
+        } else if (list.getWaitingCapacity() > -1 && list.getWaitingList().size() >= list.getWaitingCapacity()) {
+            onWaitFull(event);
+        } else if (event.getRegistrationTimeEndAsDateTime().isBefore(LocalDateTime.now())) {
+            onLate(event);
+        } else {
+            onJoin(event);
+        }
+    }
+
+    private void onAttending(Event event) {
+        eventDeadline.setVisibility(View.GONE);
+        waitingListCount.setVisibility(View.GONE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.VISIBLE);
+        cannotAttendLabel.setVisibility(View.GONE);
+
+        infoButton.setVisibility(View.GONE);
+    }
+
+    private void onSelected(Event event) {
+        eventDeadline.setVisibility(View.VISIBLE);
+        waitingListCount.setVisibility(View.VISIBLE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.VISIBLE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.GONE);
+
+        infoButton.setVisibility(View.VISIBLE);
+
+        // move user from selectedList to attendingList on acceptance
+        acceptButton.setOnClickListener(v -> {
+            v.setEnabled(false);
+            EventDb.getInstance().userAcceptSelection(eventId, userId,
+                    () -> Log.d(TAG, "Accepted Invitation"),
+                    e -> {
+                        Log.e(TAG, "Failed to accept", e);
+                        v.setEnabled(true);
+                    }
+            );
+        });
+        // move user from selectedList to declinedList on decline
+        declineButton.setOnClickListener(v -> {
+            v.setEnabled(false);
+            EventDb.getInstance().userDeclineSelection(eventId, userId,
+                    () -> Log.d(TAG, "Declined Invitation"),
+                    e -> {
+                        Log.e(TAG, "Failed to Decline", e);
+                        v.setEnabled(true);
+                    }
+            );
+        });
+    }
+
+    private void onWaiting(Event event) {
+        eventDeadline.setVisibility(View.VISIBLE);
+        waitingListCount.setVisibility(View.VISIBLE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.VISIBLE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.GONE);
+
+        infoButton.setVisibility(View.VISIBLE);
+
+        leaveButton.setOnClickListener(v -> {
+            EventDb.getInstance().leaveWaitlist(eventId, userId,
+                    () -> {
+                        EventDb.getInstance().deleteEntrantLocation(
+                                event.getEventId(), userId,
+                                () -> Log.d(TAG, "Location removed"),
+                                e -> Log.e(TAG, "Failed to remove location", e)
+                        );
+                        v.setEnabled(false);
+                        Log.d(TAG, "Successfully Left WaitList");
+                    },
+                    e -> {
+                        Log.e(TAG, "Failed to leave Waitlist");
+                        v.setEnabled(false);
+                    });
+        });
+    }
+
+    private void onRemoved(Event event) {
+        eventDeadline.setVisibility(View.GONE);
+        waitingListCount.setVisibility(View.GONE);
+        attendeesCount.setVisibility(View.GONE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.VISIBLE);
+
+        infoButton.setVisibility(View.GONE);
+    }
+
+    private void onFull(Event event) {
+        eventDeadline.setVisibility(View.GONE);
+        waitingListCount.setVisibility(View.GONE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.VISIBLE);
+
+        infoButton.setVisibility(View.VISIBLE);
+    }
+
+    private void onWaitFull(Event event) {
+        eventDeadline.setVisibility(View.GONE);
+        waitingListCount.setVisibility(View.VISIBLE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.VISIBLE);
+
+        infoButton.setVisibility(View.VISIBLE);
+    }
+
+    private void onLate(Event event) {
+        eventDeadline.setVisibility(View.VISIBLE);
+        waitingListCount.setVisibility(View.GONE);
+        attendeesCount.setVisibility(View.GONE);
+
+        joinButton.setVisibility(View.GONE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.VISIBLE);
+
+        infoButton.setVisibility(View.VISIBLE);
+    }
+
+    private void onJoin(Event event) {
+        eventDeadline.setVisibility(View.VISIBLE);
+        waitingListCount.setVisibility(View.VISIBLE);
+        attendeesCount.setVisibility(View.VISIBLE);
+
+        joinButton.setVisibility(View.VISIBLE);
+        leaveButton.setVisibility(View.GONE);
+        selectButtonSet.setVisibility(View.GONE);
+        attendingLabel.setVisibility(View.GONE);
+        cannotAttendLabel.setVisibility(View.GONE);
+
+        infoButton.setVisibility(View.VISIBLE);
+
+        joinButton.setOnClickListener(v -> {
+            v.setEnabled(false);
+            attemptJoinWaitingList(event, v);
+        });
+    }
+
+    private void attemptJoinWaitingList(Event event, View joinBtn) {
+        if (event.getGeolocationRequired()) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Location Required")
+                    .setMessage("This event requires your location to join the waiting list. Do you want to share your location?")
+                    .setCancelable(false)
+                    .setPositiveButton("Allow", (dialog, id) -> {
+                        if (ContextCompat.checkSelfPermission(requireContext(),
+                                Manifest.permission.ACCESS_FINE_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            fetchLocationAndJoin(event);
+                        } else {
+                            // Store event, prompt for permission
+                            pendingJoinEvent = event;
+                            ActivityCompat.requestPermissions(
+                                    requireActivity(),
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    LOCATION_PERMISSION_REQUEST_CODE
+                            );
+                        }
+                    })
+                    .setNegativeButton("Cancel", (dialog, id) -> {
+                        dialog.dismiss();
+                        if (joinBtn != null) joinBtn.setEnabled(true);
+                    })
+                    .show();
+        } else {
+            // Join directly, geolocation not required
+            joinWaitingList(event, null, null);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void fetchLocationAndJoin(Event event) {
+        com.google.android.gms.location.LocationRequest locationRequest =
+                com.google.android.gms.location.LocationRequest.create()
+                        .setPriority(com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY)
+                        .setNumUpdates(1)   // only need one fix
+                        .setInterval(0);
+
+        fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                new com.google.android.gms.location.LocationCallback() {
+                    @Override
+                    public void onLocationResult(@NonNull com.google.android.gms.location.LocationResult result) {
+                        fusedLocationClient.removeLocationUpdates(this);
+                        android.location.Location location = result.getLastLocation();
+                        if (location != null) {
+                            Log.d(TAG, "Fresh location: " + location.getLatitude() + ", " + location.getLongitude());
+
+                            if (event.getGeolocationRequired()) {
+                                boolean withinRange = RadiusUtil.isWithinRadius(
+                                        EDMONTON_LAT, EDMONTON_LNG,
+                                        location.getLatitude(), location.getLongitude(),
+                                        EDMONTON_RADIUS_METERS
+                                );
+                                if (!withinRange) {
+                                    requireActivity().runOnUiThread(() ->
+                                            Toast.makeText(requireContext(),
+                                                    "You must be in Edmonton to join.",
+                                                    Toast.LENGTH_LONG).show()
+                                    );
+                                    return;
+                                }
+                            }
+                            joinWaitingList(event, location.getLatitude(), location.getLongitude());
+                        } else {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(),
+                                            "Unable to get location. Please try again.",
+                                            Toast.LENGTH_SHORT).show()
+                            );
+                        }
+                    }
+                },
+                requireActivity().getMainLooper()
+        );
+    }
+
+    private void joinWaitingList(Event event, Double latitude, Double longitude) {
+        EventDb.getInstance().joinWaitlist(eventId, userId,
+                () -> Log.d(TAG, "Joined waitlist"),
+                e -> Log.e(TAG, "Failed to join Waitlist")
+        );
+
+        // Store coordinates separately if geolocation is enabled
+        if (latitude != null && longitude != null) {
+            EventDb.getInstance().saveEntrantLocation(
+                    event.getEventId(), userId, latitude, longitude,
+                    () -> Log.d(TAG, "Location saved"),
+                    e -> Log.e(TAG, "Failed to save location", e)
+            );
+        }
     }
 
     /**
@@ -253,6 +685,141 @@ public class InfoUEventFragment extends Fragment {
         if (eventSnapshotListener != null) {
             eventSnapshotListener.remove();
             Log.d(TAG, "Event snapshot listener detached");
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Input dialog for image selection
+     */
+    private void showInputDialogImage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
+        builder.setView((dialogView));
+
+        dialogImageView = dialogView.findViewById(R.id.image_preview);
+
+        AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.gravity = Gravity.CENTER;
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setAttributes(params);
+        }
+
+        Button btnCamera = dialogView.findViewById(R.id.btn_take_photo);
+        Button btnGallery = dialogView.findViewById(R.id.btn_choose_gallery);
+        Button btnCancel = dialogView.findViewById(R.id.btn_image_cancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
+        FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
+        TextView header = dialogView.findViewById(R.id.dialog_title);
+
+        header.setText("Edit Event Poster");
+
+        btnGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                activityResultLauncher.launch(intent);
+            }
+        });
+
+        btnConfirm.setOnClickListener(v -> {
+            if (image == null) {
+                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Update and upload poster
+            selectedImageUri = image;
+            Glide.with(requireContext()).load(selectedImageUri).into(poster);
+            EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, eventId);
+            dialog.dismiss();
+        });
+
+        btnCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    /**
+     * Upload image from camera or photo gallery
+     */
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null && result.getData().getData() != null) {
+                        image = result.getData().getData();
+                    } else if (cameraImageUri != null) {
+                        image = cameraImageUri;
+                    }
+
+                    if (image != null) {
+
+                        // Update image upload dialog
+                        if (dialogImageView != null) {
+                            dialogImageView.setVisibility(View.VISIBLE);
+                            dialogView.findViewById(R.id.image_placeholder).setVisibility(View.GONE);
+                            dialogImageView.post(() ->
+                                    Glide.with(requireContext()).load(image).into(dialogImageView)
+                            );
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No image selected", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
+
+    /**
+     * Take photo via intent
+     */
+    private void dispatchTakePictureIntent() {
+        // Create temp image URI
+        java.io.File photoFile = new java.io.File(
+                requireContext().getCacheDir(),
+                "camera_photo_" + System.currentTimeMillis() + ".jpg"
+        );
+        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                photoFile
+        );
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+        activityResultLauncher.launch(takePictureIntent);
+    }
+
+    @Override
+    public void onLocationToggle(boolean isEnabled) {}
+
+    @Override
+    public void onLocationPermissionResult(boolean granted) {
+        if (granted && pendingJoinEvent != null) {
+            fetchLocationAndJoin(pendingJoinEvent);
+        } else if (!granted) {
+            Toast.makeText(requireContext(),
+                    "Location permission is required to join this event.",
+                    Toast.LENGTH_LONG).show();
         }
     }
 }

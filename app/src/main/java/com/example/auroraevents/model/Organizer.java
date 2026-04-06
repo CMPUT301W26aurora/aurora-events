@@ -1,99 +1,107 @@
 package com.example.auroraevents.model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+/**
+ * A subclass of User who manages Events
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
+ */
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
+    private String deviceID;
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String role;
+    private boolean isAdmin;
 
     public Organizer() {
         super();
         setRole(User.ROLE_ORGANIZER);
-        myEvents = new ArrayList<Event>();
+        myEvents = new ArrayList<>();
     }
 
+    public Organizer(String deviceID, String name, String email, String phoneNumber, String role, boolean isAdmin) {
+        super(deviceID, name, email, phoneNumber, role, isAdmin);
+        setRole(User.ROLE_ORGANIZER);
+        myEvents = new ArrayList<>();
+    }
     public ArrayList<Event> getMyEvents() {
         return myEvents;
     }
-
     public void setMyEvents(ArrayList<Event> myEvents) {
         this.myEvents = myEvents;
     }
 
     /**
-     * @param organizerDeviceId  The organizer's device ID
-     * @param title              The title of the event
-     * @param description        The event description
-     * @param date               The date of the event, format: yyyy-MM-dd
-     * @param time               The time of the event, format: HH:mm:ss
-     * @param startTime          The start of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param endTime            The end of the registration period, format: yyyy-MM-dd HH:mm:ss
-     * @param location           The event location
-     * @param capacity           The event capacity
+     * @param organizerDeviceId   The organizer's device ID
+     * @param title               The title of the event
+     * @param description         The event description
+     * @param price               The event's price
+     * @param date                The date of the event, format: yyyy-MM-dd HH:mm:ss
+     * @param startTime           The start of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param endTime             The end of the registration period, format: yyyy-MM-dd HH:mm:ss
+     * @param location            The event location
+     * @param geolocationRequired Whether entrants need to be in the location to sign up
+     * @param waitingCapacity     The total number of entrants that could attend the event
+     * @param attendingCapacity   The total number of entrants that can join the waiting list
      */
-    public void CreateEvent(String organizerDeviceId, String title, String description, String date,
-                            String time, String startTime, String endTime, String location, int capacity) {
+    public void CreateEvent(
+            String organizerDeviceId,
+            String title,
+            String description,
+            String price,
+            String date,
+            String startTime,
+            String endTime,
+            String location,
+            boolean geolocationRequired,
+            int waitingCapacity,
+            int attendingCapacity,
+            boolean isPrivate,
+            EventDb.OnEventCreatedCallback onCreated) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // Parse from formatter
-        LocalDate eventDate = LocalDate.parse(date);
-        LocalTime parsedTime = LocalTime.parse(time);
-        LocalDateTime eventDateTime = parsedTime.atDate(eventDate);
-
-        LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
+        LocalDateTime eventDateTime          = LocalDateTime.parse(date, formatter);
+        LocalDateTime eventRegistrationStart = (startTime != null) ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime eventRegistrationEnd   = (endTime != null)   ? LocalDateTime.parse(endTime, formatter)   : null;
 
         // Create event from parameters
-        Event event = new Event(organizerDeviceId, title, description,
+        Event event = new Event(
+                organizerDeviceId,
+                title,
+                description,
+                price,
                 eventDateTime,
                 eventRegistrationStart,
                 eventRegistrationEnd,
-                location, capacity);
+                location,
+                geolocationRequired,
+                waitingCapacity,
+                attendingCapacity);
+        event.setPrivate(isPrivate);
 
-        // Add event
+        event.setGeolocationRequired(geolocationRequired);
+
         EventDb.addEvent(event,
-                eventId -> Log.d("Organizer", "Event successfully created with ID: " + eventId),
-                e      -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
+                eventId -> {
+                    Log.d("Organizer", "Event successfully created with ID: " + eventId);
+                    myEvents.add(event);
+                    onCreated.onCreated(eventId);
+                },
+                e -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );
-        myEvents.add(event);
-    }
-
-    /**
-     * Randomly samples users in the waiting list of the specified event
-     * @param event
-     * Event that the organizer wants to sample in
-     */
-    public void sampleWaitList(Event event) {
-        if (!(myEvents.contains(event))) { // Check if the organizer created the specified event
-            throw new IllegalArgumentException("Event not found");
-        }
-        else {
-            event.randomSampling();
-        }
-    }
-
-    /**
-     * Gets the list of users that are in the waiting list of the specified event
-     * @param event
-     * The event the organizer wants to get the waiting list of
-     * @return
-     * Return the waiting list of users in the specified event
-     */
-    public ArrayList<User> getEventWaitList(Event event) {
-        if (myEvents.contains(event)) {
-            //Return list of users in that are in the waiting list
-            return event.getWaitingListOfUsers();
-        }
-        else { // Cannot get waitlist of an event that the organizer did not create
-            throw new IllegalArgumentException("Event not found");
-        }
     }
 }

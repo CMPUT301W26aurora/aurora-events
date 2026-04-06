@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:background="#0A1730"
+    android:paddingBottom="24dp">
+
+    <!-- Back button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <ImageButton
+            android:id="@+id/back_button_organizer_notif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/back_button_content_description"
+            android:padding="10dp"
+            android:src="@drawable/rounded_arrow_back_24"
+            app:tint="@color/blue"
+            android:background="@drawable/rounded_box"
+            android:backgroundTint="@color/light_glass"/>
+
+    </RelativeLayout>
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Sent Notifications"
+        android:textSize="14pt"
+        android:textColor="@color/blue"
+        android:fontFamily="@font/roboto_bold"/>
+
+    <!-- Organizer info: name | email | deviceId -->
+    <TextView
+        android:id="@+id/organizer_info_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="6pt"
+        android:textColor="@color/light_text"
+        android:fontFamily="@font/roboto"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/organizer_notifications_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="20dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="96dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"/>
+
+</LinearLayout>

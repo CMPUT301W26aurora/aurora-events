@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="10dp"
+    android:background="#0A1730"
+    android:minHeight="56dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:background="@drawable/rounded_box"
+        android:backgroundTint="@color/light_glass"
+        android:layout_marginEnd="10dp">
+
+        <TextView
+            android:id="@+id/co_organizer_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="7pt"
+            android:textColor="@color/light_text"
+            android:fontFamily="@font/roboto_bold"/>
+
+        <TextView
+            android:id="@+id/co_organizer_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="5pt"
+            android:textColor="@color/purple"
+            android:fontFamily="@font/roboto"/>
+
+    </LinearLayout>
+
+    <!-- Remove button -->
+    <Button
+        android:id="@+id/remove_co_organizer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/light_red"
+        android:paddingHorizontal="15dp"
+        android:paddingVertical="10dp"
+        android:text="@string/remove_co_organizer_button_text"
+        android:textColor="@color/dark_text"
+        android:fontFamily="@font/roboto_bold"
+        app:icon="@drawable/rounded_cancel_24"
+        app:iconTint="@color/dark_text"/>
+
+</LinearLayout>

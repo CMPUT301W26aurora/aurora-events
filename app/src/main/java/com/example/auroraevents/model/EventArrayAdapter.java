@@ -17,23 +17,19 @@ import java.util.ArrayList;
 /**
  * Converts a list of Event objects to rows
  * Each event row displays the event details i.e.
- * name, description, status tag
+ * name, description
+ * @author Alina Iqbal
  */
 public class EventArrayAdapter extends ArrayAdapter <com.example.auroraevents.model.Event> {
-    /** get the user's deviceId*/
-    private final String userId;
-
     /**
+     * Constructor for the array adapter
      *
-     * @param context
+     * @param context current context used to inflate layout
      * @param events: list of event objects
-     * @param userId: device id of the user to identify status tag
      */
-    public EventArrayAdapter(Context context, ArrayList <com.example.auroraevents.model.Event> events, String userId){
+    public EventArrayAdapter(Context context, ArrayList <com.example.auroraevents.model.Event> events){
         super(context, 0,events);
-        this.userId = userId;
     }
-
     /**
      *
      * @param position The position of the item in the list
@@ -53,23 +49,8 @@ public class EventArrayAdapter extends ArrayAdapter <com.example.auroraevents.mo
         Event event = getItem(position);
         TextView eventName = view.findViewById(R.id.event_name);
         TextView eventDescription = view.findViewById(R.id.event_description);
-        TextView eventTag = view.findViewById(R.id.event_tag_1);
-        TextView eventLongerTag = view.findViewById(R.id.event_tag_2);
-        TextView eventInterestingTag = view.findViewById(R.id.event_tag_3);
-
         eventName.setText(event.getName());
         eventDescription.setText(event.getDescription());
-
-        // check user status and update status tag
-        if (event.registrationList.getAttendingList() != null && event.registrationList.getAttendingList().contains(userId)) {
-            eventTag.setText("Attending");
-        } else if (event.registrationList.getSelectedList() != null && event.registrationList.getSelectedList().contains(userId)) {
-            eventTag.setText("Invited");
-        } else if (event.registrationList.getWaitingList() != null && event.registrationList.getWaitingList().contains(userId)) {
-            eventTag.setText("Waiting");
-        } else {
-            eventTag.setText("");
-        }
         return view;
     }
 }

@@ -10,8 +10,11 @@ import com.example.auroraevents.model.Event;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
+/**
+ * Tests Qr code generation
+ * @author Sean Ross
+ */
 public class QRcodeTest {
 
     @Test
@@ -20,18 +23,16 @@ public class QRcodeTest {
                 "test device",
                 "QR code test",
                 "event for QR code test",
+                "free",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1),
                 "testing environment",
-                0);
+                false,0,0);
         event.setEventId("sample id for QR Code testing");
-        event.generateQrCode();
-
-         Bitmap test = event.getQrCode();
+         Bitmap test = event.generateQrCode();
          assertNotNull(test);
          assertEquals(400, test.getWidth());
          assertEquals(400, test.getHeight());
     }
-
 }

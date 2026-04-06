@@ -1,49 +1,72 @@
 package com.example.auroraevents.model;
 
+import android.text.format.DateUtils;
+import android.util.Log;
+
+import com.example.auroraevents.server.EventDb;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.ServerTimestamp;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents a user in the application.
  * The deviceId serves as the Firestore document ID in the "Users" collection.
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
  */
 public class User {
 
     // Roles
     public static final String ROLE_ENTRANT   = "entrant";
     public static final String ROLE_ORGANIZER = "organizer";
-    public static final String ROLE_ADMIN     = "admin";
-
     private String deviceId;      // Firestore document ID
     private String name;
     private String email;
     private String phoneNumber;
     private String role;
-    private Integer databaseTimeout = 10;
-    private TimeUnit timeoutUnit = TimeUnit.SECONDS;
-
-
+    private final String TAG = "User";
+    private Boolean isAdmin;
+    private Map<String, String> eventsSigned;
+    @ServerTimestamp
+    private Timestamp accountAge;
     // Notification history (stored as notification IDs or message strings)
     private List<String> notificationHistory;
 
     // Tags associated with this user
     private List<String> tags;
-
-
     /** Required no-arg constructor for Firestore deserialization */
     public User() {
-        notificationHistory  = new ArrayList<>();
-        tags                 = new ArrayList<>();
+        this.name = "";
+        this.email = "";
+        this.phoneNumber = "";
+        this.role = ROLE_ENTRANT;
+        this.isAdmin = false;
+        this.notificationHistory  = new ArrayList<>();
+        this.tags                 = new ArrayList<>();
+        this.eventsSigned = new HashMap<>();
     }
-
-    public User(String deviceId, String name, String email, String phoneNumber, String role) {
+    public User(String deviceId, String name, String email, String phoneNumber, String role, Boolean isAdmin) {
         this();
         this.deviceId        = deviceId;
         this.name            = name;
         this.email           = email;
         this.phoneNumber     = phoneNumber;
         this.role            = role;
+        this.isAdmin = isAdmin;
     }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
@@ -62,25 +85,30 @@ public class User {
 
     public String getRole()                            { return role; }
     public void   setRole(String role)                 { this.role = role; }
-
+    public Boolean getIsAdmin()                          {return isAdmin;}
+    public void setIsAdmin(Boolean admin)                {isAdmin = admin;}
     public List<String> getNotificationHistory()                                   { return notificationHistory; }
     public void         setNotificationHistory(List<String> notificationHistory)   { this.notificationHistory = notificationHistory; }
 
     public List<String> getTags()                      { return tags; }
     public void         setTags(List<String> tags)     { this.tags = tags; }
+    public Timestamp getAccountAge(){return accountAge;}
+    public void setAccountAge(Timestamp accountAge){this.accountAge=accountAge;}
+    public Map<String, String> getEventsSigned() {
+        return eventsSigned != null ? eventsSigned : new HashMap<>();
+    }
+    public void setEventsSigned (Map<String,String> eventsSigned) {this.eventsSigned=eventsSigned;}
 
-    public Integer getDatabaseTimeout() {
-        return databaseTimeout;
+    /**
+     * A helper function that returns the account age as a formatted string
+     * @return A {@link String} that represents an age.
+     */
+    @Exclude
+    public String getFormattedAccountAge() {
+        if (accountAge == null) return "Unknown";
+        String timeAgo = DateUtils.getRelativeTimeSpanString(accountAge.toDate().getTime(),
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS).toString();
+        return "Joined " +timeAgo;
     }
-    public void setDatabaseTimeout(Integer databaseTimeout) {
-        this.databaseTimeout = databaseTimeout;
-    }
-
-    public TimeUnit getTimeoutUnit() {
-        return timeoutUnit;
-    }
-    public void setTimeoutUnit(TimeUnit unit) {
-        timeoutUnit = unit;
-    }
-
 }

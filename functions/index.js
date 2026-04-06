@@ -1,65 +1,265 @@
-const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const {
+    onDocumentUpdated,
+    onDocumentDeleted
+} = require("firebase-functions/v2/firestore");
+const { onCall } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
+const bucket = admin.storage().bucket();
+
+//firebase functions for notifications made by Joshua Terry, anything else
+//is by Sean Ross, with additions from each other to the others functions.
+exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
+    const deletedUserId = event.params.userId;
+    const batch = db.batch();
+
+    console.log("Triggered Cleanup for deleted user:", deletedUserId);
+    try {
+            const eventsOwnedSnapshot = await db.collection("Events")
+                .where("eventOrganizerId", "==", deletedUserId)
+                .get();
+
+            eventsOwnedSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            // delete from all event lists
+
+            const eventsSnapshot = await db.collection("Events").get();
+            eventsSnapshot.forEach(doc => {
+                const data = doc.data();
+                const regList = data.registrationList || {};
+
+                if (regList.selectedList) {
+                      const updatedSelected = regList.selectedList.filter(u => u.userId !== deletedUserId);
+                      batch.update(doc.ref, { "registrationList.selectedList": updatedSelected });
+                }
+
+                batch.update(doc.ref, {
+                    "registrationList.waitingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.attendingList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.cancelledList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.declinedList": admin.firestore.FieldValue.arrayRemove(deletedUserId),
+                    "registrationList.removedList": admin.firestore.FieldValue.arrayRemove(deletedUserId)
+                });
+            });
+
+            // delete users parent comments
+            const parentCommentSnapshot = await db.collection("Comments")
+                .where("userId", "==", deletedUserId)
+                .where("parentId", "==", null)
+                .get();
+
+            parentCommentSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            // delete users replies, cascade will destroy the replies to self, this handles replies to others
+            const replyCommentSnapshot = await db.collection("Comments")
+                .where("userId", "==", deletedUserId)
+                .where("parentId", "!=", null)
+                .get();
+
+            replyCommentSnapshot.forEach(doc =>{
+                batch.delete(doc.ref);
+            });
+
+            // delete users notifications
+            const notificationsSnapshot = await db.collection("Notifications")
+                .where("deviceId", "==", deletedUserId)
+                .get();
+
+            notificationsSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+            console.log("Cleanup complete for user:", deletedUserId);
+
+        } catch (error) {
+            console.error("Error during user cleanup:", error);
+        }
+
+});
+
+exports.onCommentDeleted = onDocumentDeleted("Comments/{commentId}", async (event) => {
+    const deletedCommentId = event.params.commentId;
+    const batch = db.batch();
+
+    console.log("Checking for replies to deleted comment:", deletedCommentId);
+
+    try {
+        // Find all comments that are replies, delete
+        const repliesSnapshot = await db.collection("Comments")
+            .where("parentId", "==", deletedCommentId)
+            .get();
+
+        //if none exit early
+        if (repliesSnapshot.empty) {
+            return null;
+        }
+
+        repliesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log("Deleted replies for parent:",  deletedCommentId, repliesSnapshot.size);
+    } catch (error) {
+        console.error("Error cascading comment deletion:", error);
+    }
+});
+
+exports.onEventDeleted= onDocumentDeleted("Events/{eventId}", async (event)=>{
+    const deletedEventId = event.params.eventId;
+    const batch = db.batch();
+
+    try {
+        // Find all parent comments, cascade will delete replies
+        const parentSnapshot = await db.collection("Comments")
+            .where("eventId", "==", deletedEventId)
+            .where("parentId", "==", null)
+            .get();
+
+        //https://docs.cloud.google.com/storage/docs/samples/storage-delete-file#storage_delete_file-nodejs
+        //Question asked by user Pat Myron, answered used from TheFastCat
+        //https://stackoverflow.com/questions/37749647/firebasestorage-how-to-delete-directory
+
+        await bucket.deleteFiles({
+            prefix: `${deletedEventId}/`
+        });
+
+        parentSnapshot.forEach(doc=>{
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log("Deleted event and its comments", deletedEventId);
+
+    } catch (error) {
+        console.error("Error deleting events comments", error);
+    }
+});
 
 /**
  * Firestore-triggered Cloud Function that sends push notifications to entrants
  * when they are moved between registration lists on an Event document.
- *
- * Listens for updates to any document in the "Events" collection and compares
- * the before/after state of each participant list. Any entrant newly added to
- * a list receives a push notification via FCM.
  */
 exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) => {
-    const before = event.data.before.data().registrationList || {};
-    const after  = event.data.after.data().registrationList || {};
+    const before     = event.data.before.data().registrationList || {};
+    const after      = event.data.after.data().registrationList || {};
+    const beforeCo   = event.data.before.data().coOrganizerDeviceIds || [];
+    const afterCo    = event.data.after.data().coOrganizerDeviceIds || [];
 
-    console.log("Function triggered for event:", event.params.eventId);
-    console.log("Before selectedList:", JSON.stringify(before.selectedList));
-    console.log("After selectedList:", JSON.stringify(after.selectedList));
+    const eventName      = event.data.after.data().name || "an event";
+    const eventId        = event.params.eventId;
+    const organizerId    = event.data.after.data().organizerDeviceId || ""; // organizer who owns the event
 
-    await notifyNewEntrants(before.selectedList,  after.selectedList,  "You've been selected!",     "Check the app to confirm your spot.");
-    await notifyNewEntrants(before.attendingList, after.attendingList, "You're confirmed!",          "You're now on the attending list.");
-    await notifyNewEntrants(before.declinedList,  after.declinedList,  "Invitation declined",        "Your invitation has been declined.");
-    await notifyNewEntrants(before.cancelledList, after.cancelledList, "Registration cancelled",     "Your registration has been cancelled.");
-    await notifyNewEntrants(before.removedList,   after.removedList,   "Removed from event",         "You have been removed from this event.");
+    const beforeSelected = (before.selectedList || []).map(u => u.userId);
+    const afterSelected  = (after.selectedList  || []).map(u => u.userId);
+
+
+    //Manually check wait list joins
+    const beforeJoin = (before.waitingList).map(u=>u.userId);
+    const afterJoin = (after.waitingList).map(u=>u.userId);
+    const newJoin = afterJoin.filter(id => !beforeJoin.includes(id));
+    for (const uid of newJoin) {
+        const userRef = db.collection("Users").doc(uid);
+        await userRef.set({
+            eventsSigned: {
+                [eventId]: "Waiting"
+            }
+        }, { merge: true });
+        console.log(`User ${uid} status synced to: Waiting`);
+    }
+
+    console.log("Function triggered for event:", eventId);
+    console.log("Before selectedList:", JSON.stringify(beforeSelected));
+    console.log("After selectedList:", JSON.stringify(afterSelected));
+
+    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, organizerId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`, "Selected");
+    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, organizerId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`, "Attending");
+    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, organizerId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`, "Declined");
+    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, organizerId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`, "Cancelled");
+    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, organizerId, eventName, "Removed from event",        `You have been removed from ${eventName}.`, "Removed");
+
+    // Handle co-organizer additions/removals
+    const addedCoOrgs   = afterCo.filter(id => !beforeCo.includes(id));
+    const removedCoOrgs = beforeCo.filter(id => !afterCo.includes(id));
+
+    await Promise.all([
+        ...addedCoOrgs.map(deviceId =>
+            sendNotification(
+                deviceId,
+                organizerId,
+                eventId,
+                "You've been made a co-organizer!",
+                `You are now a co-organizer for ${eventName}.`
+            )
+        ),
+        ...removedCoOrgs.map(deviceId =>
+            sendNotification(
+                deviceId,
+                organizerId,
+                eventId,
+                "Co-organizer access removed",
+                `You are no longer a co-organizer for ${eventName}.`
+            )
+        )
+    ]);
 });
 
 /**
- * Finds entrants newly added to a list by comparing its before and after state,
- * then sends a push notification to each new entrant.
- *
- * @param {string[]} beforeList - The list of device IDs before the update.
- * @param {string[]} afterList  - The list of device IDs after the update.
- * @param {string}   title      - The notification title to display on the device.
- * @param {string}   body       - The notification body text to display on the device.
- * @returns {Promise<void>}
+ * Finds entrants newly added to a list and sends each a push notification.
  */
-async function notifyNewEntrants(beforeList, afterList, title, body) {
+async function notifyNewEntrants(beforeList, afterList, eventId, sentFromId, eventName, title, body, statusLabel) {
     const before = beforeList || [];
     const after  = afterList  || [];
 
     const newEntrants = after.filter(id => !before.includes(id));
 
-    for (const deviceId of newEntrants) {
-        await sendNotification(deviceId, title, body);
-    }
+    await Promise.all(
+        newEntrants.map(deviceId =>{
+            const userRef = db.collection("Users").doc(deviceId); //updates user map for admin adapters
+            const dbUpdate = userRef.set({
+                  eventsSigned: {
+                       [eventId]: statusLabel
+                  }
+            }, { merge: true });
+            const notif =sendNotification(deviceId, sentFromId, eventId, title, body)
+            return Promise.all([dbUpdate, notif]);
+        })
+    );
 }
 
 /**
- * Looks up a user's FCM token from the "Users" Firestore collection and sends
- * them a push notification via Firebase Cloud Messaging.
- *
- * Silently returns if the user document does not exist or has no FCM token stored.
- *
- * @param {string} deviceId - The user's device ID, used as the Firestore document ID in "Users".
- * @param {string} title    - The notification title to display on the device.
- * @param {string} body     - The notification body text to display on the device.
- * @returns {Promise<void>}
+ * Callable Cloud Function that lets the organizer send a custom push
+ * notification to a specific device. Called from NotificationSender.java.
  */
-async function sendNotification(deviceId, title, body) {
+exports.sendNotification = onCall(async (request) => {
+    const { token, title, body, eventId, sentFromId } = request.data;
+    if (!token || !title || !body) {
+        throw new Error("Missing required fields: token, title, body");
+    }
+    try {
+        const result = await admin.messaging().send({
+            token: token,
+            data: { eventId: eventId || "", sentFromId: sentFromId || "", title, body }
+        });
+        console.log("Custom notification sent:", result);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to send custom notification:", error);
+        throw new Error("Failed to send notification: " + error.message);
+    }
+});
+
+/**
+ * Looks up a user's FCM token and sends them a push notification via FCM.
+ */
+async function sendNotification(deviceId, sentFromId, eventId, title, body) {
     console.log("sendNotification called for deviceId:", deviceId);
 
     const userDoc = await db.collection("Users").doc(deviceId).get();
@@ -78,7 +278,7 @@ async function sendNotification(deviceId, title, body) {
     try {
         const result = await admin.messaging().send({
             token: token,
-            notification: { title, body }
+            data: { eventId, sentFromId: sentFromId || "", title, body }
         });
         console.log("Notification sent successfully:", result);
     } catch (error) {

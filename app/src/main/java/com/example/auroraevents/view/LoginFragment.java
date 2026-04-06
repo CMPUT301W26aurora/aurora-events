@@ -2,7 +2,6 @@ package com.example.auroraevents.view;
 
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,21 +11,25 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
+import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-
+/**
+ * A fragment for user login
+ * @author Jared Strandlund (Layout)
+ * @author Sean Ross(Logic)
+ */
 public class LoginFragment extends Fragment {
     String deviceId;
     EditText nameEdit;
     EditText emailEdit;
     EditText phoneEdit;
+
+    UserViewModel userViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,10 +44,13 @@ public class LoginFragment extends Fragment {
         emailEdit = view.findViewById(R.id.user_email);
         phoneEdit = view.findViewById(R.id.user_phone_number);
 
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+
         view.findViewById(R.id.confirm_button).setOnClickListener(v -> {
             if (nameEdit.getText().toString().isEmpty() || emailEdit.getText().toString().isEmpty()) {
                 Toast.makeText(view.getContext(), R.string.mandatory_fields_toast_text, Toast.LENGTH_SHORT).show();
             } else {
+                v.setEnabled(false);
                 Toast.makeText(view.getContext(), "confirm", Toast.LENGTH_SHORT).show();
                 /* Update user info */
                 // create new User
@@ -53,37 +59,28 @@ public class LoginFragment extends Fragment {
                         nameEdit.getText().toString(),
                         emailEdit.getText().toString(),
                         phoneEdit.getText().toString(),
-                        User.ROLE_ENTRANT
+                        User.ROLE_ENTRANT,
+                        false
                 );
-                // update db
-                CountDownLatch latch = new CountDownLatch(1);
-                AtomicReference<Boolean> status = new AtomicReference<>(true);
-                UserDb.getInstance().addUser(user,
-                        latch::countDown,
-                        e -> {
-                            status.set(false);
-                            latch.countDown();
-                        }
-                );
-
-                try {
-                    if (!latch.await(10, TimeUnit.SECONDS)) {
-                        Log.w("LoginFragment", "user update timed out");
-                    }
-                } catch (InterruptedException e) {
-                    Log.w("LoginFragment", "user update interrupted");
-                }
-
-                if (status.get()) {
+                //https://medium.com/@yossisegev/understanding-activity-runonuithread-e102d388fe93
+                UserDb.getInstance().addUser(user, ()-> requireActivity().runOnUiThread(()->{
                     Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .remove(this)
-                            .commit();
-                } else {
-                    // show network error
-                    Toast.makeText(view.getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
-                }
+
+                    userViewModel.selectItem(user);
+
+
+                    if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                        getParentFragmentManager().popBackStack();
+                    } else {
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new EventFragment())
+                                .commit();
+                    }
+
+                }), e-> requireActivity().runOnUiThread(() -> {
+                    v.setEnabled(true);
+                    Toast.makeText(getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
+                }));
             }
         });
     }
@@ -92,5 +89,22 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_login, container, false);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        View nav = requireActivity().findViewById(R.id.nav_bar);
+        if (nav != null) {
+            nav.setVisibility(View.GONE);
+        }
     }
 }
