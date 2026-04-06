@@ -40,6 +40,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RadiusUtil;
@@ -69,7 +70,7 @@ import java.util.Map;
  * Implements US 01.06.02 - Sign up for an event from event details.
  * Implements US 02.02.01 - Admin can view and delete events.
  */
-public class InfoUEventFragment extends Fragment {
+public class InfoUEventFragment extends Fragment implements LocationToggleListener {
 
     private static final String TAG = "InfoUEventFragment";
 
@@ -616,6 +617,11 @@ public class InfoUEventFragment extends Fragment {
         leaveButton.setOnClickListener(v -> {
             EventDb.getInstance().leaveWaitlist(eventId, userId,
                     () -> {
+                        EventDb.getInstance().deleteEntrantLocation(
+                                event.getEventId(), userId,
+                                () -> Log.d(TAG, "Location removed"),
+                                e -> Log.e(TAG, "Failed to remove location", e)
+                        );
                         v.setEnabled(false);
                         Log.d(TAG, "Successfully Left WaitList");
                     },
@@ -733,49 +739,51 @@ public class InfoUEventFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                fetchLocationAndJoin(pendingJoinEvent);
-            } else {
-                Toast.makeText(requireContext(),
-                        "Location permission is required to join this event.",
-                        Toast.LENGTH_LONG).show();
-                // Do NOT join — entrant blocked until permission is granted
-            }
-        }
-    }
-
     @SuppressLint("MissingPermission")
     private void fetchLocationAndJoin(Event event) {
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        // Only check radius if the event has coordinates set
-                        if (event.getLatitude() != 0 && event.getLongitude() != 0) {
-                            boolean withinRange = RadiusUtil.isWithinRadius(
-                                    EDMONTON_LAT, EDMONTON_LNG,
-                                    location.getLatitude(), location.getLongitude(),
-                                    EDMONTON_RADIUS_METERS
-                            );
-                            if (!withinRange) {
-                                Toast.makeText(requireContext(),
-                                        "You must be in Edmonton to join.",
-                                        Toast.LENGTH_LONG).show();
-                                return;
+        com.google.android.gms.location.LocationRequest locationRequest =
+                com.google.android.gms.location.LocationRequest.create()
+                        .setPriority(com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY)
+                        .setNumUpdates(1)   // only need one fix
+                        .setInterval(0);
+
+        fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                new com.google.android.gms.location.LocationCallback() {
+                    @Override
+                    public void onLocationResult(@NonNull com.google.android.gms.location.LocationResult result) {
+                        fusedLocationClient.removeLocationUpdates(this);
+                        android.location.Location location = result.getLastLocation();
+                        if (location != null) {
+                            Log.d(TAG, "Fresh location: " + location.getLatitude() + ", " + location.getLongitude());
+
+                            if (event.getGeolocationRequired()) {
+                                boolean withinRange = RadiusUtil.isWithinRadius(
+                                        EDMONTON_LAT, EDMONTON_LNG,
+                                        location.getLatitude(), location.getLongitude(),
+                                        EDMONTON_RADIUS_METERS
+                                );
+                                if (!withinRange) {
+                                    requireActivity().runOnUiThread(() ->
+                                            Toast.makeText(requireContext(),
+                                                    "You must be in Edmonton to join.",
+                                                    Toast.LENGTH_LONG).show()
+                                    );
+                                    return;
+                                }
                             }
+                            joinWaitingList(event, location.getLatitude(), location.getLongitude());
+                        } else {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(),
+                                            "Unable to get location. Please try again.",
+                                            Toast.LENGTH_SHORT).show()
+                            );
                         }
-                        joinWaitingList(event, location.getLatitude(), location.getLongitude());
-                    } else {
-                        Toast.makeText(requireContext(),
-                                "Unable to get location. Please try again.",
-                                Toast.LENGTH_SHORT).show();
                     }
-                });
+                },
+                requireActivity().getMainLooper()
+        );
     }
 
     private void joinWaitingList(Event event, Double latitude, Double longitude) {
@@ -786,16 +794,11 @@ public class InfoUEventFragment extends Fragment {
 
         // Store coordinates separately if geolocation is enabled
         if (latitude != null && longitude != null) {
-            Map<String, Object> locationEntry = new HashMap<>();
-            locationEntry.put("latitude", latitude);
-            locationEntry.put("longitude", longitude);
-            FirebaseFirestore.getInstance()
-                    .collection("Events")
-                    .document(event.getEventId())
-                    .collection("entrantLocations")
-                    .document(userId)
-                    .set(locationEntry)
-                    .addOnFailureListener(e -> Log.e(TAG, "Failed to save location", e));
+            EventDb.getInstance().saveEntrantLocation(
+                    event.getEventId(), userId, latitude, longitude,
+                    () -> Log.d(TAG, "Location saved"),
+                    e -> Log.e(TAG, "Failed to save location", e)
+            );
         }
     }
 
@@ -930,5 +933,19 @@ public class InfoUEventFragment extends Fragment {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
         activityResultLauncher.launch(takePictureIntent);
+    }
+
+    @Override
+    public void onLocationToggle(boolean isEnabled) {}
+
+    @Override
+    public void onLocationPermissionResult(boolean granted) {
+        if (granted && pendingJoinEvent != null) {
+            fetchLocationAndJoin(pendingJoinEvent);
+        } else if (!granted) {
+            Toast.makeText(requireContext(),
+                    "Location permission is required to join this event.",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -44,6 +44,7 @@ public class EventDb {
 
     private static final String TAG             = "EventDb";
     private static final String COLLECTION_NAME = "Events";
+    public static final String COLLECTION_ENTRANT_LOCATIONS = "entrantLocations";
 
     // Participant list field names — use these constants everywhere
     public static final String LIST_REGISTRATION  = "registrationList";
@@ -621,6 +622,73 @@ public class EventDb {
                         List<Event> events = value.toObjects(Event.class);
                         onFetched.onFetched(events);
                     }
+                });
+    }
+
+    // ── SAVE ENTRANT LOCATIONS ────────────────────────────────────────────
+
+    /**
+     * Saves an entrants location to firestore
+     * @param eventId
+     * The event id
+     * @param userId
+     * Entrant's device id
+     * @param latitude
+     * Entrant's latitude
+     * @param longitude
+     * Entrant's longitude
+     * @param onSuccess
+     * Called if write successful
+     * @param onFailure
+     * Called with exception if write fails
+     */
+    public void saveEntrantLocation(String eventId, String userId, double latitude, double longitude,
+                                     OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        Map<String, Object> locationEntry = new HashMap<>();
+        locationEntry.put("userId", userId);
+        locationEntry.put("latitude", latitude);
+        locationEntry.put("longitude", longitude);
+
+        db.collection(COLLECTION_NAME)
+                .document(eventId)
+                .collection(COLLECTION_ENTRANT_LOCATIONS)
+                .document(userId)
+                .set(locationEntry)
+                .addOnSuccessListener(u -> {
+                    Log.d(TAG, "Entrant location saved for user: " + userId);
+                    onSuccess.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error saving entrant location", e);
+                    onFailure.onFailure(e);
+                });
+    }
+
+    /**
+     * Deletes entrant location from firestore
+     * @param eventId
+     * The event id
+     * @param userId
+     * Entrant's device id
+     * @param onSuccess
+     * Called if deletion successful
+     * @param onFailure
+     * Called with exception if deletion fails
+     */
+    public void deleteEntrantLocation(String eventId, String userId,
+                                       OnSuccessCallback onSuccess, OnFailureCallback onFailure) {
+        db.collection(COLLECTION_NAME)
+                .document(eventId)
+                .collection(COLLECTION_ENTRANT_LOCATIONS)
+                .document(userId)
+                .delete()
+                .addOnSuccessListener(u -> {
+                    Log.d(TAG, "Entrant location deleted for: " + userId);
+                    onSuccess.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error saving deleted entrant location", e);
+                    onFailure.onFailure(e);
                 });
     }
 }

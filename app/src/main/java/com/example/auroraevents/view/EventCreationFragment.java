@@ -84,8 +84,6 @@ public class EventCreationFragment extends Fragment {
     private Organizer organizer;
     private User user;
     private UserViewModel userViewModel;
-    private double eventLat;
-    private double eventLong;
 
     private android.net.Uri image;
     private android.widget.ImageView imageView;
@@ -96,6 +94,12 @@ public class EventCreationFragment extends Fragment {
 
     private LocationToggleListener locationToggleListener;
     public boolean geolocationToggled;
+    private double eventLat = 0;
+    private double eventLng = 0;
+
+    private Bitmap poster = null;
+    private int waitingCapacity = 0;
+    private int attendingCapacity = 0;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -236,7 +240,7 @@ public class EventCreationFragment extends Fragment {
             mapPicker.setOnLocationPickedListener((address, lat, lng) -> {
                 location = address;
                 eventLat = lat;     // Store latitude and longitude
-                eventLong = lng;
+                eventLng = lng;
             });
             getParentFragmentManager()
                     .beginTransaction()
@@ -262,20 +266,6 @@ public class EventCreationFragment extends Fragment {
                     geolocationDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             geolocationToggled = true;
-
-                            Geocoder geocoder = new Geocoder(requireContext());
-                            List<Address> addresses = null;
-                            try {
-                                addresses = geocoder.getFromLocationName(location, 1);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                            if (addresses != null && !addresses.isEmpty()) {
-                                // Store latitude and longitude of event location
-                                double lat = addresses.get(0).getLatitude();
-                                double lng = addresses.get(0).getLongitude();
-                            }
-
                             Toast.makeText(requireContext(), "Geolocation enabled", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -339,6 +329,8 @@ public class EventCreationFragment extends Fragment {
                     eventCapInput.setError("Please enter a valid number");
                     return;
                 }
+                waitingCapacity = capacityValue;
+                attendingCapacity = capacityValue;
 
                 //
                 if (location == null || date == null) {
@@ -349,12 +341,19 @@ public class EventCreationFragment extends Fragment {
                 if (organizer != null) {
                     organizer.CreateEvent(
                             organizer.getDeviceId(),
-                            eventName, eventDescription, price, date,
-                            registerStart, registerEnd, location,
+                            eventName,
+                            eventDescription,
+                            price,
+                            date,
+                            registerStart,
+                            registerEnd,
+                            location,
+                            eventLat,
+                            eventLng,
                             geolocationToggled,
-                            Integer.parseInt(eventCap),
-                            Integer.parseInt(eventCap),
-                            null,
+                            waitingCapacity,
+                            attendingCapacity,
+                            poster,
                             eventId -> {
                                 Log.d(TAG, "Callback reached, attempting popBackStack");
                                 if (selectedImageUri != null) {
