@@ -5,17 +5,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Notification;
 import com.example.auroraevents.model.OrganizerNotificationArrayAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -27,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Displays every notification sent by a specific organizer.
+ * Displays every notification sent by a specific organizer, kept live via a snapshot listener.
  */
 public class OrganizerNotificationFragment extends Fragment {
 
@@ -38,7 +40,7 @@ public class OrganizerNotificationFragment extends Fragment {
     private static final String TAG = "OrganizerNotifList";
 
     private OrganizerNotificationArrayAdapter adapter;
-    private final ArrayList<Notification> notifications = new ArrayList<>();
+    private ListenerRegistration notifListener;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -66,53 +68,73 @@ public class OrganizerNotificationFragment extends Fragment {
         TextView infoText = view.findViewById(R.id.organizer_info_text);
         infoText.setText(organizerName + "  |  " + organizerEmail + "  |  " + organizerId);
 
-        // List
-        adapter = new OrganizerNotificationArrayAdapter(requireContext(), notifications);
-        ListView listView = view.findViewById(R.id.organizer_notifications_list);
-        listView.setAdapter(adapter);
+        // add spacing between RecyclerView items
+        adapter = new OrganizerNotificationArrayAdapter();
+        RecyclerView recyclerView = view.findViewById(R.id.organizer_notifications_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            private final int space = (int) (16 * getResources().getDisplayMetrics().density);
+            @Override
+            public void getItemOffsets(@NonNull android.graphics.Rect outRect, @NonNull View v,
+                                       @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                if (parent.getChildAdapterPosition(v) != 0) outRect.top = space;
+            }
+        });
+        recyclerView.setAdapter(adapter);
 
         if (!organizerId.isEmpty()) {
-            loadNotificationsForOrganizer(organizerId);
+            attachSnapshotListener(organizerId);
         } else {
             Log.e(TAG, "No organizerId argument provided");
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (notifListener != null) {
+            notifListener.remove();
+            notifListener = null;
+        }
+    }
+
     // ── Data loading ──────────────────────────────────────────────────────────
 
-    private void loadNotificationsForOrganizer(String organizerId) {
+    private void attachSnapshotListener(String organizerId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("Notifications")
+        notifListener = db.collection("Notifications")
                 .whereEqualTo("sentFromId", organizerId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snapshot -> {
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null || snapshot == null) {
+                        Log.e(TAG, "Snapshot listener error", e);
+                        return;
+                    }
 
-                    notifications.clear();
+                    List<Notification> fresh = new ArrayList<>();
                     Set<String> recipientIds = new HashSet<>();
 
                     for (QueryDocumentSnapshot doc : snapshot) {
                         Notification n = doc.toObject(Notification.class);
                         n.setNotificationId(doc.getId());
-                        notifications.add(n);
+                        fresh.add(n);
                         if (n.getDeviceId() != null) recipientIds.add(n.getDeviceId());
                     }
 
-                    if (notifications.isEmpty()) {
-                        adapter.notifyDataSetChanged();
+                    if (fresh.isEmpty()) {
+                        adapter.setNotifications(fresh);
                         return;
                     }
 
                     fetchUserNames(db, new ArrayList<>(recipientIds), nameMap -> {
-                        for (Notification n : notifications) {
+                        for (Notification n : fresh) {
                             String name = nameMap.get(n.getDeviceId());
                             n.setRecipientName(name != null ? name : n.getDeviceId());
                         }
-                        adapter.notifyDataSetChanged();
+                        adapter.setNotifications(fresh);
                     });
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to load notifications", e));
+                });
     }
 
     private void fetchUserNames(FirebaseFirestore db,
@@ -140,8 +162,8 @@ public class OrganizerNotificationFragment extends Fragment {
                         done[0]++;
                         if (done[0] == numChunks) callback.onReady(nameMap);
                     })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to fetch user chunk", e);
+                    .addOnFailureListener(err -> {
+                        Log.e(TAG, "Failed to fetch user chunk", err);
                         done[0]++;
                         if (done[0] == numChunks) callback.onReady(nameMap);
                     });
