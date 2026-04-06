@@ -809,6 +809,11 @@ public class InfoUEventFragment extends Fragment {
             eventSnapshotListener.remove();
             Log.d(TAG, "Event snapshot listener detached");
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
         View navBar = requireActivity().findViewById(R.id.nav_bar);
         if (navBar != null) {
             navBar.setVisibility(View.VISIBLE);

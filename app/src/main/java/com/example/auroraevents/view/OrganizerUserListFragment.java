@@ -188,12 +188,14 @@ public class OrganizerUserListFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        View nav = getActivity().findViewById(R.id.nav_bar);
-        if (nav != null) {
-            nav.setVisibility(View.VISIBLE);
-        }
-        if (listenerRegistration != null) {
-            listenerRegistration.remove();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
         }
     }
 
