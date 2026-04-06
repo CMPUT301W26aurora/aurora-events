@@ -158,15 +158,30 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     const beforeSelected = (before.selectedList || []).map(u => u.userId);
     const afterSelected  = (after.selectedList  || []).map(u => u.userId);
 
+
+    //Manually check wait list joins
+    const beforeJoin = (before.waitingList).map(u=>u.userId);
+    const afterJoin = (after.waitingList).map(u=>u.userId);
+    const newJoin = afterJoin.filter(id => !beforeJoin.includes(id));
+    for (const uid of newJoin) {
+        const userRef = db.collection("Users").doc(uid);
+        await userRef.set({
+            eventsSigned: {
+                [eventId]: "Waiting"
+            }
+        }, { merge: true });
+        console.log(`User ${uid} status synced to: Waiting`);
+    }
+
     console.log("Function triggered for event:", eventId);
     console.log("Before selectedList:", JSON.stringify(beforeSelected));
     console.log("After selectedList:", JSON.stringify(afterSelected));
 
-    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, organizerId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
-    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, organizerId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
-    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, organizerId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`);
-    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, organizerId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
-    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, organizerId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
+    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, organizerId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`, "Selected");
+    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, organizerId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`, "Attending");
+    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, organizerId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`, "Declined");
+    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, organizerId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`, "Cancelled");
+    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, organizerId, eventName, "Removed from event",        `You have been removed from ${eventName}.`, "Removed");
 
     // Handle co-organizer additions/removals
     const addedCoOrgs   = afterCo.filter(id => !beforeCo.includes(id));
@@ -197,16 +212,23 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
 /**
  * Finds entrants newly added to a list and sends each a push notification.
  */
-async function notifyNewEntrants(beforeList, afterList, eventId, sentFromId, eventName, title, body) {
+async function notifyNewEntrants(beforeList, afterList, eventId, sentFromId, eventName, title, body, statusLabel) {
     const before = beforeList || [];
     const after  = afterList  || [];
 
     const newEntrants = after.filter(id => !before.includes(id));
 
     await Promise.all(
-        newEntrants.map(deviceId =>
-            sendNotification(deviceId, sentFromId, eventId, title, body)
-        )
+        newEntrants.map(deviceId =>{
+            const userRef = db.collection("Users").doc(deviceId); //updates user map for admin adapters
+            const dbUpdate = userRef.set({
+                  eventsSigned: {
+                       [eventId]: statusLabel
+                  }
+            }, { merge: true });
+            const notif =sendNotification(deviceId, sentFromId, eventId, title, body)
+            return Promise.all([dbUpdate, notif]);
+        })
     );
 }
 

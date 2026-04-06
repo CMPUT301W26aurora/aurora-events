@@ -1,14 +1,20 @@
 package com.example.auroraevents.model;
 
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +34,9 @@ public class User {
     private String role;
     private final String TAG = "User";
     private Boolean isAdmin;
+    private Map<String, String> eventsSigned;
+    @ServerTimestamp
+    private Timestamp accountAge;
     // Notification history (stored as notification IDs or message strings)
     private List<String> notificationHistory;
 
@@ -40,11 +49,10 @@ public class User {
         this.phoneNumber = "";
         this.role = ROLE_ENTRANT;
         this.isAdmin = false;
-
-        notificationHistory  = new ArrayList<>();
-        tags                 = new ArrayList<>();
+        this.notificationHistory  = new ArrayList<>();
+        this.tags                 = new ArrayList<>();
+        this.eventsSigned = new HashMap<>();
     }
-
     public User(String deviceId, String name, String email, String phoneNumber, String role, Boolean isAdmin) {
         this();
         this.deviceId        = deviceId;
@@ -78,7 +86,18 @@ public class User {
 
     public List<String> getTags()                      { return tags; }
     public void         setTags(List<String> tags)     { this.tags = tags; }
-
-
-
+    public Timestamp getAccountAge(){return accountAge;}
+    public void setAccountAge(Timestamp accountAge){this.accountAge=accountAge;}
+    public Map<String, String> getEventsSigned() {
+        return eventsSigned != null ? eventsSigned : new HashMap<>();
+    }
+    public void setEventsSigned (Map<String,String> eventsSigned) {this.eventsSigned=eventsSigned;}
+    @Exclude
+    public String getFormattedAccountAge() {
+        if (accountAge == null) return "Unknown";
+        String timeAgo = DateUtils.getRelativeTimeSpanString(accountAge.toDate().getTime(),
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS).toString();
+        return "Joined " +timeAgo;
+    }
 }

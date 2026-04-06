@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,7 +18,10 @@ import com.example.auroraevents.R;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.UserAdapter;
 import com.example.auroraevents.server.EventDb;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -72,9 +76,23 @@ public class RemoveUserPopUpDialog extends DialogFragment {
         });
 
         setDeadlineButton.setOnClickListener(v->{
-            Toast.makeText(getContext(), "does nothing for now", Toast.LENGTH_SHORT).show();
+            Calendar c = Calendar.getInstance();
+            DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view1, year, month, dayOfMonth) -> {
+                Calendar deadline = Calendar.getInstance();
+                deadline.set(year, month, dayOfMonth, 23, 59, 59);
+                Timestamp ts = new Timestamp(deadline.getTime());
+                FirebaseFirestore.getInstance()
+                        .collection("Events")
+                        .document(currentEventID)
+                        .update("userDeadlines." + selectedUserID, ts)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(getContext(), "Deadline updated", Toast.LENGTH_SHORT).show();
+                            dismiss();
+                        });
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+            datePickerDialog.show();
         });
-
         alertDialog.setOnShowListener(d ->
                 alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent)
         );
