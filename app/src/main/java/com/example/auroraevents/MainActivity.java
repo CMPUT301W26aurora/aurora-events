@@ -47,6 +47,7 @@ import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.LoginFragment;
 import com.example.auroraevents.view.NotificationFragment;
+import com.example.auroraevents.view.OrganizerNotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.appcheck.FirebaseAppCheck;

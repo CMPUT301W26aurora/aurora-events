@@ -140,6 +140,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             }
             if(user.getUser().getRole().equals(User.ROLE_ORGANIZER)){
                 notify.setVisibility(VISIBLE);
+                notify.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.OnNotify(user.getUser());
+                    }
+                });
             }
         }
     }
@@ -165,4 +170,3 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
 
 }
-

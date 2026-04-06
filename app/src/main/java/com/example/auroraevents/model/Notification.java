@@ -1,5 +1,7 @@
 package com.example.auroraevents.model;
 
+import com.google.firebase.firestore.Exclude;
+
 import java.util.Date;
 
 /**
@@ -10,22 +12,31 @@ public class Notification {
 
     private String  notificationId;   // Firestore document ID (set after creation)
     private String  deviceId;         // recipient device (Settings.Secure.ANDROID_ID)
+    private String  sentFromId;       // organizer's deviceId who sent this notification
     private String  eventId;          // the event this notification was sent from
     private String  title;
     private String  body;
     private Date    timestamp;
     private boolean read;
 
+    /**
+     * Resolved at runtime from the Users collection — never written to Firestore.
+     * {@code @Exclude} ensures Firestore ignores this field during serialization.
+     */
+    @Exclude
+    private String recipientName;
+
     /** Required no-arg constructor for Firestore deserialization */
     public Notification() {}
 
-    public Notification(String deviceId, String eventId, String title, String body) {
-        this.deviceId  = deviceId;
-        this.eventId   = eventId;
-        this.title     = title;
-        this.body      = body;
-        this.timestamp = new Date();
-        this.read      = false;
+    public Notification(String deviceId, String sentFromId, String eventId, String title, String body) {
+        this.deviceId   = deviceId;
+        this.sentFromId = sentFromId;
+        this.eventId    = eventId;
+        this.title      = title;
+        this.body       = body;
+        this.timestamp  = new Date();
+        this.read       = false;
     }
 
     // ── Getters & Setters ──────────────────────────────────────────────────
@@ -35,6 +46,9 @@ public class Notification {
 
     public String getDeviceId()                                { return deviceId; }
     public void   setDeviceId(String deviceId)                 { this.deviceId = deviceId; }
+
+    public String getSentFromId()                              { return sentFromId; }
+    public void   setSentFromId(String sentFromId)             { this.sentFromId = sentFromId; }
 
     public String getEventId()                                 { return eventId; }
     public void   setEventId(String eventId)                   { this.eventId = eventId; }
@@ -51,4 +65,8 @@ public class Notification {
     public boolean isRead()                                    { return read; }
     public void    setRead(boolean read)                       { this.read = read; }
 
+    @Exclude
+    public String getRecipientName()                           { return recipientName; }
+    @Exclude
+    public void   setRecipientName(String recipientName)       { this.recipientName = recipientName; }
 }

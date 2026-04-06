@@ -1,5 +1,4 @@
 package com.example.auroraevents.view;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,13 +7,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserAdapter;
@@ -32,7 +29,6 @@ public class AdminProfileFragment extends Fragment {
     private List<User> masterUserList;
     private List<User> createDisplayList;
     private UserAdapter adapter;
-
 
 
     @Nullable
@@ -97,7 +93,19 @@ public class AdminProfileFragment extends Fragment {
             }
             @Override
             public void OnNotify(User user) {
-                //Insert Notification list code here
+                Bundle args = new Bundle();
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_ID,    user.getDeviceId());
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_NAME,  user.getName());
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_EMAIL, user.getEmail());
+
+                OrganizerNotificationFragment fragment = new OrganizerNotificationFragment();
+                fragment.setArguments(args);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 
@@ -137,6 +145,6 @@ public class AdminProfileFragment extends Fragment {
         adapter.setUserList(displayList);
         adapter.notifyDataSetChanged();
     }
-}
 
+}
 
