@@ -65,7 +65,6 @@ Location conversion to coordinates handled by Geocoder: https://developer.androi
 Maps handled by Google Maps SDK:
  */
 public class EventCreationFragment extends Fragment {
-    private ImageButton backButton;
     private final String TAG = "EventCreationFragment";
     private ImageButton backButton;
     private EditText eventNameInput, eventDescInput, eventPriceInput, eventCapInput, eventWaitingCapInput;
@@ -132,7 +131,7 @@ public class EventCreationFragment extends Fragment {
         );
         cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
                 requireContext(),
-                requireContext().getPackageName() + ".fileprovider",
+                requireContext().getPackageName() + ".provider",
                 photoFile
         );
 
