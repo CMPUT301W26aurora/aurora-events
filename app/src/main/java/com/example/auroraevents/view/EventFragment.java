@@ -3,6 +3,11 @@ package com.example.auroraevents.view;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,18 +20,25 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.EventArrayAdapter;
+import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Displays a list of all available events fetched form Firestore.
@@ -38,11 +50,21 @@ public class EventFragment extends Fragment {
 
     private static final String TAG = "EventFragment";
     private FloatingActionButton addEventButton;
+    private ExtendedFloatingActionButton filterEventButton;
     private UserViewModel userViewModel;
     private String userId;
     private ArrayList<Event> allEventsList;
     private TextView noEventText;
     private EventArrayAdapter eventsAdapter;
+    private boolean filterLocation = false;
+    private boolean filterAvailableNow = false;
+    private boolean filterWaitingList = false;
+    private boolean filterCapacity = false;
+    private boolean filterCreatedEvents = false;
+
+    private double userLatitude = 0;
+    private double userLongitude = 0;
+    private static final float LOCATION_RADIUS = 50f;
 
     // resource used: https://stackoverflow.com/questions/51769944/android-studio-recylerview-in-fragment-using-data-from-firestore
 
@@ -64,6 +86,8 @@ public class EventFragment extends Fragment {
         addEventButton = root.findViewById(R.id.eventAddButton);
         addEventButton.setVisibility(GONE);
 
+        filterEventButton = root.findViewById(R.id.filter_button);
+
         // Show add event button only if the user is an organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
@@ -78,6 +102,17 @@ public class EventFragment extends Fragment {
                 addEventButton.setVisibility(GONE);
             }
         });
+
+        // Request location
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+            Location last = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (last != null) {
+                userLatitude = last.getLatitude();
+                userLongitude = last.getLongitude();
+            }
+        }
 
         userViewModel.getAdminModeActive().observe(getViewLifecycleOwner(), isAdminMode -> {
             if(isAdminMode){
@@ -150,6 +185,110 @@ public class EventFragment extends Fragment {
                         .replace(R.id.fragment_container, new EventCreationFragment())
                         .addToBackStack(null)
                         .commit());
+
+        filterEventButton.setOnClickListener(v -> {
+            BottomSheetDialog bottomSheet = new BottomSheetDialog(requireContext(), R.style.TransparentBottomSheet);
+            View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_filter, null);
+            bottomSheet.setContentView(sheetView);
+
+            View bottomSheetContainer = bottomSheet.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheetContainer != null) {
+                bottomSheetContainer.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            }
+
+            SwitchMaterial toggleLocation = sheetView.findViewById(R.id.toggle_location);
+            SwitchMaterial toggleAvailableNow = sheetView.findViewById(R.id.toggle_available_now);
+            SwitchMaterial toggleWaiting = sheetView.findViewById(R.id.toggle_waiting_list);
+            SwitchMaterial toggleCapacity = sheetView.findViewById(R.id.toggle_capacity);
+            SwitchMaterial toggleCreated = sheetView.findViewById(R.id.toggle_created_events);
+
+            // Restore previous toggle states
+            toggleLocation.setChecked(filterLocation);
+            toggleAvailableNow.setChecked(filterAvailableNow);
+            toggleWaiting.setChecked(filterWaitingList);
+            toggleCapacity.setChecked(filterCapacity);
+            toggleCreated.setChecked(filterCreatedEvents);
+
+            userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
+                if (user != null) {
+                    userId = user.getDeviceId();
+                }
+
+                Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
+                if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()))) {
+                    toggleCreated.setVisibility(VISIBLE);
+                } else {
+                    TextView text = sheetView.findViewById(R.id.text_created_events);
+                    text.setVisibility(GONE);
+                    toggleCreated.setVisibility(GONE);
+                }
+            });
+
+            sheetView.findViewById(R.id.btn_confirm).setOnClickListener(confirmView -> {
+                filterLocation    = toggleLocation.isChecked();
+                filterAvailableNow = toggleAvailableNow.isChecked();
+                filterWaitingList   = toggleWaiting.isChecked();
+                filterCapacity = toggleCapacity.isChecked();
+                filterCreatedEvents = toggleCreated.isChecked();
+
+                boolean anyFilterActive = filterLocation || filterAvailableNow
+                        || filterWaitingList || filterCapacity || filterCreatedEvents;
+
+                // Apply filters - can be stacked
+                if (!filterWaitingList && !filterCreatedEvents) {
+                    ArrayList<Event> filtered = new ArrayList<>();
+                    for (Event event : allEventsList) {
+                        if (filterAvailableNow && !isRegistrationActive(event)) continue;
+                        if (filterLocation && !isNearUser(event)) continue;
+                        if (filterCapacity && !hasWaitingCapacity(event) && !hasAttendingCapacity(event)) continue;
+                        filtered.add(event);
+                    }
+                    applyFilters(filtered.isEmpty() && !filterLocation && !filterAvailableNow
+                            ? allEventsList : filtered);
+                } else {
+                    ArrayList<Event> filtered = new ArrayList<>();
+                    int[] pending = {0};
+
+                    if (filterWaitingList) pending[0]++;
+                    if (filterCreatedEvents) pending[0]++;
+
+                    Runnable onAllDone = () -> {
+                        ArrayList<Event> finalFiltered = new ArrayList<>();
+                        for (Event event : filtered) {
+                            if (filterAvailableNow && !isRegistrationActive(event)) continue;
+                            if (filterLocation && !isNearUser(event)) continue;
+                            if (filterCapacity && !hasWaitingCapacity(event) && !hasAttendingCapacity(event)) continue;
+                            finalFiltered.add(event);
+                        }
+                        applyFilters(finalFiltered);
+                    };
+
+                    if (filterWaitingList) {
+                        EventDb.getInstance().getEventsForUser(userId, EventDb.LIST_WAITING,
+                                events -> {
+                                    filtered.addAll(events);
+                                    pending[0]--;
+                                    if (pending[0] == 0) onAllDone.run();
+                                },
+                                e -> Log.e(TAG, "Failed to fetch waiting list events", e));
+                    }
+
+                    if (filterCreatedEvents) {
+                        EventDb.getInstance().getEventsByOrganizer(userId,
+                                events -> {
+                                    filtered.addAll(events);
+                                    pending[0]--;
+                                    if (pending[0] == 0) onAllDone.run();
+                                },
+                                e -> Log.e(TAG, "Failed to fetch created events", e));
+                    }
+                }
+
+                bottomSheet.dismiss();
+            });
+            bottomSheet.show();
+        });
+
 
         // set SearchView query text listener
         SearchView searchView = root.findViewById(R.id.search_event);
@@ -240,5 +379,97 @@ public class EventFragment extends Fragment {
                 noEventText.setVisibility(GONE);
             }
         }
+    }
+
+    /**
+     * Apply filtersfor events
+     * @param filtered
+     * List of filtered events
+     */
+    private void applyFilters(List<Event> filtered) {
+        ArrayList<Event> publicOnly = new ArrayList<>();
+        for (Event event : filtered) {
+            if (!event.isPrivate()) {
+                publicOnly.add(event);
+            }
+        }
+
+        eventsAdapter.clear();
+        eventsAdapter.addAll(publicOnly);
+        eventsAdapter.notifyDataSetChanged();
+
+        if (noEventText != null) {
+            noEventText.setVisibility(publicOnly.isEmpty() ? VISIBLE : GONE);
+        }
+    }
+
+    /**
+     * Check if event registration time is active
+     * @param event
+     * Event to be checked
+     * @return
+     * Returns a boolean
+     */
+    private boolean isRegistrationActive(Event event) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime start = event.getRegistrationTimeStartAsDateTime();
+            LocalDateTime end = event.getRegistrationTimeEndAsDateTime();
+            return !now.isBefore(start) && !now.isAfter(end);
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing registration time");
+            return false;
+        }
+    }
+
+    /**
+     * Check if event is within the radius of the user or
+     * if the event does not need geolocation
+     * @param event
+     * Event to be checked
+     * @return
+     * Returns a float
+     */
+    private boolean isNearUser(Event event) {
+        if (!event.getGeolocationRequired()) return true;
+        if (userLatitude == 0 && userLongitude == 0) return false;
+
+        float[] results = new float[1];
+        Location.distanceBetween(userLatitude, userLongitude,
+                event.getLatitude(), event.getLongitude(),
+                results
+        );
+        float distance = results[0] / 1000f;
+        return distance <= LOCATION_RADIUS;
+    }
+
+    /**
+     * Check if an event has available spots on waiting list
+     * @param event
+     * Event to be checked
+     * @return
+     * Returns a boolean
+     */
+    private boolean hasWaitingCapacity(Event event) {
+        RegistrationList regList = event.getRegistrationList();
+        if (regList == null) return false;
+        int eventCapacity = regList.getWaitingCapacity();
+        int currentCapacity = regList.getWaitingList().size();
+        return eventCapacity <= 0 || currentCapacity < eventCapacity;
+    }
+
+    /**
+     * Check if an event has available spots on waiting list
+     * @param event
+     * Event to be checked
+     * @return
+     * Returns a boolean
+     */
+    private boolean hasAttendingCapacity(Event event) {
+        RegistrationList regList = event.getRegistrationList();
+        if (regList == null) return false;
+        int eventCapacity = regList.getAttendingCapacity();
+        int currentCapacity = regList.getAttendingList().size();
+        return eventCapacity <= 0 || currentCapacity < eventCapacity;
     }
 }
