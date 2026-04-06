@@ -32,24 +32,20 @@ public class AdminProfileFragment extends Fragment {
     private List<User> createDisplayList;
     private UserAdapter adapter;
 
-
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_admin_profiles, container, false);
-
-        return view;
+        return inflater.inflate(R.layout.fragment_admin_profiles, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView recyclerView = view.findViewById(R.id.entrants_list_admin);
         ImageButton deleteButton  = view.findViewById(R.id.delete_user_button_admin_item);
-        CheckBox filterButton       = view.findViewById(R.id.filter_organizers_checkbox);
+        CheckBox filterButton     = view.findViewById(R.id.filter_organizers_checkbox);
         filterButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             applyFilter(isChecked);
         });
@@ -58,11 +54,24 @@ public class AdminProfileFragment extends Fragment {
 
             @Override
             public void Onclick(User user) {
-                //womp
+                // womp
             }
+
             @Override
             public void OnNotify(User user) {
-                //Insert Notification list code here
+                Bundle args = new Bundle();
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_ID,    user.getDeviceId());
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_NAME,  user.getName());
+                args.putString(OrganizerNotificationFragment.ARG_ORGANIZER_EMAIL, user.getEmail());
+
+                OrganizerNotificationFragment fragment = new OrganizerNotificationFragment();
+                fragment.setArguments(args);
+
+                getParentFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
             }
         });
 
@@ -78,7 +87,7 @@ public class AdminProfileFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(listenerRegistration != null){
+        if (listenerRegistration != null) {
             listenerRegistration.remove();
             listenerRegistration = null;
         }
@@ -95,7 +104,7 @@ public class AdminProfileFragment extends Fragment {
                 }
             }
         } else {
-            for (User u: masterUserList){
+            for (User u : masterUserList) {
                 displayList.add(new UserAdapterWrapper(u, "", null));
             }
         }
@@ -103,5 +112,3 @@ public class AdminProfileFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 }
-
-

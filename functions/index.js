@@ -151,8 +151,9 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     const beforeCo   = event.data.before.data().coOrganizerDeviceIds || [];
     const afterCo    = event.data.after.data().coOrganizerDeviceIds || [];
 
-    const eventName  = event.data.after.data().name || "an event";
-    const eventId    = event.params.eventId;
+    const eventName      = event.data.after.data().name || "an event";
+    const eventId        = event.params.eventId;
+    const organizerId    = event.data.after.data().organizerDeviceId || ""; // organizer who owns the event
 
     const beforeSelected = (before.selectedList || []).map(u => u.userId);
     const afterSelected  = (after.selectedList  || []).map(u => u.userId);
@@ -161,11 +162,11 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     console.log("Before selectedList:", JSON.stringify(beforeSelected));
     console.log("After selectedList:", JSON.stringify(afterSelected));
 
-    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
-    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
-    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`);
-    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
-    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
+    await notifyNewEntrants(beforeSelected,        afterSelected,        eventId, organizerId, eventName, "You've been selected!",     `You've been selected for ${eventName}!`);
+    await notifyNewEntrants(before.attendingList,  after.attendingList,  eventId, organizerId, eventName, "You're confirmed!",         `You're confirmed for ${eventName}.`);
+    await notifyNewEntrants(before.declinedList,   after.declinedList,   eventId, organizerId, eventName, "Invitation declined",       `Your invitation to ${eventName} has been declined.`);
+    await notifyNewEntrants(before.cancelledList,  after.cancelledList,  eventId, organizerId, eventName, "Registration cancelled",    `Your registration for ${eventName} has been cancelled.`);
+    await notifyNewEntrants(before.removedList,    after.removedList,    eventId, organizerId, eventName, "Removed from event",        `You have been removed from ${eventName}.`);
 
     // Handle co-organizer additions/removals
     const addedCoOrgs   = afterCo.filter(id => !beforeCo.includes(id));
@@ -175,6 +176,7 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
         ...addedCoOrgs.map(deviceId =>
             sendNotification(
                 deviceId,
+                organizerId,
                 eventId,
                 "You've been made a co-organizer!",
                 `You are now a co-organizer for ${eventName}.`
@@ -183,6 +185,7 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
         ...removedCoOrgs.map(deviceId =>
             sendNotification(
                 deviceId,
+                organizerId,
                 eventId,
                 "Co-organizer access removed",
                 `You are no longer a co-organizer for ${eventName}.`
@@ -194,7 +197,7 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
 /**
  * Finds entrants newly added to a list and sends each a push notification.
  */
-async function notifyNewEntrants(beforeList, afterList, eventId, eventName, title, body) {
+async function notifyNewEntrants(beforeList, afterList, eventId, sentFromId, eventName, title, body) {
     const before = beforeList || [];
     const after  = afterList  || [];
 
@@ -202,7 +205,7 @@ async function notifyNewEntrants(beforeList, afterList, eventId, eventName, titl
 
     await Promise.all(
         newEntrants.map(deviceId =>
-            sendNotification(deviceId, eventId, title, body)
+            sendNotification(deviceId, sentFromId, eventId, title, body)
         )
     );
 }
@@ -212,14 +215,14 @@ async function notifyNewEntrants(beforeList, afterList, eventId, eventName, titl
  * notification to a specific device. Called from NotificationSender.java.
  */
 exports.sendNotification = onCall(async (request) => {
-    const { token, title, body, eventId } = request.data;
+    const { token, title, body, eventId, sentFromId } = request.data;
     if (!token || !title || !body) {
         throw new Error("Missing required fields: token, title, body");
     }
     try {
         const result = await admin.messaging().send({
             token: token,
-            data: { eventId: eventId || "", title, body }
+            data: { eventId: eventId || "", sentFromId: sentFromId || "", title, body }
         });
         console.log("Custom notification sent:", result);
         return { success: true };
@@ -232,7 +235,7 @@ exports.sendNotification = onCall(async (request) => {
 /**
  * Looks up a user's FCM token and sends them a push notification via FCM.
  */
-async function sendNotification(deviceId, eventId, title, body) {
+async function sendNotification(deviceId, sentFromId, eventId, title, body) {
     console.log("sendNotification called for deviceId:", deviceId);
 
     const userDoc = await db.collection("Users").doc(deviceId).get();
@@ -251,7 +254,7 @@ async function sendNotification(deviceId, eventId, title, body) {
     try {
         const result = await admin.messaging().send({
             token: token,
-            data: { eventId, title, body }
+            data: { eventId, sentFromId: sentFromId || "", title, body }
         });
         console.log("Notification sent successfully:", result);
     } catch (error) {

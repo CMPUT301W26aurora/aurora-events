@@ -127,19 +127,27 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
         @Override
         public void bind(UserAdapterWrapper user, OnUserInteractionListener listener) {
-            String name =user.getUser().getName();
+            String name  = user.getUser().getName();
             String email = user.getUser().getEmail();
             String phone = user.getUser().getPhoneNumber();
+
             notify.setVisibility(View.GONE);
             userName.setText(name);
             userEmail.setText(email);
-            if(phone != null && !phone.isEmpty()){
+
+            if (phone != null && !phone.isEmpty()) {
                 userPhone.setText(phone);
-            }else{
+            } else {
                 userPhone.setVisibility(View.GONE);
             }
-            if(user.getUser().getRole().equals(User.ROLE_ORGANIZER)){
+
+            if (user.getUser().getRole().equals(User.ROLE_ORGANIZER)) {
                 notify.setVisibility(VISIBLE);
+                notify.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.OnNotify(user.getUser());
+                    }
+                });
             }
         }
     }
@@ -165,4 +173,3 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
 
 }
-
