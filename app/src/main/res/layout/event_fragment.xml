@@ -54,5 +54,22 @@
         android:layout_marginTop="48dp"
         android:src="@android:drawable/ic_input_add"
         app:elevation="6dp" />
+
+        <!-- Filter Button-->
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/filter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="80dp"
+            android:text="Filter"
+            android:textColor="#1C1C2E"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#7EFBB0"
+            app:elevation="6dp"
+            app:icon="@drawable/ic_filter"
+            app:iconTint="#1C1C2E"
+            app:shapeAppearance="@style/PillShape" />
     </FrameLayout>
 </LinearLayout>
