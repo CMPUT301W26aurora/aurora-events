@@ -343,26 +343,36 @@ public class EventCreationFragment extends Fragment {
                 return;
             }
 
-            // Create and add event
-            if (organizer != null) {
-                organizer.CreateEvent(
-                        organizer.getDeviceId(),
-                        eventName,
-                        eventDescription,
-                        price,
-                        date,
-                        registerStart,
-                        registerEnd,
-                        location,
-                        geolocationRequired,
-                        Integer.parseInt(eventCap),
-                        waitingCapacity,
-                        isPrivate,
-                        null,
-                        eventId -> {
-                            Log.d(TAG, "Callback reached, attempting popBackStack");
-                            if (selectedImageUri != null) {
-                                EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, eventId);
+                // Create and add event
+                if (organizer != null) {
+                    organizer.CreateEvent(
+                            organizer.getDeviceId(),
+                            eventName,
+                            eventDescription,
+                            price,
+                            date,
+                            registerStart,
+                            registerEnd,
+                            location,
+                            eventLat,
+                            eventLng,
+                            geolocationToggled,
+                            waitingCapacity,
+                            attendingCapacity,
+                            poster,
+                            eventId -> {
+                                Log.d(TAG, "Callback reached, attempting popBackStack");
+                                if (selectedImageUri != null) {
+                                    EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, eventId);
+                                }
+                                if (isAdded() && getActivity() != null) {
+                                    getActivity().runOnUiThread(() -> {
+                                        Log.d(TAG, "Running popBackStack on UI thread");
+                                        getParentFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                    });
+                                } else {
+                                    Log.d(TAG, "Fragment not added or activity null — skip pop");
+                                }
                             }
                             if (isAdded() && getActivity() != null) {
                                 getActivity().runOnUiThread(() -> {

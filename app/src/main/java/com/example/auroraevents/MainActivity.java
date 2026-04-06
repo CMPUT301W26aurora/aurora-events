@@ -411,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
             boolean granted = grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED;
 
-            // Notify the fragment of the result
+            // Relay result to the current fragment
             Fragment current = getSupportFragmentManager()
                     .findFragmentById(R.id.fragment_container);
             if (current instanceof LocationToggleListener) {
@@ -420,10 +420,8 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
 
             if (!granted) {
                 Toast.makeText(this,
-                        "Location permission denied. Geolocation tracking disabled.",
+                        "Location permission denied.",
                         Toast.LENGTH_SHORT).show();
-            } else {
-                checkPermissionsAndRequestLocation();
             }
         }
     }

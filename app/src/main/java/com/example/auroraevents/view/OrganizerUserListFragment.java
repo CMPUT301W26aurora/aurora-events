@@ -75,6 +75,7 @@ public class OrganizerUserListFragment extends DialogFragment {
         ImageButton deleteButton  = view.findViewById(R.id.delete_user_button_org_item);
         Button filterButton       = view.findViewById(R.id.filter_button);
         Button doneButton         = view.findViewById(R.id.done_button);
+        Button viewMapButton      = view.findViewById(R.id.map_button);
 
         Bundle args = getArguments();
         statuses = new ArrayList<>();
@@ -125,6 +126,20 @@ public class OrganizerUserListFragment extends DialogFragment {
                 },
                 e -> Log.e(TAG, "failed to fetch event", e)
         );
+
+        viewMapButton.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("eventId", currentEventId);
+
+            EntrantHeatmapFragment heatmapFragment = new EntrantHeatmapFragment();
+            heatmapFragment.setArguments(bundle);
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, heatmapFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 
     private void loadParticipantData() {
