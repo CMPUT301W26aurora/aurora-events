@@ -107,7 +107,13 @@ public class EventFragment extends Fragment {
             for (Event event : events) {
                 Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
                 boolean isPrivate = event.isPrivate();
-                if (!isPrivate || Objects.equals(event.getOrganizerDeviceId(), userId) || event.getCoOrganizerDeviceIds().contains(userId)) {
+                if (
+                        !isPrivate ||
+                        Objects.equals(event.getOrganizerDeviceId(), userId) ||
+                        event.getCoOrganizerDeviceIds().contains(userId) ||
+                        event.getRegistrationList().getAttendingList().contains(userId) ||
+                        event.getRegistrationList().getSelectedUserStrings().contains(userId)
+                ) {
                     allEventsList.add(event);
                     eventList.add(event);
                 }
@@ -120,7 +126,8 @@ public class EventFragment extends Fragment {
             Event selectedEvent = eventList.get(position - 1);
 
             Fragment eventFragment;
-            if (userId.equals(selectedEvent.getOrganizerDeviceId())) {
+            Boolean adminMode = userViewModel.getAdminModeActive().getValue();
+            if (userId != null && userId.equals(selectedEvent.getOrganizerDeviceId()) && adminMode != null && !adminMode) {
                 Bundle args = new Bundle();
                 args.putString("eventId", selectedEvent.getEventId());
 
