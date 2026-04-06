@@ -17,7 +17,8 @@
         android:layout_marginTop="12dp"
         android:iconifiedByDefault="false"
         android:queryHint="Search Events"
-        android:background="@color/purple"/>
+        android:background="@drawable/rounded_box"
+        android:backgroundTint="@color/purple"/>
 
     <FrameLayout
         android:layout_width="match_parent"
