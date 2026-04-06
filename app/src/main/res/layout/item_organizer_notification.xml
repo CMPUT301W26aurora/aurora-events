@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="18dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/event_list_card">
+
+    <!-- Notification title -->
+    <TextView
+        android:id="@+id/organizer_notif_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification Title"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Notification body -->
+    <TextView
+        android:id="@+id/organizer_notif_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Notification body text"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <!-- Recipient name -->
+    <TextView
+        android:id="@+id/organizer_notif_recipient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="To: Recipient Name"
+        android:textColor="@android:color/black"
+        android:textSize="14sp" />
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/organizer_notif_timestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Jan 1, 2026, 12:00 PM"
+        android:textColor="@android:color/black"
+        android:textSize="13sp" />
+
+</LinearLayout>
