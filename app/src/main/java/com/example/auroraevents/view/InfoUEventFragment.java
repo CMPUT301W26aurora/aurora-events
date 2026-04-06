@@ -81,7 +81,7 @@ public class InfoUEventFragment extends Fragment implements LocationToggleListen
     private User user;
     private ImageButton backButton;
     private ImageView poster;
-    private Button sampleButton, viewEntrantsButton, notificationButton, commentButton, editPosterButton;
+    private Button commentButton;
     private TextView eventName, eventDateTime, eventOrganizer, eventPrice, eventLocation, eventDescription;
     private TextView reportedNum;
     private Button reportButton, deleteButton;
@@ -90,10 +90,6 @@ public class InfoUEventFragment extends Fragment implements LocationToggleListen
     private Button joinButton, leaveButton, acceptButton, declineButton;
     private TextView attendingLabel, cannotAttendLabel;
     private ImageButton infoButton;
-
-    // Co-organizer management button (visible to the primary organizer only)
-    private Button manageCoOrganizersButton;
-
     private FusedLocationProviderClient fusedLocationClient;
     private Event pendingJoinEvent;
 
@@ -139,42 +135,37 @@ public class InfoUEventFragment extends Fragment implements LocationToggleListen
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // get views to display event details
-        backButton = view.findViewById(R.id.back_button);
-        sampleButton = view.findViewById(R.id.sample_button);
-        viewEntrantsButton = view.findViewById(R.id.view_entrants_button);
-        commentButton = view.findViewById(R.id.comment_button);
-        notificationButton = view.findViewById(R.id.notification_button);
-        editPosterButton = view.findViewById(R.id.edit_poster_button);
+        backButton         = view.findViewById(R.id.back_button);
+        commentButton      = view.findViewById(R.id.comment_button);
 
-        poster = view.findViewById(R.id.poster_image);
-        eventName = view.findViewById(R.id.event_name);
-        eventDateTime = view.findViewById(R.id.event_date_time);
-        eventOrganizer = view.findViewById(R.id.event_organizer);
-        eventPrice = view.findViewById(R.id.event_price);
-        eventLocation = view.findViewById(R.id.event_location);
-        eventDescription = view.findViewById(R.id.event_description);
+        poster             = view.findViewById(R.id.poster_image);
+        eventName          = view.findViewById(R.id.event_name);
+        eventDateTime      = view.findViewById(R.id.event_date_time);
+        eventOrganizer     = view.findViewById(R.id.event_organizer);
+        eventPrice         = view.findViewById(R.id.event_price);
+        eventLocation      = view.findViewById(R.id.event_location);
+        eventDescription   = view.findViewById(R.id.event_description);
 
-        reportButton = view.findViewById(R.id.report_button);
-        adminInfo = view.findViewById(R.id.admin_info);
-        reportedNum = view.findViewById(R.id.reported_num);
-        deleteButton = view.findViewById(R.id.delete_button);
+        reportButton       = view.findViewById(R.id.report_button);
+        adminInfo          = view.findViewById(R.id.admin_info);
+        reportedNum        = view.findViewById(R.id.reported_num);
+        deleteButton       = view.findViewById(R.id.delete_button);
 
-        bottomBar = view.findViewById(R.id.bottom_bar);
+        bottomBar          = view.findViewById(R.id.bottom_bar);
 
-        eventDeadline = view.findViewById(R.id.event_deadline);
-        waitingListCount = view.findViewById(R.id.waiting_list_count);
-        attendeesCount = view.findViewById(R.id.attendees_count);
+        eventDeadline      = view.findViewById(R.id.event_deadline);
+        waitingListCount   = view.findViewById(R.id.waiting_list_count);
+        attendeesCount     = view.findViewById(R.id.attendees_count);
 
-        joinButton = view.findViewById(R.id.join_button);
-        leaveButton = view.findViewById(R.id.leave_button);
-        selectButtonSet = view.findViewById(R.id.select_button_set);
-        acceptButton = view.findViewById(R.id.accept_button);
-        declineButton = view.findViewById(R.id.decline_button);
-        attendingLabel = view.findViewById(R.id.attending_label);
-        cannotAttendLabel = view.findViewById(R.id.cannot_attend_label);
-      
+        joinButton         = view.findViewById(R.id.join_button);
+        leaveButton        = view.findViewById(R.id.leave_button);
+        selectButtonSet    = view.findViewById(R.id.select_button_set);
+        acceptButton       = view.findViewById(R.id.accept_button);
+        declineButton      = view.findViewById(R.id.decline_button);
+        attendingLabel     = view.findViewById(R.id.attending_label);
+        cannotAttendLabel  = view.findViewById(R.id.cannot_attend_label);
+
         infoButton                = view.findViewById(R.id.lottery_info_button);
-        manageCoOrganizersButton  = view.findViewById(R.id.manage_co_organizers_button);
 
         // back button to return to events list
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
@@ -295,12 +286,8 @@ public class InfoUEventFragment extends Fragment implements LocationToggleListen
         bottomBar.setVisibility(View.GONE);
         reportButton.setVisibility(View.GONE);
         adminInfo.setVisibility(View.VISIBLE);
-        manageCoOrganizersButton.setVisibility(View.GONE);
 
-        sampleButton.setVisibility(View.GONE);
-        viewEntrantsButton.setVisibility(View.GONE);
         commentButton.setVisibility(View.VISIBLE);
-        notificationButton.setVisibility(View.GONE);
 
         eventDeadline.setVisibility(View.VISIBLE);
         waitingListCount.setVisibility(View.VISIBLE);
@@ -347,135 +334,16 @@ public class InfoUEventFragment extends Fragment implements LocationToggleListen
      *                           Only the primary organizer can open the co-organizer management screen.
      */
     private void setupOrganizerUI(Event event, boolean isPrimaryOrganizer) {
-        bottomBar.setVisibility(View.GONE);
-        reportButton.setVisibility(View.GONE);
-        adminInfo.setVisibility(View.VISIBLE);
-
-        editPosterButton.setVisibility(View.VISIBLE);
-        sampleButton.setVisibility(View.VISIBLE);
-        viewEntrantsButton.setVisibility(View.VISIBLE);
-        commentButton.setVisibility(View.VISIBLE);
-        notificationButton.setVisibility(View.VISIBLE);
-
-        // Only the primary organizer can manage co-organizers
-        if (isPrimaryOrganizer) {
-            manageCoOrganizersButton.setVisibility(View.VISIBLE);
-            manageCoOrganizersButton.setOnClickListener(v -> {
-                Bundle args = new Bundle();
-                args.putString("eventId", event.getEventId());
-                args.putString("organizerDeviceId", event.getOrganizerDeviceId());
-
-                ManageCoOrganizersFragment fragment = new ManageCoOrganizersFragment();
-                fragment.setArguments(args);
-
-                getParentFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
-                        .addToBackStack(null)
-                        .commit();
-            });
-        } else {
-            manageCoOrganizersButton.setVisibility(View.GONE);
-        }
-
-        // set the number of people that reported this event grammatically
-        String reportedNumText = "Reported by " + event.getNumReports();
-        if (event.getNumReports() == 1) {
-            reportedNumText += " person";
-        } else {
-            reportedNumText += " people";
-        }
-        reportedNum.setText(reportedNumText);
-
-        // set delete button functionality
-        deleteButton.setOnClickListener(v -> {
-            PermanentWarningFragment fragment = PermanentWarningFragment.newInstance(() ->
-                    EventDb.getInstance().deleteEvent(
-                            event.getEventId(),
-                            () -> {
-                                Log.d(TAG, "Event deleted by organizer");
-                                getParentFragmentManager().popBackStack();
-                            },
-                            e -> Log.e(TAG, "Error deleting event: " + e)
-                    )
-            );
-            fragment.show(requireActivity().getSupportFragmentManager(), "Confirm Event Delete");
-        });
-        notificationButton.setOnClickListener(v -> {
-            SendNotificationDialog dialog = SendNotificationDialog.newInstance(
-                    event.getEventId(),
-                    event.getName(),
-                    event.getRegistrationList()
-            );
-            dialog.show(getParentFragmentManager(), "send_notification");
-        });
-        viewEntrantsButton.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putString("eventId", event.getEventId());
-            OrganizerUserListFragment userListFragment = new OrganizerUserListFragment();
-            userListFragment.setArguments(args);
-            getParentFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, userListFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
-
-        editPosterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showInputDialogImage();
-            }
-        });
-
-        sampleButton.setOnClickListener(v->{
-
-            event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(), new RegistrationList.OnDbUpdateListener() {
-                @Override
-                public void onSuccess() {
-                    //useless here
-                }
-
-                @Override
-                public void onFailure() {
-                    //useless here
-                }
-
-                @Override
-                public void onComplete(RegistrationList.RegistrationResult result) {
-                    switch (result) {
-                        case SUCCESS:
-                            Toast.makeText(getContext(),"Users sampled",Toast.LENGTH_SHORT ).show();
-                            break;
-                        case CAPACITY_FULL:
-                            Toast.makeText(getContext(),"can't Sample any more", Toast.LENGTH_SHORT).show();
-                            break;
-                        case DATABASE_ERROR:
-                            Toast.makeText(getContext(),"Database error, try again in a moment", Toast.LENGTH_SHORT).show();
-                            break;
-                        case BLOCKED:
-                            Toast.makeText(getContext(),"Sampled Users cannot enter Selected list", Toast.LENGTH_SHORT).show();
-                            break;
-                        case ALREADY_IN_LIST:
-                            Toast.makeText(getContext(),"Users already in list", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                }
-            });
-        });
+        Log.e(TAG, "When organizer of this event, it should open `EventEditFragment`");
+        Toast.makeText(getContext(), "You shouldn't be here", Toast.LENGTH_LONG).show();
     }
 
     private void setupEntrantUI(Event event) {
         reportButton.setVisibility(View.VISIBLE);
         adminInfo.setVisibility(View.GONE);
         bottomBar.setVisibility(View.VISIBLE);
-        manageCoOrganizersButton.setVisibility(View.GONE);
 
-        sampleButton.setVisibility(View.GONE);
-        viewEntrantsButton.setVisibility(View.GONE);
         commentButton.setVisibility(View.VISIBLE);
-        notificationButton.setVisibility(View.GONE);
-        editPosterButton.setVisibility(View.GONE);
 
         // set report button functionality
         reportButton.setOnClickListener(v -> {

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_aroura_gradient">
+    android:background="@color/background">
 
     <ListView
         android:id="@+id/notifications_list"
@@ -13,8 +13,7 @@
         android:paddingBottom="96dp"
         android:dividerHeight="8dp"
         android:divider="@android:color/transparent"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+
         android:clipToPadding="false"
         android:scrollbars="none"/>
 
@@ -26,17 +25,17 @@
         android:layout_gravity="top|end"
         android:layout_marginTop="48dp"
         android:layout_marginEnd="12dp"
-        android:text="✓  Opt In"
-        android:textColor="#000000"
+        android:text="@string/opt_in_button_text"
+        android:textColor="@color/dark_text"
         android:textSize="14sp"
         android:textStyle="bold"
+        app:icon="@drawable/rounded_check_24"
+        app:iconTint="@color/dark_text"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="#5CDB95"
+        android:backgroundTint="@color/green"
         android:stateListAnimator="@null"
-        android:visibility="gone"
         app:cornerRadius="24dp"
-        style="@style/Widget.MaterialComponents.Button"
         android:fontFamily="@font/roboto"/>
 
     <!-- Opt Out (red) — shown when notifications are ON -->
@@ -47,17 +46,17 @@
         android:layout_gravity="top|end"
         android:layout_marginTop="48dp"
         android:layout_marginEnd="12dp"
-        android:text="✕  Opt Out"
-        android:textColor="#000000"
+        android:text="@string/opt_out_button_text"
+        android:textColor="@color/dark_text"
         android:textSize="14sp"
         android:textStyle="bold"
+        app:icon="@drawable/rounded_cancel_24"
+        app:iconTint="@color/dark_text"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:backgroundTint="#E05C5C"
+        android:backgroundTint="@color/light_red"
         android:stateListAnimator="@null"
-        android:visibility="gone"
         app:cornerRadius="24dp"
-        style="@style/Widget.MaterialComponents.Button"
         android:fontFamily="@font/roboto"/>
 
 </FrameLayout>

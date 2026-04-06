@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/background_aroura_gradient"
-    android:fitsSystemWindows="true">
+    android:background="@android:color/transparent">
 
     <SearchView
         android:id="@+id/search_event"
@@ -14,9 +13,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginBottom="12dp"
         android:iconifiedByDefault="false"
-        android:queryHint="Search Events"/>
+        android:queryHint="Search Events"
+        android:background="@drawable/rounded_box"
+        android:backgroundTint="@color/purple"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -29,8 +31,6 @@
         android:paddingBottom="96dp"
         android:dividerHeight="8dp"
         android:divider="@android:color/transparent"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
         android:clipToPadding="false"
         android:scrollbars="none"/>
 
@@ -39,20 +39,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="No such events exist"
+            android:text="@string/no_event_found_text"
             android:textSize="16sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/light_text"
             android:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/eventAddButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="48dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="120dp"
+        android:contentDescription="@string/add_an_event_content_description"
+        android:backgroundTint="@color/blue"
         android:src="@android:drawable/ic_input_add"
+        android:tint="@color/dark_text"
+        app:iconTint="@color/dark_text"
         app:elevation="6dp" />
 
         <!-- Filter Button-->
@@ -60,16 +63,17 @@
             android:id="@+id/filter_button"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="80dp"
-            android:text="Filter"
-            android:textColor="#1C1C2E"
+            android:layout_gravity="bottom|start"
+            android:layout_marginBottom="120dp"
+            android:layout_marginHorizontal="16dp"
+            android:text="@string/filter_button_text"
+            android:textColor="@color/dark_text"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:backgroundTint="#7EFBB0"
+            app:backgroundTint="@color/blue"
             app:elevation="6dp"
             app:icon="@drawable/ic_filter"
-            app:iconTint="#1C1C2E"
+            app:iconTint="@color/dark_text"
             app:shapeAppearance="@style/PillShape" />
     </FrameLayout>
 </LinearLayout>

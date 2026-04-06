@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Source - https://stackoverflow.com/a/42516202
+Posted by CommonsWare, modified by community. See post 'Timeline' for change history
+Retrieved 2026-04-05, License - CC BY-SA 4.0
+-->
+<paths>
+    <cache-path
+        name="cache_files"
+        path="." />
+</paths>

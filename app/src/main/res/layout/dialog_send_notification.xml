@@ -12,17 +12,17 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="To:"
+        android:text="@string/to_text"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="#A78BFA"
+        android:textColor="@color/purple"
         android:layout_marginBottom="10dp"/>
 
     <!-- Toggles card with aurora gradient background and rounded corners -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="@dimen/corner_radius"
         app:cardBackgroundColor="@android:color/transparent"
         app:cardElevation="0dp">
 
@@ -46,9 +46,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Participating"
+                    android:text="@string/participating_text"
                     android:layout_marginStart="12dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/light_text"
                     android:textSize="15sp"/>
             </LinearLayout>
 
@@ -65,9 +65,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Rejected"
+                    android:text="@string/rejected_text"
                     android:layout_marginStart="12dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/light_text"
                     android:textSize="15sp"/>
             </LinearLayout>
 
@@ -84,9 +84,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Invited"
+                    android:text="@string/invited_text"
                     android:layout_marginStart="12dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/light_text"
                     android:textSize="15sp"/>
             </LinearLayout>
 
@@ -103,9 +103,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Waiting"
+                    android:text="@string/waiting_text"
                     android:layout_marginStart="12dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/light_text"
                     android:textSize="15sp"/>
             </LinearLayout>
 
@@ -121,9 +121,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cancelled"
+                    android:text="@string/cancelled_text"
                     android:layout_marginStart="12dp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/light_text"
                     android:textSize="15sp"/>
             </LinearLayout>
 
@@ -134,9 +134,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Message"
+        android:text="@string/message_title"
         android:textSize="12sp"
-        android:textColor="#A78BFA"
+        android:textColor="@color/purple"
         android:layout_marginTop="20dp"/>
 
     <!-- Message input -->
@@ -144,35 +144,36 @@
         android:id="@+id/notification_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter your message"
+        android:autofillHints="none"
+        android:hint="@string/enter_your_message_hint"
         android:inputType="textMultiLine"
         android:minLines="2"
         android:maxLines="4"
         android:background="@null"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#888888"
+        android:textColor="@color/green"
+        android:textColorHint="@color/light_glass"
         android:layout_marginTop="4dp"/>
 
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#A78BFA"
+        android:background="@color/blue"
         android:layout_marginBottom="20dp"/>
 
     <Button
         android:id="@+id/btn_send"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:text="✓  Send"
-        android:textAllCaps="false"
-        android:textColor="#1C1B2E"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:backgroundTint="#A78BFA"
+        android:layout_height="wrap_content"
+        android:text="@string/send_button_text"
+        android:textColor="@color/dark_text"
+        android:fontFamily="@font/roboto_bold"
         android:stateListAnimator="@null"
-        app:cornerRadius="26dp"
-        style="@style/Widget.MaterialComponents.Button"/>
+        app:icon="@drawable/rounded_check_24"
+        app:iconTint="@color/dark_text"
+        app:iconGravity="textStart"
+        app:backgroundTint="@null"
+        android:background="@drawable/gradient_confirm_button"/>
 
 </LinearLayout>

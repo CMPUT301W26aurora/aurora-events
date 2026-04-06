@@ -44,69 +44,6 @@
 
         </RelativeLayout>
 
-        <!--Send Notification Button-->
-        <Button
-            android:id="@+id/notification_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="26dp"
-            android:backgroundTint="@color/light_glass"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
-            android:text="Send Notification"
-            android:textColor="@android:color/white"
-            android:fontFamily="@font/roboto"/>
-
-        <!--View Entrants Button-->
-        <Button
-            android:id="@+id/view_entrants_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="View Entrants"
-            android:textColor="@color/dark_text"
-            android:backgroundTint="@color/green"
-            android:layout_marginTop="14sp"
-            android:gravity="center"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"/>
-
-        <!--Sample Entrants Button-->
-        <Button
-            android:id="@+id/sample_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Sample Entrants"
-            android:textColor="@color/dark_text"
-            android:backgroundTint="@color/purple"
-            android:layout_marginTop="14sp"
-            android:gravity="center"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"/>
-
-        <!--
-            Manage Co-Organizers Button.
-            Visible only to the primary organizer; hidden for co-organizers,
-            admins, and entrants. Visibility is controlled in InfoUEventFragment.
-        -->
-        <Button
-            android:id="@+id/manage_co_organizers_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14sp"
-            android:backgroundTint="@color/light_glass"
-            android:gravity="center"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:text="Manage Co-Organizers"
-            android:textColor="@color/light_text"
-            android:fontFamily="@font/roboto"
-            android:visibility="gone"
-            app:icon="@drawable/rounded_group_24"
-            app:iconTint="@color/light_text"/>
-
         <!--Optional poster image-->
         <FrameLayout
             android:layout_width="match_parent"
@@ -359,13 +296,16 @@
                         android:fontFamily="@font/roboto_bold"
                         app:icon="@drawable/rounded_add_circle_24"
                         app:iconTint="@color/dark_text"
-                        android:backgroundTint="@color/green"/>
+                        app:iconGravity="textStart"
+                        app:backgroundTint="@null"
+                        android:background="@drawable/gradient_confirm_button"/>
 
                     <!-- Leave Button-->
                     <Button
                         android:id="@+id/leave_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:paddingVertical="13dp"
                         android:text="@string/leave_pool_button_text"
                         android:textSize="7pt"
                         android:textColor="@color/light_text"
@@ -386,13 +326,15 @@
                             android:id="@+id/accept_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:backgroundTint="@color/green"
                             android:fontFamily="@font/roboto_bold"
                             android:text="@string/accept_button_text"
                             android:textSize="7pt"
                             android:textColor="@color/dark_text"
                             app:icon="@drawable/rounded_check_24"
-                            app:iconTint="@color/dark_text"/>
+                            app:iconTint="@color/dark_text"
+                            app:iconGravity="textStart"
+                            app:backgroundTint="@null"
+                            android:background="@drawable/gradient_confirm_button"/>
 
                         <Space
                             android:layout_width="10dp"
@@ -403,6 +345,7 @@
                             android:id="@+id/decline_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:paddingVertical="13dp"
                             android:backgroundTint="@color/dark_red"
                             android:fontFamily="@font/roboto_bold"
                             android:text="@string/decline_button_text"
@@ -418,7 +361,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="10dp"
+                        android:paddingVertical="13dp"
                         android:text="@string/attending_label_text"
                         android:textSize="7pt"
                         android:textColor="@color/dark_text"
@@ -435,7 +378,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="20dp"
-                        android:paddingVertical="10dp"
+                        android:paddingVertical="13dp"
                         android:text="@string/cannot_attend_label_text"
                         android:textSize="7pt"
                         android:textColor="@color/light_text"

@@ -2,7 +2,6 @@ package com.example.auroraevents.view;
 
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +17,6 @@ import com.example.auroraevents.R;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class LoginFragment extends Fragment {
@@ -64,28 +59,24 @@ public class LoginFragment extends Fragment {
                         false
                 );
                 //https://medium.com/@yossisegev/understanding-activity-runonuithread-e102d388fe93
-                UserDb.getInstance().addUser(user, ()->{
-                    requireActivity().runOnUiThread(()->{
-                        Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
+                UserDb.getInstance().addUser(user, ()-> requireActivity().runOnUiThread(()->{
+                    Toast.makeText(view.getContext(), R.string.user_info_successfully_updated_toast_text, Toast.LENGTH_SHORT).show();
 
-                        userViewModel.selectItem(user);
+                    userViewModel.selectItem(user);
 
 
-                        if (getParentFragmentManager().getBackStackEntryCount() > 0) {
-                            getParentFragmentManager().popBackStack();
-                        } else {
-                            getParentFragmentManager().beginTransaction()
-                                    .replace(R.id.fragment_container, new EventFragment())
-                                    .commit();
-                        }
+                    if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                        getParentFragmentManager().popBackStack();
+                    } else {
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new EventFragment())
+                                .commit();
+                    }
 
-                    });
-                }, e->{
-                    requireActivity().runOnUiThread(() -> {
-                        v.setEnabled(true);
-                        Toast.makeText(getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
-                    });
-                });
+                }), e-> requireActivity().runOnUiThread(() -> {
+                    v.setEnabled(true);
+                    Toast.makeText(getContext(), R.string.database_error_toast_text, Toast.LENGTH_SHORT).show();
+                }));
             }
         });
     }
@@ -94,5 +85,22 @@ public class LoginFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_login, container, false);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        View navBar = requireActivity().findViewById(R.id.nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        View nav = requireActivity().findViewById(R.id.nav_bar);
+        if (nav != null) {
+            nav.setVisibility(View.GONE);
+        }
     }
 }
