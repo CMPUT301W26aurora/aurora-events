@@ -150,21 +150,17 @@ public class OrganizerUserListFragment extends DialogFragment {
             }
         });
     }
-
     private List<UserAdapterWrapper> createDisplayList(List<User> fetchedUsers,
                                                        RegistrationList registration) {
         List<UserAdapterWrapper> displayList = new ArrayList<>();
-
         Map<String, Date> map = new HashMap<>();
         for (SelectedUser se : registration.getSelectedList()) {
             map.put(se.getUserId(), se.getSelectedAt().toDate());
         }
-
         for (User user : fetchedUsers) {
             String userId = user.getDeviceId();
             String status = "Waiting";
             Date time = null;
-
             if (map.containsKey(userId)) {
                 status = "Selected";
                 time = map.get(userId);
@@ -177,13 +173,10 @@ public class OrganizerUserListFragment extends DialogFragment {
             } else if (registrationList.getRemovedList().contains(userId)) {
                 status = "Removed";
             }
-
-            displayList.add(new UserAdapterWrapper(user, status, time));
+            displayList.add(new UserAdapterWrapper(user, status, time, null, null, null ));
         }
-
         return displayList;
     }
-
     private void orgUserApplyFilter(List<String> statuses) {
         if (masterUiList == null) return;
         if (statuses.isEmpty()) {
@@ -191,28 +184,23 @@ public class OrganizerUserListFragment extends DialogFragment {
             adapter.notifyDataSetChanged();
             return;
         }
-
         List<UserAdapterWrapper> filtered = new ArrayList<>();
         for (UserAdapterWrapper user : masterUiList) {
             if (statuses.contains(user.getStatus())) {
                 filtered.add(user);
             }
         }
-
         adapter.setUserList(filtered);
         adapter.notifyDataSetChanged();
     }
-
     @Override
     public void onDestroyView() {
-
         super.onDestroyView();
         if (listenerRegistration != null) {
             listenerRegistration.remove();
             listenerRegistration = null;
         }
     }
-
     @Override
     public void onStop() {
         super.onStop();
@@ -221,7 +209,6 @@ public class OrganizerUserListFragment extends DialogFragment {
             navBar.setVisibility(View.VISIBLE);
         }
     }
-
     @Override
     public void onStart() {
         super.onStart();

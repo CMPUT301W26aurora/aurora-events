@@ -13,24 +13,28 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.auroraevents.R;
+import com.example.auroraevents.model.Event;
+import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserAdapter;
 import com.example.auroraevents.model.UserAdapterWrapper;
 import com.example.auroraevents.server.UserDb;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 public class AdminProfileFragment extends Fragment {
     ListenerRegistration listenerRegistration;
     private final String TAG = "AdminProfileFragment";
     private List<User> masterUserList;
     private List<User> createDisplayList;
     private UserAdapter adapter;
-
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -40,7 +44,6 @@ public class AdminProfileFragment extends Fragment {
 
         return view;
     }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
@@ -52,7 +55,6 @@ public class AdminProfileFragment extends Fragment {
         });
 
         adapter = new UserAdapter(new ArrayList<>(), true, new UserAdapter.OnUserInteractionListener() {
-
             @Override
             public void Onclick(User user) {
                 if(user.getRole().equals(User.ROLE_ENTRANT)){
@@ -117,7 +119,6 @@ public class AdminProfileFragment extends Fragment {
             applyFilter(filterButton.isChecked());
         }, e -> Log.e(TAG, "Error loading users", e));
     }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -126,25 +127,83 @@ public class AdminProfileFragment extends Fragment {
             listenerRegistration = null;
         }
     }
-
+    /**
+     *
+     * @param onlyOrganizers
+     */
     private void applyFilter(boolean onlyOrganizers) {
         if (masterUserList == null) return;
 
-        List<UserAdapterWrapper> displayList = new ArrayList<>();
-        if (onlyOrganizers) {
-            for (User u : masterUserList) {
-                if (u.getRole().equals(User.ROLE_ORGANIZER)) {
-                    displayList.add(new UserAdapterWrapper(u, "", null));
-                }
-            }
-        } else {
-            for (User u: masterUserList){
-                displayList.add(new UserAdapterWrapper(u, "", null));
+        List<User> filteredUsers = new ArrayList<>();
+        for (User u : masterUserList) {
+            if (!onlyOrganizers || u.getRole().equals(User.ROLE_ORGANIZER)) {
+                filteredUsers.add(u);
             }
         }
-        adapter.setUserList(displayList);
-        adapter.notifyDataSetChanged();
+        if (filteredUsers.isEmpty()) {
+            adapter.setUserList(new ArrayList<>());
+            return;
+        }
+        List<UserAdapterWrapper> displayList = new ArrayList<>();
+        AtomicInteger count = new AtomicInteger(0);
+        for (User u : filteredUsers) {
+            List<String> eventIds = getAllEventIds(u);
+            Map<String, String> localNameMap = new HashMap<>();
+            grabEventNamesForUser(eventIds, localNameMap, () -> {
+                displayList.add(new UserAdapterWrapper(u, "", null,u.getEventsSigned() , eventIds, localNameMap));
+                if (count.incrementAndGet() == filteredUsers.size()) {
+                    adapter.setUserList(displayList);
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
     }
 
+    /**
+     *
+     * @param eventIds
+     * @param nameMap
+     * @param onComplete
+     */
+    public void grabEventNamesForUser(List<String> eventIds, Map<String, String> nameMap, Runnable onComplete) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            onComplete.run();
+            return;
+        }
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        for (int i = 0; i < eventIds.size(); i += 30) {
+            List<String> chunk = eventIds.subList(i, Math.min(i + 30, eventIds.size()));
+
+            db.collection("Events")
+                    .whereIn(FieldPath.documentId(), chunk)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        for (DocumentSnapshot doc : querySnapshot) {
+                            nameMap.put(doc.getId(), doc.getString("name"));
+                        }
+                        if (nameMap.size() >= eventIds.size() || querySnapshot.size() < 30) {
+                            onComplete.run();
+                        }
+                    });
+        }
+    }
+    /**
+     *
+     * @param user
+     * @return
+     */
+    public List<String> getAllEventIds(User user) {
+        Map<String, String> signedMap = user.getEventsSigned();
+        List<String> ids = new ArrayList<>(signedMap.keySet());
+        if (user instanceof Organizer) {
+            Organizer org = (Organizer) user;
+            if (org.getMyEvents() != null) {
+                for (Event e : org.getMyEvents()) {
+                    ids.add(e.getEventId());
+                }
+            }
+        }
+        return ids;
+    }
 }
 
