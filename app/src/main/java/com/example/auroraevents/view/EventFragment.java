@@ -205,6 +205,21 @@ public class EventFragment extends Fragment {
             toggleWaiting.setChecked(filterWaitingList);
             toggleCreated.setChecked(filterCreatedEvents);
 
+            userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
+                if (user != null) {
+                    userId = user.getDeviceId();
+                }
+
+                Log.d(TAG, "user role = " + (user != null ? user.getRole() : "null"));
+                if (user != null && (User.ROLE_ORGANIZER.equals(user.getRole()))) {
+                    toggleCreated.setVisibility(VISIBLE);
+                } else {
+                    TextView text = sheetView.findViewById(R.id.text_created_events);
+                    text.setVisibility(GONE);
+                    toggleCreated.setVisibility(GONE);
+                }
+            });
+
             sheetView.findViewById(R.id.btn_confirm).setOnClickListener(confirmView -> {
                 filterLocation    = toggleLocation.isChecked();
                 filterAvailableNow = toggleAvailableNow.isChecked();
