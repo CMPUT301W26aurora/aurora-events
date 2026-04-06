@@ -59,6 +59,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
+                    android:visibility="visible" />
                     android:visibility="gone" />
 
                 <Button
@@ -81,6 +82,7 @@
                     app:iconTint="#AAAAAA" />
             </FrameLayout>
         </FrameLayout>
+
 
         <!-- Event Name Input -->
         <com.google.android.material.textfield.TextInputLayout
