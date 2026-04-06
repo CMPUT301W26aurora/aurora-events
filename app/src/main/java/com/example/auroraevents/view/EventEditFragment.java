@@ -2,9 +2,11 @@ package com.example.auroraevents.view;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,6 +27,8 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -39,12 +43,9 @@ import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
 import com.example.auroraevents.server.UserDb;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-/*TODO:
- * prompt for camera access
- */
 
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
@@ -555,7 +556,13 @@ public class EventEditFragment extends Fragment {
             dialog.dismiss();
         });
 
-        btnCamera.setOnClickListener(v -> dispatchTakePictureIntent());
+        btnCamera.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                dispatchTakePictureIntent();
+            } else {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, 0);
+            }
+        });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
@@ -597,13 +604,19 @@ public class EventEditFragment extends Fragment {
      */
     private void dispatchTakePictureIntent() {
         // Create temp image URI
-        java.io.File photoFile = new java.io.File(
-                requireContext().getCacheDir(),
+        File photoFile = new File(
+                requireActivity().getApplicationContext().getCacheDir(),
                 "camera_photo_" + System.currentTimeMillis() + ".jpg"
         );
-        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
-                requireContext(),
-                requireContext().getPackageName() + ".fileprovider",
+
+        /*
+        Source - https://stackoverflow.com/a/58908053
+        Posted by Pradeep Kumar, modified by community. See post 'Timeline' for change history
+        Retrieved 2026-04-05, License - CC BY-SA 4.0
+        */
+        cameraImageUri = FileProvider.getUriForFile(
+                requireActivity().getApplicationContext(),
+                requireContext().getPackageName() + ".provider",
                 photoFile
         );
 
