@@ -199,9 +199,7 @@ public class EventEditFragment extends Fragment {
                     if (isPrivate) {
                         privateButton.setText(R.string.make_public_text);
                         inviteEntrantsButton.setVisibility(View.VISIBLE);
-                        inviteEntrantsButton.setOnClickListener(v -> {
-                            buildPickEntrantDialog(event);
-                        });
+                        inviteEntrantsButton.setOnClickListener(v -> buildPickEntrantDialog(event));
 
                         qrCodeButton.setVisibility(View.GONE);
                     } else {

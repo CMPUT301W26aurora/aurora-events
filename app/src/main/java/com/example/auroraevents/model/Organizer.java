@@ -1,6 +1,5 @@
 package com.example.auroraevents.model;
 
-import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.auroraevents.server.EventDb;
@@ -50,7 +49,6 @@ public class Organizer extends User {
      * @param geolocationRequired Whether entrants need to be in the location to sign up
      * @param waitingCapacity     The total number of entrants that could attend the event
      * @param attendingCapacity   The total number of entrants that can join the waiting list
-     * @param poster              A pretty picture for the event info screen
      */
     public void CreateEvent(
             String organizerDeviceId,
@@ -61,13 +59,10 @@ public class Organizer extends User {
             String startTime,
             String endTime,
             String location,
-            double latitude,
-            double longitude,
             boolean geolocationRequired,
             int waitingCapacity,
             int attendingCapacity,
             boolean isPrivate,
-            Bitmap poster,
             EventDb.OnEventCreatedCallback onCreated) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -92,8 +87,6 @@ public class Organizer extends User {
         event.setPrivate(isPrivate);
 
         event.setGeolocationRequired(geolocationRequired);
-        event.setLatitude(latitude);
-        event.setLongitude(longitude);
 
         EventDb.addEvent(event,
                 eventId -> {

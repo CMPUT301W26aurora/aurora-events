@@ -4,11 +4,6 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -31,7 +26,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
@@ -43,16 +37,6 @@ import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
-
-import java.io.File;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
-
-import android.widget.Toast;
-
-import java.io.IOException;
-import java.util.List;
 
 /*
 Image loading handled by resource Glide:
@@ -320,6 +304,7 @@ public class EventCreationFragment extends Fragment {
             }
 
             // Validate int input
+            int attendingCapacity = -1;
             try {
                 Integer.parseInt(eventCap);
             } catch (NumberFormatException e) {
@@ -354,12 +339,10 @@ public class EventCreationFragment extends Fragment {
                             registerStart,
                             registerEnd,
                             location,
-                            eventLat,
-                            eventLng,
-                            geolocationToggled,
+                            geolocationRequired,
                             waitingCapacity,
                             attendingCapacity,
-                            poster,
+                            isPrivate,
                             eventId -> {
                                 Log.d(TAG, "Callback reached, attempting popBackStack");
                                 if (selectedImageUri != null) {
@@ -374,17 +357,8 @@ public class EventCreationFragment extends Fragment {
                                     Log.d(TAG, "Fragment not added or activity null — skip pop");
                                 }
                             }
-                            if (isAdded() && getActivity() != null) {
-                                getActivity().runOnUiThread(() -> {
-                                    Log.d(TAG, "Running popBackStack on UI thread");
-                                    getParentFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                });
-                            } else {
-                                Log.d(TAG, "Fragment not added or activity null — skip pop");
-                            }
-                        }
-                );
-            }
+                    );
+                }
         });
 
         return view;
