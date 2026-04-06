@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*TODO:
- * show QR code
  * prompt for camera access
  */
 
@@ -201,20 +201,30 @@ public class EventEditFragment extends Fragment {
                         inviteEntrantsButton.setOnClickListener(v -> {
                             buildPickEntrantDialog(event);
                         });
+
+                        qrCodeButton.setVisibility(View.GONE);
                     } else {
                         inviteEntrantsButton.setVisibility(View.GONE);
                         privateButton.setText(R.string.make_private_text);
+
+                        qrCodeButton.setVisibility(View.VISIBLE);
+                        qrCodeButton.setOnClickListener(v -> {
+                            ImageView qrView = new ImageView(getContext());
+                            qrView.setImageBitmap(event.generateQrCode());
+                            new AlertDialog.Builder(requireContext())
+                                    .setTitle("Scan this QR code\nto join this event")
+                                    .setView(qrView)
+                                    .show();
+                        });
                     }
 
                     if (event.getPosterUrl() == null) {
                         imageView.setVisibility(View.GONE);
                     } else {
-                        if (event.getPosterUrl() != null) {
-                            imageView.setVisibility(View.VISIBLE);
-                            Glide.with(requireContext())
-                                    .load(event.getPosterUrl())
-                                    .into(imageView);
-                        }
+                        imageView.setVisibility(View.VISIBLE);
+                        Glide.with(requireContext())
+                                .load(event.getPosterUrl())
+                                .into(imageView);
                     }
 
                     if (user != null && user.getDeviceId().equals(event.getOrganizerDeviceId()) && user.getRole().equals(User.ROLE_ORGANIZER)) {
@@ -243,9 +253,6 @@ public class EventEditFragment extends Fragment {
                 Log.e(TAG, "failed to fetch event");
             });
         }
-
-        // Fetch firebase cloud storage
-        imageView = view.findViewById(R.id.iv_event_image);
 
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
@@ -290,10 +297,6 @@ public class EventEditFragment extends Fragment {
 
                     }
         }));
-
-        qrCodeButton.setOnClickListener(v -> {
-            //
-        });
 
         viewEntrantsButton.setOnClickListener(v -> {
             Bundle bundle = new Bundle();

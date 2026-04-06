@@ -111,4 +111,5 @@
     <string name="manage_co_organizers_button_text">Manage Co-Organizers</string>
     <string name="edit_event_poster_title">Edit Event Poster</string>
     <string name="invite_entrants_button_text">Invite Entrants</string>
+    <string name="qr_code_picture_content_description">QR Code of the event ID</string>
 </resources>
