@@ -71,7 +71,6 @@ public class OrganizerUserListFragment extends DialogFragment {
         }
 
         csvExportManager = new CsvExportManager(requireContext());
-
         adapter = new UserAdapter(new ArrayList<>(), false, new UserAdapter.OnUserInteractionListener() {
             @Override
             public void Onclick(User user) {
@@ -81,6 +80,10 @@ public class OrganizerUserListFragment extends DialogFragment {
                         currentEventId
                 );
                 removeDialog.show(getParentFragmentManager(), "remove_picker");
+            }
+            @Override
+            public void OnNotify(User user){
+                //do nothing here
             }
         });
 
