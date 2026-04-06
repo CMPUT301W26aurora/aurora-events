@@ -131,7 +131,7 @@ public class EventFragment extends Fragment {
         ArrayList<Event> eventList = new ArrayList<>();
 
         // create adapter with eventList
-        eventsAdapter = new EventArrayAdapter(requireContext(), eventList, userId);
+        eventsAdapter = new EventArrayAdapter(requireContext(), eventList);
         eventsListView.setAdapter(eventsAdapter);
 
         noEventText = root.findViewById(R.id.no_event_found_text);

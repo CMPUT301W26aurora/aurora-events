@@ -48,6 +48,12 @@ https://github.com/bumptech/glide
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
 Maps handled by Google Maps SDK:
  */
+
+/**
+ * The fragment for event creation
+ * @author Arron Rossa (Logic)
+ * @author Jared Strandlund (Layout)
+ */
 public class EventCreationFragment extends Fragment {
     private final String TAG = "EventCreationFragment";
     private ImageButton backButton;

@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * Requires a Cloud Function named "sendNotification" deployed to your project.
  * See the comment below for the Cloud Function code.
+ * @author Joshua Terry
  */
 public class NotificationSender {
 

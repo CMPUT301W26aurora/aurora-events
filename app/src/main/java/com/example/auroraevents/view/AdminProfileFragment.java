@@ -13,8 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.auroraevents.R;
-import com.example.auroraevents.model.Event;
-import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserAdapter;
 import com.example.auroraevents.model.UserAdapterWrapper;
@@ -29,6 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * A fragment for an admin to view and moderate profiles
+ * @author Sean Ross
+ */
 public class AdminProfileFragment extends Fragment {
     ListenerRegistration listenerRegistration;
     private final String TAG = "AdminProfileFragment";
@@ -128,8 +131,8 @@ public class AdminProfileFragment extends Fragment {
         }
     }
     /**
-     *
-     * @param onlyOrganizers
+     * A filter to set the only shown users to organizers
+     * @param onlyOrganizers {@link Boolean} a boolean that toggles the filter
      */
     private void applyFilter(boolean onlyOrganizers) {
         if (masterUserList == null) return;
@@ -145,6 +148,8 @@ public class AdminProfileFragment extends Fragment {
             adapter.setUserList(new ArrayList<>());
             return;
         }
+
+        //iterate batch get not thread safe, need atomic int to ensure proper sync
         List<UserAdapterWrapper> displayList = new ArrayList<>();
         AtomicInteger count = new AtomicInteger(0);
         for (User u : filteredUsers) {
@@ -161,10 +166,11 @@ public class AdminProfileFragment extends Fragment {
     }
 
     /**
+     * Grabs the event names for a user
      *
-     * @param eventIds
-     * @param nameMap
-     * @param onComplete
+     * @param eventIds the list of events to grab
+     * @param nameMap a map of the names with the respective ids
+     * @param onComplete a listener for completion
      */
     public void grabEventNamesForUser(List<String> eventIds, Map<String, String> nameMap, Runnable onComplete) {
         if (eventIds == null || eventIds.isEmpty()) {
@@ -175,6 +181,8 @@ public class AdminProfileFragment extends Fragment {
         for (int i = 0; i < eventIds.size(); i += 30) {
             List<String> chunk = eventIds.subList(i, Math.min(i + 30, eventIds.size()));
 
+            //where in maxes out at 30 grabs before timing out, need to
+            //group batches
             db.collection("Events")
                     .whereIn(FieldPath.documentId(), chunk)
                     .get()
@@ -189,9 +197,9 @@ public class AdminProfileFragment extends Fragment {
         }
     }
     /**
-     *
-     * @param user
-     * @return
+     * A gelper function that returns the event ids from a map
+     * @param user the user who the map is attached to
+     * @return A {@link List<String>} with all eventIds
      */
     public List<String> getAllEventIds(User user) {
         Map<String, String> signedMap = user.getEventsSigned();

@@ -22,6 +22,8 @@ import java.util.Map;
 
 /**
  * User adapter class for displaying users
+ * Has two subclasses for specific views
+ * @author Sean Ross
  */
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     public interface OnUserInteractionListener{
@@ -50,6 +52,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         UserAdapterWrapper user = userList.get(position);
         holder.bind(user, listener);
     }
+
+    /**
+     * To be used by the organizer
+     */
     public static class  OrgViewHolder extends UserViewHolder{
         private final View rootLayout;
         private final ImageButton delete;
@@ -97,6 +103,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             });
         }
     }
+
+    /**
+     * To be used by the Admin
+     */
     public static class  AdminViewHolder extends UserViewHolder{
         private final View rootLayout;
         private final ImageButton delete, notify;
@@ -171,6 +181,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     //https://www.geeksforgeeks.org/java/stringbuilder-class-in-java-with-examples/
+
+    /**
+     * A helper function that returns a string of joined events and their status in said event
+     * @param statuses A map of event ids and a correlated status for a given user
+     * @param lookup A map of a event ids and its correlated event name
+     * @return A {@link String} to be used in formatting
+     * @author Sean Ross
+     */
     private static String formatJoined(Map<String, String> statuses, Map<String, String> lookup) {
         if (statuses == null || statuses.isEmpty()) return "No events joined.";
         StringBuilder sb = new StringBuilder();
@@ -183,6 +201,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
         return sb.toString().trim();
     }
+
+    /**
+     * A helper function that returns a string of created events
+     * @param userId the user who is being queried
+     * @param targetTextView The TextView to be updated
+     * @author Sean Ross
+     */
     private static void grabEventsFormat(String userId, TextView targetTextView) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Events")

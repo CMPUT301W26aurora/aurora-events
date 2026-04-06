@@ -9,6 +9,8 @@ admin.initializeApp();
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
+//firebase functions for notifications made by Joshua Terry, anything else
+//is by Sean Ross, with additions from each other to the others functions.
 exports.onUserDeleted = onDocumentDeleted("Users/{userId}", async (event)=>{
     const deletedUserId = event.params.userId;
     const batch = db.batch();

@@ -19,6 +19,10 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Handles Notifications with FirebaseMessagingService
+ * @author Joshua Terry
+ */
 public class FirebaseNotificationHandler extends FirebaseMessagingService {
 
     private static final String TAG              = "FCMService";

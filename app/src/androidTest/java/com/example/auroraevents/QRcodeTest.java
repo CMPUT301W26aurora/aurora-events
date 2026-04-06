@@ -11,6 +11,10 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 
+/**
+ * Tests Qr code generation
+ * @author Sean Ross
+ */
 public class QRcodeTest {
 
     @Test
@@ -26,11 +30,9 @@ public class QRcodeTest {
                 "testing environment",
                 false,0,0);
         event.setEventId("sample id for QR Code testing");
-
          Bitmap test = event.generateQrCode();
          assertNotNull(test);
          assertEquals(400, test.getWidth());
          assertEquals(400, test.getHeight());
     }
-
 }

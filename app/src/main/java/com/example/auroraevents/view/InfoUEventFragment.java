@@ -69,6 +69,12 @@ import java.util.Map;
  * Implements US 01.06.01 - View waiting list count.
  * Implements US 01.06.02 - Sign up for an event from event details.
  * Implements US 02.02.01 - Admin can view and delete events.
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
  */
 public class InfoUEventFragment extends Fragment implements LocationToggleListener {
 

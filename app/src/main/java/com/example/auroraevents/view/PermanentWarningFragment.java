@@ -13,6 +13,10 @@ import com.example.auroraevents.R;
 
 import java.io.Serializable;
 
+/**
+ * A warning when deleting something important
+ * @author Jared Strandlund
+ */
 public class PermanentWarningFragment extends DialogFragment {
     public interface Callback extends Serializable { void onCallback(); }
 

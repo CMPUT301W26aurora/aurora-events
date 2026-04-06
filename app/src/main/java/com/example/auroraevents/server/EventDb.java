@@ -38,6 +38,8 @@ import java.util.Map;
  * Singleton class for all Firestore operations on the "Events" collection.
  * Usage:
  *   EventDb.getInstance().addEvent(event, id -> { ... }, e -> { ... });
+ * @author Joshua Terry
+ * @author Sean Ross
  */
 public class EventDb {
 
@@ -84,6 +86,13 @@ public class EventDb {
     // ── CREATE ─────────────────────────────────────────────────────────────
 
     //https://firebase.google.com/docs/storage/android/upload-files
+
+    /**
+     * A function that saves a image to firestore
+     * @param eventId the event whose image is being stored
+     * @param url the location of the image
+     * @param field the image name
+     */
     public void saveUrlToFirestore(String eventId, String url, String field){
         db.collection(COLLECTION_NAME)
                 .document(eventId)
@@ -96,6 +105,12 @@ public class EventDb {
                 });
     }
 
+    /**
+     * Compresses an image and uploads to the database
+     * @param context application or used to access the image
+     * @param uri the uploaded image
+     * @param eventId the eventId to be uploaded
+     */
     public void compressAndUpload(Context context, Uri uri, String eventId) {
         try {
             InputStream inputStream = context.getContentResolver().openInputStream(uri);
@@ -112,6 +127,11 @@ public class EventDb {
         }
     }
 
+    /**
+     * uploads a bitmap of the poster to firebase
+     * @param data The bitmap data
+     * @param eventId The string of the eventId
+     */
     public void uploadPosterBytes(byte[] data, String eventId) {
         if (data == null || eventId == null) return;
 
@@ -127,6 +147,11 @@ public class EventDb {
                 .addOnFailureListener(e -> Log.e(TAG, "Upload failed", e));
     }
 
+    /**
+     * uploads a qr code to the database
+     * @param qr the qr code to upload
+     * @param eventId the event id to be saved to
+     */
     public void uploadQr(Bitmap qr, String eventId){
         if (qr == null || eventId == null) return;
 
@@ -586,6 +611,13 @@ public class EventDb {
 
     public interface OnEventSnapshotCallback { void onEventSnapshot(Event event); }
 
+    /**
+     * A listener for a specific event
+     * @param eventId the event to be listened to
+     * @param onEventSnapshot the callback on success
+     * @param onFailure the listener for failer
+     * @return A {@link ListenerRegistration} that listens to a given event
+     */
     public ListenerRegistration addSnapshotListenerForEvent(String eventId, OnEventSnapshotCallback onEventSnapshot, OnFailureCallback onFailure) {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(eventId);
         return docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -609,6 +641,12 @@ public class EventDb {
         });
     }
 
+    /**
+     * A listener for all event
+     * @param onFetched the success callback
+     * @param onFailure the listener for failer
+     * @return A {@link ListenerRegistration} that listens to a given event
+     */
     public ListenerRegistration eventListenerAll( OnEventListFetchedCallback onFetched, OnFailureCallback onFailure) {
         return db.collection(COLLECTION_NAME)
                 .addSnapshotListener((value, e) -> {

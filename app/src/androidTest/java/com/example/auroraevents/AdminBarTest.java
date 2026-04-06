@@ -17,15 +17,17 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import com.example.auroraevents.view.AdminCommentFragment;
-import com.example.auroraevents.view.AdminImageFragment;
-import com.example.auroraevents.view.AdminOrganizerFragment;
-import com.example.auroraevents.view.AdminProfileFragment;
 import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.ProfileFragment;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+/**
+ * Test class for the admin bar
+ * @author Sean Ross
+ */
 
 public class AdminBarTest {
     @Rule
@@ -37,22 +39,15 @@ public class AdminBarTest {
             new ActivityScenarioRule<>(MainActivity.class);
     @Before
     public void before() {
-        //will add new tester function with mockito; for now, if running this test
-        //please ensure you set isAdmin = True before running otherwise these will fail...
         onView(withId(R.id.nav_browse)).check(matches(isDisplayed()));
         onView(withId(R.id.nav_profile)).perform(click());
-        //Use of thread sleep is REALLY bad, but since using the live server for now
-        //It will have to be included due to server delay, even then it acts strangly
-        //So just trust me I guess lol
         try {Thread.sleep(2000);} catch (InterruptedException e) {}
 
     }
-
     @Test
     public void seeVisibility(){
         onView(withId(R.id.switch_to_admin_button)).check(matches(isDisplayed()));
     }
-
     @Test
     public void toggleAdminOn(){
         onView(withId(R.id.switch_to_admin_button)).perform(click());
@@ -66,7 +61,6 @@ public class AdminBarTest {
         onView(withId(R.id.nav_bar)).check(matches(isDisplayed()));
         onView(withId(R.id.nav_bar_admin)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
     }
-
     private void testNavButtonLoadsFragment(int buttonId, Class<? extends Fragment> fragmentClass) {
         onView(withId(R.id.switch_to_admin_button)).perform(click());
         onView(withId(buttonId)).perform(click());
@@ -80,33 +74,16 @@ public class AdminBarTest {
             );
         });
     }
-
-
-
-    @Test
-    public void testAdminOrganizerLoads() {
-        testNavButtonLoadsFragment(R.id.nav_admin_organizer, AdminOrganizerFragment.class);
-    }
-
-    @Test
-    public void testAdminImageLoads() {
-        testNavButtonLoadsFragment(R.id.nav_admin_image, AdminImageFragment.class);
-    }
-
     @Test
     public void testAdminEventLoads() {
         testNavButtonLoadsFragment(R.id.nav_admin_event, EventFragment.class);
     }
-
     @Test
     public void testAdminCommentLoads() {
         testNavButtonLoadsFragment(R.id.nav_admin_comments, AdminCommentFragment.class);
     }
-
     @Test
     public void testAdminProfileLoads() {
         testNavButtonLoadsFragment(R.id.nav_profile_admin, ProfileFragment.class);
     }
-
-
 }

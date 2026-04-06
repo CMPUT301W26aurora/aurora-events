@@ -21,6 +21,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Represents a user in the application.
  * The deviceId serves as the Firestore document ID in the "Users" collection.
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
  */
 public class User {
 
@@ -92,6 +98,11 @@ public class User {
         return eventsSigned != null ? eventsSigned : new HashMap<>();
     }
     public void setEventsSigned (Map<String,String> eventsSigned) {this.eventsSigned=eventsSigned;}
+
+    /**
+     * A helper function that returns the account age as a formatted string
+     * @return A {@link String} that represents an age.
+     */
     @Exclude
     public String getFormattedAccountAge() {
         if (accountAge == null) return "Unknown";

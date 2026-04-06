@@ -26,6 +26,7 @@ import java.util.Locale;
  * {@link #export(List, List)} whenever an export is requested. The class is
  * intentionally framework-agnostic (no Fragment/Activity dependency) so it can
  * be unit-tested without Robolectric if needed.
+ * @author Josh Terry
  */
 public class CsvExportManager {
 

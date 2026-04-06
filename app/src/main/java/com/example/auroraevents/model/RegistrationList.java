@@ -19,6 +19,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+/**
+ * An object class with helper server functions
+ * @author Jared Strandlund (Original)
+ * @author Sean Ross (Refactored/Rewritten)
+ */
 public class RegistrationList {
     private String eventId;
     private  List<String> waitingList;     // signed up, awaiting lottery
@@ -69,10 +74,18 @@ public class RegistrationList {
     public void setCancelledList(List<String> cancelledList) {this.cancelledList=cancelledList;}
     public void setAttendingList(List<String> attendingList) {this.attendingList=attendingList;}
     public void setSelectedList(List<SelectedUser> selectedList) {this.selectedList=selectedList;}
+
+    /**
+     * Combines all registration categories into a single list of user IDs.
+     * This includes users from the waiting, selected, attending, declined,
+     * cancelled, and removed lists.
+     * * @return A {@link List} of strings containing every unique user ID associated
+     * with this registration list.
+     * @author Sean Ross
+     */
     @Exclude
     public List<String> getAllUsers(){
         List<String> master = new ArrayList<>();
-
         master.addAll(selectedList.stream().map(entrant->entrant.getUserId())
                 .collect(Collectors.toList()));
         master.addAll(removedList);
@@ -83,6 +96,11 @@ public class RegistrationList {
 
         return master;
     }
+
+    /**
+     * enum of potential Registration Results
+     * @author Sean Ross
+     */
     public enum RegistrationResult {
         SUCCESS,
         ALREADY_IN_LIST,
@@ -92,7 +110,8 @@ public class RegistrationList {
     }
 
     /**
-     * Interface for listeners
+     * Interface for listeners, checks on success, failure, and outcome of a move attempt
+     * @author Sean Ross
      */
     public interface OnDbUpdateListener{
         void onSuccess();
@@ -100,6 +119,14 @@ public class RegistrationList {
         void onComplete(RegistrationResult result);
     }
     //-- Add user functions ------------------------------------------------------------------------------------------
+
+    /**
+     * A function to change a user from one list to another
+     * @param fromFieldName The list to be switched from
+     * @param toFieldName The list to be switched to
+     * @param userID The user who is being switched
+     * @param listener Listens for failure and success of the firebase call
+     */
     private void changeDb(String fromFieldName, String toFieldName, String userID, OnDbUpdateListener listener) {
         if ((toFieldName == null) && (fromFieldName == null)) return;
 
@@ -126,13 +153,13 @@ public class RegistrationList {
      * move a single person from waiting to selected without calling group transition, so toList is always a
      * List of strings, so we can ignore the case of it being a group transition of selected users.
      *
-     * @param userId
-     * @param toList
-     * @param toName
-     * @param fromList
-     * @param fromName
-     * @param capacity
-     * @param listener
+     * @param userId The user who is being swapped
+     * @param toList The list being moved to
+     * @param toName The list being moved to's name
+     * @param fromList The list who is being moved from
+     * @param fromName The list who is being moved from's name
+     * @param capacity The capacity of the list, if any
+     * @param listener Listens for completion of firebase request
      */
     private void transitionUser(String userId,
                                 List<String> toList,
@@ -141,6 +168,7 @@ public class RegistrationList {
                                 String fromName,
                                 int capacity,
                                 OnDbUpdateListener listener){
+        //Set list to object, we don't know the contents, as it may be a list<SelectedUser> or List<String>
         int currentSize = (toList instanceof List) ? ((List<?>) toList).size() : 0;
         if (capacity > -1 && currentSize >= capacity){
             listener.onComplete(RegistrationResult.CAPACITY_FULL);
@@ -151,6 +179,7 @@ public class RegistrationList {
             listener.onComplete(RegistrationResult.ALREADY_IN_LIST);
             return;
         }
+        //change database, handle both cases
         changeDb(fromName, toName, userId, new OnDbUpdateListener() {
             @Override
             public void onSuccess() {
@@ -177,6 +206,20 @@ public class RegistrationList {
         });
 
     }
+
+    /**
+     * Transitions a group of users to a selected list
+     * Has a similar philosophy to transition user where we don't know
+     * the contents of each list, so we set an object and cast.
+     *
+     * @param userIDs the group to be moved
+     * @param fromList the list who they originate
+     * @param fromName the name of the original list
+     * @param toList the list where they are going
+     * @param toName the name of the list where they are going
+     * @param capacity the capacity, if any
+     * @param listener listens for failure and success
+     */
     private void transitionGroup(List<String> userIDs,
                                  Object fromList,
                                  String fromName,
@@ -216,7 +259,14 @@ public class RegistrationList {
         );
     }
 
-
+    /**
+     * A wrapped function that moves a user to the removed list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @param fromList the list where they originate
+     * @param fromName the list from where they come from's name
+     * @author Sean Ross
+     */
     public void addToRemovedList(String userID, OnDbUpdateListener listener, List<?> fromList, String fromName) {
         if (removedList.contains(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
@@ -225,6 +275,14 @@ public class RegistrationList {
         transitionUser(userID,removedList, LIST_REMOVED,  fromList,fromName , -1, listener);
     }
 
+    /**
+     * A wrapped function that moves a user to the cancelled list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @param fromList the list where they originate
+     * @param fromName the list from where they come from's name
+     * @author Sean Ross
+     */
     public void addToCancelledList(String userID, OnDbUpdateListener listener, List<?> fromList, String fromName) {
         if (removedList.contains(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
@@ -233,6 +291,12 @@ public class RegistrationList {
         transitionUser(userID,cancelledList, LIST_CANCELLED, fromList,fromName, -1, listener);
     }
 
+    /**
+     * A wrapped function that moves a user to the attending list from the selected list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @author Sean Ross
+     */
     public void addToAttendingList(String userID, OnDbUpdateListener listener){
         if (!isUserSelected(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
@@ -241,6 +305,12 @@ public class RegistrationList {
         transitionUser(userID, attendingList, LIST_ATTENDING,selectedList,LIST_SELECTED , getAttendingCapacity(), listener);
     }
 
+    /**
+     * A wrapped function that moves a user to the waiting list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @author Sean Ross
+     */
     public void addToWaitingList(String userID, OnDbUpdateListener listener){
         if(attendingList.contains(userID) || isUserSelected(userID) || removedList.contains(userID) || waitingList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
@@ -251,6 +321,12 @@ public class RegistrationList {
         }
     }
 
+    /**
+     * A wrapped function that moves a user to the selected list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @author Sean Ross
+     */
     public void addToSelectedList(String userID, OnDbUpdateListener listener){
         if (getWaitingList().contains(userID)) {
             transitionGroup(new ArrayList<>(Collections.singleton(userID)), waitingList, LIST_WAITING, selectedList, LIST_SELECTED, -1, listener);
@@ -265,6 +341,12 @@ public class RegistrationList {
         }
     }
 
+    /**
+     * A wrapped function that moves a user to the declined list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @author Sean Ross
+     */
     public void addToDeclinedList(String userID, OnDbUpdateListener listener){
         if(!isUserSelected(userID) || removedList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
@@ -272,6 +354,12 @@ public class RegistrationList {
         }
         transitionUser(userID, declinedList, LIST_DECLINED, selectedList, LIST_SELECTED, -1, listener);
     }
+    /**
+     * A wrapped function that moves a user to out from the block list
+     * @param userID the user to be moved
+     * @param listener listens for a result
+     * @author Sean Ross
+     */
     public void reinstateUser(String userID, OnDbUpdateListener listener) {
         if (!removedList.contains(userID)) {
             listener.onComplete(RegistrationResult.BLOCKED);
@@ -280,9 +368,10 @@ public class RegistrationList {
         transitionUser(userID, waitingList, LIST_WAITING, removedList, LIST_REMOVED, getWaitingCapacity(), listener);
     }
 
-    // add firebase functionality for remove all
-
-    //check userdB and add some more functionality maybe
+    /**
+     * A function with the exclusion tag so firebase ignores
+     * @return gets the amount of empty slots between the attending and selected lists
+     */
     @Exclude
     public int getEmptySlotAmount() {
         if (getAttendingCapacity() < 0)
@@ -290,9 +379,15 @@ public class RegistrationList {
         return getAttendingCapacity() - getAttendingList().size() - getSelectedList().size();
     }
     //-- Sample -------------------------------------------------------------------------------------
+
+    /**
+     * Performs a lottery and sends the users to the selected list
+     * @param amount the amount of users to move
+     * @param listener listens for completion of the move
+     */
     @Exclude
     public void performLottery(int amount, OnDbUpdateListener listener) {
-        int limit = Math.min(amount, waitingList.size()); // I'm unsure about the lottery reqs, ask later...
+        int limit = Math.min(amount, waitingList.size());
         if (limit <= 0) {
             listener.onComplete(RegistrationResult.SUCCESS);
             return;
@@ -312,8 +407,8 @@ public class RegistrationList {
 
     /**
      * Another Helper function to wrap a set of ids, used in the perform lottery
-     * @param userIDs
-     * @return
+     * @param userIDs the ids to be wrapped
+     * @return A {@link  List<SelectedUser>} to be sent to the selected list
      */
     @Exclude
     private List<SelectedUser> wrapIdList(List<String> userIDs) {
@@ -328,7 +423,7 @@ public class RegistrationList {
 
     /**
      * Another Helper function to unwrap a set of ids, used in contains calls
-     * @return
+     * @return A {@link List<String>} converts a list of selected users to their ids
      */
     @Exclude
     public List<String> getSelectedUserStrings(){

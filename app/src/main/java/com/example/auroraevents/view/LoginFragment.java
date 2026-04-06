@@ -18,7 +18,11 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 
-
+/**
+ * A fragment for user login
+ * @author Jared Strandlund (Layout)
+ * @author Sean Ross(Logic)
+ */
 public class LoginFragment extends Fragment {
     String deviceId;
     EditText nameEdit;

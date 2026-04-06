@@ -109,29 +109,6 @@
             app:tint="#1C1B2E"
             />
 
-        <!-- Admin image tab -->
-        <ImageButton
-            android:id="@+id/nav_admin_image"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:background="@drawable/nav_item_inactive"
-            android:src="@drawable/ic_nav_image"
-            android:scaleType="center"
-            android:contentDescription="Browse Images"
-            android:layout_marginEnd="6dp"
-            app:tint="#1C1B2E" />
-
-        <!-- admin organizer tab -->
-        <ImageButton
-            android:id="@+id/nav_admin_organizer"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:background="@drawable/nav_item_inactive"
-            android:src="@drawable/ic_nav_browse_org"
-            android:scaleType="center"
-            android:contentDescription="organizers"
-            android:layout_marginEnd="6dp"
-            app:tint="#1C1B2E" />
 
         <!-- Admin profile tab -->
         <ImageButton

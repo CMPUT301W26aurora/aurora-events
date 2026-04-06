@@ -22,6 +22,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Support functions for testing
+ * @author Jared Strandlund
+ * @author Sean Ross (Sourced clickChildWithView)
+ */
 public class TestsSupport {
     public static void signIn(long timeout, TimeUnit unit) {
         CountDownLatch latch = new CountDownLatch(1);

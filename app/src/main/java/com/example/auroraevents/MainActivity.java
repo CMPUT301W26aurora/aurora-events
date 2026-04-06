@@ -1,37 +1,26 @@
 package com.example.auroraevents;
 
-import static androidx.core.location.LocationManagerCompat.getCurrentLocation;
 
 import android.Manifest;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-//import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -40,28 +29,17 @@ import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.UserDb;
 import com.example.auroraevents.view.AdminCommentFragment;
-import com.example.auroraevents.view.AdminImageFragment;
-import com.example.auroraevents.view.AdminOrganizerFragment;
 import com.example.auroraevents.view.AdminProfileFragment;
 import com.example.auroraevents.view.EventFragment;
 import com.example.auroraevents.view.CameraFragment;
 import com.example.auroraevents.view.LoginFragment;
 import com.example.auroraevents.view.NotificationFragment;
-import com.example.auroraevents.view.OrganizerNotificationFragment;
 import com.example.auroraevents.view.ProfileFragment;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.appcheck.FirebaseAppCheck;
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -71,6 +49,17 @@ import java.util.Collections;
 
 /*
 Last known location based off FusedLocationProviderClient: https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient
+ */
+
+/**
+ * Main Activity for the app
+ * Holds listeners and other important permissions/views
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
  */
 public class MainActivity extends AppCompatActivity implements LocationToggleListener {
 
@@ -85,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
     private View navBar;
     private View adminBar;
 
-    private ImageButton navScan, navBrowse, navNotifications, navAdminBrowseProfile,navAdminImage,navAdminEvent,navAdminComment,navAdminOrganizer;
+    private ImageButton navScan, navBrowse, navNotifications, navAdminBrowseProfile,navAdminEvent,navAdminComment;
     public ImageButton navProfile,navAdminProfile;
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -105,8 +94,6 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         navAdminComment = findViewById(R.id.nav_admin_comments);
         navAdminProfile = findViewById(R.id.nav_profile_admin);
         navAdminEvent = findViewById(R.id.nav_admin_event);
-        navAdminImage = findViewById(R.id.nav_admin_image);
-        navAdminOrganizer = findViewById(R.id.nav_admin_organizer);
         navAdminBrowseProfile = findViewById(R.id.nav_admin_browse_profiles);
         navBar = findViewById(R.id.nav_bar);
         adminBar = findViewById(R.id.nav_bar_admin);
@@ -160,25 +147,6 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
         FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
                 DebugAppCheckProviderFactory.getInstance()
         );
-
-        /*
-        Hardcode user role for testing purposes
-         */
-
-        //Hardcode user role for testing purposes
-        /*
-        UserDb.getInstance().getUser(deviceId,
-                user -> {
-                    user.setDeviceId(deviceId);
-                    user.setRole(User.ROLE_ENTRANT;
-                    user.setAdmin(Boolean.TRUE);
-                    userViewModel.selectItem(user);
-                },
-                e -> Log.e(TAG, "User info not available")
-        );
-        */
-
-
         // Get user
         UserDb.getInstance().getUser(deviceId,
                 user -> {
@@ -232,15 +200,6 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
             loadFragment(new AdminProfileFragment());
         });
 
-        navAdminOrganizer.setOnClickListener(v->{
-            setActiveTab(navAdminOrganizer);
-            loadFragment(new AdminOrganizerFragment());
-        });
-
-        navAdminImage.setOnClickListener(v->{
-            setActiveTab(navAdminImage);
-            loadFragment(new AdminImageFragment());
-        });
 
         navAdminEvent.setOnClickListener(v->{
             setActiveTab(navAdminEvent);
@@ -285,10 +244,10 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
                 navProfile,
                 navAdminProfile,
                 navAdminBrowseProfile,
-                navAdminImage,
+
                 navAdminEvent,
                 navAdminComment,
-                navAdminOrganizer};
+                };
 
         for (ImageButton tab : tabs) {
             int targetWidth = dpToPx(tab == selected ? 88 : 52);
@@ -352,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements LocationToggleLis
 
     /**
      * Toggle between sharing/unsharing geolocation
-     * @param isChecked
+     * @param isChecked a {@link Boolean}
      * Toggle boolean
      */
     @Override

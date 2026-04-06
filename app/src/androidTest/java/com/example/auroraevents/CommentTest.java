@@ -7,6 +7,11 @@ import com.google.firebase.Timestamp;
 
 import org.junit.Test;
 
+/**
+ * Tests comment class functions
+ * @author Sean Ross
+ */
+
 public class CommentTest {
     @Test
     public void testConstructorAndGetters(){

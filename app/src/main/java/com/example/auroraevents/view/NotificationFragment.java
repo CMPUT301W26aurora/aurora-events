@@ -36,6 +36,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Displays a list of notifications
+ * @author Joshua Terry
+ */
+
 public class NotificationFragment extends Fragment {
 
     private static final String TAG = "NotificationList";

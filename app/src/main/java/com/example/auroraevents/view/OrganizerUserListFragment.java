@@ -35,6 +35,9 @@ import java.util.Map;
 /**
  * Displays list of all entrants with any and all status.
  * Allows Organizers to filter and cancel entrants.
+ * @author Sean Ross
+ * @author Joshua Terry (CSV export)
+ * @author Arron Rossa (Entrant HeatMap)
  */
 public class OrganizerUserListFragment extends DialogFragment {
     private UserAdapter adapter;
@@ -63,6 +66,7 @@ public class OrganizerUserListFragment extends DialogFragment {
         Button doneButton         = view.findViewById(R.id.done_button);
         Button viewMapButton      = view.findViewById(R.id.map_button);
 
+        //set args and views
         Bundle args = getArguments();
         statuses = new ArrayList<>();
 
@@ -70,10 +74,11 @@ public class OrganizerUserListFragment extends DialogFragment {
             currentEventId = args.getString("eventId");
         }
 
+        //adapter for array
         csvExportManager = new CsvExportManager(requireContext());
         adapter = new UserAdapter(new ArrayList<>(), false, new UserAdapter.OnUserInteractionListener() {
             @Override
-            public void Onclick(User user) {
+            public void Onclick(User user) { //on user click do
                 RemoveUserPopUpDialog removeDialog = RemoveUserPopUpDialog.newInstance(
                         registrationList,
                         user.getDeviceId(),
@@ -89,6 +94,7 @@ public class OrganizerUserListFragment extends DialogFragment {
 
         doneButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
+        //button to activate filters
         filterButton.setOnClickListener(v -> {
             FilterUserPopUpDialog dialog = FilterUserPopUpDialog.newInstance();
             dialog.setOnFilterAppliedListener(selectedStatuses -> {
@@ -104,6 +110,7 @@ public class OrganizerUserListFragment extends DialogFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
+        //listens to event
         listenerRegistration = EventDb.getInstance().addSnapshotListenerForEvent(
                 currentEventId,
                 event -> {
@@ -113,6 +120,7 @@ public class OrganizerUserListFragment extends DialogFragment {
                 e -> Log.e(TAG, "failed to fetch event", e)
         );
 
+        //opens heatmap of entrants
         viewMapButton.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putString("eventId", currentEventId);

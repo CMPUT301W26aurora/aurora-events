@@ -6,6 +6,13 @@ import androidx.lifecycle.ViewModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+/**
+ * A user ViewModel that listens for updates to a user from FireBase
+ * @author Arron Rossa
+ * @author Sean Ross
+ * @author Joshua Terry
+ */
+
 public class UserViewModel extends ViewModel {
     //https://developer.android.com/topic/libraries/architecture/viewmodel
     //https://developer.android.com/topic/libraries/architecture/livedata

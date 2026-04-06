@@ -25,6 +25,7 @@ import org.junit.Test;
 /**
  * UI tests for:
  *   - Notification opt in / opt out buttons in NotificationFragment
+ * @author Joshua Terry
  */
 @LargeTest
 public class NotificationUITest {

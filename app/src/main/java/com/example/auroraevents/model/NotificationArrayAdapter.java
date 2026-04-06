@@ -19,6 +19,7 @@ import java.util.Locale;
 /**
  * Converts a list of Notification objects to rows.
  * Each row displays the notification title, body, and timestamp.
+ * @author Joshua Terry
  */
 public class NotificationArrayAdapter extends ArrayAdapter<Notification> {
 

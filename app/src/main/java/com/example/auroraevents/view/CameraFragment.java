@@ -24,6 +24,11 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+/**
+ * A fragment that opens the camera and scans a qr code
+ * @author Sean Ross
+ */
+
 public class CameraFragment extends Fragment {
     private final String TAG = "CameraFragment";
     private ListenerRegistration eventSnapshotListener;
@@ -111,7 +116,6 @@ public class CameraFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-
         if (eventSnapshotListener != null) {
             eventSnapshotListener.remove();
             eventSnapshotListener = null;

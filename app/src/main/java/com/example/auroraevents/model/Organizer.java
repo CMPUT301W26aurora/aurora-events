@@ -8,6 +8,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+/**
+ * A subclass of User who manages Events
+ * @author Arron Rossa
+ * @author Alina Iqbal
+ * @author Joshua Terry
+ * @author Jared Strandlund
+ * @author Won Koh
+ * @author Sean Ross
+ */
 public class Organizer extends User {
     private ArrayList<Event> myEvents;
     private String deviceID;
@@ -28,11 +37,9 @@ public class Organizer extends User {
         setRole(User.ROLE_ORGANIZER);
         myEvents = new ArrayList<>();
     }
-
     public ArrayList<Event> getMyEvents() {
         return myEvents;
     }
-
     public void setMyEvents(ArrayList<Event> myEvents) {
         this.myEvents = myEvents;
     }

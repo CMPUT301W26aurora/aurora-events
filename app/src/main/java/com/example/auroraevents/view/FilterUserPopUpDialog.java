@@ -15,6 +15,12 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Won Koh (Original)
+ * @author Sean Ross (Fixed + Logic)
+ * A popup Dialog that allows a user to filter lists
+ */
+
 public class FilterUserPopUpDialog extends DialogFragment {
 
     public static FilterUserPopUpDialog newInstance() {
@@ -100,11 +106,11 @@ public class FilterUserPopUpDialog extends DialogFragment {
      * status label list. Called by both the Confirm and Export buttons so the
      * mapping stays in one place.
      *
-     * @param waiting       The "Waiting" switch.
-     * @param invited       The "Invited / Selected" switch.
-     * @param participating The "Participating / Accepted" switch.
-     * @param cancelled     The "Cancelled" switch.
-     * @param rejected      The "Rejected / Removed" switch.
+     * @param waiting       Waiting Switch
+     * @param invited       Selected Switch
+     * @param participating Attending Switch
+     * @param cancelled     Cancelled Switch
+     * @param rejected      Removed Switch
      * @return A list of status label strings matching the checked switches.
      */
     private List<String> buildStatusList(SwitchMaterial waiting,

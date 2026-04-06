@@ -26,6 +26,7 @@ import java.util.List;
 /**
  * Dialog for organizers to send a custom push notification
  * to selected registration lists for their event.
+ * @author Joshua Terry
  */
 public class SendNotificationDialog extends DialogFragment {
 

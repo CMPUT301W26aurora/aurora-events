@@ -6,6 +6,9 @@ import java.util.Map;
 
 /**
  * wrapper class for User Adapter
+ * Allows the user Adapter to accept multiple fields without
+ * crowding the function print
+ * @author Sean Ross
  */
 public class UserAdapterWrapper {
     private User user;

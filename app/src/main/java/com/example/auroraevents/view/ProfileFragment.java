@@ -30,6 +30,7 @@ import java.util.List;
 /**
  * This class controls the profile screen
  * @author Jared Strandlund
+ * @author Sean Ross (Fixed Logic)
  */
 public class ProfileFragment extends Fragment {
     private UserViewModel userViewModel;

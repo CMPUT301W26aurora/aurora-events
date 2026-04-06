@@ -20,6 +20,7 @@ import java.util.Map;
 
 /**
  * Singleton Class for Firestore operations on "Comments" collection
+ * @author Sean Ross
  */
 public class CommentDb {
     private static final String TAG             = "CommentDb";
@@ -46,7 +47,7 @@ public class CommentDb {
      * Takes a list of comments and sorts the replies by oldest first
      *
      * @param allComments the list of comments to sort
-     * @return the sorted list with the required order
+     * @return A {@link List<Comment>} list of sorted comments
      */
     private List<Comment> threadSort(List<Comment> allComments){
         List<Comment> main = new ArrayList<>();

@@ -26,6 +26,12 @@ import com.example.auroraevents.server.CommentDb;
 
 import java.util.ArrayList;
 
+/**
+ * A fragment where an admin can browse all comments
+ * and moderate as necessary
+ * @author Sean Ross
+ */
+
 public class AdminCommentFragment extends Fragment {
     private final static String TAG = "AdminCommentFragment";
     private String userId;
@@ -88,8 +94,8 @@ public class AdminCommentFragment extends Fragment {
     }
 
     /**
-     * helper function to setup view
-     * @param view the view to setup the ui on
+     * helper function to set up the view
+     * @param view the view to set up the ui on
      */
     private void setUp(View view){
         //initialize RecyclerView

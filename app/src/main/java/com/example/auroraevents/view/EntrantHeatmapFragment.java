@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * Displays a heatmap of all entrants for an event
  * Based off: https://github.com/osmdroid/osmdroid/blob/master/OpenStreetMapViewer/src/main/java/org/osmdroid/samplefragments/data/HeatMap.java
+ * @author Arron Rossa
  */
 public class EntrantHeatmapFragment extends Fragment {
 

@@ -2,7 +2,8 @@ package com.example.auroraevents.model;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.ServerTimestamp;
 /**
- * wrapper for selected users
+ * wrapper for selected users, contains the id and time of selection
+ * @author Sean Ross
  */
 public class SelectedUser {
     private String userId;

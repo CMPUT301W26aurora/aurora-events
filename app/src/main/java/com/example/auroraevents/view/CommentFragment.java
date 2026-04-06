@@ -26,6 +26,10 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+/**
+ * A fragment that displays comments with live updates and replies
+ * @author Sean Ross
+ */
 public class CommentFragment extends Fragment {
     private Comment selectedParentComment = null;
     private String eventId;
@@ -154,6 +158,10 @@ public class CommentFragment extends Fragment {
         }
     }
 
+    /**
+     * A helper function to set up the view
+     * @param view the view in which the layout is inflated to
+     */
     private void setUp(View view){
         //initialize RecyclerView
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_comments);

@@ -50,6 +50,13 @@ import java.util.List;
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
  */
+
+/**
+ * A fragment for editing events
+ * @author Arron Rossa (Logic)
+ * @author Jared Strandlund (Layout)
+ *
+ */
 public class EventEditFragment extends Fragment {
     private final String TAG = "EventEditFragment";
     private ImageButton backButton;

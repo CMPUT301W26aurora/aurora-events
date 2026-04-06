@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * Usage:
  *   UserDb.getInstance().addUser(user, success -> { ... }, e -> { ... });
+ * @author Joshua Terry
+ * @author Sean Ross (index.js work)
  */
 public class UserDb {
 

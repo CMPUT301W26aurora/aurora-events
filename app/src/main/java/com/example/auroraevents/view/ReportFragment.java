@@ -13,6 +13,10 @@ import com.example.auroraevents.R;
 
 import java.io.Serializable;
 
+/**
+ * Allows a user to remove an event
+ */
+
 public class ReportFragment extends DialogFragment {
     public interface Callback extends Serializable { void onCallback(); }
 

@@ -31,6 +31,11 @@ import java.util.List;
 /*
 Maps handled by OSMDroid: https://github.com/osmdroid/osmdroid
  */
+
+/**
+ * Opens a map picker to select a location
+ * @author Arron Rossa
+ */
 public class MapPickerFragment extends Fragment {
 
     private static final String TAG = "MapPickerFragment";

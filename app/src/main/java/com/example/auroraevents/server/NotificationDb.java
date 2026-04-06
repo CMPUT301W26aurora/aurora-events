@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Singleton for notifications
+ * @author Joshua Terry
+ */
 public class NotificationDb {
 
     private static final String TAG = "NotificationDb";

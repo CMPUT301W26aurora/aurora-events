@@ -26,6 +26,12 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A dialog to remove a user from an organizer
+ * @author Won Koh (Original)
+ * @author Sean Ross (Fixed + Logic)
+ */
+
 public class RemoveUserPopUpDialog extends DialogFragment {
     private String selectedUserID;
     private String currentEventID;
@@ -70,6 +76,7 @@ public class RemoveUserPopUpDialog extends DialogFragment {
                 )
         );
 
+        //nightmare of a block to add user deadlines, no time to make something readable
         setDeadlineButton.setOnClickListener(v->{
             Calendar c = Calendar.getInstance();
             DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view1, year, month, dayOfMonth) -> {

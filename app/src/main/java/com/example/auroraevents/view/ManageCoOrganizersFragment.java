@@ -46,6 +46,7 @@ import java.util.List;
  * Required bundle arguments:
  * - "eventId": Firestore document ID of the event.
  * - "organizerDeviceId": device ID of the primary organizer.
+ * @author Joshua Terry
  */
 public class ManageCoOrganizersFragment extends Fragment {
 

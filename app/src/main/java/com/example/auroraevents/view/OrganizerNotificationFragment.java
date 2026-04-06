@@ -14,15 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.auroraevents.R;
-import com.example.auroraevents.model.Notification;
-import com.example.auroraevents.model.OrganizerNotificationArrayAdapter;
+import com.example.auroraevents.model.OrganizerNotificationAdapter;
 import com.example.auroraevents.server.NotificationDb;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import java.util.List;
-
 /**
  * Displays every notification sent by a specific organizer, kept live via a snapshot listener.
+ * @author Joshua Terry
  */
 public class OrganizerNotificationFragment extends Fragment {
 
@@ -32,7 +30,7 @@ public class OrganizerNotificationFragment extends Fragment {
 
     private static final String TAG = "OrganizerNotifList";
 
-    private OrganizerNotificationArrayAdapter adapter;
+    private OrganizerNotificationAdapter adapter;
     private ListenerRegistration notifListener;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -62,7 +60,7 @@ public class OrganizerNotificationFragment extends Fragment {
         infoText.setText(organizerName + "  |  " + organizerEmail + "  |  " + organizerId);
 
         // add spacing between RecyclerView items
-        adapter = new OrganizerNotificationArrayAdapter();
+        adapter = new OrganizerNotificationAdapter();
         RecyclerView recyclerView = view.findViewById(R.id.organizer_notifications_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {

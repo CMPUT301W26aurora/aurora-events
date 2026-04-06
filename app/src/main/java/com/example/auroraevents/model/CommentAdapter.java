@@ -16,9 +16,15 @@ import java.util.List;
 
 /**
  * CommentAdapter to format comments in the comment fragment for RecyclerView
+ * @author Sean Ross
  */
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
 
+    /**
+     * Listener for comment interaction
+     * hosts two fields, delete and reply
+     * @author Sean Ross
+     */
     public interface OnCommentInteractionListener {
         void onReplyClicked(Comment comment);
         void onDeleteClicked(Comment comment);
@@ -33,7 +39,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
      * Constructor for the comment adapter
      *
      * @param list the list to adapt
-     * @param listener a listener for live updates
+     * @param listener a listener for interaction with the comment
      */
     public CommentAdapter(List<Comment> list, OnCommentInteractionListener listener, String currentUserId,
                           Boolean isAdmin,String eventOrganizerId, Boolean inAdmin, Boolean viewAll) {
@@ -47,7 +53,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     }
 
     /**
-     * ViewHolder for The recycler View
+     * ViewHolder for The recycler View, formats the comment fields
+     * @author Sean Ross
      */
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
         //resource used: https://developer.android.com/develop/ui/views/layout/recyclerview
@@ -65,9 +72,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
          * @param itemView the item in reference
          */
         public CommentViewHolder(@NonNull View itemView) {
-
             super(itemView);
-
+            //set ids
             rootLayout = itemView;
             comment_username = itemView.findViewById(R.id.comment_username);
             comment_body = itemView.findViewById(R.id.comment_body);
@@ -85,26 +91,24 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
          * @param commentList the whole list of comments
          * @param comment the comment in reference
          * @param listener for live updates
+         * @author Sean Ross
          */
         public void bind(int position, List<Comment> commentList, Comment comment, OnCommentInteractionListener listener,
                          String currentUserId, Boolean isAdmin, String eventOrganizerId, Boolean inAdmin, Boolean viewAll) {
             //sets fields
             comment_username.setText(comment.getUsername());
             comment_body.setText(comment.getComment());
-
             //time posted
             long time = comment.getTimeStampLong();
             CharSequence relativeTime = android.text.format.DateUtils.getRelativeTimeSpanString(
                     time, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS);
             comment_timestamp.setText(relativeTime);
-
             //reply button, only t1 reply depth
             comment_reply_button.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onReplyClicked(comment);
                 }
             });
-
             boolean isCommentOwner = currentUserId != null && currentUserId.equals(comment.getUserId());
             boolean isEventOrganizer = currentUserId != null && currentUserId.equals(eventOrganizerId);
 
@@ -118,17 +122,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             } else {
                 comment_delete_button.setVisibility(View.GONE);
             }
-
-
             //checks if a comment has replies
             boolean hasReplyFollowing = (position + 1 < commentList.size()) && comment.getId().equals(commentList.get(position + 1).getParentId());
-
             //accounts for different resolutions
             float density = itemView.getContext().getResources().getDisplayMetrics().density;
-
             //edits the parameters of the guideline in xml
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) guideline.getLayoutParams();
-
             //edits parameters of the RecyclerView item
             RecyclerView.LayoutParams rowParams = (RecyclerView.LayoutParams) itemView.getLayoutParams();
             if (comment.getParentId() != null && !comment.getParentId().isEmpty()) {
@@ -141,7 +140,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 rowParams.leftMargin = (int) (32 * density);
                 rowParams.rightMargin = (int) (12 * density);
             } else {
-
                 //if comment is a parent
                 threadLine.setVisibility(View.GONE);
                 rowParams.leftMargin = (int) (12 * density);
@@ -152,7 +150,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 rowParams.bottomMargin = hasReplyFollowing ? 0 : (int) (12 * density);
                 comment_reply_button.setVisibility(inAdmin && !viewAll ? View.GONE : View.VISIBLE);
             }
-
             //set parameters
             guideline.setLayoutParams(params);
             itemView.setLayoutParams(rowParams);
@@ -172,7 +169,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comment, parent, false);
         return new CommentViewHolder(view);
     }
-
     /**
      * Binds data to viewHolder and contains UI logic
      * @param holder   The ViewHolder which should be updated to represent the contents of the
@@ -183,7 +179,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         holder.bind(position, commentList, commentList.get(position), listener, currentUserId, isAdmin, eventOrganizerId, inAdmin, viewAll);
     }
-
     /**
      * @return Total number of items in list, or 0 if null
      */
@@ -200,18 +195,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         this.commentList = newList;
         notifyDataSetChanged();
     }
-
     public void setIsAdmin(Boolean isAdmin){
         this.isAdmin = isAdmin;
     }
     public void setInAdmin(Boolean inAdmin){
         this.inAdmin = inAdmin;
     }
-
     public void setCurrentUserId(String currentUserId) {
         this.currentUserId = currentUserId;
     }
-
     public void setEventOrganizerId(String eventOrganizerId) {
         this.eventOrganizerId = eventOrganizerId;
     }

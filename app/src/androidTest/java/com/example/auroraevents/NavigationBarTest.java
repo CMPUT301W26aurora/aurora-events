@@ -25,6 +25,10 @@ import android.os.Build;
 import org.junit.Rule;
 import org.junit.Test;
 
+/**
+ * Tests the user navigation bar test
+ * @author Joshua Terry
+ */
 @LargeTest
 public class NavigationBarTest {
     @Rule

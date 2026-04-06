@@ -19,6 +19,10 @@ import com.example.auroraevents.view.CameraFragment;
 import org.junit.Rule;
 import org.junit.Test;
 
+/**
+ * Tests the CameraFragment
+ * @author Sean Ross
+ */
 public class CameraFragmentTest {
     @Rule
     // bypass system notification permission dialogue which may interfere with tests

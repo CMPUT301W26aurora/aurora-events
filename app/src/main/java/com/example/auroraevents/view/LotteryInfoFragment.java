@@ -13,6 +13,10 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.auroraevents.R;
 
+/**
+ * Displays information about the Lottery
+ * @author Jared Strandlund
+ */
 public class LotteryInfoFragment extends DialogFragment {
     @NonNull
     @Override
