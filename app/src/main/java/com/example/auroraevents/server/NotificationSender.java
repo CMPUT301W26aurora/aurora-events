@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NotificationSender {
 
-    private static final String TAG             = "NotificationSender";
+    private static final String TAG              = "NotificationSender";
     private static final String COLLECTION_USERS = "Users";
     private static final String FIELD_FCM_TOKEN  = "fcmToken";
 
@@ -28,6 +28,7 @@ public class NotificationSender {
      * Sends a push notification to all provided device IDs.
      *
      * @param deviceIds  List of device IDs to notify
+     * @param sentFromId The organizer's device ID sending the notification
      * @param title      Notification title (typically the event name)
      * @param body       Notification message body
      * @param eventId    Event ID to include in the notification data payload
@@ -36,15 +37,16 @@ public class NotificationSender {
      */
     public static void send(
             List<String> deviceIds,
+            String sentFromId,
             String title,
             String body,
             String eventId,
             Runnable onSuccess,
             OnFailureListener onFailure
     ) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        AtomicInteger pending   = new AtomicInteger(deviceIds.size());
-        AtomicInteger failed    = new AtomicInteger(0);
+        FirebaseFirestore db      = FirebaseFirestore.getInstance();
+        AtomicInteger     pending = new AtomicInteger(deviceIds.size());
+        AtomicInteger     failed  = new AtomicInteger(0);
 
         if (deviceIds.isEmpty()) {
             onSuccess.run();
@@ -58,7 +60,7 @@ public class NotificationSender {
                     .addOnSuccessListener(doc -> {
                         String token = doc.getString(FIELD_FCM_TOKEN);
                         if (token != null) {
-                            sendToToken(token, title, body, eventId,
+                            sendToToken(token, sentFromId, title, body, eventId,
                                     () -> checkDone(pending, failed, onSuccess, onFailure),
                                     e  -> {
                                         failed.incrementAndGet();
@@ -82,6 +84,7 @@ public class NotificationSender {
      */
     private static void sendToToken(
             String token,
+            String sentFromId,
             String title,
             String body,
             String eventId,
@@ -89,10 +92,11 @@ public class NotificationSender {
             OnFailureListener onFailure
     ) {
         Map<String, Object> data = new HashMap<>();
-        data.put("token",   token);
-        data.put("title",   title);
-        data.put("body",    body);
-        data.put("eventId", eventId);
+        data.put("token",      token);
+        data.put("sentFromId", sentFromId);
+        data.put("title",      title);
+        data.put("body",       body);
+        data.put("eventId",    eventId);
 
         FirebaseFunctions.getInstance()
                 .getHttpsCallable("sendNotification")
@@ -105,7 +109,7 @@ public class NotificationSender {
     }
 
     private static void checkDone(AtomicInteger pending, AtomicInteger failed,
-                                   Runnable onSuccess, OnFailureListener onFailure) {
+                                  Runnable onSuccess, OnFailureListener onFailure) {
         if (pending.decrementAndGet() == 0) {
             if (failed.get() == 0) {
                 onSuccess.run();
