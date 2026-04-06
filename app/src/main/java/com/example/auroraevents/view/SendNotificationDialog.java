@@ -3,6 +3,7 @@ package com.example.auroraevents.view;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -90,12 +91,18 @@ public class SendNotificationDialog extends DialogFragment {
                 return;
             }
 
+            // Retrieve the organizer's device ID to attach as sentFromId
+            String organizerDeviceId = Settings.Secure.getString(
+                    requireContext().getContentResolver(), Settings.Secure.ANDROID_ID
+            );
+
             // Capture app context before dialog dismisses so Toast works in async callbacks
             Context appContext = requireContext().getApplicationContext();
             alertDialog.dismiss();
 
             NotificationSender.send(
                     recipients,
+                    organizerDeviceId,
                     eventName,
                     message,
                     eventId,
