@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.EventArrayAdapter;
+import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
@@ -58,6 +59,7 @@ public class EventFragment extends Fragment {
     private boolean filterLocation = false;
     private boolean filterAvailableNow = false;
     private boolean filterWaitingList = false;
+    private boolean filterCapacity = false;
     private boolean filterCreatedEvents = false;
 
     private double userLatitude = 0;
@@ -197,12 +199,14 @@ public class EventFragment extends Fragment {
             SwitchMaterial toggleLocation = sheetView.findViewById(R.id.toggle_location);
             SwitchMaterial toggleAvailableNow = sheetView.findViewById(R.id.toggle_available_now);
             SwitchMaterial toggleWaiting = sheetView.findViewById(R.id.toggle_waiting_list);
+            SwitchMaterial toggleCapacity = sheetView.findViewById(R.id.toggle_capacity);
             SwitchMaterial toggleCreated = sheetView.findViewById(R.id.toggle_created_events);
 
             // Restore previous toggle states
             toggleLocation.setChecked(filterLocation);
             toggleAvailableNow.setChecked(filterAvailableNow);
             toggleWaiting.setChecked(filterWaitingList);
+            toggleCapacity.setChecked(filterCapacity);
             toggleCreated.setChecked(filterCreatedEvents);
 
             userViewModel.getSelectedItem().observe(getViewLifecycleOwner(), user -> {
@@ -224,14 +228,19 @@ public class EventFragment extends Fragment {
                 filterLocation    = toggleLocation.isChecked();
                 filterAvailableNow = toggleAvailableNow.isChecked();
                 filterWaitingList   = toggleWaiting.isChecked();
+                filterCapacity = toggleCapacity.isChecked();
                 filterCreatedEvents = toggleCreated.isChecked();
+
+                boolean anyFilterActive = filterLocation || filterAvailableNow
+                        || filterWaitingList || filterCapacity || filterCreatedEvents;
 
                 // Apply filters - can be stacked
                 if (!filterWaitingList && !filterCreatedEvents) {
                     ArrayList<Event> filtered = new ArrayList<>();
                     for (Event event : allEventsList) {
-                        if (filterLocation && !isNearUser(event)) continue;
                         if (filterAvailableNow && !isRegistrationActive(event)) continue;
+                        if (filterLocation && !isNearUser(event)) continue;
+                        if (filterCapacity && !hasWaitingCapacity(event) && !hasAttendingCapacity(event)) continue;
                         filtered.add(event);
                     }
                     applyFilters(filtered.isEmpty() && !filterLocation && !filterAvailableNow
@@ -246,8 +255,9 @@ public class EventFragment extends Fragment {
                     Runnable onAllDone = () -> {
                         ArrayList<Event> finalFiltered = new ArrayList<>();
                         for (Event event : filtered) {
-                            if (filterLocation && !isNearUser(event)) continue;
                             if (filterAvailableNow && !isRegistrationActive(event)) continue;
+                            if (filterLocation && !isNearUser(event)) continue;
+                            if (filterCapacity && !hasWaitingCapacity(event) && !hasAttendingCapacity(event)) continue;
                             finalFiltered.add(event);
                         }
                         applyFilters(finalFiltered);
@@ -431,5 +441,35 @@ public class EventFragment extends Fragment {
         );
         float distance = results[0] / 1000f;
         return distance <= LOCATION_RADIUS;
+    }
+
+    /**
+     * Check if an event has available spots on waiting list
+     * @param event
+     * Event to be checked
+     * @return
+     * Returns a boolean
+     */
+    private boolean hasWaitingCapacity(Event event) {
+        RegistrationList regList = event.getRegistrationList();
+        if (regList == null) return false;
+        int eventCapacity = regList.getWaitingCapacity();
+        int currentCapacity = regList.getWaitingList().size();
+        return eventCapacity <= 0 || currentCapacity < eventCapacity;
+    }
+
+    /**
+     * Check if an event has available spots on waiting list
+     * @param event
+     * Event to be checked
+     * @return
+     * Returns a boolean
+     */
+    private boolean hasAttendingCapacity(Event event) {
+        RegistrationList regList = event.getRegistrationList();
+        if (regList == null) return false;
+        int eventCapacity = regList.getAttendingCapacity();
+        int currentCapacity = regList.getAttendingList().size();
+        return eventCapacity <= 0 || currentCapacity < eventCapacity;
     }
 }
