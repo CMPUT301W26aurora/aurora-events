@@ -83,23 +83,6 @@ public class AdminProfileFragment extends Fragment {
             listenerRegistration = null;
         }
     }
-    @Override
-    public void onStop() {
-        super.onStop();
-        View navBar = getActivity().findViewById(R.id.nav_bar_admin);
-        if (navBar != null) {
-            navBar.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        View nav = getActivity().findViewById(R.id.nav_bar_admin);
-        if (nav != null) {
-            nav.setVisibility(View.GONE);
-        }
-    }
 
     private void applyFilter(boolean onlyOrganizers) {
         if (masterUserList == null) return;
