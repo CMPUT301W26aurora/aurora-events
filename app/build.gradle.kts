@@ -84,5 +84,6 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
     implementation("org.osmdroid:osmdroid-android:6.1.17")
 }
