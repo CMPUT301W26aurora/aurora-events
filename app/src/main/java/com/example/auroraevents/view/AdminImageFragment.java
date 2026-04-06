@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -59,17 +58,17 @@ public class AdminImageFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_admin_images, container, false);
-
         imageRecyclerView = view.findViewById(R.id.recycler_view_images);
-
-        imageAdapter = new AdminImageAdapter(imageEventList,
-                event -> displayImageDetails(event));
-
+        imageAdapter = new AdminImageAdapter(
+                imageEventList,
+                event -> displayImageDetails(event)
+        );
         imageRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 4));
         imageRecyclerView.setAdapter(imageAdapter);
         startImageListener();
         return view;
     }
+
     private void startImageListener() {
         imageListenerRegistration = EventDb.getInstance().eventListenerAll(
                 events -> {
@@ -82,44 +81,13 @@ public class AdminImageFragment extends Fragment {
                             imageEventList.add(event);
                         }
                     }
-                    fetchUploaderNames();
+                    imageAdapter.notifyDataSetChanged();
                 },
                 e -> {
                     Log.e(TAG, "Failed to load images", e);
                     Toast.makeText(getContext(), "Failed to load images", Toast.LENGTH_SHORT).show();
                 }
         );
-    }
-
-    private void fetchUploaderNames() {
-        imageAdapter.notifyDataSetChanged();
-
-        for (int i = 0; i < imageEventList.size(); i++) {
-            Event event = imageEventList.get(i);
-            int position = i;
-
-            UserDb.getInstance().getUser(
-                    event.getOrganizerDeviceId(),
-                    user -> {
-                        // find the ViewHolder for this position
-                        RecyclerView.ViewHolder viewHolder =
-                                imageRecyclerView.findViewHolderForAdapterPosition(position);
-
-                        if (viewHolder instanceof AdminImageAdapter.ImageViewHolder) {
-                            AdminImageAdapter.ImageViewHolder imageViewHolder =
-                                    (AdminImageAdapter.ImageViewHolder) viewHolder;
-
-                            String uploaderName = (user != null && user.getName() != null) ? "Uploaded by: " + user.getName()
-                                    : "Uploaded by: Unknown";
-
-                            imageViewHolder.itemView.post(() ->
-                                    imageViewHolder.setUploaderName(uploaderName));
-                        }
-                    },
-                    e -> Log.e(TAG, "Failed to fetch uploader for event: "
-                            + event.getEventId(), e)
-            );
-        }
     }
 
     /**
@@ -134,10 +102,10 @@ public class AdminImageFragment extends Fragment {
         View dialogView = LayoutInflater.from(requireContext())
                 .inflate(R.layout.dialog_admin_image_details, null);
 
-        ImageView enlargeImage  = dialogView.findViewById(R.id.image_enlarge_preview);
-        TextView  eventName     = dialogView.findViewById(R.id.event_name_text);
-        TextView  imageUploader = dialogView.findViewById(R.id.image_uploader_text);
-        Button    deleteImageButton = dialogView.findViewById(R.id.delete_image_button);
+        ImageView enlargeImage = dialogView.findViewById(R.id.image_enlarge_preview);
+        TextView eventName = dialogView.findViewById(R.id.event_name_text);
+        TextView imageUploader = dialogView.findViewById(R.id.image_uploader_text);
+        Button deleteImageButton = dialogView.findViewById(R.id.delete_image_button);
 
         Glide.with(requireContext())
                 .load(event.getPosterUrl())
@@ -148,14 +116,14 @@ public class AdminImageFragment extends Fragment {
 
         eventName.setText(event.getName());
 
-        // fetch uploader name
+        // fetch uploader name for detail dialog
         UserDb.getInstance().getUser(
                 event.getOrganizerDeviceId(),
                 user -> {
-                    String uploaderName = (user != null && user.getName() != null
-                            && !user.getName().isEmpty())
+                    String uploaderName = (user != null && user.getName() != null && !user.getName().isEmpty())
                             ? "Uploaded by: " + user.getName()
                             : "Uploaded by: Unknown";
+
                     imageUploader.post(() -> imageUploader.setText(uploaderName));
                 },
                 e -> imageUploader.post(() ->
@@ -187,12 +155,12 @@ public class AdminImageFragment extends Fragment {
                 .setPositiveButton("Delete", (dialog, which) ->
                         EventDb.getInstance().deletePoster(
                                 event.getEventId(),
-                                () -> {
-                                    imageRecyclerView.post(() -> Toast.makeText(getContext(), "Image Deleted", Toast.LENGTH_SHORT).show());
-                                },
+                                () -> imageRecyclerView.post(() ->
+                                        Toast.makeText(getContext(), "Image Deleted", Toast.LENGTH_SHORT).show()),
                                 e -> {
                                     Log.e(TAG, "Failed to delete image", e);
-                                    imageRecyclerView.post(() -> Toast.makeText(getContext(), "Failed to delete image.", Toast.LENGTH_SHORT).show());
+                                    imageRecyclerView.post(() ->
+                                            Toast.makeText(getContext(), "Failed to delete image.", Toast.LENGTH_SHORT).show());
                                 }
                         )
                 )
