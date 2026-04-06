@@ -157,6 +157,31 @@ exports.onEventListChange = onDocumentUpdated("Events/{eventId}", async (event) 
     const beforeSelected = (before.selectedList || []).map(u => u.userId);
     const afterSelected  = (after.selectedList  || []).map(u => u.userId);
 
+    const syncUserRecord = async (userId, status) => {
+            const userRef = db.collection("Users").doc(userId);
+            const userDoc = await userRef.get();
+            if (!userDoc.exists) return;
+            let eventsSigned = userDoc.data().eventsSigned || [];
+            eventsSigned = eventsSigned.filter(e => e.eventId !== eventId);
+            eventsSigned.push({ eventId: eventId, status: status });
+            await userRef.update({ eventsSigned: eventsSigned });
+        };
+
+    const beforeWaiting = before.waitingList || [];
+    const afterWaiting = after.waitingList || [];
+    const newWaitlist = afterWaiting.filter(id => !beforeWaiting.includes(id));
+    for (const uid of newWaitlist) await syncUserRecord(uid, "Waiting");
+
+    const beforeSelected = (before.selectedList || []).map(u => u.userId);
+    const afterSelected  = (after.selectedList  || []).map(u => u.userId);
+    const newSelected = afterSelected.filter(id => !beforeSelected.includes(id));
+    for (const uid of newSelected) await syncUserRecord(uid, "Joined");
+
+    const beforeRemoved = before.removedList || [];
+    const afterRemoved = after.removedList || [];
+    const newlyRemoved = afterRemoved.filter(id => !beforeRemoved.includes(id));
+    for (const uid of newlyRemoved) await syncUserRecord(uid, "Removed");
+
     console.log("Function triggered for event:", eventId);
     console.log("Before selectedList:", JSON.stringify(beforeSelected));
     console.log("After selectedList:", JSON.stringify(afterSelected));
