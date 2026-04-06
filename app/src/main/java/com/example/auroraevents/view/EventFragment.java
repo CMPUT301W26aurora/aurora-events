@@ -107,10 +107,7 @@ public class EventFragment extends Fragment {
             for (Event event : events) {
                 Log.d(TAG, "Event" + event.getName() + " in " + event.getLocation());
                 boolean isPrivate = event.isPrivate();
-                if (!isPrivate) {
-                    allEventsList.add(event);
-                    eventList.add(event);
-                } else if (Objects.equals(event.getOrganizerDeviceId(), userId) || event.getCoOrganizerDeviceIds().contains(userId)) {
+                if (!isPrivate || Objects.equals(event.getOrganizerDeviceId(), userId) || event.getCoOrganizerDeviceIds().contains(userId)) {
                     allEventsList.add(event);
                     eventList.add(event);
                 }

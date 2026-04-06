@@ -14,7 +14,6 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -69,6 +68,7 @@ public class RegistrationList {
     public void setCancelledList(List<String> cancelledList) {this.cancelledList=cancelledList;}
     public void setAttendingList(List<String> attendingList) {this.attendingList=attendingList;}
     public void setSelectedList(List<SelectedUser> selectedList) {this.selectedList=selectedList;}
+    @Exclude
     public List<String> getAllUsers(){
         List<String> master = new ArrayList<>();
 
@@ -244,8 +244,20 @@ public class RegistrationList {
         if(attendingList.contains(userID) || isUserSelected(userID) || removedList.contains(userID) || waitingList.contains(userID)){
             listener.onComplete(RegistrationResult.BLOCKED);
             return;
+        } else if (cancelledList.contains(userID)) {
+            transitionUser(userID, waitingList, LIST_WAITING, cancelledList, LIST_CANCELLED, getWaitingCapacity(), listener);
+        } else {
+            transitionUser(userID, waitingList, LIST_WAITING, null, null, getWaitingCapacity(), listener);
         }
-        transitionUser(userID, waitingList, LIST_WAITING, null, null, getWaitingCapacity(), listener);
+    }
+
+    public void addToSelectedList(String userID, OnDbUpdateListener listener){
+        if (removedList.contains(userID)) {
+            reinstateUser(userID, listener);
+        } else {
+            addToWaitingList(userID, listener);
+        }
+        performLottery(getAttendingCapacity(), listener);
     }
 
     public void addToDeclinedList(String userID, OnDbUpdateListener listener){

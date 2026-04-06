@@ -36,9 +36,12 @@ import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
+import com.example.auroraevents.server.UserDb;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*TODO:
- * invite entrants to private event
  * show QR code
  * prompt for camera access
  */
@@ -49,13 +52,14 @@ Location conversion to coordinates handled by Geocoder: https://developer.androi
 public class EventEditFragment extends Fragment {
     private final String TAG = "EventEditFragment";
     private ImageButton backButton;
-    private Button commentButton, sampleButton, qrCodeButton, viewEntrantsButton, sendNotificationButton, addImageButton;
+    private Button commentButton, sampleButton, qrCodeButton, viewEntrantsButton, sendNotificationButton, inviteEntrantsButton, manageCoOrganizersButton, addImageButton;
     private EditText eventNameInput, eventDescInput, eventPriceInput, eventCapInput, eventWaitingCapInput;
-    private Button locationButton, geolocationButton, startDateButton, endDateButton, dateButton, privateButton, confirmButton, manageCoOrganizersButton;
+    private Button locationButton, geolocationButton, startDateButton, endDateButton, dateButton, privateButton, confirmButton;
     private String eventName, eventDescription, price, eventCap, waitingCap, location, registerStart, registerEnd, date;
     private boolean geolocationRequired, isPrivate;
     private Organizer organizer;
     private User user;
+    private List<String> allUsers;
     private Event event;
     private UserViewModel userViewModel;
 
@@ -91,6 +95,18 @@ public class EventEditFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_edit, container, false);
 
+        allUsers = new ArrayList<>();
+        UserDb.getInstance().getAllUsers(
+                users -> {
+                    for (User u : users) {
+                        if (u != null && u.getDeviceId() != null && !event.getRegistrationList().getRemovedList().contains(u.getDeviceId())) {
+                            allUsers.add(u.getDeviceId());
+                        }
+                    }
+                },
+                e -> Log.e(TAG, "Could not get list of users", e)
+        );
+
         // Button and input setup
         backButton = view.findViewById(R.id.backButton);
         commentButton = view.findViewById(R.id.comment_button);
@@ -99,6 +115,7 @@ public class EventEditFragment extends Fragment {
         qrCodeButton = view.findViewById(R.id.show_qr_code);
         viewEntrantsButton = view.findViewById(R.id.view_entrants);
         sendNotificationButton = view.findViewById(R.id.send_notification);
+        inviteEntrantsButton = view.findViewById(R.id.invite_entrants);
         manageCoOrganizersButton = view.findViewById(R.id.manage_co_organizers_button);
 
         addImageButton = view.findViewById(R.id.btn_add_image);
@@ -180,7 +197,12 @@ public class EventEditFragment extends Fragment {
                     isPrivate = event.isPrivate();
                     if (isPrivate) {
                         privateButton.setText(R.string.make_public_text);
+                        inviteEntrantsButton.setVisibility(View.VISIBLE);
+                        inviteEntrantsButton.setOnClickListener(v -> {
+                            buildPickEntrantDialog(event);
+                        });
                     } else {
+                        inviteEntrantsButton.setVisibility(View.GONE);
                         privateButton.setText(R.string.make_private_text);
                     }
 
@@ -615,5 +637,69 @@ public class EventEditFragment extends Fragment {
 
         }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH),
                 calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
+    }
+
+    /**
+     * Builds and displays a dialog of eligible entrants using their names instead of IDs.
+     */
+    private void buildPickEntrantDialog(Event event) {
+        List<String> eligible = allUsers;
+
+        List<String> displayLabels = new ArrayList<>();
+        int total = eligible.size();
+        int[] loaded = {0};
+
+        for (int i = 0; i < eligible.size(); i++) {
+            String deviceId = eligible.get(i);
+            displayLabels.add(deviceId);
+
+            final int index = i;
+
+            UserDb.getInstance().getUser(deviceId,
+                    user -> {
+                        if (user != null && user.getName() != null && !user.getName().isEmpty()) {
+                            displayLabels.set(index, user.getName());
+                        }
+
+                        loaded[0]++;
+                        if (loaded[0] == total) {
+                            showDialogWithNames(eligible, displayLabels);
+                        }
+                    },
+                    e -> {
+                        loaded[0]++;
+                        if (loaded[0] == total) {
+                            showDialogWithNames(eligible, displayLabels);
+                        }
+                    }
+            );
+        }
+    }
+
+    private void showDialogWithNames(List<String> eligible, List<String> displayLabels) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Select an Entrant")
+                .setItems(displayLabels.toArray(new String[0]), (dialog, which) ->
+                        confirmAndAddEntrant(eligible.get(which)))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void confirmAndAddEntrant(String deviceId) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Add Entrant")
+                .setMessage("Invite this entrant to your private event?")
+                .setPositiveButton("Confirm", (dialog, which) ->
+                    event.getRegistrationList().addToSelectedList(deviceId, new RegistrationList.OnDbUpdateListener() {
+                        @Override
+                        public void onSuccess() {}
+                        @Override
+                        public void onFailure() {}
+                        @Override
+                        public void onComplete(RegistrationList.RegistrationResult result) {}
+                    })
+                )
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

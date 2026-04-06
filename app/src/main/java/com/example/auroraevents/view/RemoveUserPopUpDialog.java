@@ -1,8 +1,5 @@
 package com.example.auroraevents.view;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -13,13 +10,14 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.UserAdapter;
 import com.example.auroraevents.server.EventDb;
-
-import java.util.Collections;
-import java.util.List;
 
 public class RemoveUserPopUpDialog extends DialogFragment {
     private String selectedUserID;
@@ -50,30 +48,22 @@ public class RemoveUserPopUpDialog extends DialogFragment {
         AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .create();
-        // When Organizer presses confirm, the selected user is cancelled from the event
+        // When Organizer presses confirm, the selected user is removed from the event
 
         cancel.setOnClickListener(v->alertDialog.dismiss());
 
-        confirmButton.setOnClickListener(v -> {
-            List<String> userToMove = Collections.singletonList(selectedUserID);
-            EventDb.getInstance().moveGroupUsers(
+        confirmButton.setOnClickListener(v ->
+                EventDb.getInstance().moveUserBetweenLists(
                     currentEventID,
                     EventDb.LIST_SELECTED,
-                    EventDb.LIST_CANCELLED,
-                    userToMove,
-                    new EventDb.OnSuccessCallback() {
-                        @Override
-                        public void onSuccess() {
-                            alertDialog.dismiss();
-                        }
-                    },
+                    EventDb.LIST_REMOVED,
+                    selectedUserID,
+                    alertDialog::dismiss,
                     e -> Log.e("Dialog", "Move failed", e)
-            );
-        });
+                )
+        );
 
-        setDeadlineButton.setOnClickListener(v->{
-            Toast.makeText(getContext(), "does nothing for now", Toast.LENGTH_SHORT).show();
-        });
+        setDeadlineButton.setOnClickListener(v-> Toast.makeText(getContext(), "does nothing for now", Toast.LENGTH_SHORT).show());
 
         alertDialog.setOnShowListener(d ->
                 alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent)
