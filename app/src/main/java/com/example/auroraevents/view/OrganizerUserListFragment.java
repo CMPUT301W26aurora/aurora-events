@@ -132,6 +132,12 @@ public class OrganizerUserListFragment extends DialogFragment {
     private void loadParticipantData() {
         if (registrationList == null) return;
         List<String> allIds = registrationList.getAllUsers();
+        if (allIds == null || allIds.isEmpty()) {
+            masterUiList = new ArrayList<>();
+            adapter.setUserList(new ArrayList<>());
+            adapter.notifyDataSetChanged();
+            return;
+        }
 
         UserDb.getInstance().fetchParticipants(allIds, new UserDb.OnUsersLoadedListener() {
             @Override
