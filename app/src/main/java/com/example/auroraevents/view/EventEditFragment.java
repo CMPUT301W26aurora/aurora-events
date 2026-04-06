@@ -1,9 +1,13 @@
 package com.example.auroraevents.view;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,13 +17,18 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
@@ -28,8 +37,6 @@ import com.example.auroraevents.model.RegistrationList;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
 import com.example.auroraevents.server.EventDb;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 /*
 Location conversion to coordinates handled by Geocoder: https://developer.android.com/reference/android/location/Geocoder
@@ -77,7 +84,7 @@ public class EventEditFragment extends Fragment {
     private android.widget.ImageView imageView;
     private android.widget.ImageView dialogImageView;
     private android.net.Uri cameraImageUri;
-    private Bitmap uploadedImageUrl = null;
+    private Uri selectedImageUri = null;
     private View dialogView;
     private com.google.firebase.storage.FirebaseStorage storage;
     private com.google.firebase.storage.StorageReference storageRef;
@@ -128,6 +135,11 @@ public class EventEditFragment extends Fragment {
         privateButton = view.findViewById(R.id.btn_is_private);
         confirmButton = view.findViewById(R.id.btn_confirm);
 
+        imageView = view.findViewById(R.id.iv_event_image);
+        imageView.setVisibility(View.VISIBLE);
+
+        addImageButton.setVisibility(View.VISIBLE);
+
         // Get organizer
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
@@ -165,7 +177,6 @@ public class EventEditFragment extends Fragment {
             EventDb.getInstance().addSnapshotListenerForEvent(eventId, event -> {
                 this.event = event;
                 if (event != null) {
-                    //TODO: set current poster
                     eventName = event.getName();
                     eventNameInput.setText(eventName);
 
@@ -200,6 +211,17 @@ public class EventEditFragment extends Fragment {
                     } else {
                         privateButton.setText(R.string.make_private_text);
                     }
+
+                    if (event.getPosterUrl() == null) {
+                        imageView.setVisibility(View.GONE);
+                    } else {
+                        if (event.getPosterUrl() != null) {
+                            imageView.setVisibility(View.VISIBLE);
+                            Glide.with(requireContext())
+                                    .load(event.getPosterUrl())
+                                    .into(imageView);
+                        }
+                    }
                 } else {
                     Log.e(TAG, "No such event available");
                 }
@@ -220,7 +242,7 @@ public class EventEditFragment extends Fragment {
 
                 getParentFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
+                        .add(R.id.fragment_container, fragment)
                         .addToBackStack(null)
                         .commit();
             });
@@ -234,6 +256,9 @@ public class EventEditFragment extends Fragment {
         imageView = view.findViewById(R.id.iv_event_image);
 
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        addImageButton.setOnClickListener(v -> showInputDialogImage());
+        imageView.setOnClickListener(v -> showInputDialogImage());
 
         sampleButton.setOnClickListener(v -> event.getRegistrationList().performLottery(event.getRegistrationList().getEmptySlotAmount(),
                 new RegistrationList.OnDbUpdateListener() {
@@ -264,7 +289,7 @@ public class EventEditFragment extends Fragment {
             userListFragment.setArguments(bundle);
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, userListFragment)
+                    .add(R.id.fragment_container, userListFragment)
                     .addToBackStack(null)
                     .commit();
         });
@@ -288,7 +313,7 @@ public class EventEditFragment extends Fragment {
             });
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, mapPicker)
+                    .add(R.id.fragment_container, mapPicker)
                     .addToBackStack(null)
                     .commit();
         });
@@ -434,10 +459,12 @@ public class EventEditFragment extends Fragment {
                 event.getRegistrationList().setAttendingCapacity(Integer.parseInt(eventCap));
                 event.getRegistrationList().setWaitingCapacity(waitingCapacity);
                 event.setPrivate(isPrivate);
-                //TODO: update image
 
                 EventDb.getInstance().updateEvent(event,
                         () -> {
+                            if (selectedImageUri != null) {
+                                EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, event.getEventId());
+                            }
                             Log.d(TAG, "Event updated!");
                             Toast.makeText(getContext(), "Event updated successfully!", Toast.LENGTH_SHORT).show();
                         },
@@ -458,8 +485,8 @@ public class EventEditFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onStop() {
+        super.onStop();
         // Show nav bar when leaving fragment
         View navBar = requireActivity().findViewById(R.id.nav_bar);
         if (navBar != null) {
@@ -468,18 +495,14 @@ public class EventEditFragment extends Fragment {
     }
 
     /**
-     * Input dialog for location button
-     * @param targetButton
-     * Button to be updated
-     * @param hint
-     * Default text
-     * @param onConfirm
-     * Updated text on confirm
+     * Input dialog for image selection
      */
-    private void showInputDialog(Button targetButton, String hint, java.util.function.Consumer<String> onConfirm) {
+    private void showInputDialogImage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.custom_input, null);
-        builder.setView(dialogView);
+        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
+        builder.setView((dialogView));
+
+        dialogImageView = dialogView.findViewById(R.id.image_preview);
 
         AlertDialog dialog = builder.create();
 
@@ -491,26 +514,96 @@ public class EventEditFragment extends Fragment {
             dialog.getWindow().setAttributes(params);
         }
 
-        TextInputEditText input = dialogView.findViewById(R.id.dialog_input);
-        TextInputLayout inputLayout = dialogView.findViewById(R.id.dialog_input_layout);
-        Button btnCancel = dialogView.findViewById(R.id.dialog_btn_cancel);
-        Button btnConfirm = dialogView.findViewById(R.id.dialog_btn_confirm);
+        Button btnCamera = dialogView.findViewById(R.id.btn_take_photo);
+        Button btnGallery = dialogView.findViewById(R.id.btn_choose_gallery);
+        Button btnCancel = dialogView.findViewById(R.id.btn_image_cancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
+        FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
+        TextView header = dialogView.findViewById(R.id.dialog_title);
 
-        inputLayout.setHint(hint);
+        header.setText("Edit Event Poster");
+
+        btnGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                activityResultLauncher.launch(intent);
+            }
+        });
+
+        btnConfirm.setOnClickListener(v -> {
+            if (image == null) {
+                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Update and upload poster
+            selectedImageUri = image;
+            Glide.with(requireContext()).load(selectedImageUri).into(imageView);
+            EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, event.getEventId());
+            dialog.dismiss();
+        });
+
+        btnCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
+        });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        btnConfirm.setOnClickListener(v -> {
-            String enteredText = input.getText() != null ? input.getText().toString().trim() : "";
-            if (enteredText.isEmpty()) {
-                inputLayout.setError("This field is required");
-            } else {
-                targetButton.setText(enteredText);
-                onConfirm.accept(enteredText);
-                dialog.dismiss();
-            }
-        });
         dialog.show();
+    }
+
+    /**
+     * Upload image from camera or photo gallery
+     */
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null && result.getData().getData() != null) {
+                        image = result.getData().getData();
+                    } else if (cameraImageUri != null) {
+                        image = cameraImageUri;
+                    }
+
+                    if (image != null) {
+
+                        // Update image upload dialog
+                        if (dialogImageView != null) {
+                            dialogImageView.setVisibility(View.VISIBLE);
+                            dialogView.findViewById(R.id.image_placeholder).setVisibility(View.GONE);
+                            dialogImageView.post(() ->
+                                    Glide.with(requireContext()).load(image).into(dialogImageView)
+                            );
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No image selected", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
+
+    /**
+     * Take photo via intent
+     */
+    private void dispatchTakePictureIntent() {
+        // Create temp image URI
+        java.io.File photoFile = new java.io.File(
+                requireContext().getCacheDir(),
+                "camera_photo_" + System.currentTimeMillis() + ".jpg"
+        );
+        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                photoFile
+        );
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+        activityResultLauncher.launch(takePictureIntent);
     }
 
     /**

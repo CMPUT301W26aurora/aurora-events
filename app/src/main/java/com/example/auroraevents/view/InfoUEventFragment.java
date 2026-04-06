@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Event;
 import com.example.auroraevents.model.RadiusUtil;
@@ -207,7 +208,12 @@ public class InfoUEventFragment extends Fragment {
         if (event.getPosterUrl() == null) {
             poster.setVisibility(View.GONE);
         } else {
-            //poster.setImageBitmap(event.getPoster()); // need to use glide to pull poster from database
+            if (event.getPosterUrl() != null) {
+                poster.setVisibility(View.VISIBLE);
+                Glide.with(requireContext())
+                        .load(event.getPosterUrl())
+                        .into(poster);
+            }
         }
         eventName.setText(event.getName());
         eventDateTime.setText(event.getDateTime());

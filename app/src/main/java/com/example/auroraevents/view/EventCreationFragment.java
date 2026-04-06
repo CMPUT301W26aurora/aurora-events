@@ -1,10 +1,15 @@
 package com.example.auroraevents.view;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,18 +17,24 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.example.auroraevents.LocationToggleListener;
 import com.example.auroraevents.R;
 import com.example.auroraevents.model.Organizer;
 import com.example.auroraevents.model.User;
 import com.example.auroraevents.model.UserViewModel;
+import com.example.auroraevents.server.EventDb;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -68,7 +79,7 @@ public class EventCreationFragment extends Fragment {
     private android.widget.ImageView imageView;
     private android.widget.ImageView dialogImageView;
     private android.net.Uri cameraImageUri;
-    private Bitmap uploadedImageUrl = null;
+    private Uri selectedImageUri = null;
     private View dialogView;
     private com.google.firebase.storage.FirebaseStorage storage;
     private com.google.firebase.storage.StorageReference storageRef;
@@ -83,6 +94,52 @@ public class EventCreationFragment extends Fragment {
         } else {
             throw new RuntimeException(context.toString() + " must implement LocationToggleListener");
         }
+    }
+
+    private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null && result.getData().getData() != null) {
+                        image = result.getData().getData();
+                    } else if (cameraImageUri != null) {
+                        image = cameraImageUri;
+                    }
+
+                    if (image != null) {
+                        // Update image upload dialog
+                        if (dialogImageView != null) {
+                            dialogImageView.setVisibility(View.VISIBLE);
+                            dialogView.findViewById(R.id.image_placeholder).setVisibility(View.GONE);
+                            dialogImageView.post(() ->
+                                    Glide.with(requireContext()).load(image).into(dialogImageView)
+                            );
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "No image selected", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
+
+    /**
+     * Take photo via intent
+     */
+    private void dispatchTakePictureIntent() {
+        // Create temp image URI
+        java.io.File photoFile = new java.io.File(
+                requireContext().getCacheDir(),
+                "camera_photo_" + System.currentTimeMillis() + ".jpg"
+        );
+        cameraImageUri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                photoFile
+        );
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+        activityResultLauncher.launch(takePictureIntent);
     }
 
     @Override
@@ -111,6 +168,11 @@ public class EventCreationFragment extends Fragment {
         dateButton = view.findViewById(R.id.btn_signup_deadline);
         privateButton = view.findViewById(R.id.btn_is_private);
         confirmButton = view.findViewById(R.id.btn_confirm);
+
+        imageView = view.findViewById(R.id.iv_event_image);
+        imageView.setVisibility(View.VISIBLE);
+
+        addImageButton.setVisibility(View.VISIBLE);
 
         // Hide nav bar
         requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
@@ -142,11 +204,11 @@ public class EventCreationFragment extends Fragment {
         );
 
         // Fetch firebase cloud storage
-        storage = com.google.firebase.storage.FirebaseStorage.getInstance("gs://aurora-events.firebasestorage.app");
-        storageRef = storage.getReference();
         imageView = view.findViewById(R.id.iv_event_image);
 
         backButton.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        addImageButton.setOnClickListener(v -> showInputDialogImage());
 
         locationButton.setOnClickListener(v -> {
             MapPickerFragment mapPicker = new MapPickerFragment();
@@ -154,12 +216,11 @@ public class EventCreationFragment extends Fragment {
                 location = address;
                 eventLat = lat;     // Store latitude and longitude
                 eventLong = lng;
-                locationButton.setText(address);
                 requireActivity().findViewById(R.id.nav_bar).setVisibility(View.GONE);
             });
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, mapPicker)
+                    .add(R.id.fragment_container, mapPicker)
                     .addToBackStack(null)
                     .commit();
         });
@@ -307,7 +368,21 @@ public class EventCreationFragment extends Fragment {
                         Integer.parseInt(eventCap),
                         waitingCapacity,
                         isPrivate,
-                        uploadedImageUrl
+                        null,
+                        eventId -> {
+                            Log.d(TAG, "Callback reached, attempting popBackStack");
+                            if (selectedImageUri != null) {
+                                EventDb.getInstance().compressAndUpload(requireContext(), selectedImageUri, eventId);
+                            }
+                            if (isAdded() && getActivity() != null) {
+                                getActivity().runOnUiThread(() -> {
+                                    Log.d(TAG, "Running popBackStack on UI thread");
+                                    getParentFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                });
+                            } else {
+                                Log.d(TAG, "Fragment not added or activity null — skip pop");
+                            }
+                        }
                 );
                 getParentFragmentManager().popBackStack();
             }
@@ -326,18 +401,14 @@ public class EventCreationFragment extends Fragment {
     }
 
     /**
-     * Input dialog for location button
-     * @param targetButton
-     * Button to be updated
-     * @param hint
-     * Default text
-     * @param onConfirm
-     * Updated text on confirm
+     * Display input dialog for image selection
      */
-    private void showInputDialog(Button targetButton, String hint, java.util.function.Consumer<String> onConfirm) {
+    private void showInputDialogImage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.custom_input, null);
-        builder.setView(dialogView);
+        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.image_upload, null);
+        builder.setView((dialogView));
+
+        dialogImageView = dialogView.findViewById(R.id.image_preview);
 
         AlertDialog dialog = builder.create();
 
@@ -349,25 +420,36 @@ public class EventCreationFragment extends Fragment {
             dialog.getWindow().setAttributes(params);
         }
 
-        TextInputEditText input = dialogView.findViewById(R.id.dialog_input);
-        TextInputLayout inputLayout = dialogView.findViewById(R.id.dialog_input_layout);
-        Button btnCancel = dialogView.findViewById(R.id.dialog_btn_cancel);
-        Button btnConfirm = dialogView.findViewById(R.id.dialog_btn_confirm);
+        Button btnCamera = dialogView.findViewById(R.id.btn_take_photo);
+        Button btnGallery = dialogView.findViewById(R.id.btn_choose_gallery);
+        Button btnCancel = dialogView.findViewById(R.id.btn_image_cancel);
+        Button btnConfirm = dialogView.findViewById(R.id.btn_image_confirm);
+        FrameLayout dialogImageFrame = dialogView.findViewById(R.id.image_preview_container);
 
-        inputLayout.setHint(hint);
+        btnGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                activityResultLauncher.launch(intent);
+            }
+        });
+
+        btnConfirm.setOnClickListener(v -> {
+            if (image == null) {
+                Toast.makeText(requireContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            selectedImageUri = image;
+            Glide.with(requireContext()).load(selectedImageUri).into(imageView);
+            addImageButton.setVisibility(View.GONE);
+            dialog.dismiss();
+        });
+
+        btnCamera.setOnClickListener(v -> dispatchTakePictureIntent());
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        btnConfirm.setOnClickListener(v -> {
-            String enteredText = input.getText() != null ? input.getText().toString().trim() : "";
-            if (enteredText.isEmpty()) {
-                inputLayout.setError("This field is required");
-            } else {
-                targetButton.setText(enteredText);
-                onConfirm.accept(enteredText);
-                dialog.dismiss();
-            }
-        });
         dialog.show();
     }
 
@@ -399,5 +481,34 @@ public class EventCreationFragment extends Fragment {
 
         }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH),
                 calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
+    }
+
+    /**
+     * For testing purposes, adds an image to the gallery
+     */
+    private void addMockImageToGallery() {
+        // Copy drawable to external storage
+        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeResource(
+                getResources(), R.drawable.test_image);
+
+        String fileName = "test_image_" + System.currentTimeMillis() + ".jpg";
+        android.content.ContentValues values = new android.content.ContentValues();
+        values.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/");
+
+        android.net.Uri uri = requireContext().getContentResolver()
+                .insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            assert uri != null;
+            java.io.OutputStream outputStream = requireContext().getContentResolver().openOutputStream(uri);
+            assert outputStream != null;
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.close();
+            Toast.makeText(requireContext(), "Mock image added to gallery", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            android.util.Log.e("MockImage", "Failed to add mock image: " + e.getMessage());
+        }
     }
 }

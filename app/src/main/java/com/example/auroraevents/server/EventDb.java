@@ -1,16 +1,16 @@
 package com.example.auroraevents.server;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.example.auroraevents.model.Comment;
 import com.example.auroraevents.model.Event;
 import com.google.firebase.Timestamp;
-
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -18,17 +18,16 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.io.ByteArrayOutputStream;
-
 import java.util.List;
 import java.util.Map;
 
@@ -94,19 +93,35 @@ public class EventDb {
                 });
     }
 
-    public void uploadPoster(Uri uri, String eventId) {
-        if (uri == null || eventId == null) return;
+    public void compressAndUpload(Context context, Uri uri, String eventId) {
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
+
+            byte[] bitmapData = outputStream.toByteArray();
+            EventDb.getInstance().uploadPosterBytes(bitmapData, eventId);
+
+        } catch (Exception e) {
+            Log.d(TAG, "Compression failed", e);
+        }
+    }
+
+    public void uploadPosterBytes(byte[] data, String eventId) {
+        if (data == null || eventId == null) return;
 
         StorageReference fileRef = FirebaseStorage.getInstance().getReference()
-                .child(eventId + "/" +"poster.jpg");
+                .child(eventId + "/poster.jpg");
 
-        fileRef.putFile(uri)
+        fileRef.putBytes(data)
                 .addOnSuccessListener(taskSnapshot -> {
                     fileRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
                         saveUrlToFirestore(eventId, downloadUri.toString(), "posterUrl");
                     });
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Upload failed for poster", e));
+                .addOnFailureListener(e -> Log.e(TAG, "Upload failed", e));
     }
 
     public void uploadQr(Bitmap qr, String eventId){

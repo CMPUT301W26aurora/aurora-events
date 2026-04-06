@@ -65,13 +65,14 @@ public class Organizer extends User {
             int waitingCapacity,
             int attendingCapacity,
             boolean isPrivate,
-            Bitmap poster) {
+            Bitmap poster,
+            EventDb.OnEventCreatedCallback onCreated) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         LocalDateTime eventDateTime          = LocalDateTime.parse(date, formatter);
-        LocalDateTime eventRegistrationStart = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime eventRegistrationEnd   = LocalDateTime.parse(endTime, formatter);
+        LocalDateTime eventRegistrationStart = (startTime != null) ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime eventRegistrationEnd   = (endTime != null)   ? LocalDateTime.parse(endTime, formatter)   : null;
 
         // Create event from parameters
         Event event = new Event(
@@ -88,11 +89,11 @@ public class Organizer extends User {
                 attendingCapacity);
         event.setPrivate(isPrivate);
 
-        // Bug 3 fix: only add to local list after Firestore confirms success
         EventDb.addEvent(event,
                 eventId -> {
                     Log.d("Organizer", "Event successfully created with ID: " + eventId);
                     myEvents.add(event);
+                    onCreated.onCreated(eventId);
                 },
                 e -> Log.e("Organizer", "Failed to create event: " + e.getMessage())
         );
