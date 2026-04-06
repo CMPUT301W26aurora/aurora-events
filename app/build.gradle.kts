@@ -58,6 +58,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-storage")
+    implementation(libs.firebase.storage)
+
     implementation(libs.firebase.functions)
     implementation(libs.firebase.storage)
     implementation(libs.swiperefreshlayout)
@@ -75,6 +78,10 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.7.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("org.osmdroid:osmdroid-android:6.1.17")

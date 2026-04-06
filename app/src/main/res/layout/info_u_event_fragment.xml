@@ -108,16 +108,35 @@
             app:iconTint="@color/light_text"/>
 
         <!--Optional poster image-->
-        <ImageView
-            android:id="@+id/poster_image"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/rounded_box"
-            android:backgroundTint="@color/light_glass"
-            android:contentDescription="@string/event_poster_content_description"
-            android:scaleType="centerCrop"/>
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:id="@+id/poster_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/rounded_box"
+                android:backgroundTint="@color/light_glass"
+                android:contentDescription="@string/event_poster_content_description"
+                android:scaleType="centerCrop"/>
+
+            <Button
+                android:id="@+id/edit_poster_button"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:backgroundTint="@color/light_glass"
+                android:fontFamily="@font/roboto"
+                android:text="Edit Poster"
+                android:textColor="@color/light_text"
+                android:textSize="6pt"
+                app:iconTint="@color/light_text" />
+        </FrameLayout>
 
         <!--Event Name-->
         <TextView
